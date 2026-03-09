@@ -1,4 +1,3 @@
-// app/operations/customers/components/CustomerDetailsHeader.tsx
 import { Customer } from '@/lib/api/services/customer.service';
 import { StatusBadge } from './StatusBadge';
 
@@ -8,51 +7,43 @@ interface CustomerDetailsHeaderProps {
 
 export function CustomerDetailsHeader({ customer }: CustomerDetailsHeaderProps) {
   return (
-    <div className="bg-white rounded-xl p-6 mb-6">
-      <div className="flex flex-col md:flex-row gap-6">
+    <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 w-full">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+
         {/* Avatar */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex sm:block justify-center">
           <img
             src={customer.avatar}
             alt={customer.name}
-            className="w-36 h-36 md:w-[154px] md:h-[154px] rounded-2xl object-cover"
+            className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl object-cover"
           />
         </div>
 
         {/* Details */}
-        <div className="flex-1">
-          <div className="space-y-2">
-            <div>
-              <span className="font-semibold" style={{ color: '#1A3F1C' }}>
-                Name:{' '}
-              </span>
-              <span style={{ color: '#1A3F1C' }}>{customer.name}</span>
-            </div>
-            <div>
-              <span className="font-semibold" style={{ color: '#1A3F1C' }}>
-                Phone number:{' '}
-              </span>
-              <span style={{ color: '#1A3F1C' }}>{customer.phone}</span>
-            </div>
-            <div>
-              <span className="font-semibold" style={{ color: '#1A3F1C' }}>
-                Email:{' '}
-              </span>
-              <span style={{ color: '#1A3F1C' }}>{customer.email}</span>
-            </div>
-            <div>
-              <span className="font-semibold" style={{ color: '#1A3F1C' }}>
-                Address:{' '}
-              </span>
-              <span style={{ color: '#1A3F1C' }}>{customer.address}</span>
-            </div>
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex flex-wrap gap-x-1">
+            <span className="font-semibold" style={{ color: '#1A3F1C' }}>Name:</span>
+            <span className="break-words" style={{ color: '#1A3F1C' }}>{customer.name}</span>
+          </div>
+          <div className="flex flex-wrap gap-x-1">
+            <span className="font-semibold" style={{ color: '#1A3F1C' }}>Phone number:</span>
+            <span style={{ color: '#1A3F1C' }}>{customer.phone}</span>
+          </div>
+          <div className="flex flex-wrap gap-x-1">
+            <span className="font-semibold" style={{ color: '#1A3F1C' }}>Email:</span>
+            <span className="break-all" style={{ color: '#1A3F1C' }}>{customer.email}</span>
+          </div>
+          <div className="flex flex-wrap gap-x-1">
+            <span className="font-semibold" style={{ color: '#1A3F1C' }}>Address:</span>
+            <span className="break-words" style={{ color: '#1A3F1C' }}>{customer.address}</span>
           </div>
         </div>
 
-        {/* Status Badge */}
-        <div className="flex md:items-start justify-end">
+        {/* Status Badge — top-right on desktop, below avatar on mobile */}
+        <div className="flex sm:items-start justify-center sm:justify-end">
           <StatusBadge status={customer.accountStatus} size="lg" />
         </div>
+
       </div>
     </div>
   );

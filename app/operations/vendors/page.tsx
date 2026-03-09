@@ -1,12 +1,12 @@
-// app/operations/vendors/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { vendorService, type VendorFilters as FilterParams, type TopVendor } from '@/lib/api/services/vendor.service';
 import { VendorTopChart } from '@/components/operations/Vendors/VendorTopChart';
 import { VendorFilters, type FilterValues } from '@/components/operations/Vendors/VendorFilters';
 import { VendorTable } from '@/components/operations/Vendors/VendorTable';
 import { VendorTableSkeleton } from '@/app/operations/vendors/loaders/VendorTableSkeleton';
+import Pagination from '@/components/Pagination';
 import { toast } from 'sonner';
 
 export default function VendorsPage() {
@@ -14,159 +14,128 @@ export default function VendorsPage() {
   const [topVendors, setTopVendors] = useState<TopVendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [topVendorsLoading, setTopVendorsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState<FilterParams>({});
+  const [pageSize, setPageSize] = useState(7);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    limit: 7,
+  });
 
-  const fetchVendors = async (filterParams: FilterParams = {}) => {
-    try {
-      setLoading(true);
-      const data = await vendorService.getVendors({
-        ...filterParams,
-        page: currentPage,
-        limit: 7
-      });
-      setVendors(data.vendors);
-      setTotalPages(data.totalPages);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to load vendors');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchTopVendors = async () => {
-    try {
-      setTopVendorsLoading(true);
-      const data = await vendorService.getTopVendors();
-      setTopVendors(data);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to load top vendors');
-    } finally {
-      setTopVendorsLoading(false);
-    }
-  };
-
+  // ── Fetch top vendors (once) ───────────────────────────
   useEffect(() => {
+    const fetchTopVendors = async () => {
+      try {
+        setTopVendorsLoading(true);
+        const data = await vendorService.getTopVendors();
+        setTopVendors(data);
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to load top vendors');
+      } finally {
+        setTopVendorsLoading(false);
+      }
+    };
     fetchTopVendors();
   }, []);
 
-  useEffect(() => {
-    fetchVendors(filters);
-  }, [currentPage]);
+  // ── Fetch paginated vendor list ────────────────────────
+  const loadVendors = useCallback(
+    async (page: number, activeFilters: FilterParams, limit = pageSize) => {
+      try {
+        setLoading(true);
+        const data = await vendorService.getVendors({
+          ...activeFilters,
+          page,
+          limit,
+        });
+        setVendors(data.vendors);
+        setPagination({
+          page: data.page ?? page,
+          totalPages: data.totalPages,
+          total: data.total ?? 0,
+          limit,
+        });
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to load vendors');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pageSize]
+  );
 
+  useEffect(() => {
+    loadVendors(1, {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Handlers ──────────────────────────────────────────
   const handleSearch = (filterValues: FilterValues) => {
     const newFilters: FilterParams = {
       name: filterValues.name || undefined,
-      accountStatus: filterValues.accountStatus || undefined,
-      businessStatus: filterValues.businessStatus || undefined
+      accountStatus: (filterValues.accountStatus || undefined) as 'active' | 'suspended' | undefined,
+      businessStatus: (filterValues.businessStatus || undefined) as 'registered' | 'unregistered' | 'pending' | undefined,
     };
     setFilters(newFilters);
-    setCurrentPage(1);
-    fetchVendors(newFilters);
+    loadVendors(1, newFilters);
   };
 
   const handleReset = () => {
     setFilters({});
-    setCurrentPage(1);
-    fetchVendors({});
+    loadVendors(1, {});
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    loadVendors(page, filters);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    loadVendors(1, filters, size);
   };
 
   return (
-    <div className="min-h-screen p-6" style={{ backgroundColor: '#E8F7E8' }}>
-      <div className="max-w-7xl mx-auto">
-        {/* Top Chart Section */}
+    <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
+
+        {/* Page Title */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>
+            Vendors
+          </h1>
+          {pagination.total > 0 && (
+            <span className="text-sm text-gray-500">{pagination.total} total</span>
+          )}
+        </div>
+
+        {/* Top Chart */}
         <VendorTopChart topVendors={topVendors} loading={topVendorsLoading} />
 
         {/* Filters */}
         <VendorFilters onSearch={handleSearch} onReset={handleReset} />
 
-        {/* Table or Skeleton */}
+        {/* Table */}
         {loading ? (
           <VendorTableSkeleton />
         ) : (
-          <>
-            <VendorTable vendors={vendors} currentPage={currentPage} />
+          <div className="bg-white rounded-xl overflow-hidden border border-gray-200 w-full">
+            <VendorTable
+              vendors={vendors}
+              currentPage={pagination.page}
+              pageLimit={pagination.limit}
+            />
 
-            {/* Pagination */}
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm" style={{ color: '#1A3F1C' }}>
-                  Displays
-                </span>
-                <input
-                  type="number"
-                  value={7}
-                  readOnly
-                  className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
-                  style={{ color: '#1A3F1C' }}
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
-                  style={{ color: '#1A3F1C' }}
-                >
-                  First
-                </button>
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
-                  style={{ color: '#1A3F1C' }}
-                >
-                  Previous
-                </button>
-
-                {/* Page Numbers */}
-                {[...Array(Math.min(7, totalPages))].map((_, i) => {
-                  const pageNum = i + 1;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`px-3 py-1 rounded ${
-                        currentPage === pageNum
-                          ? 'text-white'
-                          : 'border border-gray-300'
-                      }`}
-                      style={{
-                        backgroundColor: currentPage === pageNum ? '#1A3F1C' : 'white',
-                        color: currentPage === pageNum ? 'white' : '#1A3F1C'
-                      }}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
-                  style={{ color: '#1A3F1C' }}
-                >
-                  Next
-                </button>
-                <button
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
-                  style={{ color: '#1A3F1C' }}
-                >
-                  Last
-                </button>
-              </div>
-            </div>
-          </>
+            {/* ── Reusable Pagination ── */}
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
         )}
+
       </div>
     </div>
   );

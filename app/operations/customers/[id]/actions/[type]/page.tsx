@@ -1,4 +1,3 @@
-// app/operations/customers/[id]/actions/[type]/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,16 +12,16 @@ type ActionType = 'suspend' | 'activate' | 'delete';
 const actionConfig = {
   suspend: {
     confirmTitle: 'Are you sure you want to suspend this user?',
-    successTitle: "You've successfully suspended a user!"
+    successTitle: "You've successfully suspended a user!",
   },
   activate: {
     confirmTitle: 'Are you sure, you want to activate this user?',
-    successTitle: 'The account has been activated successfully!'
+    successTitle: 'The account has been activated successfully!',
   },
   delete: {
     confirmTitle: 'Are you sure, you want to delete this account?',
-    successTitle: 'The account has been successfully deleted!'
-  }
+    successTitle: 'The account has been successfully deleted!',
+  },
 };
 
 export default function CustomerActionPage() {
@@ -35,7 +34,6 @@ export default function CustomerActionPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Validate action type
   useEffect(() => {
     if (!['suspend', 'activate', 'delete'].includes(actionType)) {
       toast.error('Invalid action type');
@@ -46,8 +44,6 @@ export default function CustomerActionPage() {
   const handleConfirm = async () => {
     try {
       setLoading(true);
-
-      // Call appropriate API based on action type
       switch (actionType) {
         case 'suspend':
           await customerService.suspendCustomer(customerId);
@@ -59,8 +55,6 @@ export default function CustomerActionPage() {
           await customerService.deleteCustomer(customerId);
           break;
       }
-
-      // Show success modal
       setShowConfirm(false);
       setShowSuccess(true);
     } catch (error: any) {
@@ -81,20 +75,17 @@ export default function CustomerActionPage() {
   const config = actionConfig[actionType];
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#E8F7E8' }}>
-      {/* Confirmation Modal */}
+    <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
       <ConfirmActionModal
         isOpen={showConfirm}
         onClose={handleCancel}
         onConfirm={handleConfirm}
-        title={config.confirmTitle}
+        title={config?.confirmTitle}
         loading={loading}
       />
-
-      {/* Success Modal */}
       <SuccessModal
         isOpen={showSuccess}
-        title={config.successTitle}
+        title={config?.successTitle}
         onGoHome={handleGoHome}
       />
     </div>

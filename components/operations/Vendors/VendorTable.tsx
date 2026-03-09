@@ -1,4 +1,3 @@
-// app/operations/vendors/components/VendorTable.tsx
 'use client';
 
 import Link from 'next/link';
@@ -10,51 +9,59 @@ import { Vendor } from '@/lib/api/services/vendor.service';
 interface VendorTableProps {
   vendors: Vendor[];
   currentPage: number;
+  /** Passed from the parent so serial numbers stay correct when page size changes */
+  pageLimit: number;
 }
 
-export function VendorTable({ vendors, currentPage }: VendorTableProps) {
+export function VendorTable({ vendors, currentPage, pageLimit }: VendorTableProps) {
+  const thCls = 'px-4 py-3 text-left text-white font-medium text-sm whitespace-nowrap';
+
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr style={{ backgroundColor: '#37A449' }}>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">S/N</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Name</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Phone Number</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Address</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Business Status</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Account Status</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Actions</th>
+    <div className="overflow-x-auto w-full">
+      <table className="w-full min-w-[760px]">
+        <thead>
+          <tr style={{ backgroundColor: '#37A449' }}>
+            <th className={thCls} style={{ width: 48 }}>S/N</th>
+            <th className={thCls}>Name</th>
+            <th className={thCls}>Phone Number</th>
+            <th className={thCls}>Address</th>
+            <th className={thCls}>Business Status</th>
+            <th className={thCls}>Account Status</th>
+            <th className={thCls} style={{ width: 120 }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {vendors.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="py-16 text-center text-gray-400 text-sm">
+                No vendors found.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {vendors.map((vendor, index) => (
+          ) : (
+            vendors.map((vendor, index) => (
               <tr
                 key={vendor.id}
-                className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                className="border-b border-gray-100 hover:bg-[#f7fdf7] transition-colors"
               >
-                {/* Serial Number */}
+                {/* S/N */}
                 <td className="px-4 py-4 text-sm" style={{ color: '#1A3F1C' }}>
-                  {(currentPage - 1) * 7 + index + 1}
+                  {(currentPage - 1) * pageLimit + index + 1}
                 </td>
 
                 {/* Name */}
                 <td className="px-4 py-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium" style={{ color: '#1A3F1C' }}>
-                      {vendor.name}
-                    </span>
-                  </div>
+                  <span className="text-sm font-medium" style={{ color: '#1A3F1C' }}>
+                    {vendor.name}
+                  </span>
                 </td>
 
-                {/* Phone Number */}
-                <td className="px-4 py-4 text-sm" style={{ color: '#1A3F1C' }}>
+                {/* Phone */}
+                <td className="px-4 py-4 text-sm whitespace-nowrap" style={{ color: '#1A3F1C' }}>
                   {vendor.phone}
                 </td>
 
                 {/* Address */}
-                <td className="px-4 py-4 text-sm" style={{ color: '#1A3F1C' }}>
+                <td className="px-4 py-4 text-sm max-w-[200px] truncate" style={{ color: '#1A3F1C' }}>
                   {vendor.address}
                 </td>
 
@@ -68,24 +75,24 @@ export function VendorTable({ vendors, currentPage }: VendorTableProps) {
                   <StatusBadge status={vendor.accountStatus} size="sm" />
                 </td>
 
-                {/* Action Buttons */}
+                {/* Actions */}
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-2">
-                    {/* View Button - Green Circle */}
+                    {/* View */}
                     <Link
                       href={`/operations/vendors/${vendor.id}`}
-                      className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                      className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0"
                       style={{ backgroundColor: '#37A449' }}
                       title="View Details"
                     >
                       <Eye className="w-4 h-4 text-white" />
                     </Link>
 
-                    {/* Suspend/Activate Button - Yellow Circle */}
+                    {/* Suspend / Activate / Locked */}
                     {vendor.accountStatus === 'active' ? (
                       <Link
                         href={`/operations/vendors/${vendor.id}/actions/suspend`}
-                        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0"
                         style={{ backgroundColor: '#FFCA3A' }}
                         title="Suspend Account"
                       >
@@ -93,7 +100,7 @@ export function VendorTable({ vendors, currentPage }: VendorTableProps) {
                       </Link>
                     ) : vendor.businessStatus === 'unregistered' ? (
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center opacity-50 cursor-not-allowed"
+                        className="w-8 h-8 rounded-full flex items-center justify-center opacity-50 cursor-not-allowed flex-shrink-0"
                         style={{ backgroundColor: '#FFCA3A' }}
                         title="Business Not Registered"
                       >
@@ -102,7 +109,7 @@ export function VendorTable({ vendors, currentPage }: VendorTableProps) {
                     ) : (
                       <Link
                         href={`/operations/vendors/${vendor.id}/actions/activate`}
-                        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0"
                         style={{ backgroundColor: '#FFCA3A' }}
                         title="Activate Account"
                       >
@@ -110,10 +117,10 @@ export function VendorTable({ vendors, currentPage }: VendorTableProps) {
                       </Link>
                     )}
 
-                    {/* Delete Button - Red Circle */}
+                    {/* Delete */}
                     <Link
                       href={`/operations/vendors/${vendor.id}/actions/delete`}
-                      className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                      className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity flex-shrink-0"
                       style={{ backgroundColor: '#D00000' }}
                       title="Delete Account"
                     >
@@ -122,10 +129,10 @@ export function VendorTable({ vendors, currentPage }: VendorTableProps) {
                   </div>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

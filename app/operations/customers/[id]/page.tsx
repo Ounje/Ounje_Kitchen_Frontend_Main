@@ -1,4 +1,3 @@
-// app/operations/customers/[id]/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -41,7 +40,6 @@ export default function CustomerDetailsPage() {
         const data = await customerService.getMostUsedVendor(customerId);
         setVendor(data);
       } catch (error: any) {
-        // Vendor data is optional, so just log error
         console.error('Failed to load vendor:', error);
       } finally {
         setVendorLoading(false);
@@ -54,7 +52,7 @@ export default function CustomerDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#E8F7E8' }}>
+      <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
         <CustomerDetailsSkeleton />
       </div>
     );
@@ -62,7 +60,7 @@ export default function CustomerDetailsPage() {
 
   if (!customer) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#E8F7E8' }}>
+      <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ backgroundColor: '#E8F7E8' }}>
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4" style={{ color: '#1A3F1C' }}>
             Customer not found
@@ -80,16 +78,17 @@ export default function CustomerDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#E8F7E8' }}>
-      <div className="max-w-5xl mx-auto p-6">
+    <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
+
         {/* Header with Close Button */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold" style={{ color: '#1A3F1C' }}>
+          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>
             Customer's Details
           </h1>
           <button
             onClick={() => router.push('/operations/customers')}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/60 transition-colors flex-shrink-0"
           >
             <X className="w-6 h-6" style={{ color: '#1A3F1C' }} />
           </button>
