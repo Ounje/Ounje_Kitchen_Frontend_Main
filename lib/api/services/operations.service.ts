@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/client';
+import { ENDPOINTS } from '@/lib/config';
 import type {
   Customer,
   Vendor,
@@ -8,7 +9,6 @@ import type {
 } from '@/types';
 
 // ── Reviews Types ─────────────────────────────────────────────────────────────
-
 export type ReviewType = 'vendor' | 'rider';
 export type ReviewFilter = 'mixed' | 'good' | 'bad';
 
@@ -74,20 +74,11 @@ export interface ReviewListParams extends PaginationParams {
 }
 
 // ── Service ───────────────────────────────────────────────────────────────────
-
 export const operationsService = {
+
   // ==================== DASHBOARD ====================
   async getDashboard(period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'daily') {
-    const res = await apiClient.get<{
-      success: boolean;
-      todaysOrders: number;
-      totalVendors: number;
-      totalRiders: number;
-      totalRevenue: number;
-      recentActivity: any[];
-      alerts: any[];
-    }>(`/api/operations/dashboard?period=${period}`);
-
+    const res = await apiClient.get(`${ENDPOINTS.OPERATIONS.DASHBOARD}?period=${period}`);
     return res;
   },
 
@@ -101,12 +92,12 @@ export const operationsService = {
     dateFrom?: string;
     dateTo?: string;
   }) {
-    const res = await apiClient.get('/api/operations/orders', { params });
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.ORDERS, { params });
     return res;
   },
 
   async getOrder(id: string) {
-    const res = await apiClient.get(`/api/operations/orders/${id}`);
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.ORDER_BY_ID(id));
     return res;
   },
 
@@ -117,13 +108,12 @@ export const operationsService = {
       isActive: 'true',
       isSuspended: 'false',
     };
-
-    const res = await apiClient.get('/api/operations/customers', { params: queryParams });
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.CUSTOMERS, { params: queryParams });
     return res;
   },
 
   async getCustomer(id: string) {
-    const res = await apiClient.get(`/api/operations/customers/${id}`);
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.CUSTOMER_BY_ID(id));
     return res;
   },
 
@@ -134,13 +124,12 @@ export const operationsService = {
       isActive: 'true',
       isSuspended: 'false',
     };
-
-    const res = await apiClient.get('/api/operations/vendors', { params: queryParams });
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.VENDORS, { params: queryParams });
     return res;
   },
 
   async getVendor(id: string) {
-    const res = await apiClient.get(`/api/operations/vendors/${id}`);
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.VENDOR_BY_ID(id));
     return res;
   },
 
@@ -149,17 +138,17 @@ export const operationsService = {
     zone?: string;
     status?: 'active' | 'inactive';
   }) {
-    const res = await apiClient.get('/api/operations/riders', { params });
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.RIDERS, { params });
     return res;
   },
 
   async getRider(id: string) {
-    const res = await apiClient.get(`/api/operations/riders/${id}`);
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.RIDER_BY_ID(id));
     return res;
   },
 
   async assignRider(orderId: string, riderId: string) {
-    const res = await apiClient.post(`/api/operations/orders/${orderId}/assign-rider`, {
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.ORDER_ASSIGN_RIDER(orderId), {
       riderId,
     });
     return res;
@@ -167,135 +156,78 @@ export const operationsService = {
 
   // ==================== REVIEWS & RATINGS ====================
 
-  /**
-   * Fetch aggregated stats for the reviews page header cards.
-   * Used by both vendor and rider views.
-   *
-   * GET /api/operations/reviews/stats?type=vendor|rider
-   */
   async getReviewStats(type: ReviewType): Promise<ReviewStats> {
-    const res = await apiClient.get<ReviewStats>(
-      '/api/operations/reviews/stats',
-      { params: { type } }
-    );
-    return res;
-  },
+  const res = await apiClient.get<ReviewStats>(ENDPOINTS.OPERATIONS.REVIEWS_STATS, {
+    params: { type },
+  });
+  return res;
+},
 
-  /**
-   * Fetch paginated vendor review rows for the main table.
-   *
-   * GET /api/operations/reviews/vendors
-   * Query: page, limit, ratingCategory, filter
-   */
-  async getVendorReviews(
-    params?: ReviewListParams
-  ): Promise<PaginatedResponse<VendorReviewRow>> {
-    const res = await apiClient.get<PaginatedResponse<VendorReviewRow>>(
-      '/api/operations/reviews/vendors',
-      { params }
-    );
-    return res;
-  },
+async getVendorReviews(params?: ReviewListParams): Promise<PaginatedResponse<VendorReviewRow>> {
+  const res = await apiClient.get<PaginatedResponse<VendorReviewRow>>(
+    ENDPOINTS.OPERATIONS.REVIEWS_VENDORS, { params }
+  );
+  return res;
+},
 
-  /**
-   * Fetch paginated rider review rows for the main table.
-   *
-   * GET /api/operations/reviews/riders
-   * Query: page, limit, ratingCategory, filter
-   */
-  async getRiderReviews(
-    params?: ReviewListParams
-  ): Promise<PaginatedResponse<RiderReviewRow>> {
-    const res = await apiClient.get<PaginatedResponse<RiderReviewRow>>(
-      '/api/operations/reviews/riders',
-      { params }
-    );
-    return res;
-  },
+async getRiderReviews(params?: ReviewListParams): Promise<PaginatedResponse<RiderReviewRow>> {
+  const res = await apiClient.get<PaginatedResponse<RiderReviewRow>>(
+    ENDPOINTS.OPERATIONS.REVIEWS_RIDERS, { params }
+  );
+  return res;
+},
 
-  /**
-   * Fetch full review detail for a single vendor (profile + review list).
-   *
-   * GET /api/operations/reviews/vendors/:id
-   * Query: starFilter (1–5), filter (mixed|good|bad)
-   */
-  async getVendorReviewDetail(
-    id: string,
-    params?: { starFilter?: number; filter?: ReviewFilter }
-  ): Promise<VendorReviewDetail> {
-    const res = await apiClient.get<VendorReviewDetail>(
-      `/api/operations/reviews/vendors/${id}`,
-      { params }
-    );
-    return res;
-  },
+async getVendorReviewDetail(
+  id: string,
+  params?: { starFilter?: number; filter?: ReviewFilter }
+): Promise<VendorReviewDetail> {
+  const res = await apiClient.get<VendorReviewDetail>(
+    ENDPOINTS.OPERATIONS.REVIEWS_VENDOR_BY_ID(id), { params }
+  );
+  return res;
+},
 
-  /**
-   * Fetch full review detail for a single rider (profile + review list).
-   *
-   * GET /api/operations/reviews/riders/:id
-   * Query: starFilter (1–5), filter (mixed|good|bad)
-   */
-  async getRiderReviewDetail(
-    id: string,
-    params?: { starFilter?: number; filter?: ReviewFilter }
-  ): Promise<RiderReviewDetail> {
-    const res = await apiClient.get<RiderReviewDetail>(
-      `/api/operations/reviews/riders/${id}`,
-      { params }
-    );
-    return res;
-  },
+async getRiderReviewDetail(
+  id: string,
+  params?: { starFilter?: number; filter?: ReviewFilter }
+): Promise<RiderReviewDetail> {
+  const res = await apiClient.get<RiderReviewDetail>(
+    ENDPOINTS.OPERATIONS.REVIEWS_RIDER_BY_ID(id), { params }
+  );
+  return res;
+},
 
-  /**
-   * Warn a vendor or rider account based on their reviews.
-   *
-   * POST /api/operations/reviews/:type/:id/warn
-   */
   async warnReviewAccount(type: ReviewType, id: string): Promise<void> {
-    await apiClient.post(`/api/operations/reviews/${type}/${id}/warn`);
+    await apiClient.post(ENDPOINTS.OPERATIONS.REVIEWS_WARN(type, id));
   },
 
-  /**
-   * Suspend a vendor or rider account based on their reviews.
-   *
-   * POST /api/operations/reviews/:type/:id/suspend
-   */
   async suspendReviewAccount(type: ReviewType, id: string): Promise<void> {
-    await apiClient.post(`/api/operations/reviews/${type}/${id}/suspend`);
+    await apiClient.post(ENDPOINTS.OPERATIONS.REVIEWS_SUSPEND(type, id));
   },
 
-  /**
-   * Commend a vendor or rider account based on their reviews.
-   *
-   * POST /api/operations/reviews/:type/:id/commend
-   */
   async commendReviewAccount(type: ReviewType, id: string): Promise<void> {
-    await apiClient.post(`/api/operations/reviews/${type}/${id}/commend`);
+    await apiClient.post(ENDPOINTS.OPERATIONS.REVIEWS_COMMEND(type, id));
   },
 
   // ==================== PROFILE (SETTINGS) ====================
+
   async getProfile() {
-    const res = await apiClient.get('/api/operations/profile');
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.PROFILE);
     return res;
   },
 
-  async updateProfile(data: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-  }) {
-    const res = await apiClient.put('/api/operations/profile', data);
+  async updateProfile(data: { firstName?: string; lastName?: string; phone?: string }) {
+    const res = await apiClient.put(ENDPOINTS.OPERATIONS.PROFILE, data);
     return res;
   },
 
   async uploadAvatar(formData: FormData) {
-    const res = await apiClient.post('/api/operations/profile/avatar', formData);
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.PROFILE_AVATAR, formData);
     return res;
   },
 
   async changePassword(currentPassword: string, newPassword: string) {
-    const res = await apiClient.post('/api/operations/change-password', {
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.CHANGE_PASSWORD, {
       currentPassword,
       newPassword,
     });
@@ -303,12 +235,12 @@ export const operationsService = {
   },
 
   async verifyOTP(otp: string) {
-    const res = await apiClient.post('/api/operations/verify-otp', { otp });
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.VERIFY_OTP, { otp });
     return res;
   },
 
   async resendOTP() {
-    const res = await apiClient.post('/api/operations/resend-otp');
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.RESEND_OTP);
     return res;
   },
 };

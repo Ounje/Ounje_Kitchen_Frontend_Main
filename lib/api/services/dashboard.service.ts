@@ -2,61 +2,50 @@ import { apiClient } from '@/lib/client';
 import { ENDPOINTS } from '@/lib/config';
 import type { DashboardData, RevenueData, OrderStats } from '@/types';
 
-class DashboardService {
+export const dashboardService = {
+
   /**
-   * Get dashboard overview data
-   * Backend returns all stats in one call
+   * GET /api/superadmin/dashboard
+   * Returns users, orders, ratings, queries, revenue stats
    */
   async getDashboard(): Promise<DashboardData> {
-    const response = await apiClient.get<{ success: boolean; data: DashboardData }>(
-      ENDPOINTS.SUPERADMIN.DASHBOARD
-    );
-    return response.data;
-  }
+    const res = await apiClient.get<DashboardData>(ENDPOINTS.SUPERADMIN.DASHBOARD);
+    return res;
+  },
 
   /**
-   * Get revenue data with optional period filter
-   * @param period - 'daily' | 'weekly' | 'monthly' | 'yearly'
+   * GET /api/superadmin/revenue?period=...
    */
-  async getRevenue(period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly'): Promise<RevenueData> {
-    const response = await apiClient.get<{ success: boolean; data: RevenueData }>(
-      `${ENDPOINTS.SUPERADMIN.REVENUE}?period=${period}`
+  async getRevenue(
+    period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly'
+  ): Promise<RevenueData> {
+    const res = await apiClient.get<RevenueData>(
+      ENDPOINTS.SUPERADMIN.REVENUE, { params: { period } }
     );
-    return response.data;
-  }
+    return res;
+  },
 
   /**
-   * Get revenue trends over time
+   * GET /api/superadmin/revenue/trends
    */
   async getRevenueTrends(): Promise<any> {
-    const response = await apiClient.get<{ success: boolean; data: any }>(
-      ENDPOINTS.SUPERADMIN.REVENUE_TRENDS
-    );
-    return response.data;
-  }
+    const res = await apiClient.get(ENDPOINTS.SUPERADMIN.REVENUE_TRENDS);
+    return res;
+  },
 
   /**
-   * Get aggregated order statistics
+   * GET /api/superadmin/orders/stats
    */
   async getOrderStats(): Promise<OrderStats> {
-    const response = await apiClient.get<{ success: boolean; data: OrderStats }>(
-      `${ENDPOINTS.SUPERADMIN.ORDERS}/stats`
-    );
-    return response.data;
-  }
+    const res = await apiClient.get<OrderStats>(`${ENDPOINTS.SUPERADMIN.ORDERS}/stats`);
+    return res;
+  },
 
   /**
-   * Get system-wide statistics
-   * Alternative endpoint for system stats
+   * GET /api/superadmin/dashboard/stats
    */
   async getSystemStats(): Promise<any> {
-    const response = await apiClient.get<{ success: boolean; data: any }>(
-      `${ENDPOINTS.SUPERADMIN.DASHBOARD}/stats`
-    );
-    return response.data;
-  }
-}
-
-
-
-export const dashboardService = new DashboardService();
+    const res = await apiClient.get(`${ENDPOINTS.SUPERADMIN.DASHBOARD}/stats`);
+    return res;
+  },
+};
