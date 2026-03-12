@@ -1,297 +1,253 @@
 import { apiClient } from '@/lib/client';
-import type {
-  Customer,
-  Vendor,
-  Rider,
-  Staff,
-  PaginatedResponse,
-  PaginationParams,
-} from '@/types';
+import { ENDPOINTS } from '@/lib/config';
 
-// Dashboard
+// ── Shared Types ──────────────────────────────────────────────────────────────
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  pages: number;
+  limit: number;
+}
+
+// ── Customer ──────────────────────────────────────────────────────────────────
+export interface CustomerRow {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  isActive: boolean;
+  isSuspended: boolean;
+  createdAt: string;
+}
+
+// ── Vendor ────────────────────────────────────────────────────────────────────
+export interface VendorRow {
+  id: string;
+  businessName: string;
+  ownerName: string;
+  email: string;
+  phone?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  isActive: boolean;
+  isSuspended: boolean;
+  isVerified: boolean;
+  rating: number;
+  totalOrders: number;
+  createdAt: string;
+}
+
+// ── Rider ─────────────────────────────────────────────────────────────────────
+export interface RiderRow {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  zone?: string;
+  vehicleType?: string;
+  vehicleNumber?: string;
+  isActive: boolean;
+  isSuspended: boolean;
+  rating: number;
+  createdAt: string;
+}
+
+// ── Staff ─────────────────────────────────────────────────────────────────────
+export interface StaffRow {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  department: string;
+  isHead: boolean;
+  isActive: boolean;
+  isSuspended: boolean;
+  createdAt: string;
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+export interface ITDashboardData {
+  customers: { total: number; active: number };
+  vendors:   { total: number; active: number };
+  riders:    { total: number; active: number };
+  staff:     { total: number; active: number };
+  orders:    { total: number; pending: number };
+}
+
+// ── Service ───────────────────────────────────────────────────────────────────
 export const itService = {
+
   // ==================== DASHBOARD ====================
-  async getDashboard() {
-    const res = await apiClient.get<{
-      success: boolean;
-      message?: string;
-      customers: { total: number; active: number };
-      vendors: { total: number; active: number };
-      riders: { total: number; active: number };
-      staff: { total: number; active: number };
-      orders: { total: number; pending: number };
-    }>('/api/it/dashboard');
-    
-    // Backend returns data directly, not wrapped in 'data' field
+
+  async getDashboard(): Promise<ITDashboardData> {
+    const res = await apiClient.get(ENDPOINTS.IT.DASHBOARD);
     return {
       customers: res.customers,
-      vendors: res.vendors,
-      riders: res.riders,
-      staff: res.staff,
-      orders: res.orders,
+      vendors:   res.vendors,
+      riders:    res.riders,
+      staff:     res.staff,
+      orders:    res.orders,
     };
   },
 
   // ==================== CUSTOMERS ====================
-  async getCustomers(params?: PaginationParams) {
-    // CRITICAL: Apply strict filters to only show active, non-suspended, non-deleted customers
-    const queryParams: Record<string, any> = {
-      ...params,
-      isActive: 'true',       // Only active accounts
-      isSuspended: 'false',   // Exclude suspended
-      // isDeleted filter handled by backend (always excluded)
-    };
-    
-    const res = await apiClient.get<{
-      success: boolean;
-      customers: Customer[];
-      pagination: {
-        total: number;
-        page: number;
-        pages: number;
-        limit: number;
-      };
-    }>('/api/it/customers', { params: queryParams });
-    return {
-      customers: res.customers,
-      pagination: res.pagination,
-    };
+  // Returns full profile: name, email, phone, address, status fields
+
+  async getCustomers(params?: PaginationParams & {
+    name?: string;
+    isActive?: string;
+    isSuspended?: string;
+  }) {
+    const res = await apiClient.get(ENDPOINTS.IT.CUSTOMERS, { params: params ?? {} });
+    return res;
   },
 
   async getCustomer(id: string) {
-    const res = await apiClient.get<{
-      success: boolean;
-      customer: Customer;
-    }>(`/api/it/customers/${id}`);
-    return res.customer;
+    const res = await apiClient.get(ENDPOINTS.IT.CUSTOMER_BY_ID(id));
+    return res;
   },
 
   async suspendCustomer(id: string, reason: string) {
-    const res = await apiClient.put(`/api/it/customers/${id}/suspend`, { reason });
-    return res.data;
+    const res = await apiClient.put(ENDPOINTS.IT.CUSTOMER_SUSPEND(id), { reason });
+    return res;
   },
 
   async activateCustomer(id: string) {
-    const res = await apiClient.put(`/api/it/customers/${id}/activate`);
-    return res.data;
+    const res = await apiClient.put(ENDPOINTS.IT.CUSTOMER_ACTIVATE(id));
+    return res;
   },
 
   async deleteCustomer(id: string) {
-    const res = await apiClient.delete(`/api/it/customers/${id}`);
+    const res = await apiClient.delete(ENDPOINTS.IT.CUSTOMER_DELETE(id));
     return res;
   },
 
   async restoreCustomer(id: string) {
-    const res = await apiClient.put(`/api/it/customers/${id}/restore`);
+    const res = await apiClient.put(ENDPOINTS.IT.CUSTOMER_RESTORE(id));
     return res;
   },
 
   // ==================== VENDORS ====================
-  async getVendors(params?: PaginationParams) {
-    // CRITICAL: Apply strict filters to only show active, non-suspended, non-deleted vendors
-    const queryParams: Record<string, any> = {
-      ...params,
-      isActive: 'true',       // Only active accounts
-      isSuspended: 'false',   // Exclude suspended
-      // isDeleted filter handled by backend (always excluded)
-    };
-    
-    const res = await apiClient.get<{
-      success: boolean;
-      vendors: Vendor[];
-      pagination: {
-        total: number;
-        page: number;
-        pages: number;
-        limit: number;
-      };
-    }>('/api/it/vendors', { params: queryParams });
-    return {
-      vendors: res.vendors,
-      pagination: res.pagination,
-    };
+  // Returns full profile: businessName, ownerName, email, phone, address, ratings, status
+
+  async getVendors(params?: PaginationParams & {
+    name?: string;
+    isActive?: string;
+    isSuspended?: string;
+  }) {
+    const res = await apiClient.get(ENDPOINTS.IT.VENDORS, { params: params ?? {} });
+    return res;
   },
 
   async getVendor(id: string) {
-    const res = await apiClient.get<{
-      success: boolean;
-      vendor: Vendor;
-    }>(`/api/it/vendors/${id}`);
-    return res.vendor;
+    const res = await apiClient.get(ENDPOINTS.IT.VENDOR_BY_ID(id));
+    return res;
   },
 
   async suspendVendor(id: string, reason: string) {
-    const res = await apiClient.put(`/api/it/vendors/${id}/suspend`, { reason });
-    return res.data;
+    const res = await apiClient.put(ENDPOINTS.IT.VENDOR_SUSPEND(id), { reason });
+    return res;
   },
 
   async activateVendor(id: string) {
-    const res = await apiClient.put(`/api/it/vendors/${id}/activate`);
-    return res.data;
+    const res = await apiClient.put(ENDPOINTS.IT.VENDOR_ACTIVATE(id));
+    return res;
   },
 
   async verifyVendor(id: string) {
-    const res = await apiClient.put(`/api/it/vendors/${id}/verify`);
-    return res.data;
+    const res = await apiClient.put(ENDPOINTS.IT.VENDOR_VERIFY(id));
+    return res;
   },
 
   async deleteVendor(id: string) {
-    const res = await apiClient.delete(`/api/it/vendors/${id}`);
+    const res = await apiClient.delete(ENDPOINTS.IT.VENDOR_DELETE(id));
     return res;
   },
 
   async restoreVendor(id: string) {
-    const res = await apiClient.put(`/api/it/vendors/${id}/restore`);
+    const res = await apiClient.put(ENDPOINTS.IT.VENDOR_RESTORE(id));
     return res;
   },
 
   // ==================== RIDERS ====================
-  async getRiders(params?: PaginationParams) {
-    // CRITICAL: Apply strict filters to only show active, non-suspended, non-deleted riders
-    const queryParams: Record<string, any> = {
-      ...params,
-      isActive: 'true',       // Only active accounts
-      isSuspended: 'false',   // Exclude suspended
-      // isDeleted filter handled by backend (always excluded)
-    };
-    
-    const res = await apiClient.get<{
-      success: boolean;
-      riders: Rider[];
-      pagination: {
-        total: number;
-        page: number;
-        pages: number;
-        limit: number;
-      };
-    }>('/api/it/riders', { params: queryParams });
-    return {
-      riders: res.riders,
-      pagination: res.pagination,
-    };
+  // Returns full profile: firstName, lastName, email, phone, zone, vehicle, ratings, status
+
+  async getRiders(params?: PaginationParams & {
+    name?: string;
+    zone?: string;
+    isActive?: string;
+    isSuspended?: string;
+  }) {
+    const res = await apiClient.get(ENDPOINTS.IT.RIDERS, { params: params ?? {} });
+    return res;
   },
 
   async getRider(id: string) {
-    const res = await apiClient.get<{
-      success: boolean;
-      rider: Rider;
-    }>(`/api/it/riders/${id}`);
-    return res.rider;
+    const res = await apiClient.get(ENDPOINTS.IT.RIDER_BY_ID(id));
+    return res;
   },
 
   async suspendRider(id: string, reason: string) {
-    const res = await apiClient.put(`/api/it/riders/${id}/suspend`, { reason });
-    return res.data;
+    const res = await apiClient.put(ENDPOINTS.IT.RIDER_SUSPEND(id), { reason });
+    return res;
   },
 
   async activateRider(id: string) {
-    const res = await apiClient.put(`/api/it/riders/${id}/activate`);
-    return res.data;
+    const res = await apiClient.put(ENDPOINTS.IT.RIDER_ACTIVATE(id));
+    return res;
   },
 
   async deleteRider(id: string) {
-    const res = await apiClient.delete(`/api/it/riders/${id}`);
+    const res = await apiClient.delete(ENDPOINTS.IT.RIDER_DELETE(id));
     return res;
   },
 
   async restoreRider(id: string) {
-    const res = await apiClient.put(`/api/it/riders/${id}/restore`);
+    const res = await apiClient.put(ENDPOINTS.IT.RIDER_RESTORE(id));
     return res;
   },
 
   // ==================== STAFF ====================
-  /**
-   * Get all staff members (isHead=false, ACTIVE ONLY, NOT SUSPENDED, NOT DELETED)
-   * Backend returns: { success, count, total, page, pages, data: [...] }
-   */
-  async getStaff(params?: PaginationParams) {
-    // CRITICAL: Apply strict filters to only show active, non-suspended, non-deleted staff
-    const queryParams: Record<string, any> = {
-      ...params,
-      isHead: 'false',        // Only non-head staff
-      isActive: 'true',       // Only active accounts
-      isSuspended: 'false',   // Exclude suspended
-      // isDeleted filter handled by backend (always excluded)
-    };
 
-    const res = await apiClient.get<{
-      success: boolean;
-      count: number;
-      total: number;
-      page: number;
-      pages: number;
-      data: Staff[];
-    }>('/api/staff', { params: queryParams });
-    
-    console.log('[IT Service] Staff response:', res);
-    
-    return {
-      staff: res.data,
-      pagination: {
-        total: res.total,
-        page: res.page,
-        pages: res.pages,
-        limit: params?.limit || 7,
-      },
-    };
+  async getStaff(params?: PaginationParams & { name?: string; department?: string }) {
+    const queryParams = { isHead: 'false', ...params };
+    const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, { params: queryParams });
+    return res;
   },
 
-  /**
-   * Get all admins/heads (isHead=true OR isSuperAdmin=true, ACTIVE ONLY, NOT SUSPENDED, NOT DELETED)
-   * Backend returns: { success, count, total, page, pages, data: [...] }
-   */
-  async getAdmins(params?: PaginationParams) {
-    // CRITICAL: Apply strict filters to only show active, non-suspended, non-deleted admins
-    const queryParams: Record<string, any> = {
-      ...params,
-      isHead: 'true',         // Only heads/admins
-      isActive: 'true',       // Only active accounts
-      isSuspended: 'false',   // Exclude suspended
-      // isDeleted filter handled by backend (always excluded)
-    };
-
-    const res = await apiClient.get<{
-      success: boolean;
-      count: number;
-      total: number;
-      page: number;
-      pages: number;
-      data: Staff[];
-    }>('/api/staff', { params: queryParams });
-    
-    console.log('[IT Service] Admins response:', res);
-    
-    return {
-      admins: res.data,
-      pagination: {
-        total: res.total,
-        page: res.page,
-        pages: res.pages,
-        limit: params?.limit || 7,
-      },
-    };
+  async getAdmins(params?: PaginationParams & { department?: string }) {
+    const queryParams = { isHead: 'true', ...params };
+    const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, { params: queryParams });
+    return res;
   },
 
-  /**
-   * Create a new admin/department head
-   * POST /api/staff/department-heads
-   */
+  async getStaffMember(id: string) {
+    const res = await apiClient.get(ENDPOINTS.STAFF.STAFF_BY_ID(id));
+    return res;
+  },
+
   async createAdmin(data: {
     firstName: string;
     lastName: string;
     email: string;
     department: string;
   }) {
-    console.log('[IT Service] Creating admin:', data);
-    const res = await apiClient.post('/api/staff/department-heads', data);
-    console.log('[IT Service] Admin created:', res);
+    const res = await apiClient.post(ENDPOINTS.STAFF.DEPARTMENT_HEADS, data);
     return res;
   },
 
-  /**
-   * Create a new staff member
-   * POST /api/staff
-   */
   async createStaff(data: {
     firstName: string;
     lastName: string;
@@ -300,182 +256,79 @@ export const itService = {
     lineManager: string;
     phone?: string;
   }) {
-    console.log('[IT Service] Creating staff:', data);
-    const res = await apiClient.post('/api/staff', data);
-    console.log('[IT Service] Staff created:', res);
+    const res = await apiClient.post(ENDPOINTS.STAFF.ALL_STAFF, data);
     return res;
   },
 
-  /**
-   * Get single staff member by ID
-   */
-  async getStaffMember(id: string) {
-    const res = await apiClient.get<{ success: boolean; data: Staff }>(`/api/staff/${id}`);
-    return res.data;
-  },
-
-  /**
-   * Suspend staff member
-   */
   async suspendStaff(id: string, reason: string) {
-    const res = await apiClient.put(`/api/staff/${id}/suspend`, { reason });
+    const res = await apiClient.put(ENDPOINTS.STAFF.STAFF_SUSPEND(id), { reason });
     return res;
   },
 
-  /**
-   * Deactivate staff member
-   */
   async deactivateStaff(id: string) {
-    const res = await apiClient.put(`/api/staff/${id}/deactivate`);
+    const res = await apiClient.put(ENDPOINTS.STAFF.STAFF_DEACTIVATE(id));
     return res;
   },
 
-  /**
-   * Activate staff member
-   */
   async activateStaff(id: string) {
-    const res = await apiClient.put(`/api/staff/${id}/activate`);
+    const res = await apiClient.put(ENDPOINTS.STAFF.STAFF_ACTIVATE(id));
     return res;
   },
 
-  /**
-   * Delete staff member
-   */
   async deleteStaff(id: string) {
-    const res = await apiClient.delete(`/api/staff/${id}`);
+    const res = await apiClient.delete(ENDPOINTS.STAFF.STAFF_DELETE(id));
     return res;
   },
 
   async restoreStaff(id: string) {
-    const res = await apiClient.put(`/api/staff/${id}/restore`);
+    const res = await apiClient.put(ENDPOINTS.STAFF.STAFF_RESTORE(id));
     return res;
   },
 
   // ==================== ACCOUNT MANAGEMENT ====================
+
   async getSuspendedAccounts(params?: PaginationParams) {
-    console.log('[IT Service] Fetching suspended accounts with params:', params);
-    
-    const res = await apiClient.get<{
-      success: boolean;
-      suspendedAccounts: {
-        customers: any[];
-        vendors: any[];
-        riders: any[];
-        staff: any[];
-      };
-      pagination: {
-        total: number;
-        page: number;
-        pages: number;
-        limit: number;
-      };
-    }>('/api/it/suspended-accounts', { params });
-    
-    console.log('[IT Service] Raw suspended accounts response:', res);
-    console.log('[IT Service] Has suspendedAccounts?', !!res.suspendedAccounts);
-    console.log('[IT Service] Customers count:', res.suspendedAccounts?.customers?.length);
-    console.log('[IT Service] Vendors count:', res.suspendedAccounts?.vendors?.length);
-    console.log('[IT Service] Riders count:', res.suspendedAccounts?.riders?.length);
-    console.log('[IT Service] Staff count:', res.suspendedAccounts?.staff?.length);
-    
-    return {
-      suspendedAccounts: res.suspendedAccounts,
-      pagination: res.pagination,
-    };
+    const res = await apiClient.get(ENDPOINTS.IT.SUSPENDED_ACCOUNTS, { params });
+    return res;
   },
 
   async getDeletedAccounts(params?: PaginationParams) {
-    console.log('[IT Service] Fetching deleted accounts with params:', params);
-    
-    const res = await apiClient.get<{
-      success: boolean;
-      deletedAccounts: {
-        customers: any[];
-        vendors: any[];
-        riders: any[];
-        staff: any[];
-      };
-      pagination: {
-        total: number;
-        page: number;
-        pages: number;
-        limit: number;
-      };
-    }>('/api/it/deleted-accounts', { params });
-    
-    console.log('[IT Service] Raw deleted accounts response:', res);
-    console.log('[IT Service] Has deletedAccounts?', !!res.deletedAccounts);
-    console.log('[IT Service] Customers count:', res.deletedAccounts?.customers?.length);
-    console.log('[IT Service] Vendors count:', res.deletedAccounts?.vendors?.length);
-    console.log('[IT Service] Riders count:', res.deletedAccounts?.riders?.length);
-    console.log('[IT Service] Staff count:', res.deletedAccounts?.staff?.length);
-    
-    return {
-      deletedAccounts: res.deletedAccounts,
-      pagination: res.pagination,
-    };
+    const res = await apiClient.get(ENDPOINTS.IT.DELETED_ACCOUNTS, { params });
+    return res;
   },
 
   // ==================== PROFILE (SETTINGS) ====================
-  /**
-   * Get current user's profile
-   * GET /api/it/profile
-   */
+
   async getProfile() {
-    const res = await apiClient.get('/api/it/profile');
+    const res = await apiClient.get(ENDPOINTS.IT.PROFILE);
     return res;
   },
 
-  /**
-   * Update current user's profile
-   * PUT /api/it/profile
-   */
-  async updateProfile(data: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-  }) {
-    const res = await apiClient.put('/api/it/profile', data);
+  async updateProfile(data: { firstName?: string; lastName?: string; phone?: string }) {
+    const res = await apiClient.put(ENDPOINTS.IT.PROFILE, data);
     return res;
   },
 
-  /**
-   * Upload profile avatar (base64)
-   * POST /api/it/profile/avatar
-   */
   async uploadAvatar(formData: FormData) {
-  // ✅ NO headers - let browser handle Content-Type with boundary
-  const res = await apiClient.post('/api/it/profile/avatar', formData);
-  return res;
-},
+    const res = await apiClient.post(ENDPOINTS.IT.PROFILE_AVATAR, formData);
+    return res;
+  },
 
-  /**
-   * Initiate password change (sends OTP)
-   * POST /api/it/change-password
-   */
   async changePassword(currentPassword: string, newPassword: string) {
-    const res = await apiClient.post('/api/it/change-password', {
+    const res = await apiClient.post(ENDPOINTS.IT.CHANGE_PASSWORD, {
       currentPassword,
       newPassword,
     });
     return res;
   },
 
-  /**
-   * Verify OTP and complete password change
-   * POST /api/it/verify-otp
-   */
   async verifyOTP(otp: string) {
-    const res = await apiClient.post('/api/it/verify-otp', { otp });
+    const res = await apiClient.post(ENDPOINTS.IT.VERIFY_OTP, { otp });
     return res;
   },
 
-  /**
-   * Resend OTP for password change
-   * POST /api/it/resend-otp
-   */
   async resendOTP() {
-    const res = await apiClient.post('/api/it/resend-otp');
+    const res = await apiClient.post(ENDPOINTS.IT.RESEND_OTP);
     return res;
   },
 };

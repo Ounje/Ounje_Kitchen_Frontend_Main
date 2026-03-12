@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/client';
+import { ENDPOINTS } from '@/lib/config';
 
 export interface Rider {
   id: string;
@@ -44,90 +45,54 @@ export interface PaginatedRiders {
   totalPages: number;
 }
 
-class RiderService {
-  /**
-   * Get paginated list of riders with optional filters
-   */
+export const riderService = {
+
   async getRiders(params: RiderFilters = {}): Promise<PaginatedRiders> {
-    try {
-      const response = await apiClient.get('/riders', { params });
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch riders');
-    }
-  }
+    const res = await apiClient.get<PaginatedRiders>(
+      ENDPOINTS.OPERATIONS.RIDERS, { params }
+    );
+    return res;
+  },
 
-  /**
-   * Get top 3 performers
-   */
   async getTopPerformers(): Promise<TopPerformer[]> {
-    try {
-      const response = await apiClient.get('/riders/top-performers');
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch top performers');
-    }
-  }
+    const res = await apiClient.get<TopPerformer[]>(
+      `${ENDPOINTS.OPERATIONS.RIDERS}/top-performers`
+    );
+    return res;
+  },
 
-  /**
-   * Get single rider by ID
-   */
   async getRiderById(id: string): Promise<Rider> {
-    try {
-      const response = await apiClient.get(`/riders/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch rider details');
-    }
-  }
+    const res = await apiClient.get<Rider>(
+      ENDPOINTS.OPERATIONS.RIDER_BY_ID(id)
+    );
+    return res;
+  },
 
-  /**
-   * Get rider document
-   */
   async getRiderDocument(id: string): Promise<{ documentUrl: string; documentType: string }> {
-    try {
-      const response = await apiClient.get(`/riders/${id}/document`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch rider document');
-    }
-  }
+    const res = await apiClient.get<{ documentUrl: string; documentType: string }>(
+      `${ENDPOINTS.OPERATIONS.RIDER_BY_ID(id)}/document`
+    );
+    return res;
+  },
 
-  /**
-   * Suspend a rider account
-   */
   async suspendRider(id: string): Promise<{ message: string }> {
-    try {
-      const response = await apiClient.post(`/riders/${id}/suspend`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to suspend rider');
-    }
-  }
+    const res = await apiClient.post<{ message: string }>(
+      ENDPOINTS.OPERATIONS.RIDER_SUSPEND(id)
+    );
+    return res;
+  },
 
-  /**
-   * Activate a rider account
-   */
   async activateRider(id: string): Promise<{ message: string }> {
-    try {
-      const response = await apiClient.post(`/riders/${id}/activate`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to activate rider');
-    }
-  }
+    const res = await apiClient.post<{ message: string }>(
+      ENDPOINTS.OPERATIONS.RIDER_ACTIVATE(id)
+    );
+    return res;
+  },
 
-  /**
-   * Delete a rider account
-   */
   async deleteRider(id: string): Promise<{ message: string }> {
-    try {
-      const response = await apiClient.delete(`/riders/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to delete rider');
-    }
-  }
-}
-
-export const riderService = new RiderService();
+    const res = await apiClient.delete<{ message: string }>(
+      ENDPOINTS.OPERATIONS.RIDER_DELETE(id)
+    );
+    return res;
+  },
+};

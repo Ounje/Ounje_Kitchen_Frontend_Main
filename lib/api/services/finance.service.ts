@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/client';
+import { ENDPOINTS } from '@/lib/config';
 
 // ── Shared ────────────────────────────────────────────────────────────────────
 export interface PaginatedResponse<T> {
@@ -40,7 +41,7 @@ export interface TransactionItem {
 }
 
 export interface TransactionGroup {
-  date: string;           // e.g. "Wednesday 7th, 2026"
+  date: string;
   transactions: TransactionItem[];
 }
 
@@ -110,7 +111,7 @@ export type RevenuePeriod = 'daily' | 'weekly' | 'monthly';
 
 export interface RevenueStatCard {
   amount: number;
-  change: number;       // percentage change
+  change: number;
   detail1?: string;
   detail2?: string;
 }
@@ -123,7 +124,7 @@ export interface RevenueStats {
 }
 
 export interface RevenueTrendPoint {
-  label: string;        // "Mon", "Tue" …
+  label: string;
   gross: number;
   vendor: number;
   rider: number;
@@ -152,7 +153,7 @@ export interface TopRider {
   photo?: string;
   deliveries: number;
   earnings: number;
-  completion: number;   // percentage
+  completion: number;
   rating: number;
 }
 
@@ -186,70 +187,35 @@ export const financeService = {
 
   // ==================== DASHBOARD ====================
 
-  /**
-   * GET /api/finance/dashboard/stats
-   * Returns the 3 top-level stat cards (Withdrawals, Transactions, Payroll).
-   */
   async getDashboardStats() {
-    const res = await apiClient.get<{
-      success: boolean;
-      data: DashboardStats;
-    }>('/api/finance/dashboard/stats');
+    const res = await apiClient.get(ENDPOINTS.FINANCE.DASHBOARD_STATS);
     return res;
   },
 
-  /**
-   * GET /api/finance/dashboard/withdrawals
-   * Returns recent withdrawal rows for the dashboard table.
-   */
   async getDashboardWithdrawals() {
-    const res = await apiClient.get<{
-      success: boolean;
-      data: DashboardWithdrawalRow[];
-    }>('/api/finance/dashboard/withdrawals');
+    const res = await apiClient.get(ENDPOINTS.FINANCE.DASHBOARD_WITHDRAWALS);
     return res;
   },
 
-  /**
-   * DELETE /api/finance/dashboard/withdrawals/:id
-   * Removes a withdrawal row from the dashboard list.
-   */
   async deleteDashboardWithdrawal(id: string) {
-    const res = await apiClient.delete(`/api/finance/dashboard/withdrawals/${id}`);
+    const res = await apiClient.delete(ENDPOINTS.FINANCE.DASHBOARD_WITHDRAWAL_DELETE(id));
     return res;
   },
 
   // ==================== TRANSACTIONS ====================
 
-  /**
-   * GET /api/finance/transactions
-   * Paginated, filtered transaction list — grouped by date on the backend.
-   */
   async getTransactions(filters: TransactionFilters) {
-    const res = await apiClient.get<
-      PaginatedResponse<TransactionGroup>
-    >('/api/finance/transactions', { params: filters });
+    const res = await apiClient.get(ENDPOINTS.FINANCE.TRANSACTIONS, { params: filters });
     return res;
   },
 
-  /**
-   * GET /api/finance/transactions/:id
-   * Full transaction detail / slip data.
-   */
   async getTransactionDetail(id: string) {
-    const res = await apiClient.get<{
-      success: boolean;
-      data: TransactionDetail;
-    }>(`/api/finance/transactions/${id}`);
+    const res = await apiClient.get(ENDPOINTS.FINANCE.TRANSACTION_BY_ID(id));
     return res;
   },
 
-  /**
-   * GET /api/finance/transactions/export
-   * Downloads filtered transactions as a CSV blob.
-   */
   async exportTransactionsCSV(filters: Omit<TransactionFilters, 'page' | 'limit'>) {
-    const res = await apiClient.get<Blob>('/api/finance/transactions/export', {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.TRANSACTIONS_EXPORT, {
       params: filters,
     } as any);
     return res;
@@ -257,35 +223,18 @@ export const financeService = {
 
   // ==================== WITHDRAWALS ====================
 
-  /**
-   * GET /api/finance/withdrawals
-   * Paginated, filtered withdrawal list — grouped by date on the backend.
-   */
   async getWithdrawals(filters: WithdrawalFilters) {
-    const res = await apiClient.get<
-      PaginatedResponse<WithdrawalGroup>
-    >('/api/finance/withdrawals', { params: filters });
+    const res = await apiClient.get(ENDPOINTS.FINANCE.WITHDRAWALS, { params: filters });
     return res;
   },
 
-  /**
-   * GET /api/finance/withdrawals/:id
-   * Full withdrawal detail / slip data.
-   */
   async getWithdrawalDetail(id: string) {
-    const res = await apiClient.get<{
-      success: boolean;
-      data: WithdrawalDetail;
-    }>(`/api/finance/withdrawals/${id}`);
+    const res = await apiClient.get(ENDPOINTS.FINANCE.WITHDRAWAL_BY_ID(id));
     return res;
   },
 
-  /**
-   * GET /api/finance/withdrawals/export
-   * Downloads filtered withdrawals as a CSV blob.
-   */
   async exportWithdrawalsCSV(filters: Omit<WithdrawalFilters, 'page' | 'limit'>) {
-    const res = await apiClient.get<Blob>('/api/finance/withdrawals/export', {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.WITHDRAWALS_EXPORT, {
       params: filters,
     } as any);
     return res;
@@ -293,105 +242,53 @@ export const financeService = {
 
   // ==================== REVENUE ====================
 
-  /**
-   * GET /api/finance/revenue
-   * Full revenue dashboard — stats, trend chart, distribution chart, top performers.
-   */
   async getRevenueData(filters: RevenueFilters) {
-    const res = await apiClient.get<{
-      success: boolean;
-      data: RevenueData;
-    }>('/api/finance/revenue', { params: filters });
+    const res = await apiClient.get(ENDPOINTS.FINANCE.REVENUE, { params: filters });
     return res;
   },
 
-  /**
-   * GET /api/finance/revenue/top-vendors
-   * Top 5 vendors for the given period.
-   */
   async getTopVendors(params: { period?: RevenuePeriod }) {
-    const res = await apiClient.get<{
-      success: boolean;
-      data: TopVendor[];
-    }>('/api/finance/revenue/top-vendors', { params });
+    const res = await apiClient.get(ENDPOINTS.FINANCE.REVENUE_TOP_VENDORS, { params });
     return res;
   },
 
-  /**
-   * GET /api/finance/revenue/top-riders
-   * Top 5 riders for the given period.
-   */
   async getTopRiders(params: { period?: RevenuePeriod }) {
-    const res = await apiClient.get<{
-      success: boolean;
-      data: TopRider[];
-    }>('/api/finance/revenue/top-riders', { params });
+    const res = await apiClient.get(ENDPOINTS.FINANCE.REVENUE_TOP_RIDERS, { params });
     return res;
   },
 
   // ==================== PROFILE (SETTINGS) ====================
 
-  /**
-   * GET /api/finance/profile
-   * Returns the current finance user's profile.
-   */
   async getProfile() {
-    const res = await apiClient.get<{
-      success: boolean;
-      data: FinanceProfile;
-    }>('/api/finance/profile');
+    const res = await apiClient.get(ENDPOINTS.FINANCE.PROFILE);
     return res;
   },
 
-  /**
-   * PUT /api/finance/profile
-   * Updates name / phone fields.
-   */
-  async updateProfile(data: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-  }) {
-    const res = await apiClient.put('/api/finance/profile', data);
+  async updateProfile(data: { firstName?: string; lastName?: string; phone?: string }) {
+    const res = await apiClient.put(ENDPOINTS.FINANCE.PROFILE, data);
     return res;
   },
 
-  /**
-   * POST /api/finance/profile/avatar
-   * Uploads a new avatar image (multipart/form-data).
-   */
   async uploadAvatar(formData: FormData) {
-    const res = await apiClient.post('/api/finance/profile/avatar', formData);
+    const res = await apiClient.post(ENDPOINTS.FINANCE.PROFILE_AVATAR, formData);
     return res;
   },
 
-  /**
-   * POST /api/finance/change-password
-   * Updates the finance user's password after verifying the current one.
-   */
   async changePassword(currentPassword: string, newPassword: string) {
-    const res = await apiClient.post('/api/finance/change-password', {
+    const res = await apiClient.post(ENDPOINTS.FINANCE.CHANGE_PASSWORD, {
       currentPassword,
       newPassword,
     });
     return res;
   },
 
-  /**
-   * POST /api/finance/verify-otp
-   * Verifies a one-time password (e.g. after password change).
-   */
   async verifyOTP(otp: string) {
-    const res = await apiClient.post('/api/finance/verify-otp', { otp });
+    const res = await apiClient.post(ENDPOINTS.FINANCE.VERIFY_OTP, { otp });
     return res;
   },
 
-  /**
-   * POST /api/finance/resend-otp
-   * Resends the OTP to the finance user's registered contact.
-   */
   async resendOTP() {
-    const res = await apiClient.post('/api/finance/resend-otp');
+    const res = await apiClient.post(ENDPOINTS.FINANCE.RESEND_OTP);
     return res;
   },
 };
