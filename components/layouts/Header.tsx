@@ -30,7 +30,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b">
+    <header className="sticky top-0 z-30 bg-[#1A3F1C] border-b">
       <div className="px-4 md:px-6 py-3 flex items-center justify-end gap-4">
         {/* Mobile menu button */}
         <Button
@@ -39,16 +39,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
           className="lg:hidden absolute left-4"
           onClick={onMenuClick}
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6 text-white font-bold" />
         </Button>
 
         {/* Notification bell */}
         <Button
           variant="ghost"
           size="icon"
-          className="relative"
+          className="relative cursor-pointer"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 text-white" />
           <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
         </Button>
 
