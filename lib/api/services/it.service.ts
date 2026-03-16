@@ -3,81 +3,18 @@ import { ENDPOINTS } from '@/lib/config';
 
 // ── Shared Types ──────────────────────────────────────────────────────────────
 export interface PaginationParams {
-  page?: number;
+  page?:  number;
   limit?: number;
 }
 
 export interface PaginationMeta {
   total: number;
-  page: number;
+  page:  number;
   pages: number;
   limit: number;
 }
 
-// ── Customer ──────────────────────────────────────────────────────────────────
-export interface CustomerRow {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  isActive: boolean;
-  isSuspended: boolean;
-  createdAt: string;
-}
-
-// ── Vendor ────────────────────────────────────────────────────────────────────
-export interface VendorRow {
-  id: string;
-  businessName: string;
-  ownerName: string;
-  email: string;
-  phone?: string;
-  address?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-  };
-  isActive: boolean;
-  isSuspended: boolean;
-  isVerified: boolean;
-  rating: number;
-  totalOrders: number;
-  createdAt: string;
-}
-
-// ── Rider ─────────────────────────────────────────────────────────────────────
-export interface RiderRow {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  zone?: string;
-  vehicleType?: string;
-  vehicleNumber?: string;
-  isActive: boolean;
-  isSuspended: boolean;
-  rating: number;
-  createdAt: string;
-}
-
-// ── Staff ─────────────────────────────────────────────────────────────────────
-export interface StaffRow {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  department: string;
-  isHead: boolean;
-  isActive: boolean;
-  isSuspended: boolean;
-  createdAt: string;
-}
-
-// ── Dashboard ─────────────────────────────────────────────────────────────────
+// ── Staff / Dashboard types ───────────────────────────────────────────────────
 export interface ITDashboardData {
   customers: { total: number; active: number };
   vendors:   { total: number; active: number };
@@ -91,24 +28,23 @@ export const itService = {
 
   // ==================== DASHBOARD ====================
 
-  async getDashboard(): Promise<ITDashboardData> {
+  async getDashboard() {
     const res = await apiClient.get(ENDPOINTS.IT.DASHBOARD);
-    return {
-      customers: res.customers,
-      vendors:   res.vendors,
-      riders:    res.riders,
-      staff:     res.staff,
-      orders:    res.orders,
-    };
+    // apiClient unwraps { success, data } → res is the data object directly
+    // Handle both shapes: res = { customers, vendors, ... } OR res = { data: { customers, ... } }
+    const d = (res?.customers !== undefined) ? res : (res?.data ?? res);
+    return d;
   },
 
   // ==================== CUSTOMERS ====================
-  // Returns full profile: name, email, phone, address, status fields
+  // Controllers check: search, name, email, phoneNumber, isActive, isSuspended
+  // Frontend sends:    name, email, phoneNumber, accountStatus as individual filters
 
   async getCustomers(params?: PaginationParams & {
-    name?: string;
-    isActive?: string;
-    isSuspended?: string;
+    name?:          string;
+    email?:         string;
+    phoneNumber?:   string;
+    accountStatus?: string;
   }) {
     const res = await apiClient.get(ENDPOINTS.IT.CUSTOMERS, { params: params ?? {} });
     return res;
@@ -140,12 +76,14 @@ export const itService = {
   },
 
   // ==================== VENDORS ====================
-  // Returns full profile: businessName, ownerName, email, phone, address, ratings, status
+  // Controllers check: search, name, email, phoneNumber, isActive, isSuspended, isVerified
+  // No server-side active/suspended defaults — frontend filters client-side
 
   async getVendors(params?: PaginationParams & {
-    name?: string;
-    isActive?: string;
-    isSuspended?: string;
+    name?:        string;
+    email?:       string;
+    phoneNumber?: string;
+    isVerified?:  string;
   }) {
     const res = await apiClient.get(ENDPOINTS.IT.VENDORS, { params: params ?? {} });
     return res;
@@ -182,13 +120,14 @@ export const itService = {
   },
 
   // ==================== RIDERS ====================
-  // Returns full profile: firstName, lastName, email, phone, zone, vehicle, ratings, status
+  // Controllers check: search, name, phoneNumber, isActive, isSuspended, vehicleType
+  // No server-side active/suspended defaults — frontend filters client-side
 
   async getRiders(params?: PaginationParams & {
-    name?: string;
-    zone?: string;
-    isActive?: string;
-    isSuspended?: string;
+    name?:        string;
+    phoneNumber?: string;
+    vehicleType?: string;
+    zone?:        string;
   }) {
     const res = await apiClient.get(ENDPOINTS.IT.RIDERS, { params: params ?? {} });
     return res;
@@ -222,14 +161,24 @@ export const itService = {
   // ==================== STAFF ====================
 
   async getStaff(params?: PaginationParams & { name?: string; department?: string }) {
-    const queryParams = { isHead: 'false', ...params };
-    const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, { params: queryParams });
+    const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, {
+      params: { isHead: 'false', ...params },
+    });
     return res;
   },
 
   async getAdmins(params?: PaginationParams & { department?: string }) {
-    const queryParams = { isHead: 'true', ...params };
-    const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, { params: queryParams });
+    const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, {
+      params: { isHead: 'true', ...params },
+    });
+    return res;
+  },
+
+  // No isHead filter — returns everyone including SuperAdmin for lineManager lookups
+  async getAllStaffForLookup(params?: PaginationParams) {
+    const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, {
+      params: { page: 1, limit: 200, ...params },
+    });
     return res;
   },
 
@@ -239,9 +188,9 @@ export const itService = {
   },
 
   async createAdmin(data: {
-    firstName: string;
-    lastName: string;
-    email: string;
+    firstName:  string;
+    lastName:   string;
+    email:      string;
     department: string;
   }) {
     const res = await apiClient.post(ENDPOINTS.STAFF.DEPARTMENT_HEADS, data);
@@ -249,12 +198,12 @@ export const itService = {
   },
 
   async createStaff(data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    department: string;
+    firstName:   string;
+    lastName:    string;
+    email:       string;
+    department:  string;
     lineManager: string;
-    phone?: string;
+    phone?:      string;
   }) {
     const res = await apiClient.post(ENDPOINTS.STAFF.ALL_STAFF, data);
     return res;
@@ -282,6 +231,30 @@ export const itService = {
 
   async restoreStaff(id: string) {
     const res = await apiClient.put(ENDPOINTS.STAFF.STAFF_RESTORE(id));
+    return res;
+  },
+
+  // ==================== ORDERS ====================
+
+  async getOrders(params?: PaginationParams & {
+    name?:   string;
+    vendor?: string;
+    rider?:  string;
+    zone?:   string;
+    period?: string;
+    status?: string;
+  }) {
+    const res = await apiClient.get(ENDPOINTS.IT.ORDERS, { params });
+    return res;
+  },
+
+  async getOrder(id: string) {
+    const res = await apiClient.get(ENDPOINTS.IT.ORDER_BY_ID(id));
+    return res;
+  },
+
+  async deleteOrder(id: string) {
+    const res = await apiClient.delete(ENDPOINTS.IT.ORDER_BY_ID(id));
     return res;
   },
 

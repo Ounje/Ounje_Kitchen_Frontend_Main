@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { itService } from "@/lib/api/services/it.service";
 import { exportToCSV } from "@/lib/csv-export";
@@ -24,30 +24,71 @@ import Pagination from "@/components/Pagination";
 type ViewType = "Admin" | "Staff" | "Customer" | "Vendor" | "Rider";
 const DEPARTMENTS = ["IT", "Operations", "Finance", "Investors"];
 
-// ── Field helpers (mirrors actual DB shapes) ─────────────────────────────────
+// ── Field helpers ─────────────────────────────────────────────────────────────
 function getDisplayName(item: any, view: ViewType): string {
-  if (view === "Admin" || view === "Staff") {
-    return `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() || '—';
-  }
-  if (view === "Customer") {
-    return item.user?.name || '—';
-  }
-  if (view === "Vendor") {
-    return item.name || '—';
-  }
-  if (view === "Rider") {
-    // IT rider backend has NO .populate("user") — firstName/lastName are direct fields
-    return `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() || '—';
-  }
-  return '—';
+  if (view === "Admin" || view === "Staff")
+    return `${item.firstName ?? ""} ${item.lastName ?? ""}`.trim() || "—";
+  if (view === "Customer") return item.user?.name || "—";
+  if (view === "Vendor")   return item.name       || "—";
+  if (view === "Rider")    return `${item.firstName ?? ""} ${item.lastName ?? ""}`.trim() || "—";
+  return "—";
 }
 
 function getEmail(item: any, view: ViewType): string {
-  if (view === "Admin" || view === "Staff") return item.email || '—';
-  if (view === "Customer")  return item.user?.email || '—';
-  if (view === "Vendor")    return item.owner?.email || '—';
-  if (view === "Rider")     return item.email || '—'; // direct field, no user ref
-  return '—';
+  if (view === "Admin" || view === "Staff") return item.email        || "—";
+  if (view === "Customer")                  return item.user?.email  || "—";
+  if (view === "Vendor")                    return item.owner?.email || "—";
+  if (view === "Rider")                     return item.email        || "—";
+  return "—";
+}
+
+// ── Unwrap helpers ────────────────────────────────────────────────────────────
+function extractRows(res: any): any[] {
+  if (Array.isArray(res)) return res;
+  const d = res?.data ?? res;
+  if (Array.isArray(d?.customers)) return d.customers;
+  if (Array.isArray(d?.vendors))   return d.vendors;
+  if (Array.isArray(d?.riders))    return d.riders;
+  if (Array.isArray(d?.staff))     return d.staff;
+  if (Array.isArray(d?.admins))    return d.admins;
+  if (Array.isArray(d?.users))     return d.users;
+  if (Array.isArray(d?.data))      return d.data;
+  if (Array.isArray(d))            return d;
+  return [];
+}
+
+function extractPagination(res: any, currentLimit: number) {
+  const d = res?.data ?? res;
+  const p = d?.pagination ?? d;
+  return {
+    page:  p?.page  ?? 1,
+    pages: p?.pages ?? 1,
+    total: p?.total ?? 0,
+    limit: currentLimit,
+  };
+}
+
+// Resolve line manager name from a lookup array
+function resolveLineManager(lm: any, lookupList: any[]): string {
+  if (!lm) return "Not Assigned";
+  if (typeof lm === "object") {
+    return lm.name
+      || `${lm.firstName ?? ""} ${lm.lastName ?? ""}`.trim()
+      || lm.email
+      || "—";
+  }
+  // Raw ObjectId string — look up in full staff list
+  const lmStr = String(lm);
+  const found = lookupList.find(
+    a => String(a._id) === lmStr || String(a.id) === lmStr
+  );
+  if (found) {
+    return `${found.firstName ?? ""} ${found.lastName ?? ""}`.trim()
+      || found.name
+      || found.email
+      || "—";
+  }
+  return "—";
 }
 
 // ── Skeleton Row ──────────────────────────────────────────────────────────────
@@ -56,7 +97,10 @@ function SkeletonRow({ cols }: { cols: number }) {
     <tr className="animate-pulse">
       {Array.from({ length: cols }).map((_, i) => (
         <td key={i} className="px-4 py-3">
-          <div className="h-3.5 rounded bg-gray-200" style={{ width: `${[40, 140, 180, 120, 120, 100, 80][i] ?? 100}px` }} />
+          <div
+            className="h-3.5 rounded bg-gray-200"
+            style={{ width: `${[40, 140, 180, 130, 160, 100, 80][i] ?? 100}px` }}
+          />
         </td>
       ))}
     </tr>
@@ -69,82 +113,56 @@ export default function ITAdminPage() {
   const [currentView, setCurrentView] = useState<ViewType>("Admin");
   const [data, setData]               = useState<any[]>([]);
   const [loading, setLoading]         = useState(false);
-  const [admins, setAdmins]           = useState<any[]>([]);
+  // allStaffLookup: used to resolve lineManager ObjectIds in the Staff table
+  const [allStaffLookup, setAllStaffLookup] = useState<any[]>([]);
 
   const [pagination, setPagination] = useState({ page: 1, limit: 7, total: 0, pages: 1 });
 
   const [adminForm, setAdminForm] = useState({ firstName: "", lastName: "", email: "", department: "" });
   const [staffForm, setStaffForm] = useState({ firstName: "", lastName: "", email: "", department: "", lineManager: "", phone: "" });
-  const [searchFilters, setSearchFilters] = useState({ name: "", email: "", phoneNumber: "", accountStatus: "" });
+  const [searchFilters, setSearchFilters] = useState({ name: "", email: "", phoneNumber: "" });
 
   const [suspendModalOpen, setSuspendModalOpen] = useState(false);
-  const [suspendTarget, setSuspendTarget] = useState<{ id: string; name: string } | null>(null);
-  const [suspendReason, setSuspendReason] = useState("");
-  const [suspending, setSuspending] = useState(false);
+  const [suspendTarget, setSuspendTarget]       = useState<{ id: string; name: string } | null>(null);
+  const [suspendReason, setSuspendReason]       = useState("");
+  const [suspending, setSuspending]             = useState(false);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [deleteTarget, setDeleteTarget]       = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting]               = useState(false);
 
-  // ── Extract rows from raw API response ───────────────────────────────────
-  // IT controllers return: { success, data: { customers/vendors/riders: [...], pagination: {...} } }
-  // Superadmin returns:    { success, data: { data: [...], page, pages, total } }
-  const extractRows = (res: any): any[] => {
-    if (Array.isArray(res)) return res;
-
-    const d = res?.data ?? res; // unwrap one level
-
-    // IT-style named keys
-    if (Array.isArray(d?.customers)) return d.customers;
-    if (Array.isArray(d?.vendors))   return d.vendors;
-    if (Array.isArray(d?.riders))    return d.riders;
-    if (Array.isArray(d?.staff))     return d.staff;
-    if (Array.isArray(d?.admins))    return d.admins;
-    if (Array.isArray(d?.users))     return d.users;
-
-    // Superadmin-style: { data: [...], page, pages }
-    if (Array.isArray(d?.data))      return d.data;
-    if (Array.isArray(d))            return d;
-
-    return [];
-  };
-
-  const extractPagination = (res: any, currentLimit: number) => {
-    const d = res?.data ?? res;
-    // IT-style: pagination is a nested object
-    const p = d?.pagination ?? d;
-    return {
-      page:  p?.page  ?? 1,
-      pages: p?.pages ?? 1,
-      total: p?.total ?? 0,
-      limit: currentLimit,
-    };
-  };
-
-  // ── Fetch admins for line manager dropdown ────────────────────────────────
-  const fetchAdmins = useCallback(async () => {
+  // ── Fetch staff lookup list (for lineManager resolution) ─────────────────
+  // Fetches ALL staff with no isHead filter — includes heads, staff, superadmin
+  const fetchAllStaffLookup = useCallback(async () => {
     try {
-      const res: any = await itService.getAdmins({ page: 1, limit: 100 });
-      setAdmins(extractRows(res));
-    } catch { /* silent */ }
-  }, [extractRows]);
+      const res: any = await itService.getAllStaffForLookup();
+      setAllStaffLookup(extractRows(res));
+    } catch { /* silent — just means lineManager won't resolve */ }
+  }, []);
 
   // ── Main data fetch ───────────────────────────────────────────────────────
   const fetchData = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const params = { page, limit: pagination.limit };
-      let res: any;
+      const base = { page, limit: pagination.limit, ...searchFilters };
 
+      let res: any;
       switch (currentView) {
-        case "Admin":    res = await itService.getAdmins(params);    break;
-        case "Staff":    res = await itService.getStaff(params);     break;
-        case "Customer": res = await itService.getCustomers(params); break;
-        case "Vendor":   res = await itService.getVendors(params);   break;
-        case "Rider":    res = await itService.getRiders(params);    break;
+        case "Admin":    res = await itService.getAdmins(base);    break;
+        case "Staff":    res = await itService.getStaff(base);     break;
+        case "Customer": res = await itService.getCustomers(base); break;
+        case "Vendor":   res = await itService.getVendors(base);   break;
+        case "Rider":    res = await itService.getRiders(base);    break;
       }
 
-      setData(extractRows(res));
+      // Client-side filter: exclude suspended and deleted accounts
+      // We do this client-side because backend MongoDB strict-matches boolean fields
+      // and excludes records where isSuspended/isDeleted is undefined (unset in DB)
+      const rows = extractRows(res).filter(
+        item => item.isSuspended !== true && item.isDeleted !== true
+      );
+
+      setData(rows);
       setPagination(extractPagination(res, pagination.limit));
     } catch (err: any) {
       toast.error(err.message || "Failed to fetch data");
@@ -152,11 +170,17 @@ export default function ITAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentView, pagination.limit]);
+  }, [currentView, pagination.limit, searchFilters]);
 
+  // ── On view change: fetch data AND lookup list in parallel ────────────────
+  // Using Promise.all ensures allStaffLookup is populated before/alongside rows
   useEffect(() => {
-    fetchData(1);
-    if (currentView === "Admin" || currentView === "Staff") fetchAdmins();
+    if (currentView === "Admin" || currentView === "Staff") {
+      // Fetch both in parallel — rows and lookup list at the same time
+      Promise.all([fetchData(1), fetchAllStaffLookup()]);
+    } else {
+      fetchData(1);
+    }
   }, [currentView]);
 
   // ── Create Admin ──────────────────────────────────────────────────────────
@@ -169,8 +193,7 @@ export default function ITAdminPage() {
       await itService.createAdmin({ ...adminForm, department: adminForm.department.toLowerCase() });
       toast.success("Admin created! Credentials sent to email.");
       setAdminForm({ firstName: "", lastName: "", email: "", department: "" });
-      fetchData(pagination.page);
-      fetchAdmins();
+      await Promise.all([fetchData(pagination.page), fetchAllStaffLookup()]);
     } catch (err: any) { toast.error(err.message || "Failed to create admin"); }
   };
 
@@ -188,34 +211,47 @@ export default function ITAdminPage() {
     } catch (err: any) { toast.error(err.message || "Failed to create staff"); }
   };
 
-  // ── Suspend ───────────────────────────────────────────────────────────────
+  // ── Suspend — optimistic removal from table ───────────────────────────────
   const confirmSuspend = async () => {
     if (!suspendTarget || !suspendReason.trim()) { toast.error("Enter a suspension reason"); return; }
     setSuspending(true);
     try {
-      if (currentView === "Customer") await itService.suspendCustomer(suspendTarget.id, suspendReason);
+      if (currentView === "Customer")    await itService.suspendCustomer(suspendTarget.id, suspendReason);
       else if (currentView === "Vendor") await itService.suspendVendor(suspendTarget.id, suspendReason);
-      else if (currentView === "Rider") await itService.suspendRider(suspendTarget.id, suspendReason);
-      else await itService.suspendStaff(suspendTarget.id, suspendReason);
+      else if (currentView === "Rider")  await itService.suspendRider(suspendTarget.id, suspendReason);
+      else                               await itService.suspendStaff(suspendTarget.id, suspendReason);
+
       toast.success("Account suspended");
-      setSuspendModalOpen(false); setSuspendTarget(null); setSuspendReason("");
-      fetchData(pagination.page);
+
+      // Immediately remove from table — no refetch needed
+      setData(prev => prev.filter(item => (item._id ?? item.id) !== suspendTarget.id));
+      setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+
+      setSuspendModalOpen(false);
+      setSuspendTarget(null);
+      setSuspendReason("");
     } catch (err: any) { toast.error(err.message || "Failed to suspend"); }
     finally { setSuspending(false); }
   };
 
-  // ── Delete ────────────────────────────────────────────────────────────────
+  // ── Delete — optimistic removal from table ────────────────────────────────
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      if (currentView === "Customer") await itService.deleteCustomer(deleteTarget.id);
+      if (currentView === "Customer")    await itService.deleteCustomer(deleteTarget.id);
       else if (currentView === "Vendor") await itService.deleteVendor(deleteTarget.id);
-      else if (currentView === "Rider") await itService.deleteRider(deleteTarget.id);
-      else await itService.deleteStaff(deleteTarget.id);
+      else if (currentView === "Rider")  await itService.deleteRider(deleteTarget.id);
+      else                               await itService.deleteStaff(deleteTarget.id);
+
       toast.success("Account deleted");
-      setDeleteModalOpen(false); setDeleteTarget(null);
-      fetchData(pagination.page);
+
+      // Immediately remove from table — no refetch needed
+      setData(prev => prev.filter(item => (item._id ?? item.id) !== deleteTarget.id));
+      setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+
+      setDeleteModalOpen(false);
+      setDeleteTarget(null);
     } catch (err: any) { toast.error(err.message || "Failed to delete"); }
     finally { setDeleting(false); }
   };
@@ -227,33 +263,46 @@ export default function ITAdminPage() {
 
   const handleExportCSV = () => {
     if (!data.length) { toast.error("No data to export"); return; }
-    exportToCSV({ filename: `${currentView.toLowerCase()}_accounts`, data, entityType: currentView === "Admin" ? "staff" : currentView.toLowerCase() as any, includeEntityTypeColumn: false });
+    exportToCSV({
+      filename:                `${currentView.toLowerCase()}_accounts`,
+      data,
+      entityType:              currentView === "Admin" ? "staff" : currentView.toLowerCase() as any,
+      includeEntityTypeColumn: false,
+    });
     toast.success("CSV exported");
   };
 
-  // ── Column count for skeleton ─────────────────────────────────────────────
   const colCount =
     currentView === "Admin"    ? 5 :
     currentView === "Staff"    ? 6 :
-    currentView === "Customer" ? 5 :
-    currentView === "Vendor"   ? 6 :
-    currentView === "Rider"    ? 7 : 5;
+    currentView === "Customer" ? 4 :
+    currentView === "Vendor"   ? 5 :
+    currentView === "Rider"    ? 6 : 5;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Admin</h1>
-        <Select value={currentView} onValueChange={(v) => setCurrentView(v as ViewType)}>
-          <SelectTrigger className="w-48" style={{ backgroundColor: '#98ef9b' }}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {(["Admin","Staff","Customer","Vendor","Rider"] as ViewType[]).map(v => (
-              <SelectItem key={v} value={v}>{v}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select value={currentView} onValueChange={v => setCurrentView(v as ViewType)}>
+            <SelectTrigger className="w-40" style={{ backgroundColor: "#98ef9b" }}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(["Admin","Staff","Customer","Vendor","Rider"] as ViewType[]).map(v => (
+                <SelectItem key={v} value={v}>{v}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {/* <Button
+            variant="outline"
+            onClick={() => router.push("/it/account-management")}
+            className="whitespace-nowrap border-[#1a3f1c] text-[#1a3f1c] hover:bg-[#e8f7e8] text-sm"
+          >
+            Account Management
+          </Button> */}
+        </div>
       </div>
 
       {/* Admin creation form */}
@@ -264,22 +313,22 @@ export default function ITAdminPage() {
             <form onSubmit={handleCreateAdmin} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><Label>First Name *</Label>
-                  <Input value={adminForm.firstName} onChange={e => setAdminForm({...adminForm, firstName: e.target.value})} placeholder="Enter first name" /></div>
+                  <Input value={adminForm.firstName} onChange={e => setAdminForm({ ...adminForm, firstName: e.target.value })} placeholder="Enter first name" /></div>
                 <div><Label>Last Name *</Label>
-                  <Input value={adminForm.lastName} onChange={e => setAdminForm({...adminForm, lastName: e.target.value})} placeholder="Enter last name" /></div>
+                  <Input value={adminForm.lastName} onChange={e => setAdminForm({ ...adminForm, lastName: e.target.value })} placeholder="Enter last name" /></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><Label>Email *</Label>
-                  <Input type="email" value={adminForm.email} onChange={e => setAdminForm({...adminForm, email: e.target.value})} placeholder="Enter email" /></div>
+                  <Input type="email" value={adminForm.email} onChange={e => setAdminForm({ ...adminForm, email: e.target.value })} placeholder="Enter email" /></div>
                 <div><Label>Department *</Label>
-                  <Select value={adminForm.department} onValueChange={v => setAdminForm({...adminForm, department: v})}>
+                  <Select value={adminForm.department} onValueChange={v => setAdminForm({ ...adminForm, department: v })}>
                     <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
                     <SelectContent>{DEPARTMENTS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                   </Select></div>
               </div>
               <div className="flex gap-2">
-                <Button type="submit" style={{ backgroundColor: '#1a3f1c' }} className="text-white hover:opacity-90">Create Admin</Button>
-                <Button type="button" variant="outline" onClick={() => setAdminForm({ firstName:"", lastName:"", email:"", department:"" })}>Clear</Button>
+                <Button type="submit" style={{ backgroundColor: "#1a3f1c" }} className="text-white hover:opacity-90">Create Admin</Button>
+                <Button type="button" variant="outline" onClick={() => setAdminForm({ firstName: "", lastName: "", email: "", department: "" })}>Clear</Button>
               </div>
             </form>
           </CardContent>
@@ -293,53 +342,56 @@ export default function ITAdminPage() {
             <h2 className="text-lg font-semibold mb-4">Create New Staff</h2>
             <form onSubmit={handleCreateStaff} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div><Label>First Name *</Label><Input value={staffForm.firstName} onChange={e => setStaffForm({...staffForm, firstName: e.target.value})} placeholder="Enter first name" /></div>
-                <div><Label>Last Name *</Label><Input value={staffForm.lastName} onChange={e => setStaffForm({...staffForm, lastName: e.target.value})} placeholder="Enter last name" /></div>
-                <div><Label>Email *</Label><Input type="email" value={staffForm.email} onChange={e => setStaffForm({...staffForm, email: e.target.value})} placeholder="Enter email" /></div>
+                <div><Label>First Name *</Label><Input value={staffForm.firstName} onChange={e => setStaffForm({ ...staffForm, firstName: e.target.value })} placeholder="Enter first name" /></div>
+                <div><Label>Last Name *</Label><Input value={staffForm.lastName} onChange={e => setStaffForm({ ...staffForm, lastName: e.target.value })} placeholder="Enter last name" /></div>
+                <div><Label>Email *</Label><Input type="email" value={staffForm.email} onChange={e => setStaffForm({ ...staffForm, email: e.target.value })} placeholder="Enter email" /></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div><Label>Department *</Label>
-                  <Select value={staffForm.department} onValueChange={v => setStaffForm({...staffForm, department: v})}>
+                  <Select value={staffForm.department} onValueChange={v => setStaffForm({ ...staffForm, department: v })}>
                     <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
                     <SelectContent>{DEPARTMENTS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                   </Select></div>
                 <div><Label>Line Manager *</Label>
-                  <Select value={staffForm.lineManager} onValueChange={v => setStaffForm({...staffForm, lineManager: v})}>
+                  <Select value={staffForm.lineManager} onValueChange={v => setStaffForm({ ...staffForm, lineManager: v })}>
                     <SelectTrigger><SelectValue placeholder="Select line manager" /></SelectTrigger>
                     <SelectContent>
-                      {admins.length === 0 && <SelectItem value="_none" disabled>No admins available</SelectItem>}
-                      {admins.map(a => (
-                        <SelectItem key={a._id} value={a._id}>
-                          {a.firstName} {a.lastName} ({a.department})
-                        </SelectItem>
-                      ))}
+                      {allStaffLookup.length === 0 && <SelectItem value="_none" disabled>Loading...</SelectItem>}
+                      {allStaffLookup
+                        .filter(a => a.isHead || a.isSuperAdmin) // only heads/superadmins can be line managers
+                        .map(a => (
+                          <SelectItem key={a._id} value={a._id}>
+                            {a.firstName} {a.lastName} ({a.department})
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select></div>
-                <div><Label>Phone Number</Label><Input value={staffForm.phone} onChange={e => setStaffForm({...staffForm, phone: e.target.value})} placeholder="Enter phone number" /></div>
+                <div><Label>Phone Number</Label><Input value={staffForm.phone} onChange={e => setStaffForm({ ...staffForm, phone: e.target.value })} placeholder="Enter phone number" /></div>
               </div>
               <div className="flex gap-2">
-                <Button type="submit" style={{ backgroundColor: '#1a3f1c' }} className="text-white hover:opacity-90">Create Staff</Button>
-                <Button type="button" variant="outline" onClick={() => setStaffForm({ firstName:"", lastName:"", email:"", department:"", lineManager:"", phone:"" })}>Clear</Button>
+                <Button type="submit" style={{ backgroundColor: "#1a3f1c" }} className="text-white hover:opacity-90">Create Staff</Button>
+                <Button type="button" variant="outline" onClick={() => setStaffForm({ firstName: "", lastName: "", email: "", department: "", lineManager: "", phone: "" })}>Clear</Button>
               </div>
             </form>
           </CardContent>
         </Card>
       )}
 
-      {/* Search filters (Customer / Vendor / Rider) */}
+      {/* Search filters — Customer / Vendor / Rider */}
       {(currentView === "Customer" || currentView === "Vendor" || currentView === "Rider") && (
         <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div><Label>Name</Label><Input value={searchFilters.name} onChange={e => setSearchFilters({...searchFilters, name: e.target.value})} placeholder="Search by name" /></div>
-              <div><Label>E-mail</Label><Input type="email" value={searchFilters.email} onChange={e => setSearchFilters({...searchFilters, email: e.target.value})} placeholder="Search by email" /></div>
-              <div><Label>Phone Number</Label><Input value={searchFilters.phoneNumber} onChange={e => setSearchFilters({...searchFilters, phoneNumber: e.target.value})} placeholder="Search by phone" /></div>
+              <div><Label>Name</Label>
+                <Input value={searchFilters.name} onChange={e => setSearchFilters({ ...searchFilters, name: e.target.value })} placeholder="Search by name" /></div>
+              <div><Label>E-mail</Label>
+                <Input type="email" value={searchFilters.email} onChange={e => setSearchFilters({ ...searchFilters, email: e.target.value })} placeholder="Search by email" /></div>
+              <div><Label>Phone Number</Label>
+                <Input value={searchFilters.phoneNumber} onChange={e => setSearchFilters({ ...searchFilters, phoneNumber: e.target.value })} placeholder="Search by phone" /></div>
             </div>
-            <div className="mb-4"><Label>Account Status</Label>
-              <Input value={searchFilters.accountStatus} onChange={e => setSearchFilters({...searchFilters, accountStatus: e.target.value})} placeholder="Account Status" /></div>
             <div className="flex gap-2">
-              <Button onClick={() => fetchData(1)} style={{ backgroundColor: '#1a3f1c' }} className="text-white hover:opacity-90">Search</Button>
-              <Button onClick={() => { setSearchFilters({ name:"", email:"", phoneNumber:"", accountStatus:"" }); fetchData(1); }} variant="outline">Reset</Button>
+              <Button onClick={() => fetchData(1)} style={{ backgroundColor: "#1a3f1c" }} className="text-white hover:opacity-90">Search</Button>
+              <Button onClick={() => { setSearchFilters({ name: "", email: "", phoneNumber: "" }); fetchData(1); }} variant="outline">Reset</Button>
             </div>
           </CardContent>
         </Card>
@@ -353,11 +405,11 @@ export default function ITAdminPage() {
       </div>
 
       {/* Table */}
-      <Card className="border shadow-sm" style={{ backgroundColor: '#e8f7e8' }}>
+      <Card className="border shadow-sm" style={{ backgroundColor: "#e8f7e8" }}>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead style={{ backgroundColor: '#98ef9b' }}>
+              <thead style={{ backgroundColor: "#98ef9b" }}>
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">S/N</th>
                   <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Name</th>
@@ -368,20 +420,17 @@ export default function ITAdminPage() {
                   {currentView === "Staff" && (
                     <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Line Manager</th>
                   )}
-                  {currentView === "Customer" && <>
+                  {currentView === "Customer" && (
                     <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Phone</th>
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Status</th>
-                  </>}
+                  )}
                   {currentView === "Vendor" && <>
                     <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Owner</th>
                     <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Phone</th>
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Status</th>
                   </>}
                   {currentView === "Rider" && <>
                     <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Phone</th>
                     <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Operating Area</th>
                     <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Rank</th>
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Status</th>
                   </>}
                   <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Actions</th>
                 </tr>
@@ -390,82 +439,80 @@ export default function ITAdminPage() {
                 {loading ? (
                   Array.from({ length: 7 }).map((_, i) => <SkeletonRow key={i} cols={colCount} />)
                 ) : data.length === 0 ? (
-                  <tr><td colSpan={colCount} className="px-4 py-10 text-center text-gray-400">No {currentView.toLowerCase()} found</td></tr>
+                  <tr>
+                    <td colSpan={colCount} className="px-4 py-10 text-center text-gray-400">
+                      No {currentView.toLowerCase()} found
+                    </td>
+                  </tr>
                 ) : data.map((item: any, idx) => {
-                  const name = getDisplayName(item, currentView);
+                  const name  = getDisplayName(item, currentView);
                   const email = getEmail(item, currentView);
-                  const id = item._id ?? item.id;
-                  const isActive = item.isActive !== false;
-                  const sn = (pagination.page - 1) * pagination.limit + idx + 1;
+                  const id    = item._id ?? item.id;
+                  const sn    = (pagination.page - 1) * pagination.limit + idx + 1;
 
                   return (
-                    <tr key={id} className="border-t hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => handleRowClick(id)}>
+                    <tr
+                      key={id}
+                      className="border-t hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => handleRowClick(id)}
+                    >
                       <td className="px-4 py-3">{sn}</td>
                       <td className="px-4 py-3 font-medium hover:text-[#1a3f1c] hover:underline">{name}</td>
                       <td className="px-4 py-3 text-gray-600">{email}</td>
 
                       {(currentView === "Admin" || currentView === "Staff") && (
-                        <td className="px-4 py-3 capitalize">{item.department || '—'}</td>
+                        <td className="px-4 py-3 capitalize">{item.department || "—"}</td>
                       )}
+
                       {currentView === "Staff" && (
-                        <td className="px-4 py-3">
-                          {item.lineManager
-                            ? typeof item.lineManager === 'object'
-                              ? item.lineManager.name
-                                || `${item.lineManager.firstName ?? ''} ${item.lineManager.lastName ?? ''}`.trim()
-                                || '—'
-                              : item.lineManager
-                            : '—'}
+                        <td className="px-4 py-3 text-gray-600">
+                          {resolveLineManager(item.lineManager, allStaffLookup)}
                         </td>
                       )}
 
-                      {currentView === "Customer" && <>
-                        <td className="px-4 py-3">{item.user?.phone ? String(item.user.phone) : '—'}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {isActive ? 'Active' : 'Suspended'}
-                          </span>
+                      {currentView === "Customer" && (
+                        <td className="px-4 py-3 text-gray-600">
+                          {item.user?.phone ? String(item.user.phone) : "—"}
                         </td>
-                      </>}
+                      )}
 
                       {currentView === "Vendor" && <>
-                        <td className="px-4 py-3">{item.owner?.name || '—'}</td>
-                        <td className="px-4 py-3">{item.owner?.phone ? String(item.owner.phone) : '—'}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {isActive ? 'Active' : 'Suspended'}
-                          </span>
-                        </td>
+                        <td className="px-4 py-3 text-gray-600">{item.owner?.name  || "—"}</td>
+                        <td className="px-4 py-3 text-gray-600">{item.owner?.phone ? String(item.owner.phone) : "—"}</td>
                       </>}
 
                       {currentView === "Rider" && <>
-                        {/* Rider backend has no .populate("user") — phone is a direct field */}
-                        <td className="px-4 py-3">{item.phone ? String(item.phone) : '—'}</td>
-                        <td className="px-4 py-3">{item.operatingArea?.join(', ') || '—'}</td>
+                        <td className="px-4 py-3 text-gray-600">{item.phone ? String(item.phone) : "—"}</td>
+                        <td className="px-4 py-3 text-gray-600">{item.operatingArea?.join(", ") || "—"}</td>
                         <td className="px-4 py-3">
                           <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
-                            {item.rank || '—'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {isActive ? 'Active' : 'Suspended'}
+                            {item.rank || "—"}
                           </span>
                         </td>
                       </>}
 
                       <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                         <div className="flex gap-2">
-                          <button onClick={e => { e.stopPropagation(); handleRowClick(id); }}
-                            className="p-1.5 rounded-full" style={{ backgroundColor: '#1a3f1c' }} title="View">
+                          <button
+                            onClick={e => { e.stopPropagation(); handleRowClick(id); }}
+                            className="p-1.5 rounded-full"
+                            style={{ backgroundColor: "#1a3f1c" }}
+                            title="View"
+                          >
                             <Eye className="h-3.5 w-3.5 text-white" />
                           </button>
-                          <button onClick={e => { e.stopPropagation(); setSuspendTarget({ id, name }); setSuspendModalOpen(true); }}
-                            className="p-1.5 bg-[#ffca3a] rounded-full" title="Suspend">
+                          <button
+                            onClick={e => { e.stopPropagation(); setSuspendTarget({ id, name }); setSuspendModalOpen(true); }}
+                            className="p-1.5 bg-[#ffca3a] rounded-full"
+                            title="Suspend"
+                          >
                             <Lock className="h-3.5 w-3.5 text-[#1a3f1c]" />
                           </button>
-                          <button onClick={e => { e.stopPropagation(); setDeleteTarget({ id, name }); setDeleteModalOpen(true); }}
-                            className="p-1.5 bg-red-500 rounded-full" title="Delete">
+                          <button
+                            onClick={e => { e.stopPropagation(); setDeleteTarget({ id, name }); setDeleteModalOpen(true); }}
+                            className="p-1.5 bg-red-500 rounded-full"
+                            title="Delete"
+                          >
                             <Trash2 className="h-3.5 w-3.5 text-white" />
                           </button>
                         </div>
@@ -483,7 +530,10 @@ export default function ITAdminPage() {
               totalPages={pagination.pages}
               pageSize={pagination.limit}
               onPageChange={fetchData}
-              onPageSizeChange={size => { setPagination(p => ({ ...p, limit: size, page: 1 })); setTimeout(() => fetchData(1), 0); }}
+              onPageSizeChange={size => {
+                setPagination(p => ({ ...p, limit: size, page: 1 }));
+                setTimeout(() => fetchData(1), 0);
+              }}
             />
           )}
         </CardContent>
@@ -496,17 +546,26 @@ export default function ITAdminPage() {
             <DialogTitle className="text-xl">Suspend Account</DialogTitle>
             <DialogDescription className="text-base pt-2">
               You are about to suspend:<br />
-              <span className="font-semibold text-gray-900 mt-1 block">{suspendTarget?.name}</span>
+              <span className="font-semibold text-white mt-1 block">{suspendTarget?.name}</span>
+              <span className="text-white/80 text-sm mt-1 block">
+                This account will be removed from the active list and moved to Account Management.
+              </span>
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <Label className="mb-2 block">Suspension Reason *</Label>
-            <Textarea value={suspendReason} onChange={e => setSuspendReason(e.target.value)} placeholder="Enter reason..." rows={4} />
+            <Label className="mb-2 block text-white">Suspension Reason *</Label>
+            <Textarea
+              value={suspendReason}
+              onChange={e => setSuspendReason(e.target.value)}
+              placeholder="Enter reason..."
+              rows={4}
+              className="bg-white text-gray-900"
+            />
           </div>
           <DialogFooter className="flex-row gap-3">
             <Button variant="outline" onClick={() => { setSuspendModalOpen(false); setSuspendReason(""); }} disabled={suspending} className="flex-1">Cancel</Button>
-            <Button onClick={confirmSuspend} disabled={suspending || !suspendReason.trim()} className="flex-1" style={{ backgroundColor: '#ffca3a', color: '#1a3f1c' }}>
-              {suspending ? <div className="w-4 h-4 border-2 border-[#1a3f1c] border-t-transparent rounded-full animate-spin" /> : 'Yes, Suspend'}
+            <Button onClick={confirmSuspend} disabled={suspending || !suspendReason.trim()} className="flex-1" style={{ backgroundColor: "#ffca3a", color: "#1a3f1c" }}>
+              {suspending ? <div className="w-4 h-4 border-2 border-[#1a3f1c] border-t-transparent rounded-full animate-spin" /> : "Yes, Suspend"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -519,14 +578,16 @@ export default function ITAdminPage() {
             <DialogTitle className="text-xl">Delete Account</DialogTitle>
             <DialogDescription className="text-base pt-4">
               Are you sure you want to delete:<br />
-              <span className="font-semibold text-gray-900 mt-2 block">{deleteTarget?.name}</span><br />
-              <span className="text-red-300 text-sm">This is a soft-delete and can be restored.</span>
+              <span className="font-semibold text-white mt-2 block">{deleteTarget?.name}</span><br />
+              <span className="text-white/80 text-sm">
+                This is a soft-delete. The account moves to Account Management and can be restored.
+              </span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-row gap-3">
             <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={deleting} className="flex-1">No, Cancel</Button>
             <Button onClick={confirmDelete} disabled={deleting} className="flex-1 bg-red-500 hover:bg-red-600 text-white">
-              {deleting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Yes, Delete'}
+              {deleting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : "Yes, Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

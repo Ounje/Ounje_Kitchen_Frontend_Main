@@ -13,57 +13,109 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, User, AlertCircle, CheckCircle2, Trash2, AlertTriangle } from "lucide-react";
+import {
+  ArrowLeft, Mail, Phone, MapPin, Calendar, User,
+  AlertCircle, CheckCircle2, Trash2, AlertTriangle,
+} from "lucide-react";
 import { toast } from "sonner";
 
-export default function AccountDetailPage({ 
-  params 
-}: { 
-  params: Promise<{ type: string; id: string }> 
+// ── Unwrap ────────────────────────────────────────────────────────────────────
+// IT single-record: { success, data: { customer/vendor/rider/staff: {...} } }
+function unwrap(res: any, entityType: string): any {
+  if (!res) return null;
+  const d = res?.data ?? res;
+  if (entityType === "customer" && d?.customer) return d.customer;
+  if (entityType === "vendor"   && d?.vendor)   return d.vendor;
+  if (entityType === "rider"    && d?.rider)    return d.rider;
+  if (entityType === "staff"    && (d?.staff || d?.admin)) return d.staff ?? d.admin;
+  // fallback — if d is a plain object it's the entity itself
+  if (d && typeof d === "object" && !Array.isArray(d)) return d;
+  return res;
+}
+
+// ── Field resolvers ───────────────────────────────────────────────────────────
+function resolveName(account: any, entityType: string): string {
+  if (entityType === "customer") return account.user?.name  || account.name || "N/A";
+  if (entityType === "vendor")   return account.name        || "N/A";
+  if (entityType === "rider")
+    return `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || "N/A";
+  return `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || account.name || "N/A";
+}
+
+function resolveEmail(account: any, entityType: string): string {
+  if (entityType === "customer") return account.user?.email  || account.email || "N/A";
+  if (entityType === "vendor")   return account.owner?.email || account.email || "N/A";
+  return account.email || "N/A";
+}
+
+function resolvePhone(account: any, entityType: string): string {
+  if (entityType === "customer") {
+    const p = account.user?.phone || account.phone || account.phoneNumber;
+    return p ? String(p) : "N/A";
+  }
+  if (entityType === "vendor") {
+    const p = account.owner?.phone || account.phone;
+    return p ? String(p) : "N/A";
+  }
+  const p = account.phone || account.phoneNumber;
+  return p ? String(p) : "N/A";
+}
+
+function resolveAddress(account: any, entityType: string): string {
+  const addr = entityType === "vendor"
+    ? account.location?.address || account.address
+    : account.address?.street   || account.address;
+  if (!addr) return "";
+  return typeof addr === "string" ? addr : "";
+}
+
+function resolveRole(account: any, entityType: string): string {
+  if (entityType === "staff") {
+    if (account.isSuperAdmin) return "Super Admin";
+    if (account.isHead) return `${account.department} Head`;
+    return `${account.department || "—"} Staff`;
+  }
+  return entityType.charAt(0).toUpperCase() + entityType.slice(1);
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+export default function AccountDetailPage({
+  params,
+}: {
+  params: Promise<{ type: string; id: string }>;
 }) {
   const { type, id } = use(params);
-  const router = useRouter();
+  const router       = useRouter();
   const searchParams = useSearchParams();
-  const entityType = searchParams.get("entityType") as "customer" | "vendor" | "rider" | "staff";
-  const status = searchParams.get("status") as "suspended" | "deleted";
+  const entityType   = searchParams.get("entityType") as "customer" | "vendor" | "rider" | "staff";
+  const status       = searchParams.get("status")     as "suspended" | "deleted";
 
-  const [account, setAccount] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [account, setAccount]   = useState<any>(null);
+  const [loading, setLoading]   = useState(true);
+
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  
-  // Delete confirmation modal
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [processing, setProcessing]             = useState(false);
 
-  useEffect(() => {
-    fetchAccountDetails();
-  }, [id, entityType]);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting]               = useState(false);
+
+  useEffect(() => { fetchAccountDetails(); }, [id, entityType]);
 
   const fetchAccountDetails = async () => {
     setLoading(true);
     try {
-      let data;
+      let raw: any;
       switch (entityType) {
-        case 'customer':
-          data = await itService.getCustomer(id);
-          break;
-        case 'vendor':
-          data = await itService.getVendor(id);
-          break;
-        case 'rider':
-          data = await itService.getRider(id);
-          break;
-        case 'staff':
-          data = await itService.getStaffMember(id);
-          break;
+        case "customer": raw = await itService.getCustomer(id);    break;
+        case "vendor":   raw = await itService.getVendor(id);      break;
+        case "rider":    raw = await itService.getRider(id);       break;
+        case "staff":    raw = await itService.getStaffMember(id); break;
+        default: throw new Error("Unknown entity type");
       }
-      console.log('[Account Detail] Data:', data);
-      setAccount(data);
-    } catch (error: any) {
-      console.error('[Account Detail] Error:', error);
-      toast.error(error.message || "Failed to load account details");
+      setAccount(unwrap(raw, entityType));
+    } catch (err: any) {
+      toast.error(err.message || "Failed to load account details");
     } finally {
       setLoading(false);
     }
@@ -72,79 +124,50 @@ export default function AccountDetailPage({
   const handleRestore = async () => {
     setProcessing(true);
     try {
-      switch (entityType) {
-        case 'customer':
-          if (status === 'suspended') {
-            await itService.activateCustomer(id);
-          } else {
-            await itService.restoreCustomer(id);
-          }
-          break;
-        case 'vendor':
-          if (status === 'suspended') {
-            await itService.activateVendor(id);
-          } else {
-            await itService.restoreVendor(id);
-          }
-          break;
-        case 'rider':
-          if (status === 'suspended') {
-            await itService.activateRider(id);
-          } else {
-            await itService.restoreRider(id);
-          }
-          break;
-        case 'staff':
-          if (status === 'suspended') {
-            await itService.activateStaff(id);
-          } else {
-            await itService.restoreStaff(id);
-          }
-          break;
+      if (entityType === "customer") {
+        status === "suspended"
+          ? await itService.activateCustomer(id)
+          : await itService.restoreCustomer(id);
+      } else if (entityType === "vendor") {
+        status === "suspended"
+          ? await itService.activateVendor(id)
+          : await itService.restoreVendor(id);
+      } else if (entityType === "rider") {
+        status === "suspended"
+          ? await itService.activateRider(id)
+          : await itService.restoreRider(id);
+      } else {
+        status === "suspended"
+          ? await itService.activateStaff(id)
+          : await itService.restoreStaff(id);
       }
-
       setConfirmModalOpen(false);
       setSuccessModalOpen(true);
-    } catch (error: any) {
-      toast.error(error.message || `Failed to ${status === 'suspended' ? 'activate' : 'restore'} account`);
+    } catch (err: any) {
+      toast.error(err.message || `Failed to ${status === "suspended" ? "activate" : "restore"} account`);
     } finally {
       setProcessing(false);
     }
   };
 
-  const handleSuccessClose = () => {
-    setSuccessModalOpen(false);
-    router.push('/it/account-management');
-  };
-
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      switch (entityType) {
-        case 'customer':
-          await itService.deleteCustomer(id);
-          break;
-        case 'vendor':
-          await itService.deleteVendor(id);
-          break;
-        case 'rider':
-          await itService.deleteRider(id);
-          break;
-        case 'staff':
-          await itService.deleteStaff(id);
-          break;
-      }
-      
+      if (entityType === "customer")     await itService.deleteCustomer(id);
+      else if (entityType === "vendor")  await itService.deleteVendor(id);
+      else if (entityType === "rider")   await itService.deleteRider(id);
+      else                               await itService.deleteStaff(id);
       toast.success("Account deleted successfully");
       setDeleteModalOpen(false);
-      router.push('/it/account-management');
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete account");
+      router.push("/it/account-management");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete account");
     } finally {
       setDeleting(false);
     }
   };
 
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -159,105 +182,84 @@ export default function AccountDetailPage({
         <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
         <p className="text-gray-500 text-lg mb-4">Account not found</p>
         <Button onClick={() => router.back()} variant="outline">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Go Back
+          <ArrowLeft className="h-4 w-4 mr-2" /> Go Back
         </Button>
       </div>
     );
   }
 
-  const getName = () => {
-    if (entityType === 'vendor') {
-      return account.businessName || account.ownerName || 'N/A';
-    }
-    return account.firstName && account.lastName
-      ? `${account.firstName} ${account.lastName}`
-      : account.name || 'N/A';
-  };
+  // ── Resolved values ───────────────────────────────────────────────────────
+  const name    = resolveName(account, entityType);
+  const email   = resolveEmail(account, entityType);
+  const phone   = resolvePhone(account, entityType);
+  const address = resolveAddress(account, entityType);
+  const role    = resolveRole(account, entityType);
+  const initials = name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase() || "??";
 
-  const getRole = () => {
-    if (entityType === 'staff') {
-      if (account.isSuperAdmin) return 'Super Admin';
-      if (account.isHead) return `${account.department} Head`;
-      return `${account.department} Staff`;
-    }
-    return entityType.charAt(0).toUpperCase() + entityType.slice(1);
-  };
+  const statusColor = status === "suspended" ? "bg-yellow-500" : "bg-red-500";
+  const actionText  = status === "suspended" ? "Activate Account" : "Restore Account";
 
-  const statusColor = status === 'suspended' ? 'bg-yellow-500' : 'bg-red-500';
-  const actionText = status === 'suspended' ? 'Activate Account' : 'Restore Account';
+  const reason    = account.suspensionReason || account.deletionReason || account.reason;
+  const eventDate = status === "suspended"
+    ? account.suspendedAt  || account.suspensionDate || account.updatedAt
+    : account.deletedAt;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
+
+        {/* Back */}
+        <Button variant="ghost" onClick={() => router.back()} className="gap-2">
+          <ArrowLeft className="h-4 w-4" /> Back
         </Button>
 
-        {/* Header Card with Profile */}
-        <Card className="border shadow-sm" style={{ backgroundColor: '#e8f7e8' }}>
+        {/* Profile header */}
+        <Card className="border shadow-sm" style={{ backgroundColor: "#e8f7e8" }}>
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
-                {/* Profile Circle */}
                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-[#1a3f1c] flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-2xl md:text-3xl font-bold">
-                    {getName().split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                  </span>
+                  <span className="text-white text-2xl md:text-3xl font-bold">{initials}</span>
                 </div>
-                
-                {/* Name & Basic Info */}
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{getName()}</h1>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{name}</h1>
                   <p className="text-sm md:text-base text-gray-600 mt-1">
                     <User className="h-4 w-4 inline mr-1" />
-                    {getRole()}
+                    {role}
                   </p>
                 </div>
               </div>
-
-              {/* Status Badge */}
               <div className={`${statusColor} px-4 py-2 rounded-lg`}>
                 <span className="text-white font-semibold text-sm">
-                  {status === 'suspended' ? 'SUSPENDED' : 'DELETED'}
+                  {status === "suspended" ? "SUSPENDED" : "DELETED"}
                 </span>
               </div>
             </div>
 
-            {/* Contact Info */}
+            {/* Contact info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center gap-3 text-gray-700">
-                <Phone className="h-5 w-5 text-[#1a3f1c]" />
+                <Phone className="h-5 w-5 text-[#1a3f1c] flex-shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Phone Number</p>
-                  <p className="font-medium">{account.phone || account.phoneNumber || 'N/A'}</p>
+                  <p className="font-medium">{phone}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 text-gray-700">
-                <Mail className="h-5 w-5 text-[#1a3f1c]" />
+                <Mail className="h-5 w-5 text-[#1a3f1c] flex-shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">Email</p>
-                  <p className="font-medium break-all">{account.email}</p>
+                  <p className="font-medium break-all">{email}</p>
                 </div>
               </div>
-              
-              {account.address && (
+
+              {address && (
                 <div className="flex items-center gap-3 text-gray-700 md:col-span-2">
-                  <MapPin className="h-5 w-5 text-[#1a3f1c]" />
+                  <MapPin className="h-5 w-5 text-[#1a3f1c] flex-shrink-0" />
                   <div>
                     <p className="text-xs text-gray-500">Address</p>
-                    <p className="font-medium">
-                      {typeof account.address === 'string' 
-                        ? account.address 
-                        : account.address.street || 'N/A'}
-                    </p>
+                    <p className="font-medium">{address}</p>
                   </div>
                 </div>
               )}
@@ -265,42 +267,35 @@ export default function AccountDetailPage({
           </CardContent>
         </Card>
 
-        {/* Suspension/Deletion Details */}
+        {/* Reason + Time */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Reason Card */}
           <Card className="border shadow-sm">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 text-gray-900">
-                Reason for {status === 'suspended' ? 'Suspension' : 'Deletion'}
+                Reason for {status === "suspended" ? "Suspension" : "Deletion"}
               </h3>
               <div className="bg-gray-100 p-4 rounded-lg">
-                <p className="text-gray-700">
-                  {account.suspensionReason || account.deletionReason || 'No reason provided'}
-                </p>
+                <p className="text-gray-700">{reason || "No reason provided"}</p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Time Card */}
           <Card className="border shadow-sm">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 text-gray-900">
-                Time of {status === 'suspended' ? 'Suspension' : 'Deletion'}
+                Time of {status === "suspended" ? "Suspension" : "Deletion"}
               </h3>
               <div className="bg-gray-100 p-4 rounded-lg flex items-center gap-3">
-                <Calendar className="h-8 w-8 text-[#1a3f1c]" />
+                <Calendar className="h-8 w-8 text-[#1a3f1c] flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Date & Time</p>
                   <p className="font-semibold text-gray-900">
-                    {account.suspendedAt || account.deletedAt 
-                      ? new Date(account.suspendedAt || account.deletedAt).toLocaleString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
+                    {eventDate
+                      ? new Date(eventDate).toLocaleString("en-US", {
+                          year: "numeric", month: "long", day: "numeric",
+                          hour: "2-digit", minute: "2-digit",
                         })
-                      : 'N/A'}
+                      : "N/A"}
                   </p>
                 </div>
               </div>
@@ -308,12 +303,15 @@ export default function AccountDetailPage({
           </Card>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
           <Button
             onClick={() => setConfirmModalOpen(true)}
             className="w-full px-8 py-6 text-lg"
-            style={{ backgroundColor: status === 'suspended' ? '#98ef9b' : '#1a3f1c' }}
+            style={{
+              backgroundColor: status === "suspended" ? "#98ef9b" : "#1a3f1c",
+              color:           status === "suspended" ? "#1a3f1c" : "#fff",
+            }}
           >
             {actionText}
           </Button>
@@ -327,17 +325,18 @@ export default function AccountDetailPage({
         </div>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Confirm Activate / Restore */}
       <Dialog open={confirmModalOpen} onOpenChange={setConfirmModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl">
-              Confirm {status === 'suspended' ? 'Activation' : 'Restoration'}
+              Confirm {status === "suspended" ? "Activation" : "Restoration"}
             </DialogTitle>
             <DialogDescription className="text-base pt-4">
-              Are you sure you want to {status === 'suspended' ? 'activate' : 'restore'} this account?
+              Are you sure you want to{" "}
+              {status === "suspended" ? "activate" : "restore"} this account?
               <br />
-              <span className="font-semibold text-gray-900 mt-2 block">{getName()}</span>
+              <span className="font-semibold text-gray-900 mt-2 block">{name}</span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-row gap-3 sm:gap-3">
@@ -346,7 +345,7 @@ export default function AccountDetailPage({
               onClick={() => setConfirmModalOpen(false)}
               disabled={processing}
               className="flex-1"
-              style={{ backgroundColor: '#ffca3a', borderColor: '#ffca3a' }}
+              style={{ backgroundColor: "#ffca3a", borderColor: "#ffca3a" }}
             >
               No
             </Button>
@@ -354,19 +353,17 @@ export default function AccountDetailPage({
               onClick={handleRestore}
               disabled={processing}
               className="flex-1"
-              style={{ backgroundColor: '#1a3f1c' }}
+              style={{ backgroundColor: "#1a3f1c" }}
             >
               {processing ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                'Yes'
-              )}
+              ) : "Yes"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Modal */}
+      {/* Confirm Delete */}
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -379,7 +376,7 @@ export default function AccountDetailPage({
             <DialogDescription className="text-base pt-4">
               Are you sure you want to delete this account?
               <br />
-              <span className="font-semibold text-gray-900 mt-2 block">{getName()}</span>
+              <span className="font-semibold text-gray-900 mt-2 block">{name}</span>
               <br />
               <span className="text-red-600 text-sm">
                 This action cannot be undone. The account will be permanently deleted.
@@ -402,15 +399,13 @@ export default function AccountDetailPage({
             >
               {deleting ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                'Yes, Delete'
-              )}
+              ) : "Yes, Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Success Modal */}
+      {/* Success */}
       <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
         <DialogContent className="sm:max-w-md text-center">
           <div className="flex flex-col items-center gap-4 py-6">
@@ -419,13 +414,14 @@ export default function AccountDetailPage({
             </div>
             <DialogHeader>
               <DialogTitle className="text-2xl">
-                The account has been {status === 'suspended' ? 'activated' : 'restored'}!!!
+                The account has been{" "}
+                {status === "suspended" ? "activated" : "restored"}!!!
               </DialogTitle>
             </DialogHeader>
             <Button
-              onClick={handleSuccessClose}
+              onClick={() => { setSuccessModalOpen(false); router.push("/it/account-management"); }}
               className="w-full mt-4"
-              style={{ backgroundColor: '#1a3f1c' }}
+              style={{ backgroundColor: "#1a3f1c" }}
             >
               Go Back to Main Screen
             </Button>

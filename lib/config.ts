@@ -95,6 +95,10 @@ export const ENDPOINTS = {
     RIDER_DELETE:   (id: string) => `/api/it/riders/${id}`,
     RIDER_RESTORE:  (id: string) => `/api/it/riders/${id}/restore`,
 
+    // Orders
+    ORDERS:      '/api/it/orders',
+    ORDER_BY_ID: (id: string) => `/api/it/orders/${id}`,
+
     // Account management
     SUSPENDED_ACCOUNTS: '/api/it/suspended-accounts',
     DELETED_ACCOUNTS:   '/api/it/deleted-accounts',
