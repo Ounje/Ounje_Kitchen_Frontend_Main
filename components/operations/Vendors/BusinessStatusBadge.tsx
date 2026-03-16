@@ -1,44 +1,17 @@
-// app/operations/vendors/components/BusinessStatusBadge.tsx
 interface BusinessStatusBadgeProps {
   status: 'registered' | 'unregistered' | 'pending';
-  size?: 'sm' | 'md';
 }
 
-export function BusinessStatusBadge({ status, size = 'sm' }: BusinessStatusBadgeProps) {
-  const sizeClasses = {
-    sm: 'px-2 py-1 text-xs',
-    md: 'px-3 py-1.5 text-sm'
-  };
-
-  const statusConfig = {
-    registered: {
-      bg: '#37A449',
-      text: 'white',
-      label: 'Registered'
-    },
-    unregistered: {
-      bg: '#D00000',
-      text: 'white',
-      label: 'Unregistered'
-    },
-    pending: {
-      bg: '#FFCA3A',
-      text: '#1A3F1C',
-      label: 'Pending'
-    }
-  };
-
-  const config = statusConfig[status];
-
+export function BusinessStatusBadge({ status }: BusinessStatusBadgeProps) {
+  const cfg = {
+    registered:   { bg: '#1A3F1C', text: 'white',   label: 'Registered' },
+    unregistered: { bg: '#E5E7EB', text: '#374151',  label: 'Unregistered' },
+    pending:      { bg: '#FFCA3A', text: '#1A3F1C',  label: 'Pending' },
+  }[status];
   return (
-    <span
-      className={`inline-block rounded ${sizeClasses[size]} font-medium`}
-      style={{
-        backgroundColor: config.bg,
-        color: config.text
-      }}
-    >
-      {config.label}
+    <span className="inline-block px-2 py-1 rounded text-xs font-semibold whitespace-nowrap"
+      style={{ backgroundColor: cfg.bg, color: cfg.text }}>
+      {cfg.label}
     </span>
   );
 }

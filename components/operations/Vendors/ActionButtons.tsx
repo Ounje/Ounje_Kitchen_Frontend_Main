@@ -1,53 +1,32 @@
-// app/operations/vendors/components/ActionButtons.tsx
-import Link from 'next/link';
+'use client';
+
+import { useRouter } from 'next/navigation';
 
 interface ActionButtonsProps {
-  vendorId: string;
+  vendorId:      string;
   accountStatus: 'active' | 'suspended';
 }
 
 export function ActionButtons({ vendorId, accountStatus }: ActionButtonsProps) {
+  const router = useRouter();
+  const isSuspended = accountStatus === 'suspended';
+
   return (
-    <div className="flex flex-col md:flex-row gap-4">
-      {/* Show Suspend button if Active */}
-      {accountStatus === 'active' && (
-        <Link
-          href={`/operations/vendors/${vendorId}/actions/suspend`}
-          className="flex-1 py-3 px-6 rounded-lg text-center font-semibold hover:opacity-90 transition-opacity"
-          style={{
-            backgroundColor: '#FFCA3A',
-            color: '#1A3F1C'
-          }}
-        >
-          Suspend Account
-        </Link>
-      )}
-
-      {/* Show Activate button if Suspended */}
-      {accountStatus === 'suspended' && (
-        <Link
-          href={`/operations/vendors/${vendorId}/actions/activate`}
-          className="flex-1 py-3 px-6 rounded-lg text-center font-semibold hover:opacity-90 transition-opacity"
-          style={{
-            backgroundColor: '#1A3F1C',
-            color: 'white'
-          }}
-        >
-          Activate Account
-        </Link>
-      )}
-
-      {/* Delete button (always shown) */}
-      <Link
-        href={`/operations/vendors/${vendorId}/actions/delete`}
-        className="flex-1 py-3 px-6 rounded-lg text-center font-semibold hover:opacity-90 transition-opacity"
-        style={{
-          backgroundColor: '#D00000',
-          color: 'white'
-        }}
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full mt-2">
+      <button
+        onClick={() => router.push(`/operations/vendors/${vendorId}/actions/${isSuspended ? 'activate' : 'suspend'}`)}
+        className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold text-[#1A3F1C] hover:opacity-90 active:scale-95 transition-all"
+        style={{ backgroundColor: '#FFCA3A' }}
+      >
+        {isSuspended ? 'Activate Account' : 'Suspend Account'}
+      </button>
+      <button
+        onClick={() => router.push(`/operations/vendors/${vendorId}/actions/delete`)}
+        className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold text-white hover:opacity-90 active:scale-95 transition-all"
+        style={{ backgroundColor: '#D00000' }}
       >
         Delete Account
-      </Link>
+      </button>
     </div>
   );
 }

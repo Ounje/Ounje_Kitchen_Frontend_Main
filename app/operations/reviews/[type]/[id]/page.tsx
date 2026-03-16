@@ -4,7 +4,6 @@
  * /reviews/[type]/[id]/page.tsx
  *
  * Full detail page for a vendor or rider review.
- * Also functions as a standalone page (not only modal).
  */
 
 import { useParams, useSearchParams, useRouter } from "next/navigation";
@@ -15,6 +14,7 @@ import { ChevronLeft, Smile, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import {
   operationsService,
   ReviewType,
+  ReviewFilter,
   VendorReviewDetail as VendorDetail,
   RiderReviewDetail as RiderDetail,
   ReviewItem,
@@ -66,7 +66,7 @@ function ActionButtons({ onAction }: { onAction: (a: string) => void }) {
         onClick={() => onAction("suspend")}
         className="py-3.5 rounded-xl bg-[#FFCA3A] text-gray-900 font-bold text-sm hover:bg-yellow-400 transition-colors"
       >
-        Suspened Account
+        Suspend Account
       </button>
       <button
         onClick={() => onAction("commend")}
@@ -119,7 +119,7 @@ export default function ReviewDetailPage() {
 
   const rawType = params?.type as string;
   const id = params?.id as string;
-  const initialFilter = searchParams?.get("filter");
+  const initialFilter = searchParams?.get("filter") ?? "";
 
   const type: ReviewType =
     rawType === "vendor" || rawType === "rider" ? rawType : "rider";
@@ -128,22 +128,29 @@ export default function ReviewDetailPage() {
   const [vendorDetail, setVendorDetail] = useState<VendorDetail | null>(null);
   const [riderDetail, setRiderDetail] = useState<RiderDetail | null>(null);
   const [activeStar, setActiveStar] = useState(5);
-  const [activeFilter, setActiveFilter] = useState<string | null>(
-    initialFilter ?? null
-  );
+  const [activeFilter, setActiveFilter] = useState<string>(initialFilter);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial load
+  // Build consistent params for every API call
+  const buildParams = (star: number, filter: string) => ({
+    starFilter: star,
+    ...(filter ? { filter: filter as ReviewFilter } : {}),
+  });
+
+  // ── Initial load ─────────────────────────────────────────
   useEffect(() => {
     setLoading(true);
     setError(null);
-    const fetch =
+    const params = buildParams(activeStar, activeFilter);
+
+    const request =
       type === "vendor"
-        ? operationsService.getVendorReviewDetail(id)
-        : operationsService.getRiderReviewDetail(id);
-    fetch
+        ? operationsService.getVendorReviewDetail(id, params)
+        : operationsService.getRiderReviewDetail(id, params);
+
+    request
       .then((d) => {
         if (type === "vendor") setVendorDetail(d as VendorDetail);
         else setRiderDetail(d as RiderDetail);
@@ -154,17 +161,21 @@ export default function ReviewDetailPage() {
         setError("Failed to load review details. Please try again.");
         setLoading(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, type]);
 
-  // Reload reviews on star change
+  // ── Refetch when star tab or filter pill changes ──────────
   useEffect(() => {
     if (loading) return;
     setReviewsLoading(true);
-    const fetch =
+    const params = buildParams(activeStar, activeFilter);
+
+    const request =
       type === "vendor"
-        ? operationsService.getVendorReviewDetail(id, { starFilter: activeStar })
-        : operationsService.getRiderReviewDetail(id, { starFilter: activeStar });
-    fetch.then((d) => {
+        ? operationsService.getVendorReviewDetail(id, params)
+        : operationsService.getRiderReviewDetail(id, params);
+
+    request.then((d) => {
       setReviews(d.reviews);
       setReviewsLoading(false);
     });
@@ -173,8 +184,10 @@ export default function ReviewDetailPage() {
 
   const handleAction = async (action: string) => {
     if (action === "warn") await operationsService.warnReviewAccount(type, id);
-    else if (action === "suspend") await operationsService.suspendReviewAccount(type, id);
-    else if (action === "commend") await operationsService.commendReviewAccount(type, id);
+    else if (action === "suspend")
+      await operationsService.suspendReviewAccount(type, id);
+    else if (action === "commend")
+      await operationsService.commendReviewAccount(type, id);
     alert(`Action "${action}" completed.`);
   };
 
@@ -235,8 +248,7 @@ export default function ReviewDetailPage() {
                 </div>
                 <div className="space-y-1 text-sm">
                   <p>
-                    <span className="font-semibold">Name:</span>{" "}
-                    {detail.name}
+                    <span className="font-semibold">Name:</span> {detail.name}
                   </p>
                   <p>
                     <span className="font-semibold">Phone number:</span>{" "}
@@ -251,9 +263,7 @@ export default function ReviewDetailPage() {
                     />
                   </div>
                   <p>
-                    <span className="font-semibold">
-                      {type === "vendor" ? "Zone" : "Zone"}:
-                    </span>{" "}
+                    <span className="font-semibold">Zone:</span>{" "}
                     {type === "vendor"
                       ? (detail as VendorDetail).address
                       : (detail as RiderDetail).zone}
@@ -261,10 +271,13 @@ export default function ReviewDetailPage() {
                 </div>
               </div>
 
-              {/* Review type filter pills */}
+              {/* Filter pills */}
               <div className="flex sm:flex-col gap-2 flex-wrap sm:items-end">
+                {/* Mixed — shown for both vendor and rider */}
                 <button
-                  onClick={() => setActiveFilter("mixed")}
+                  onClick={() =>
+                    setActiveFilter(activeFilter === "mixed" ? "" : "mixed")
+                  }
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
                     activeFilter === "mixed"
                       ? "bg-yellow-400 border-yellow-400 text-gray-900"
@@ -274,10 +287,13 @@ export default function ReviewDetailPage() {
                   Mixed review <Smile size={14} />
                 </button>
 
+                {/* Bad + Good — riders only */}
                 {type === "rider" && (
                   <>
                     <button
-                      onClick={() => setActiveFilter("bad")}
+                      onClick={() =>
+                        setActiveFilter(activeFilter === "bad" ? "" : "bad")
+                      }
                       className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
                         activeFilter === "bad"
                           ? "bg-[#D0021B] border-[#D0021B] text-white"
@@ -287,7 +303,9 @@ export default function ReviewDetailPage() {
                       Bad Review <ThumbsDown size={14} />
                     </button>
                     <button
-                      onClick={() => setActiveFilter("good")}
+                      onClick={() =>
+                        setActiveFilter(activeFilter === "good" ? "" : "good")
+                      }
                       className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
                         activeFilter === "good"
                           ? "bg-[#1A3F1C] border-[#1A3F1C] text-white"

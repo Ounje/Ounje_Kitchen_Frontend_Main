@@ -16,27 +16,35 @@ const PERIODS: { label: string; value: RevenuePeriod }[] = [
 
 const thCls = 'px-4 py-3 text-left text-sm font-semibold whitespace-nowrap';
 
+function unwrapVendors(res: any): TopVendor[] {
+  if (Array.isArray(res))              return res as TopVendor[];
+  if (Array.isArray(res?.data))        return res.data as TopVendor[];
+  if (Array.isArray(res?.vendors))     return res.vendors as TopVendor[];
+  return [];
+}
+
 export default function TopVendorsPage() {
   const router = useRouter();
-  const [period, setPeriod]     = useState<RevenuePeriod>('daily');
-  const [vendors, setVendors]   = useState<TopVendor[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [period, setPeriod]   = useState<RevenuePeriod>('daily');
+  const [vendors, setVendors] = useState<TopVendor[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const load = async (p: RevenuePeriod) => {
     setLoading(true);
     try {
-      const data = await financeService.getTopVendors({ period: p });
-      setVendors(data);
+      const res = await financeService.getTopVendors({ period: p });
+      setVendors(unwrapVendors(res));
+    } catch {
+      setVendors([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(period); }, [period]);
+  useEffect(() => { load(period); }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="w-full">
-      {/* Back breadcrumb */}
       <p
         className="text-xs text-gray-400 mb-4 cursor-pointer hover:text-gray-600 transition-colors"
         onClick={() => router.back()}
@@ -44,12 +52,10 @@ export default function TopVendorsPage() {
         ← Revenue / Vendors details
       </p>
 
-      {/* Card */}
       <div
         className="w-full rounded-2xl overflow-hidden shadow-lg"
         style={{ backgroundColor: '#E8F7E8' }}
       >
-        {/* Card header */}
         <div className="px-5 sm:px-7 pt-6 pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
@@ -62,7 +68,6 @@ export default function TopVendorsPage() {
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Period dropdown */}
               <div className="relative">
                 <select
                   value={period}
@@ -77,8 +82,6 @@ export default function TopVendorsPage() {
                 <User className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white pointer-events-none" />
                 <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-white pointer-events-none text-xs">▾</span>
               </div>
-
-              {/* Close */}
               <button
                 onClick={() => router.back()}
                 className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors"
@@ -89,7 +92,6 @@ export default function TopVendorsPage() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto px-4 pb-6">
           <table className="w-full min-w-[540px] rounded-xl overflow-hidden">
             <thead>
@@ -121,10 +123,10 @@ export default function TopVendorsPage() {
                   <tr key={v.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
-                          {v.photo && (
-                            <img src={v.photo} alt={v.name} className="w-full h-full object-cover" />
-                          )}
+                        <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-500">
+                          {v.photo
+                            ? <img src={v.photo} alt={v.name} className="w-full h-full object-cover" />
+                            : v.name?.charAt(0).toUpperCase() ?? '?'}
                         </div>
                         <span className="text-sm font-medium" style={{ color: '#1A3F1C' }}>
                           {v.name}

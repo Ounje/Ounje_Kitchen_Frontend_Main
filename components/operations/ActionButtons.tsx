@@ -1,5 +1,6 @@
-// app/operations/customers/components/ActionButtons.tsx
-import Link from 'next/link';
+'use client';
+
+import { useRouter } from 'next/navigation';
 
 interface ActionButtonsProps {
   customerId: string;
@@ -7,47 +8,33 @@ interface ActionButtonsProps {
 }
 
 export function ActionButtons({ customerId, accountStatus }: ActionButtonsProps) {
+  const router = useRouter();
+
+  const navigate = (type: 'suspend' | 'activate' | 'delete') => {
+    router.push(`/operations/customers/${customerId}/actions/${type}`);
+  };
+
+  const isSuspended = accountStatus === 'suspended';
+
   return (
-    <div className="flex flex-col md:flex-row gap-4">
-      {/* Show Suspend button if Active */}
-      {accountStatus === 'active' && (
-        <Link
-          href={`/operations/customers/${customerId}/actions/suspend`}
-          className="flex-1 py-3 px-6 rounded-lg text-center font-semibold hover:opacity-90 transition-opacity"
-          style={{
-            backgroundColor: '#FFCA3A',
-            color: '#1A3F1C'
-          }}
-        >
-          Suspend Account
-        </Link>
-      )}
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full mt-2">
+      {/* Suspend / Activate toggle */}
+      <button
+        onClick={() => navigate(isSuspended ? 'activate' : 'suspend')}
+        className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold text-[#1A3F1C] transition-opacity hover:opacity-90 active:scale-95"
+        style={{ backgroundColor: '#FFCA3A' }}
+      >
+        {isSuspended ? 'Activate Account' : 'Suspend Account'}
+      </button>
 
-      {/* Show Activate button if Suspended or Unverified */}
-      {(accountStatus === 'suspended' || accountStatus === 'unverified') && (
-        <Link
-          href={`/operations/customers/${customerId}/actions/activate`}
-          className="flex-1 py-3 px-6 rounded-lg text-center font-semibold hover:opacity-90 transition-opacity"
-          style={{
-            backgroundColor: '#37A449',
-            color: 'white'
-          }}
-        >
-          Activate Account
-        </Link>
-      )}
-
-      {/* Delete button (always shown) */}
-      <Link
-        href={`/operations/customers/${customerId}/actions/delete`}
-        className="flex-1 py-3 px-6 rounded-lg text-center font-semibold hover:opacity-90 transition-opacity"
-        style={{
-          backgroundColor: '#D00000',
-          color: 'white'
-        }}
+      {/* Delete */}
+      <button
+        onClick={() => navigate('delete')}
+        className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold text-white transition-opacity hover:opacity-90 active:scale-95"
+        style={{ backgroundColor: '#D00000' }}
       >
         Delete Account
-      </Link>
+      </button>
     </div>
   );
 }

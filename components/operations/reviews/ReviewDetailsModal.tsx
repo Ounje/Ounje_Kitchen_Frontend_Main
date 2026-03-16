@@ -6,6 +6,7 @@ import { X, Smile, ThumbsDown, ThumbsUp } from "lucide-react";
 import {
   operationsService,
   ReviewType,
+  ReviewFilter,
   VendorReviewDetail as VendorDetail,
   RiderReviewDetail as RiderDetail,
   ReviewItem,
@@ -19,7 +20,7 @@ function StarTabs({
   active,
   onChange,
 }: {
-  active: number | null;
+  active: number;
   onChange: (star: number) => void;
 }) {
   const stars = [5, 4, 3, 2, 1];
@@ -60,7 +61,7 @@ function ActionButtons({ onAction }: { onAction: (action: string) => void }) {
         onClick={() => onAction("suspend")}
         className="py-3 rounded-xl bg-[#FFCA3A] text-gray-900 font-bold text-sm hover:bg-yellow-400 transition-colors"
       >
-        Suspened Account
+        Suspend Account
       </button>
       <button
         onClick={() => onAction("commend")}
@@ -80,15 +81,20 @@ function VendorInfoHeader({
   onFilterChange,
 }: {
   detail: VendorDetail;
-  filter: string | null;
+  filter: string;
   onFilterChange: (f: string) => void;
 }) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-4">
-      {/* Left: info */}
       <div className="flex gap-4 flex-1">
         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-          <Image src={detail.photo} alt={detail.name} fill className="object-cover" unoptimized />
+          <Image
+            src={detail.photo}
+            alt={detail.name}
+            fill
+            className="object-cover"
+            unoptimized
+          />
         </div>
         <div className="space-y-1">
           <p className="text-sm">
@@ -107,10 +113,10 @@ function VendorInfoHeader({
         </div>
       </div>
 
-      {/* Right: filter button */}
+      {/* Vendors only have the "mixed" filter */}
       <div className="flex sm:flex-col gap-2 items-start">
         <button
-          onClick={() => onFilterChange("mixed")}
+          onClick={() => onFilterChange(filter === "mixed" ? "" : "mixed")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
             filter === "mixed"
               ? "bg-yellow-400 border-yellow-400 text-gray-900"
@@ -132,15 +138,20 @@ function RiderInfoHeader({
   onFilterChange,
 }: {
   detail: RiderDetail;
-  filter: string | null;
+  filter: string;
   onFilterChange: (f: string) => void;
 }) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-4">
-      {/* Left: info */}
       <div className="flex gap-4 flex-1">
         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-          <Image src={detail.photo} alt={detail.name} fill className="object-cover" unoptimized />
+          <Image
+            src={detail.photo}
+            alt={detail.name}
+            fill
+            className="object-cover"
+            unoptimized
+          />
         </div>
         <div className="space-y-1">
           <p className="text-sm">
@@ -159,10 +170,10 @@ function RiderInfoHeader({
         </div>
       </div>
 
-      {/* Right: filter buttons */}
+      {/* Riders get mixed + bad + good filters */}
       <div className="flex sm:flex-col gap-2 items-start">
         <button
-          onClick={() => onFilterChange("mixed")}
+          onClick={() => onFilterChange(filter === "mixed" ? "" : "mixed")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
             filter === "mixed"
               ? "bg-yellow-400 border-yellow-400 text-gray-900"
@@ -172,7 +183,7 @@ function RiderInfoHeader({
           Mixed review <Smile size={14} />
         </button>
         <button
-          onClick={() => onFilterChange("bad")}
+          onClick={() => onFilterChange(filter === "bad" ? "" : "bad")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
             filter === "bad"
               ? "bg-[#D0021B] border-[#D0021B] text-white"
@@ -182,7 +193,7 @@ function RiderInfoHeader({
           Bad Review <ThumbsDown size={14} />
         </button>
         <button
-          onClick={() => onFilterChange("good")}
+          onClick={() => onFilterChange(filter === "good" ? "" : "good")}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
             filter === "good"
               ? "bg-[#1A3F1C] border-[#1A3F1C] text-white"
@@ -215,39 +226,47 @@ export default function ReviewDetailsModal({
   const [vendorDetail, setVendorDetail] = useState<VendorDetail | null>(null);
   const [riderDetail, setRiderDetail] = useState<RiderDetail | null>(null);
   const [activeStar, setActiveStar] = useState<number>(5);
-  const [activeFilter, setActiveFilter] = useState<string | null>(
-    initialFilter ?? null
-  );
+  const [activeFilter, setActiveFilter] = useState<string>(initialFilter ?? "");
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  // Fetch detail on mount
+  // Build consistent params for every API call
+  const buildParams = (star: number, filter: string) => ({
+    starFilter: star,
+    ...(filter ? { filter: filter as ReviewFilter } : {}),
+  });
+
+  // ── Initial load ────────────────────────────────────────
   useEffect(() => {
     setLoading(true);
-    if (type === "vendor") {
-      operationsService.getVendorReviewDetail(id).then((d) => {
-        setVendorDetail(d);
-        setReviews(d.reviews);
-        setLoading(false);
-      });
-    } else {
-      operationsService.getRiderReviewDetail(id).then((d) => {
-        setRiderDetail(d);
-        setReviews(d.reviews);
-        setLoading(false);
-      });
-    }
+    const params = buildParams(activeStar, activeFilter);
+
+    const request =
+      type === "vendor"
+        ? operationsService.getVendorReviewDetail(id, params)
+        : operationsService.getRiderReviewDetail(id, params);
+
+    request.then((d) => {
+      if (type === "vendor") setVendorDetail(d as VendorDetail);
+      else setRiderDetail(d as RiderDetail);
+      setReviews(d.reviews);
+      setLoading(false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, type]);
 
-  // Refetch reviews on star or filter change
+  // ── Refetch when star tab or filter pill changes ─────────
   useEffect(() => {
     if (loading) return;
     setReviewsLoading(true);
-    const fetch =
+    const params = buildParams(activeStar, activeFilter);
+
+    const request =
       type === "vendor"
-        ? operationsService.getVendorReviewDetail(id, { starFilter: activeStar })
-        : operationsService.getRiderReviewDetail(id, { starFilter: activeStar });
-    fetch.then((d) => {
+        ? operationsService.getVendorReviewDetail(id, params)
+        : operationsService.getRiderReviewDetail(id, params);
+
+    request.then((d) => {
       setReviews(d.reviews);
       setReviewsLoading(false);
     });
@@ -256,15 +275,16 @@ export default function ReviewDetailsModal({
 
   const handleAction = async (action: string) => {
     if (action === "warn") await operationsService.warnReviewAccount(type, id);
-    else if (action === "suspend") await operationsService.suspendReviewAccount(type, id);
-    else if (action === "commend") await operationsService.commendReviewAccount(type, id);
+    else if (action === "suspend")
+      await operationsService.suspendReviewAccount(type, id);
+    else if (action === "commend")
+      await operationsService.commendReviewAccount(type, id);
     alert(`Action "${action}" completed.`);
   };
 
   const title = type === "vendor" ? "Vendor's Review" : "Rider's Review";
 
   return (
-    /* Backdrop */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
@@ -272,7 +292,6 @@ export default function ReviewDetailsModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* Modal */}
       <div className="bg-[#f0faf0] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-200 bg-[#f0faf0]">
@@ -306,7 +325,6 @@ export default function ReviewDetailsModal({
             </div>
           ) : (
             <>
-              {/* Info Header */}
               {type === "vendor" && vendorDetail && (
                 <VendorInfoHeader
                   detail={vendorDetail}
@@ -324,15 +342,10 @@ export default function ReviewDetailsModal({
 
               <hr className="border-gray-200 my-3" />
 
-              {/* Star Tabs */}
               <div className="mb-4">
-                <StarTabs
-                  active={activeStar}
-                  onChange={(s) => setActiveStar(s)}
-                />
+                <StarTabs active={activeStar} onChange={setActiveStar} />
               </div>
 
-              {/* Review List */}
               <ReviewList reviews={reviews} loading={reviewsLoading} />
             </>
           )}

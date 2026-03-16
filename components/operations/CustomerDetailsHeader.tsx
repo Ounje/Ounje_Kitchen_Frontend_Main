@@ -12,11 +12,19 @@ export function CustomerDetailsHeader({ customer }: CustomerDetailsHeaderProps) 
 
         {/* Avatar */}
         <div className="flex-shrink-0 flex sm:block justify-center">
-          <img
-            src={customer.avatar}
-            alt={customer.name}
-            className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl object-cover"
-          />
+          {customer.avatar ? (
+            <img
+              src={customer.avatar}
+              alt={customer.name}
+              className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl object-cover"
+            />
+          ) : (
+            <div
+              className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl bg-gray-100 flex items-center justify-center text-3xl font-bold text-gray-400"
+            >
+              {customer.name?.charAt(0).toUpperCase() ?? "?"}
+            </div>
+          )}
         </div>
 
         {/* Details */}
@@ -27,7 +35,7 @@ export function CustomerDetailsHeader({ customer }: CustomerDetailsHeaderProps) 
           </div>
           <div className="flex flex-wrap gap-x-1">
             <span className="font-semibold" style={{ color: '#1A3F1C' }}>Phone number:</span>
-            <span style={{ color: '#1A3F1C' }}>{customer.phone}</span>
+            <span style={{ color: '#1A3F1C' }}>{customer.phoneNumber}</span>
           </div>
           <div className="flex flex-wrap gap-x-1">
             <span className="font-semibold" style={{ color: '#1A3F1C' }}>Email:</span>

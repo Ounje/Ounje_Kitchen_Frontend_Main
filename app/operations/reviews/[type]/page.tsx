@@ -2,13 +2,9 @@
 
 /**
  * /reviews/[type]/page.tsx
- *
- * This page shows a filtered view for a specific type (vendor | rider).
- * It reuses the same layout as the main reviews page but pre-selects
- * the type from the URL param.
  */
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -19,23 +15,30 @@ import {
   VendorReviewRow as VendorRow,
   RiderReviewRow as RiderRow,
 } from "@/lib/api/services/operations.service";
-import type { PaginatedResponse } from "@/types";
 import StatsCards from "@/components/operations/reviews/StatsCards";
 import ReviewFilters from "@/components/operations/reviews/ReviewFilters";
 import ReviewsTable from "@/components/operations/reviews/ReviewsTable";
 import ReviewDetailsModal from "@/components/operations/reviews/ReviewDetailsModal";
 
+// The backend returns pagination fields flat at the root, not nested.
+interface ReviewsApiResponse<T> {
+  data: T[];
+  page: number;
+  totalPages: number;
+  total: number;
+  limit: number;
+}
+
 export default function ReviewTypePage() {
   const params = useParams();
-  const router = useRouter();
   const rawType = params?.type as string;
 
-  // Validate type
   const type: ReviewType =
     rawType === "vendor" || rawType === "rider" ? rawType : "rider";
 
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+
   const [rows, setRows] = useState<(VendorRow | RiderRow)[]>([]);
   const [tableLoading, setTableLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -46,10 +49,12 @@ export default function ReviewTypePage() {
   });
   const [ratingCategory, setRatingCategory] = useState("");
   const [pageSize, setPageSize] = useState(7);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalId, setModalId] = useState<string | null>(null);
   const [modalFilter, setModalFilter] = useState<string | null>(null);
 
+  // ── Stats ─────────────────────────────────────────────────
   useEffect(() => {
     setStatsLoading(true);
     operationsService.getReviewStats(type).then((s) => {
@@ -58,17 +63,24 @@ export default function ReviewTypePage() {
     });
   }, [type]);
 
+  // ── Table ─────────────────────────────────────────────────
   const loadTable = useCallback(
     async (page: number, category: string, limit = pageSize) => {
       setTableLoading(true);
       try {
-        let res: PaginatedResponse<VendorRow | RiderRow>;
-        const params = { page, limit, ...(category ? { ratingCategory: category as any } : {}) };
-        if (type === "vendor") {
-          res = await operationsService.getVendorReviews(params);
-        } else {
-          res = await operationsService.getRiderReviews(params);
-        }
+        const queryParams = {
+          page,
+          limit,
+          ...(category ? { ratingCategory: category as any } : {}),
+        };
+
+        // Cast to the actual flat response shape the backend returns
+        const res = (
+          type === "vendor"
+            ? await operationsService.getVendorReviews(queryParams)
+            : await operationsService.getRiderReviews(queryParams)
+        ) as ReviewsApiResponse<VendorRow | RiderRow>;
+
         setRows(res.data);
         setPagination({
           page: res.page,
@@ -87,6 +99,7 @@ export default function ReviewTypePage() {
     loadTable(1, "");
   }, [loadTable]);
 
+  // ── Handlers ──────────────────────────────────────────────
   const handleSearch = (cat: string) => {
     setRatingCategory(cat);
     loadTable(1, cat);
@@ -103,14 +116,15 @@ export default function ReviewTypePage() {
   };
 
   const handleOpenDetail = (id: string, filter?: string) => {
-    router.push(`/reviews/${type}/${id}${filter ? `?filter=${filter}` : ""}`);
+    setModalId(id);
+    setModalFilter(filter ?? null);
+    setModalOpen(true);
   };
 
   const capitalised = type.charAt(0).toUpperCase() + type.slice(1);
 
   return (
     <div className="px-4 sm:px-8 xl:px-14 py-6 min-h-screen bg-white">
-      {/* Back link */}
       <Link
         href="/reviews"
         className="inline-flex items-center gap-1.5 text-sm text-[#1A3F1C] font-semibold hover:underline mb-4"
@@ -119,7 +133,6 @@ export default function ReviewTypePage() {
         Back to Reviews
       </Link>
 
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
           {capitalised} Reviews &amp; Rating
@@ -150,6 +163,7 @@ export default function ReviewTypePage() {
           onClose={() => {
             setModalOpen(false);
             setModalId(null);
+            setModalFilter(null);
           }}
         />
       )}

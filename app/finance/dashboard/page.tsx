@@ -12,23 +12,38 @@ import financeService, {
 } from '@/lib/api/services/finance.service';
 
 export default function FinanceDashboardPage() {
-  const [stats, setStats]       = useState<DashboardStats | null>(null);
-  const [rows, setRows]         = useState<DashboardWithdrawalRow[]>([]);
+  const [stats, setStats]               = useState<DashboardStats | null>(null);
+  const [rows, setRows]                 = useState<DashboardWithdrawalRow[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingRows, setLoadingRows]   = useState(true);
 
   // Modal
-  const [modalOpen, setModalOpen]     = useState(false);
-  const [modalDetail, setModalDetail] = useState<WithdrawalDetail | null>(null);
+  const [modalOpen, setModalOpen]       = useState(false);
+  const [modalDetail, setModalDetail]   = useState<WithdrawalDetail | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
+    // Stats — backend returns { success, data: { withdrawals, transactions, payroll } }
     financeService.getDashboardStats()
-      .then(setStats)
+      .then((res: any) => {
+        // Unwrap .data if present, otherwise use the response directly
+        const payload = res?.data ?? res;
+        setStats(payload as DashboardStats);
+      })
+      .catch(() => { /* leave stats null — empty cards render */ })
       .finally(() => setLoadingStats(false));
 
+    // Withdrawals — backend returns { success, data: [...] }
     financeService.getDashboardWithdrawals()
-      .then(setRows)
+      .then((res: any) => {
+        const list: DashboardWithdrawalRow[] =
+          Array.isArray(res)           ? res        :
+          Array.isArray(res?.data)     ? res.data   :
+          Array.isArray(res?.withdrawals) ? res.withdrawals :
+          [];
+        setRows(list);
+      })
+      .catch(() => setRows([]))
       .finally(() => setLoadingRows(false));
   }, []);
 
@@ -37,8 +52,9 @@ export default function FinanceDashboardPage() {
     setModalDetail(null);
     setModalLoading(true);
     try {
-      const detail = await financeService.getWithdrawalDetail(row.id);
-      setModalDetail(detail);
+      const res = await financeService.getWithdrawalDetail(row.id);
+      const detail = (res as any)?.data ?? res;
+      setModalDetail(detail as WithdrawalDetail);
     } finally {
       setModalLoading(false);
     }
@@ -47,30 +63,44 @@ export default function FinanceDashboardPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this withdrawal record?')) return;
     await financeService.deleteDashboardWithdrawal(id);
-    setRows(prev => prev.filter(r => r.id !== id));
+    setRows((prev) => prev.filter((r) => r.id !== id));
   };
 
   const STAT_CARDS = stats
     ? [
-        { icon: '🏧', value: stats.withdrawals.count,  label: 'Withdrawals',  subtitle: stats.withdrawals.subtitle },
-        { icon: '🔄', value: stats.transactions.count, label: 'Transactions', subtitle: stats.transactions.subtitle },
-        { icon: '💼', value: stats.payroll.count,      label: 'Payroll',      subtitle: stats.payroll.subtitle },
+        { icon: '🏧', value: stats.withdrawals?.count  ?? 0, label: 'Withdrawals',  subtitle: stats.withdrawals?.subtitle  ?? '' },
+        { icon: '🔄', value: stats.transactions?.count ?? 0, label: 'Transactions', subtitle: stats.transactions?.subtitle ?? '' },
+        { icon: '💼', value: stats.payroll?.count      ?? 0, label: 'Payroll',      subtitle: stats.payroll?.subtitle      ?? '' },
       ]
     : [];
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: '#1A3F1C' }}>Dashboard</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: '#1A3F1C' }}>
+        Dashboard
+      </h1>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {loadingStats
-          ? [...Array(3)].map((_, i) => (
-              <div key={i} className="h-28 rounded-xl bg-gray-200 animate-pulse" />
-            ))
-          : STAT_CARDS.map(c => (
-              <StatsCard key={c.label} icon={c.icon} value={c.value} label={c.label} subtitle={c.subtitle} />
-            ))}
+        {loadingStats ? (
+          [...Array(3)].map((_, i) => (
+            <div key={i} className="h-28 rounded-xl bg-gray-200 animate-pulse" />
+          ))
+        ) : stats ? (
+          STAT_CARDS.map((c) => (
+            <StatsCard
+              key={c.label}
+              icon={c.icon}
+              value={c.value}
+              label={c.label}
+              subtitle={c.subtitle}
+            />
+          ))
+        ) : (
+          [...Array(3)].map((_, i) => (
+            <div key={i} className="h-28 rounded-xl bg-gray-100 border border-gray-200" />
+          ))
+        )}
       </div>
 
       {/* Withdrawal table */}
@@ -93,7 +123,11 @@ export default function FinanceDashboardPage() {
             ))}
           </div>
         ) : (
-          <DashboardWithdrawalTable rows={rows} onInfo={handleInfo} onDelete={handleDelete} />
+          <DashboardWithdrawalTable
+            rows={rows}
+            onInfo={handleInfo}
+            onDelete={handleDelete}
+          />
         )}
       </div>
 

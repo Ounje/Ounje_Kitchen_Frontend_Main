@@ -1,58 +1,65 @@
-// app/operations/customers/components/ConfirmActionModal.tsx
 'use client';
 
+import { Loader2 } from 'lucide-react';
+
 interface ConfirmActionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen:    boolean;
+  title?:    string;
+  loading?:  boolean;
   onConfirm: () => void;
-  title: string;
-  confirmText?: string;
-  cancelText?: string;
-  loading?: boolean;
+  onClose:   () => void;
 }
 
 export function ConfirmActionModal({
   isOpen,
-  onClose,
+  title = 'Are you sure you want to perform this action?',
+  loading = false,
   onConfirm,
-  title,
-  confirmText = 'Yes',
-  cancelText = 'No',
-  loading = false
+  onClose,
 }: ConfirmActionModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div
-        className="rounded-2xl p-8 max-w-md w-full"
+        className="w-full max-w-sm rounded-2xl p-8 shadow-2xl space-y-6 text-center"
         style={{ backgroundColor: '#1A3F1C' }}
       >
-        <h2 className="text-white text-xl font-semibold text-center mb-8">
+        {/* Icon */}
+        <div className="flex justify-center">
+          <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+            <span className="text-3xl">⚠️</span>
+          </div>
+        </div>
+
+        {/* Title */}
+        <p className="text-white text-base sm:text-lg font-semibold leading-snug">
           {title}
-        </h2>
-        <div className="flex gap-4">
+        </p>
+
+        {/* Buttons */}
+        <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-            style={{
-              backgroundColor: '#FFCA3A',
-              color: '#1A3F1C'
-            }}
+            className="flex-1 py-3 rounded-xl text-sm font-bold bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50"
           >
-            {cancelText}
+            Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-            style={{
-              backgroundColor: '#98EF9B',
-              color: '#1A3F1C'
-            }}
+            className="flex-1 py-3 rounded-xl text-sm font-bold text-[#1A3F1C] bg-[#FFCA3A] hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? 'Processing...' : confirmText}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              'Yes, Confirm'
+            )}
           </button>
         </div>
       </div>

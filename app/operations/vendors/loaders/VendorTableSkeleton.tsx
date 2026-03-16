@@ -1,46 +1,27 @@
-// app/operations/vendors/loaders/VendorTableSkeleton.tsx
 export function VendorTableSkeleton() {
   return (
-    <div className="bg-white rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl overflow-hidden border border-gray-200 w-full">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[760px]">
           <thead>
             <tr style={{ backgroundColor: '#37A449' }}>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">S/N</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Name</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Phone Number</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Address</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Business Status</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Account Status</th>
-              <th className="px-4 py-3 text-left text-white font-medium text-sm">Actions</th>
+              {['S/N','Name','Phone Number','Address','Business Status','Account Status','Actions'].map(h => (
+                <th key={h} className="px-4 py-3 text-left text-white font-medium text-sm">{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {[...Array(7)].map((_, index) => (
-              <tr key={index} className="border-b border-gray-200">
+            {[...Array(7)].map((_, i) => (
+              <tr key={i} className="border-b border-gray-100">
+                <td className="px-4 py-4"><div className="h-4 w-8 bg-gray-200 rounded animate-pulse" /></td>
+                <td className="px-4 py-4"><div className="h-4 w-36 bg-gray-200 rounded animate-pulse" /></td>
+                <td className="px-4 py-4"><div className="h-4 w-28 bg-gray-200 rounded animate-pulse" /></td>
+                <td className="px-4 py-4"><div className="h-4 w-48 bg-gray-200 rounded animate-pulse" /></td>
+                <td className="px-4 py-4"><div className="h-6 w-24 bg-gray-200 rounded animate-pulse" /></td>
+                <td className="px-4 py-4"><div className="h-6 w-20 bg-gray-200 rounded-lg animate-pulse" /></td>
                 <td className="px-4 py-4">
-                  <div className="h-4 w-8 bg-gray-300 rounded animate-pulse"></div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse"></div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse"></div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="h-4 w-48 bg-gray-300 rounded animate-pulse"></div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="h-6 w-24 bg-gray-300 rounded animate-pulse"></div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="h-6 w-20 bg-gray-300 rounded-lg animate-pulse"></div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse"></div>
-                    <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse"></div>
-                    <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse"></div>
+                  <div className="flex gap-2">
+                    {[1,2,3].map(j => <div key={j} className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />)}
                   </div>
                 </td>
               </tr>

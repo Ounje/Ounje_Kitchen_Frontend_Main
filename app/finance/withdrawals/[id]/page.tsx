@@ -23,11 +23,18 @@ export default function WithdrawalDetailPage() {
 
   const [detail, setDetail]   = useState<WithdrawalDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(false);
 
   useEffect(() => {
     if (!id) return;
+    setError(false);
     financeService.getWithdrawalDetail(id)
-      .then(setDetail)
+      .then((res: any) => {
+        // Backend wraps single objects in { success, data: { ... } }
+        const payload = res?.data ?? res;
+        setDetail(payload as WithdrawalDetail);
+      })
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -51,7 +58,7 @@ export default function WithdrawalDetailPage() {
             className="font-bold text-sm sm:text-base text-center break-all"
             style={{ color: '#1A3F1C' }}
           >
-            {loading ? '—' : detail?.withdrawalId}
+            {loading ? '—' : detail?.withdrawalId ?? '—'}
           </h1>
           <button
             onClick={() => router.back()}
@@ -68,9 +75,11 @@ export default function WithdrawalDetailPage() {
                 <div key={i} className="h-16 rounded-lg bg-gray-200 animate-pulse" />
               ))}
             </div>
-          ) : !detail ? (
+          ) : error || !detail ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">Withdrawal not found.</p>
+              <p className="text-gray-500 mb-4">
+                {error ? 'Failed to load withdrawal.' : 'Withdrawal not found.'}
+              </p>
               <button
                 onClick={() => router.back()}
                 className="px-6 py-2 rounded-lg text-white text-sm"
