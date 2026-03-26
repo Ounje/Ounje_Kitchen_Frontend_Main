@@ -8,6 +8,12 @@ export const API_CONFIG = {
 };
 
 export const ENDPOINTS = {
+  // ── Shared (Universal Access) ─────────────────────────────────────────────
+  SHARED: {
+    NOTIFICATIONS:       '/api/shared/notifications',
+    NOTIFICATION_DELETE: (id: string) => `/api/shared/notifications/${id}`,
+  },
+
   // ── Authentication ────────────────────────────────────────────────────────
   AUTH: {
     LOGIN:           '/api/auth/login',

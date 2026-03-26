@@ -1,6 +1,7 @@
 import { apiClient } from '@/lib/client';
 import { ENDPOINTS } from '@/lib/config';
 import { PaginationParams } from '@/types';
+import { notificationService } from './notification.service';
 
 // ── Shared Types ──────────────────────────────────────────────────────────────
 export interface PaginationMeta {
@@ -297,16 +298,16 @@ export const superAdminService = {
   },
 
   // ==================== NOTIFICATIONS ====================
-
+  // MOVED TO notificationService
   async getNotifications() {
-    return await apiClient.get(ENDPOINTS.SUPERADMIN.NOTIFICATIONS);
+    return await notificationService.getAllNotifications();
   },
 
   async createBroadcast(data: any) {
-    return await apiClient.post(ENDPOINTS.SUPERADMIN.NOTIFICATIONS, data);
+    return await notificationService.createBroadcast(data);
   },
 
   async deleteBroadcast(id: string) {
-    return await apiClient.delete(ENDPOINTS.SUPERADMIN.NOTIFICATION_DELETE(id));
+    return await notificationService.deleteBroadcast(id);
   },
 };

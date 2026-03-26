@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/client';
 import { ENDPOINTS } from '@/lib/config';
+import { notificationService } from './notification.service';
 import type { PaginationParams } from '@/types';
 
 // ── Reviews types ─────────────────────────────────────────────────────────────
@@ -301,16 +302,16 @@ export const operationsService = {
   },
 
   // ==================== NOTIFICATIONS ====================
-
+  // MOVED TO notificationService
   async getNotifications() {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.NOTIFICATIONS);
+    return await notificationService.getAllNotifications();
   },
 
   async createBroadcast(data: any) {
-    return await apiClient.post(ENDPOINTS.OPERATIONS.NOTIFICATIONS, data);
+    return await notificationService.createBroadcast(data);
   },
 
   async deleteBroadcast(id: string) {
-    return await apiClient.delete(ENDPOINTS.OPERATIONS.NOTIFICATION_DELETE(id));
+    return await notificationService.deleteBroadcast(id);
   },
 };
