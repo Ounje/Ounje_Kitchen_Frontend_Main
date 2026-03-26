@@ -1,25 +1,27 @@
 "use client";
 
-import useSWR from 'swr';
-import type { Notification } from '@/types';
-
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+import { useQuery } from '@tanstack/react-query';
+import { notificationService } from '@/lib/api/services/notification.service';
 
 export function useNotifications() {
-  const { data, error, isLoading, mutate } = useSWR<{ notifications: Notification[] }>(
-    '/api/superadmin/notifications',
-    fetcher,
-    {
-      refreshInterval: 10000, // Poll every 10 seconds
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
-    }
-  );
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ['notifications_widget'],
+    queryFn: async () => {
+      const res: any = await notificationService.getAllNotifications();
+      return (
+        Array.isArray(res) ? res :
+        Array.isArray(res?.data) ? res.data :
+        Array.isArray(res?.notifications) ? res.notifications :
+        []
+      ) as any[];
+    },
+    refetchInterval: 10000, // Poll every 10 seconds
+  });
 
   return {
-    notifications: data?.notifications ?? [],
+    notifications: data || [],
     isLoading,
-    isError: error,
-    refresh: mutate,
+    isError: !!error,
+    refresh: refetch,
   };
 }

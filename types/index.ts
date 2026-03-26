@@ -175,7 +175,15 @@ export interface Order {
     | 'cancelled'
     | 'rejected';
   items: OrderItem[];
-  totalAmount: number;
+  totalAmount: number; // Sum of items
+  
+  // Persisted Financials (Phase 1 Fix)
+  subtotal?: number;
+  serviceFee?: number;
+  discount?: number;
+  promoCodeApplied?: string | null;
+  grandTotal?: number;
+
   deliveryAddress: string;
   zone?: string;
   createdAt: string;

@@ -1,10 +1,12 @@
 import { apiClient } from '@/lib/client';
 import { ENDPOINTS } from '@/lib/config';
+import { PaginationParams } from '@/types';
 
-// ── Shared Types ──────────────────────────────────────────────────────────────
-export interface PaginationParams {
-  page?:  number;
-  limit?: number;
+export interface PaginationMeta {
+  total: number;
+  page:  number;
+  pages: number;
+  limit: number;
 }
 
 export interface PaginationMeta {
@@ -32,7 +34,7 @@ export const itService = {
     const res = await apiClient.get(ENDPOINTS.IT.DASHBOARD);
     // apiClient unwraps { success, data } → res is the data object directly
     // Handle both shapes: res = { customers, vendors, ... } OR res = { data: { customers, ... } }
-    const d = (res?.customers !== undefined) ? res : (res?.data ?? res);
+    const d = ((res as any)?.customers !== undefined) ? res : ((res as any)?.data ?? res);
     return d;
   },
 
@@ -303,5 +305,15 @@ export const itService = {
   async resendOTP() {
     const res = await apiClient.post(ENDPOINTS.IT.RESEND_OTP);
     return res;
+  },
+
+  // ==================== PROMO CODES ====================
+
+  async getPromos() {
+    return await apiClient.get(ENDPOINTS.IT.PROMOS);
+  },
+
+  async togglePromo(id: string) {
+    return await apiClient.put(ENDPOINTS.IT.PROMO_TOGGLE(id), {});
   },
 };

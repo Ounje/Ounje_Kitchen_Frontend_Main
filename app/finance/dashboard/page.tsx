@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { StatsCard } from '@/components/finance/StatsCard';
 import { DashboardWithdrawalTable } from '@/components/finance/DashboardWithdrawalTable';
 import { WithdrawalInfoModal } from '@/components/finance/WithdrawalInfoModal';
+import { toast } from 'sonner';
+import { PasswordChangeRequiredError } from '@/lib/client';
 import financeService, {
   type DashboardStats,
   type DashboardWithdrawalRow,
@@ -12,41 +15,60 @@ import financeService, {
 } from '@/lib/api/services/finance.service';
 
 export default function FinanceDashboardPage() {
-  const [stats, setStats]               = useState<DashboardStats | null>(null);
-  const [rows, setRows]                 = useState<DashboardWithdrawalRow[]>([]);
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [loadingRows, setLoadingRows]   = useState(true);
+  const queryClient = useQueryClient();
 
-  // Modal
+  // Modal State
   const [modalOpen, setModalOpen]       = useState(false);
   const [modalDetail, setModalDetail]   = useState<WithdrawalDetail | null>(null);
-  const [modalLoading, setModalLoading] = useState(false);
+  // Modal Loading is internal to handleInfo now, but we'll use a local state or useMutation
 
-  useEffect(() => {
-    // Stats — backend returns { success, data: { withdrawals, transactions, payroll } }
-    financeService.getDashboardStats()
-      .then((res: any) => {
-        // Unwrap .data if present, otherwise use the response directly
-        const payload = res?.data ?? res;
-        setStats(payload as DashboardStats);
-      })
-      .catch(() => { /* leave stats null — empty cards render */ })
-      .finally(() => setLoadingStats(false));
+  // 1. Fetch Stats
+  const { 
+    data: stats, 
+    isLoading: loadingStats, 
+    error: statsError 
+  } = useQuery<DashboardStats>({
+    queryKey: ['financeDashboardStats'],
+    queryFn: async () => {
+      const res: any = await financeService.getDashboardStats();
+      return (res?.data ?? res) as DashboardStats;
+    },
+  });
 
-    // Withdrawals — backend returns { success, data: [...] }
-    financeService.getDashboardWithdrawals()
-      .then((res: any) => {
-        const list: DashboardWithdrawalRow[] =
+  // 2. Fetch Withdrawals
+  const { 
+    data: rows = [], 
+    isLoading: loadingRows, 
+    error: rowsError 
+  } = useQuery<DashboardWithdrawalRow[]>({
+    queryKey: ['financeDashboardWithdrawals'],
+    queryFn: async () => {
+      const res: any = await financeService.getDashboardWithdrawals();
+      return (
           Array.isArray(res)           ? res        :
           Array.isArray(res?.data)     ? res.data   :
           Array.isArray(res?.withdrawals) ? res.withdrawals :
-          [];
-        setRows(list);
-      })
-      .catch(() => setRows([]))
-      .finally(() => setLoadingRows(false));
-  }, []);
+          []
+      ) as DashboardWithdrawalRow[];
+    },
+  });
 
+  // 3. Delete Mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => financeService.deleteDashboardWithdrawal(id),
+    onSuccess: (_, id) => {
+      queryClient.setQueryData(['financeDashboardWithdrawals'], (old: DashboardWithdrawalRow[] | undefined) => 
+        old ? old.filter(r => r.id !== id) : []
+      );
+      toast.success('Withdrawal record deleted');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Failed to delete withdrawal');
+    }
+  });
+
+  // 4. Modal Detail Mutation / Fetch
+  const [modalLoading, setModalLoading] = useState(false);
   const handleInfo = async (row: DashboardWithdrawalRow) => {
     setModalOpen(true);
     setModalDetail(null);
@@ -55,16 +77,41 @@ export default function FinanceDashboardPage() {
       const res = await financeService.getWithdrawalDetail(row.id);
       const detail = (res as any)?.data ?? res;
       setModalDetail(detail as WithdrawalDetail);
+    } catch(err: any) {
+      toast.error(err.message || 'Failed to fetch details');
     } finally {
       setModalLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm('Delete this withdrawal record?')) return;
-    await financeService.deleteDashboardWithdrawal(id);
-    setRows((prev) => prev.filter((r) => r.id !== id));
+    deleteMutation.mutate(id);
   };
+
+  // ✅ Graceful error views
+  if (statsError instanceof PasswordChangeRequiredError || rowsError instanceof PasswordChangeRequiredError) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 bg-red-50 rounded-xl border border-red-100 mt-10 text-center">
+         <h2 className="text-xl font-bold text-red-600 mb-2">Security Action Required</h2>
+         <p className="text-gray-700">You must change your password before accessing the finance portal.</p>
+         <p className="text-sm text-gray-500 mt-2">Redirecting to account settings...</p>
+      </div>
+    );
+  }
+
+  if (statsError || rowsError) {
+      const errMessage = (statsError as Error)?.message || (rowsError as Error)?.message || 'Something went wrong.';
+      return (
+        <div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl shadow-sm border border-gray-100 mt-10 text-center">
+           <h2 className="text-xl font-bold text-red-600 mb-2">Error Loading Dashboard</h2>
+           <p className="text-gray-600 mb-4">{errMessage}</p>
+           <button onClick={() => window.location.reload()} className="px-5 py-2.5 bg-[#1A3F1C] text-white font-medium rounded-lg hover:bg-opacity-90 transition">
+             Reload Dashboard
+           </button>
+        </div>
+      );
+  }
 
   const STAT_CARDS = stats
     ? [
@@ -96,11 +143,7 @@ export default function FinanceDashboardPage() {
               subtitle={c.subtitle}
             />
           ))
-        ) : (
-          [...Array(3)].map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-gray-100 border border-gray-200" />
-          ))
-        )}
+        ) : null}
       </div>
 
       {/* Withdrawal table */}

@@ -1,9 +1,21 @@
-// hooks/useRiders.ts
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { riderService, type RiderFilters } from '@/lib/api/services/rider.service';
 import { toast } from 'sonner';
+
+// ── Helper: unwrap the rider object from whatever shape the backend returns ───
+// Backend returns: { success, data: { rider, recentDeliveries } }
+// apiClient strips the outer envelope so res = { data: { rider, ... } }
+function unwrapRider(res: any) {
+  if (!res) return null;
+  // { data: { rider: {...} } }
+  if (res?.data?.rider) return res.data.rider;
+  // { data: {...} }  (flat data object)
+  if (res?.data && typeof res.data === 'object' && !Array.isArray(res.data)) return res.data;
+  // Already the rider object
+  return res;
+}
 
 /** Paginated riders list */
 export function useRiders(filters: RiderFilters) {
@@ -34,17 +46,26 @@ export function useRider(id: string) {
 
 /**
  * Rider document (NIN / drivers licence).
- * No dedicated endpoint — we fetch the full rider and extract the document
- * fields (nin / driversLicense / documentUrl) that the operations
- * riderController populates via `.select("... nin driversLicense ...")`.
+ * FIX: getRiderById returns { success, data: { rider, recentDeliveries } }
+ * so we must unwrap to reach the rider before reading nin / driversLicense.
  */
 export function useRiderDocument(id: string) {
   return useQuery({
     queryKey: ['riders', id, 'document'],
     queryFn:  async () => {
-      const rider: any = await riderService.getRiderById(id);
-      const documentUrl  = rider?.nin ?? rider?.driversLicense ?? rider?.documentUrl ?? '';
+      const res: any    = await riderService.getRiderById(id);
+      // Unwrap nested response shape
+      const rider: any  = unwrapRider(res);
+
+      const documentUrl =
+        rider?.nin            ??
+        rider?.driversLicense ??
+        rider?.documentUrl    ??
+        rider?.document       ??
+        '';
+
       if (!documentUrl) return null;
+
       const documentType = documentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image';
       return { documentUrl, documentType };
     },

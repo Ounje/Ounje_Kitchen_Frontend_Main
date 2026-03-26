@@ -1,6 +1,7 @@
 'use client';
 
-import { Bell, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import { NotificationBell } from "@/components/ui/notification-bell";
 
 interface Props {
   onMenuClick: () => void;
@@ -23,12 +24,7 @@ export default function FinanceHeader({ onMenuClick }: Props) {
 
       <span className="text-white font-bold text-lg lg:ml-0">Ounjefood</span>
 
-      <button
-        className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
-        aria-label="Notifications"
-      >
-        <Bell className="w-5 h-5 text-white" />
-      </button>
+      <NotificationBell portal="Finance" />
     </header>
   );
 }

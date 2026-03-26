@@ -71,15 +71,12 @@ export interface ReviewListParams extends PaginationParams {
 export const operationsService = {
 
   // ==================== DASHBOARD ====================
-  // Backend returns: { success, data: { overview, recentActivity, alerts } }
-  // dashboardController does NOT accept a period param — always returns full counts
   async getDashboard() {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.DASHBOARD);
     return res;
   },
 
   // ==================== ORDERS ====================
-  // operations orderController uses: status, search, startDate, endDate
   async getOrders(params?: PaginationParams & {
     name?:      string;
     vendor?:    string;
@@ -103,7 +100,6 @@ export const operationsService = {
     return res;
   },
 
-  // assignRider: PUT (router.put('/:id/assign-rider', ...))
   async assignRider(orderId: string, riderId: string) {
     const res = await apiClient.put(ENDPOINTS.OPERATIONS.ORDER_ASSIGN_RIDER(orderId), { riderId });
     return res;
@@ -221,7 +217,8 @@ export const operationsService = {
   // ==================== REVIEWS ====================
   async getReviewStats(type: ReviewType): Promise<ReviewStats> {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.REVIEWS_STATS, { params: { type } });
-    return res as ReviewStats;
+    const payload = (res as any)?.data ?? res;
+    return payload as ReviewStats;
   },
 
   async getVendorReviews(params?: ReviewListParams) {
@@ -244,18 +241,19 @@ export const operationsService = {
     return res;
   },
 
+  // FIX: router registers these as POST (router.post), not PUT
   async warnReviewAccount(type: ReviewType, id: string) {
-    const res = await apiClient.put(ENDPOINTS.OPERATIONS.REVIEWS_WARN(type, id));
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.REVIEWS_WARN(type, id));
     return res;
   },
 
   async suspendReviewAccount(type: ReviewType, id: string) {
-    const res = await apiClient.put(ENDPOINTS.OPERATIONS.REVIEWS_SUSPEND(type, id));
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.REVIEWS_SUSPEND(type, id));
     return res;
   },
 
   async commendReviewAccount(type: ReviewType, id: string) {
-    const res = await apiClient.put(ENDPOINTS.OPERATIONS.REVIEWS_COMMEND(type, id));
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.REVIEWS_COMMEND(type, id));
     return res;
   },
 
@@ -282,5 +280,37 @@ export const operationsService = {
 
   async resendOTP() {
     return apiClient.post(ENDPOINTS.OPERATIONS.RESEND_OTP);
+  },
+
+  // ==================== PROMO CODES ====================
+
+  async getPromos() {
+    return await apiClient.get(ENDPOINTS.OPERATIONS.PROMOS);
+  },
+
+  async createPromo(data: any) {
+    return await apiClient.post(ENDPOINTS.OPERATIONS.PROMOS, data);
+  },
+
+  async togglePromo(id: string) {
+    return await apiClient.put(ENDPOINTS.OPERATIONS.PROMO_TOGGLE(id), {});
+  },
+
+  async deletePromo(id: string) {
+    return await apiClient.delete(ENDPOINTS.OPERATIONS.PROMO_DELETE(id));
+  },
+
+  // ==================== NOTIFICATIONS ====================
+
+  async getNotifications() {
+    return await apiClient.get(ENDPOINTS.OPERATIONS.NOTIFICATIONS);
+  },
+
+  async createBroadcast(data: any) {
+    return await apiClient.post(ENDPOINTS.OPERATIONS.NOTIFICATIONS, data);
+  },
+
+  async deleteBroadcast(id: string) {
+    return await apiClient.delete(ENDPOINTS.OPERATIONS.NOTIFICATION_DELETE(id));
   },
 };

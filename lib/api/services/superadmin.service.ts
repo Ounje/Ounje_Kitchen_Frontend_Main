@@ -1,12 +1,8 @@
 import { apiClient } from '@/lib/client';
 import { ENDPOINTS } from '@/lib/config';
+import { PaginationParams } from '@/types';
 
 // ── Shared Types ──────────────────────────────────────────────────────────────
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
-}
-
 export interface PaginationMeta {
   total: number;
   page: number;
@@ -280,5 +276,37 @@ export const superAdminService = {
   async resendOTP() {
     const res = await apiClient.post(ENDPOINTS.SUPERADMIN.RESEND_OTP);
     return res;
+  },
+
+  // ==================== PROMO CODES ====================
+
+  async getPromos() {
+    return await apiClient.get(ENDPOINTS.SUPERADMIN.PROMOS);
+  },
+
+  async createPromo(data: any) {
+    return await apiClient.post(ENDPOINTS.SUPERADMIN.PROMOS, data);
+  },
+
+  async togglePromo(id: string) {
+    return await apiClient.put(ENDPOINTS.SUPERADMIN.PROMO_TOGGLE(id), {});
+  },
+
+  async deletePromo(id: string) {
+    return await apiClient.delete(ENDPOINTS.SUPERADMIN.PROMO_DELETE(id));
+  },
+
+  // ==================== NOTIFICATIONS ====================
+
+  async getNotifications() {
+    return await apiClient.get(ENDPOINTS.SUPERADMIN.NOTIFICATIONS);
+  },
+
+  async createBroadcast(data: any) {
+    return await apiClient.post(ENDPOINTS.SUPERADMIN.NOTIFICATIONS, data);
+  },
+
+  async deleteBroadcast(id: string) {
+    return await apiClient.delete(ENDPOINTS.SUPERADMIN.NOTIFICATION_DELETE(id));
   },
 };
