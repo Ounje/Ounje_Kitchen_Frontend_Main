@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Phone, Mail, MapPin, Star, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import AssignRiderModal from "@/components/operations/modals/AssignRiderModal";
+import { OrderTimeline } from "@/components/operations/OrderTimeline";
+import { PaymentSummary } from "@/components/operations/PaymentSummary";
 
-type TabType = "content" | "party" | "map";
+type TabType = "content" | "party" | "map" | "journey";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -290,6 +292,7 @@ export default function OrderDetailsPage({ params }: PageProps) {
   const mapHtml   = buildMap(vendorLat, vendorLng, vendorAddress, custLat, custLng, customerAddress);
 
   const tabs = [
+    { id: "journey" as TabType, label: "Order Journey"           },
     { id: "content" as TabType, label: "Order Content"          },
     { id: "party"   as TabType, label: "Involved Party Details" },
     { id: "map"     as TabType, label: "Map Feature"            },
@@ -482,6 +485,32 @@ export default function OrderDetailsPage({ params }: PageProps) {
               <iframe title="Delivery Map" width="100%" height="100%"
                 style={{ border: 0, display: "block", minHeight: 300 }}
                 srcDoc={mapHtml} sandbox="allow-scripts allow-same-origin" />
+            </div>
+          </div>
+        )}
+
+        {/* ORDER JOURNEY */}
+        {tab === "journey" && (
+          <div className="grid grid-cols-1 md:grid-cols-5 md:gap-8 min-h-[400px]">
+            <div className="md:col-span-3 pb-8 md:pb-0">
+              <OrderTimeline order={order} />
+            </div>
+            <div className="md:col-span-2 space-y-6">
+              <div className="bg-[#98ef9b]/5 rounded-2xl p-6 border border-[#98ef9b]/10 backdrop-blur-sm">
+                <h3 className="text-sm font-black text-[#1a3f1c] uppercase tracking-widest mb-6">Payment Overview</h3>
+                <PaymentSummary order={order} />
+              </div>
+              
+              <div className="p-6 rounded-2xl bg-[#1a3f1c] text-white shadow-lg space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-wider">Quick Operational Actions</h3>
+                <p className="text-[10px] text-white/60 leading-relaxed italic">These actions are based on the current live state of the order.</p>
+                <div className="grid grid-cols-2 gap-2">
+                   <Button variant="outline" className="text-[10px] h-8 bg-transparent border-white/20 text-white hover:bg-white hover:text-black transition-all">Resend OTP</Button>
+                   <Button variant="outline" className="text-[10px] h-8 bg-transparent border-white/20 text-white hover:bg-white hover:text-black transition-all">Refresh Status</Button>
+                   <Button variant="outline" className="text-[10px] h-8 bg-transparent border-white/20 text-white hover:bg-white hover:text-black transition-all">Contact Vendor</Button>
+                   <Button variant="outline" className="text-[10px] h-8 bg-transparent border-white/20 text-white hover:bg-white hover:text-black transition-all">Contact Rider</Button>
+                </div>
+              </div>
             </div>
           </div>
         )}
