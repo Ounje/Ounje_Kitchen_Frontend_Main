@@ -368,8 +368,8 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
   const role = getRole();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-10">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="w-full space-y-6">
         {/* Page Header */}
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Settings</h1>
@@ -415,7 +415,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
         {/* Profile Form Card */}
         <Card 
           className="border shadow-sm" 
-          style={{ backgroundColor: isEditMode ? '#98ef9b' : '#e8f7e8' }}
+          style={{ backgroundColor: isEditMode ? '#98ef9b' : '#98EF9B' }}
         >
           <CardContent className="p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -429,7 +429,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   value={editedData.firstName}
                   onChange={(e) => setEditedData({ ...editedData, firstName: e.target.value })}
                   disabled={!isEditMode}
-                  className={`mt-1 ${!isEditMode ? 'bg-white' : 'bg-white'}`}
+                  className={`mt-1 border border-[#000000] ${!isEditMode ? 'bg-white' : 'bg-white'}`}
                 />
                 <Label htmlFor="lastName" className="text-sm font-medium text-gray-700 mt-2">
                   Last Name
@@ -439,7 +439,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   value={editedData.lastName}
                   onChange={(e) => setEditedData({ ...editedData, lastName: e.target.value })}
                   disabled={!isEditMode}
-                  className={`mt-1 ${!isEditMode ? 'bg-white' : 'bg-white'}`}
+                  className={`mt-1 border border-[#000000] ${!isEditMode ? 'bg-white' : 'bg-white'}`}
                 />
               </div>
 
@@ -452,7 +452,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   id="email"
                   value={profile.email}
                   disabled
-                  className="mt-1 bg-white"
+                  className="mt-1 border border-[#000000] bg-white"
                 />
               </div>
 
@@ -466,7 +466,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   value={editedData.phone}
                   onChange={(e) => setEditedData({ ...editedData, phone: e.target.value })}
                   disabled={!isEditMode}
-                  className={`mt-1 ${!isEditMode ? 'bg-white' : 'bg-white'}`}
+                  className={`mt-1 border border-[#000000] ${!isEditMode ? 'bg-white' : 'bg-white'}`}
                 />
               </div>
 
@@ -480,7 +480,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                     id="department"
                     value={profile.department}
                     disabled
-                    className="mt-1 bg-white"
+                    className="mt-1 border border-[#000000] bg-white"
                   />
                 </div>
               )}
@@ -494,7 +494,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   id="accessLevel"
                   value={accessLevel}
                   disabled
-                  className="mt-1 bg-white"
+                  className="mt-1 border border-[#000000] bg-white"
                 />
               </div>
 
@@ -507,7 +507,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   id="role"
                   value={role}
                   disabled
-                  className="mt-1 bg-white"
+                  className="mt-1 border border-[#000000] bg-white"
                 />
               </div>
             </div>

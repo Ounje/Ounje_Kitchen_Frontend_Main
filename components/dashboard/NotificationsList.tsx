@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import NotificationItem from "./NotificationItem";
+import { NotificationItem } from "./NotificationItem";
 import { useNotifications } from "@/hooks/useNotifications";
 
 export default function NotificationsList() {

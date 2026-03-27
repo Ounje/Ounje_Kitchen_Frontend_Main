@@ -35,12 +35,28 @@ const dailyRevenueData: RevenueData = {
 
 // Weekly Revenue Data
 const weeklyRevenueData: RevenueData = {
-  period: 'daily',
-  duration: '09/10/2025 - 15/10/2025',
+  period: 'weekly',
+  duration: '22/10/2025 - 29/10/2025',
   grossRevenue: 1050000,
   totalExpenses: 310000,
   netRevenue: 740000,
+  totalOrders: 350,
+  revenueGenerated: 980000,
   expensesPaid: 310000,
+  topVendor: {
+    id: 1,
+    name: 'Iya Bolu',
+    avatar: 'https://i.pravatar.cc/150?img=25',
+    location: '23 Adekunle Street',
+    revenue: 500000,
+  },
+  topRider: {
+    id: 2,
+    name: 'Yusuf Jimoh',
+    avatar: 'https://i.pravatar.cc/150?img=35',
+    type: 'Bicycle',
+    revenue: 70000,
+  },
 };
 
 // Monthly Revenue Data
@@ -97,6 +113,8 @@ export const getRevenueData = (period: Period): RevenueData => {
   switch (period) {
     case 'daily':
       return dailyRevenueData;
+    case 'weekly':
+      return weeklyRevenueData;
     case 'monthly':
       return monthlyRevenueData;
     case 'yearly':

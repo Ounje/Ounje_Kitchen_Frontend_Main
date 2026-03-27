@@ -1,57 +1,38 @@
-"use client";
+'use client';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import { ReactNode } from 'react';  
+import { ChartNoAxesColumnIncreasing } from 'lucide-react';
 
-interface StatsCardProps {
-  icon: LucideIcon;
+interface StatCardProps {
+  icon: ReactNode;
   value: string | number;
   label: string;
+  subtext?: string;
+  colorClass?: string;
 }
 
-export default function StatsCard({ icon: Icon, value, label }: StatsCardProps) {
+export default function StatsCard({
+  icon,
+  value,
+  label,
+  subtext,
+  colorClass = 'bg-chart-1',
+}: StatCardProps) {
   return (
-    <Card
-      className="
-        border-none 
-        rounded-xl
-        shadow-sm
-        hover:shadow-md 
-        transition-all 
-        duration-200
-        bg-[#98ef9b]
-        w-64
-        ml-4
-      "
-    >
-      <CardContent className="p-5 flex flex-col gap-4">
-        {/* Icon bubble */}
-
-        <div className="flex items-center justify-center">
-        <div
-          className="
-            w-12 h-12
-            rounded-full 
-            flex items-center justify-center
-            shadow 
-          "
-          style={{ backgroundColor: "#ffca3a" }}
-        >
-          <Icon className="h-6 w-6 text-[#1a3f1c]" />
+    <div className="rounded-2xl p-6 flex items-start justify-between bg-[#98EF9B]">
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="text-3xl">{icon}</div>
+          <div className="text-4xl font-bold text-foreground">{value}</div>
         </div>
-
-        {/* Value */}
-        <p className="text-3xl font-extrabold text-[#1a3f1c] leading-none">
-          {value}
-          </p>
+        <h3 className="text-lg font-semibold text-foreground mb-1">{label}</h3>
+        {subtext && <p className="text-sm text-muted-foreground">{subtext}</p>}
       </div>
+      {/* <ChartNoAxesColumnIncreasing size={24} className="text-black font-bold mt-2" /> */}
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17 1H15C14.7348 1 14.4804 1.10536 14.2929 1.29289C14.1054 1.48043 14 1.73478 14 2V18.992H18V2C18 1.73478 17.8946 1.48043 17.7071 1.29289C17.5196 1.10536 17.2652 1 17 1ZM11 7H9C8.73478 7 8.48043 7.10536 8.29289 7.29289C8.10536 7.48043 8 7.73478 8 8V18.992H12V8C12 7.73478 11.8946 7.48043 11.7071 7.29289C11.5196 7.10536 11.2652 7 11 7ZM5 13H3C2.73478 13 2.48043 13.1054 2.29289 13.2929C2.10536 13.4804 2 13.7348 2 14V18.992H6V14C6 13.7348 5.89464 13.4804 5.70711 13.2929C5.51957 13.1054 5.26522 13 5 13Z" fill="black"/>
+      </svg>
 
-        {/* Label */}
-        <p className="text-sm font-medium text-[#1a3f1c]/90">
-          {label}
-        </p>
-      </CardContent>
-      
-    </Card>
+    </div>
   );
 }
