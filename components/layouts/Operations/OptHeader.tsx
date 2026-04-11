@@ -10,7 +10,7 @@ interface OperationsHeaderProps {
 
 export default function OperationsHeader({ onMenuClick }: OperationsHeaderProps) {
   return (
-    <header className="h-14 sm:h-16 bg-[#1a3f1c] flex items-center justify-between px-3 sm:px-4 md:px-6 shadow-md sticky top-0 z-30">
+    <header className="h-14 sm:h-16 bg-[#1a3f1c] flex items-center justify-between px-3 sm:px-4 md:px-6 shadow-md border-b border-white/10 sticky top-0 z-30">
       {/* Mobile Menu Button */}
       <Button
         variant="ghost"
@@ -30,8 +30,10 @@ export default function OperationsHeader({ onMenuClick }: OperationsHeaderProps)
       {/* Spacer for desktop */}
       <div className="hidden lg:block" />
 
-      {/* Notification Icon */}
-      <NotificationBell portal="Operations" />
+      {/* Actions */}
+      <div className="flex items-center gap-2">
+        <NotificationBell portal="Operations" className="text-white hover:bg-white/10" />
+      </div>
     </header>
   );
 }

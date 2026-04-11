@@ -19,8 +19,7 @@ export function ModalWatermark() {
           {[...Array(6)].map((_, col) => (
             <span
               key={col}
-              className="text-xl font-black tracking-widest"
-              style={{ color: '#1A3F1C' }}
+              className="text-xl font-black tracking-widest text-[#1A3F1C] dark:text-primary"
             >
               OUNJEFOOD
             </span>

@@ -283,10 +283,10 @@ export default function ITAdminPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Admin</h1>
+        <h1 className="text-2xl font-black text-foreground tracking-tight">Admin</h1>
         <div className="flex items-center gap-2">
           <Select value={currentView} onValueChange={v => setCurrentView(v as ViewType)}>
-            <SelectTrigger className="w-40" style={{ backgroundColor: "#98ef9b" }}>
+            <SelectTrigger className="w-40 bg-secondary text-primary font-bold border-none shadow-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -327,8 +327,8 @@ export default function ITAdminPage() {
                   </Select></div>
               </div>
               <div className="flex gap-2">
-                <Button type="submit" style={{ backgroundColor: "#1a3f1c" }} className="text-white hover:opacity-90">Create Admin</Button>
-                <Button type="button" variant="outline" onClick={() => setAdminForm({ firstName: "", lastName: "", email: "", department: "" })}>Clear</Button>
+                <Button type="submit" className="bg-primary text-white hover:opacity-90 px-8 py-2 h-10 font-bold">Create Admin</Button>
+                <Button type="button" variant="outline" className="border-border" onClick={() => setAdminForm({ firstName: "", lastName: "", email: "", department: "" })}>Clear</Button>
               </div>
             </form>
           </CardContent>
@@ -369,8 +369,8 @@ export default function ITAdminPage() {
                 <div><Label>Phone Number</Label><Input value={staffForm.phone} onChange={e => setStaffForm({ ...staffForm, phone: e.target.value })} placeholder="Enter phone number" /></div>
               </div>
               <div className="flex gap-2">
-                <Button type="submit" style={{ backgroundColor: "#1a3f1c" }} className="text-white hover:opacity-90">Create Staff</Button>
-                <Button type="button" variant="outline" onClick={() => setStaffForm({ firstName: "", lastName: "", email: "", department: "", lineManager: "", phone: "" })}>Clear</Button>
+                <Button type="submit" className="bg-primary text-white hover:opacity-90 px-8 py-2 h-10 font-bold">Create Staff</Button>
+                <Button type="button" variant="outline" className="border-border" onClick={() => setStaffForm({ firstName: "", lastName: "", email: "", department: "", lineManager: "", phone: "" })}>Clear</Button>
               </div>
             </form>
           </CardContent>
@@ -390,8 +390,8 @@ export default function ITAdminPage() {
                 <Input value={searchFilters.phoneNumber} onChange={e => setSearchFilters({ ...searchFilters, phoneNumber: e.target.value })} placeholder="Search by phone" /></div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => fetchData(1)} style={{ backgroundColor: "#1a3f1c" }} className="text-white hover:opacity-90">Search</Button>
-              <Button onClick={() => { setSearchFilters({ name: "", email: "", phoneNumber: "" }); fetchData(1); }} variant="outline">Reset</Button>
+              <Button onClick={() => fetchData(1)} className="bg-primary text-white hover:opacity-90 px-8 font-bold h-10">Search</Button>
+              <Button onClick={() => { setSearchFilters({ name: "", email: "", phoneNumber: "" }); fetchData(1); }} variant="outline" className="border-border">Reset</Button>
             </div>
           </CardContent>
         </Card>
@@ -405,37 +405,37 @@ export default function ITAdminPage() {
       </div>
 
       {/* Table */}
-      <Card className="border shadow-sm" style={{ backgroundColor: "#e8f7e8" }}>
+      <Card className="border border-border/50 shadow-sm bg-surface overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead style={{ backgroundColor: "#98ef9b" }}>
+              <thead className="bg-secondary">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">S/N</th>
-                  <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Name</th>
-                  <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Email</th>
+                  <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">S/N</th>
+                  <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Name</th>
+                  <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Email</th>
                   {(currentView === "Admin" || currentView === "Staff") && (
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Department</th>
+                    <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Department</th>
                   )}
                   {currentView === "Staff" && (
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Line Manager</th>
+                    <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Line Manager</th>
                   )}
                   {currentView === "Customer" && (
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Phone</th>
+                    <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Phone</th>
                   )}
                   {currentView === "Vendor" && <>
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Owner</th>
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Phone</th>
+                    <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Owner</th>
+                    <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Phone</th>
                   </>}
                   {currentView === "Rider" && <>
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Phone</th>
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Operating Area</th>
-                    <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Rank</th>
+                    <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Phone</th>
+                    <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Operating Area</th>
+                    <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Rank</th>
                   </>}
-                  <th className="px-4 py-3 text-left font-medium text-[#1a3f1c]">Actions</th>
+                  <th className="px-4 py-4 text-left font-black text-primary uppercase tracking-wider text-[10px]">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white">
+              <tbody className="bg-surface divide-y divide-border/50">
                 {loading ? (
                   Array.from({ length: 7 }).map((_, i) => <SkeletonRow key={i} cols={colCount} />)
                 ) : data.length === 0 ? (
@@ -453,12 +453,12 @@ export default function ITAdminPage() {
                   return (
                     <tr
                       key={id}
-                      className="border-t hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="hover:bg-muted/30 cursor-pointer transition-colors"
                       onClick={() => handleRowClick(id)}
                     >
-                      <td className="px-4 py-3">{sn}</td>
-                      <td className="px-4 py-3 font-medium hover:text-[#1a3f1c] hover:underline">{name}</td>
-                      <td className="px-4 py-3 text-gray-600">{email}</td>
+                      <td className="px-4 py-3 text-foreground font-medium">{sn}</td>
+                      <td className="px-4 py-3 font-bold text-foreground hover:text-primary transition-colors">{name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{email}</td>
 
                       {(currentView === "Admin" || currentView === "Staff") && (
                         <td className="px-4 py-3 capitalize">{item.department || "—"}</td>
@@ -493,20 +493,19 @@ export default function ITAdminPage() {
 
                       <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                         <div className="flex gap-2">
-                          <button
+                           <button
                             onClick={e => { e.stopPropagation(); handleRowClick(id); }}
-                            className="p-1.5 rounded-full"
-                            style={{ backgroundColor: "#1a3f1c" }}
+                            className="p-1.5 rounded-full bg-primary hover:opacity-80 transition-all shadow-sm"
                             title="View"
                           >
                             <Eye className="h-3.5 w-3.5 text-white" />
                           </button>
-                          <button
+                           <button
                             onClick={e => { e.stopPropagation(); setSuspendTarget({ id, name }); setSuspendModalOpen(true); }}
-                            className="p-1.5 bg-[#ffca3a] rounded-full"
+                            className="p-1.5 bg-accent hover:opacity-80 transition-all rounded-full shadow-sm"
                             title="Suspend"
                           >
-                            <Lock className="h-3.5 w-3.5 text-[#1a3f1c]" />
+                            <Lock className="h-3.5 w-3.5 text-primary" />
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); setDeleteTarget({ id, name }); setDeleteModalOpen(true); }}

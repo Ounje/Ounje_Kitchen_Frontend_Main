@@ -24,7 +24,7 @@ function DashboardSkeleton() {
       {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="p-6 bg-white rounded-xl shadow-sm border space-y-4">
+          <div key={i} className="p-6 bg-surface rounded-xl shadow-sm border border-border space-y-4">
             <div className="h-6 w-6 rounded-full bg-gray-200" />
             <div className="h-6 w-24 rounded-md bg-gray-200" />
             <div className="h-4 w-32 rounded-md bg-gray-200" />
@@ -129,29 +129,32 @@ export default function AdminDashboard() {
     <div className="space-y-10 pb-10 px-4 md:px-6 lg:px-10 animate-fadeIn">
 
       {/* Header */}
-      <div className="mt-10 flex items-center justify-between flex-wrap gap-4">
-        <h1 className="text-3xl font-bold text-[#1a3f1c]">Dashboard</h1>
+      <div className="mt-8 mb-6 flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-foreground tracking-tight">Dashboard Overview</h1>
+          <p className="text-sm font-semibold text-muted-foreground mt-1">Monitor the live performance of Ounje Kitchen.</p>
+        </div>
 
         {/* Period dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowDropdown((p) => !p)}
-            className="flex items-center gap-2 px-4 py-2 rounded-md bg-[#98ef9b] text-[#1a3f1c] hover:bg-[#88df8b] shadow-sm text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-surface text-foreground hover:bg-muted/30 shadow-sm text-sm font-bold transition-all"
           >
             <span>{selectedPeriod}</span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 text-primary transition-transform duration-300 ${showDropdown ? "rotate-180" : ""}`} />
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg py-1 z-50">
+            <div className="absolute right-0 mt-2 w-48 bg-surface border border-border rounded-xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2">
               {(["Daily", "Weekly", "Monthly", "Yearly"] as const).map((p) => (
                 <button
                   key={p}
                   onClick={() => handlePeriodSelect(p)}
-                  className={`w-full px-4 py-2 text-left text-sm ${
+                  className={`w-full px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                     selectedPeriod === p
-                      ? "bg-[#98ef9b] text-[#1a3f1c] font-medium"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-surface-secondary text-primary font-bold"
+                      : "text-muted-foreground hover:bg-surface-secondary"
                   }`}
                 >
                   {p}
@@ -174,8 +177,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Notifications */}
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold text-[#1a3f1c]">Notifications / Alerts</h2>
+      <section className="space-y-4 pt-4">
         <NotificationsList />
       </section>
     </div>

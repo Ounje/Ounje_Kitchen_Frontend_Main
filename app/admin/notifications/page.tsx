@@ -18,6 +18,8 @@ const AUDIENCE_COLORS: Record<string, string> = {
   Vendors:    'bg-yellow-100 text-yellow-700',
   Riders:     'bg-cyan-100 text-cyan-700',
   Operations: 'bg-blue-100 text-blue-700',
+  IT:         'bg-indigo-100 text-indigo-700',
+  Finance:    'bg-emerald-100 text-emerald-700',
   Admin:      'bg-purple-100 text-purple-700',
   Staff:      'bg-indigo-100 text-indigo-700',
 };
@@ -106,6 +108,7 @@ export default function AdminNotificationsPage() {
                   <option value="Vendors">🏪 Vendors</option>
                   <option value="Riders">🏍️ Riders</option>
                   <option value="Operations">⚙️ Operations</option>
+                  <option value="IT">💻 IT</option>
                   <option value="Finance">💰 Finance</option>
                 </select>
               </div>

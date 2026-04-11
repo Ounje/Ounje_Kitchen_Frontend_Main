@@ -129,6 +129,10 @@ export const ENDPOINTS = {
     // Promo Codes (Read + Emergency Toggle)
     PROMOS:       '/api/it/promos',
     PROMO_TOGGLE: (id: string) => `/api/it/promos/${id}/toggle`,
+
+    // Notifications
+    NOTIFICATIONS:       '/api/it/notifications',
+    NOTIFICATION_DELETE: (id: string) => `/api/it/notifications/${id}`,
   },
 
   // ── Staff Management ──────────────────────────────────────────────────────

@@ -23,19 +23,18 @@ export function TransactionList({ groups, onInfo, onPrint }: Props) {
       {groups.map(group => (
         <div key={group.date}>
           {/* Date heading */}
-          <p className="text-sm font-semibold mb-2" style={{ color: '#1A3F1C' }}>
+          <p className="text-xs font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-3 ml-1">
             {group.date}
           </p>
 
           {/* Group card */}
           <div
-            className="rounded-xl overflow-hidden divide-y"
-            style={{ backgroundColor: '#98EF9B', divideColor: '#7dd880' }}
+            className="rounded-2xl overflow-hidden divide-y divide-primary/10 bg-secondary border border-primary/5 shadow-sm"
           >
             {group.transactions.map((tx, idx) => (
               <div
                 key={tx.id}
-                className={`flex items-center gap-3 px-4 py-3 ${idx !== 0 ? 'border-t border-[#7dd880]/40' : ''}`}
+                className={`flex items-center gap-4 px-5 py-4 hover:bg-white/10 transition-colors group`}
               >
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-gray-300 flex-shrink-0 overflow-hidden">
@@ -66,8 +65,7 @@ export function TransactionList({ groups, onInfo, onPrint }: Props) {
                 <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0">
                   <button
                     onClick={() => onInfo(tx.id)}
-                    className="px-4 py-1.5 rounded text-xs font-semibold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#1A3F1C' }}
+                    className="px-5 py-2 rounded-xl text-xs font-black text-white hover:opacity-90 transition-all bg-primary shadow-sm active:scale-95"
                   >
                     Info
                   </button>

@@ -138,13 +138,13 @@ function formatGroupDate(dateStr: string): string {
 
 function SkeletonCard() {
   return (
-    <div className="animate-pulse rounded-xl p-4 mb-3" style={{ backgroundColor: "#98ef9b" }}>
+    <div className="animate-pulse rounded-2xl p-4 mb-3 bg-muted/30 border border-border/50">
       <div className="flex gap-3">
-        <div className="w-24 h-24 bg-gray-300 rounded-lg flex-shrink-0" />
+        <div className="w-24 h-24 bg-muted/50 rounded-lg flex-shrink-0" />
         <div className="flex-1 space-y-2 content-center">
-          {[0,1,2,3,4,5].map(j => <div key={j} className="h-3 bg-gray-300 rounded w-3/4" />)}
+          {[0,1,2,3,4,5].map(j => <div key={j} className="h-3 bg-muted/50 rounded w-3/4" />)}
         </div>
-        <div className="w-20 h-9 bg-gray-300 rounded-lg flex-shrink-0 self-center" />
+        <div className="w-20 h-9 bg-muted/50 rounded-xl flex-shrink-0 self-center" />
       </div>
     </div>
   );
@@ -239,7 +239,7 @@ export default function OperationsOrdersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Orders</h1>
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-full sm:w-36 h-10 bg-[#98ef9b] border-none text-[#1a3f1c] font-semibold">
+          <SelectTrigger className="w-full sm:w-40 h-10 bg-secondary border-primary/5 text-primary font-black uppercase tracking-wider shadow-sm rounded-xl">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -251,21 +251,21 @@ export default function OperationsOrdersPage() {
       </div>
 
       {/* Filters */}
-      <Card className="border-none shadow-sm">
-        <CardContent className="p-4 sm:p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <Card className="border border-border/50 shadow-sm rounded-2xl bg-surface">
+        <CardContent className="p-4 sm:p-7 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { label: "Name",     key: "name",    placeholder: "Customer name" },
-              { label: "Vendor",   key: "vendor",  placeholder: "Vendor name"   },
-              { label: "Zone",     key: "zone",    placeholder: "Zone"           },
-              { label: "Order ID", key: "orderId", placeholder: "OUN-XXX-XXXX"  },
+              { label: "Customer Name",     key: "name",    placeholder: "Search by customer..." },
+              { label: "Vendor Store",   key: "vendor",  placeholder: "Search by vendor..."   },
+              { label: "Zone / Area",     key: "zone",    placeholder: "Search by zone..."           },
+              { label: "Order Reference", key: "orderId", placeholder: "OUN-XXX-XXXX"  },
             ].map(f => (
               <div key={f.key}>
-                <Label className="text-sm font-medium text-gray-700">{f.label}</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 block">{f.label}</Label>
                 <Input
                   value={(filters as any)[f.key]}
                   onChange={e => setFilters(prev => ({ ...prev, [f.key]: e.target.value }))}
-                  className="mt-1" placeholder={f.placeholder}
+                  className="h-10 rounded-xl" placeholder={f.placeholder}
                   onKeyDown={e => e.key === "Enter" && handleSearch()} />
               </div>
             ))}
@@ -306,9 +306,9 @@ export default function OperationsOrdersPage() {
             })}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-            <Button onClick={handleSearch} className="bg-[#1a3f1c] hover:bg-[#164016] text-white h-10 px-8">Search</Button>
-            <Button onClick={handleReset}  className="bg-[#1a3f1c] hover:bg-[#164016] text-white h-10 px-8">Reset</Button>
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end border-t border-border/50 pt-5">
+            <Button onClick={handleSearch} className="bg-primary hover:opacity-90 text-white h-11 px-10 font-black rounded-xl shadow-md transition-all active:scale-95">Search</Button>
+            <Button onClick={handleReset} variant="outline" className="border-border text-[#1a3f1c] h-11 px-10 font-black rounded-xl hover:bg-muted/50 transition-all">Reset</Button>
           </div>
         </CardContent>
       </Card>
@@ -363,8 +363,7 @@ export default function OperationsOrdersPage() {
                 return (
                   <div
                     key={id || Math.random()}
-                    className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    style={{ backgroundColor: "#98ef9b" }}
+                    className="rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer bg-secondary border border-primary/5 hover:border-primary/20 group"
                     onClick={() => router.push(`/operations/orders/${id}`)}
                   >
                     <div className="p-3 sm:p-4 flex items-start gap-3 sm:gap-4">
@@ -421,7 +420,7 @@ export default function OperationsOrdersPage() {
 
                       {/* Details button */}
                       <Button
-                        className="bg-[#1a3f1c] hover:bg-[#164016] text-white h-9 sm:h-10 px-4 sm:px-5 flex-shrink-0 text-sm self-center"
+                        className="bg-primary hover:scale-105 text-white h-10 px-6 flex-shrink-0 text-sm font-black rounded-xl shadow-md transition-all self-center"
                         onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}
                       >
                         Details

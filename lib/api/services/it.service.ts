@@ -316,4 +316,16 @@ export const itService = {
   async togglePromo(id: string) {
     return await apiClient.put(ENDPOINTS.IT.PROMO_TOGGLE(id), {});
   },
+
+  // ==================== NOTIFICATIONS ====================
+
+  async getNotifications() {
+    const res = await apiClient.get(ENDPOINTS.IT.NOTIFICATIONS);
+    // apiClient unwraps { success, data } → res is the data array or object
+    return (res as any)?.data ?? res;
+  },
+
+  async deleteNotification(id: string) {
+    return await apiClient.delete(ENDPOINTS.IT.NOTIFICATION_DELETE(id));
+  },
 };

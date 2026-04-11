@@ -67,16 +67,15 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
           h-screen
           w-[280px] sm:w-64
           flex flex-col
-          shadow-xl
+          shadow-xl border-r border-transparent
           transition-transform duration-300 ease-in-out
-          lg:translate-x-0
+          lg:translate-x-0 bg-[#1a3f1c]
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
-        style={{ backgroundColor: "#1a3f1c" }}
       >
         {/* Header */}
-        <div className="p-3 sm:p-4 flex items-center justify-between border-b border-white/10 min-h-[64px]">
-          <h1 className="text-white text-base sm:text-lg font-bold tracking-wide">
+        <div className="p-3 sm:p-4 flex items-center justify-between border-b border-white/10 min-h-[64px] bg-[#1a3f1c]">
+          <h1 className="text-white text-xl font-black tracking-tight">
             Ounjefood
           </h1>
 
@@ -92,8 +91,8 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
         </div>
 
         {/* Profile Card */}
-        <div className="p-4 sm:p-5 pb-4 sm:pb-6 border-b border-white/10">
-          <div className="flex flex-col items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl shadow-sm">
+        <div className="p-4 sm:p-5 pb-4 sm:pb-6 border-b border-white/10 bg-[#1a3f1c]">
+          <div className="flex flex-col items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl shadow-sm bg-[#1a3f1c]">
             <Avatar className="h-14 w-14 sm:h-12 sm:w-12 bg-[#98ef9b] border-2 border-white/20">
               {avatarUrl && (
                 <AvatarImage 
@@ -108,15 +107,15 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
             </Avatar>
 
             <div className="min-w-0 flex items-center text-center">
-              <p className="text-white text-xs sm:text-sm">
-                Welcome Back {firstName}
+              <p className="text-white text-xs sm:text-sm font-semibold">
+                welcome Back {firstName}
               </p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <ScrollArea className="flex-1 px-3 sm:px-4 pb-6">
+        <ScrollArea className="flex-1 px-3 sm:px-4 pb-6 bg-[#1a3f1c]">
           <nav className="flex flex-col gap-3 sm:gap-4 mt-2 sm:mt-3">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -142,8 +141,8 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
                     touch-manipulation
                     ${
                       isActive
-                        ? "bg-[#ffca3a] text-[#1a3f1c] shadow-sm"
-                        : "bg-[#98ef9b] text-[#1a3f1c] hover:bg-[#88df8b] active:bg-[#78cf7b]"
+                        ? "bg-[#ffca3a] text-[#1a3f1c] font-black shadow-lg"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
                     }
                   `}
                 >
@@ -156,7 +155,7 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
         </ScrollArea>
 
         {/* Logout */}
-        <div className="p-3 sm:p-4 border-t border-white/10">
+        <div className="p-3 sm:p-4 border-t border-white/10 bg-[#1a3f1c]">
           <Button
             onClick={logout}
             variant="ghost"

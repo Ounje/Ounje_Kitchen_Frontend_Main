@@ -128,26 +128,28 @@ export function NotificationDetailModal({ notification, open, onClose }: Notific
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[540px] p-0 overflow-hidden rounded-xl bg-white shadow-2xl transition-all">
-        {/* Header strip — colour-coded by type */}
-        <div className={`px-6 pt-6 pb-4 ${typeInfo.bg} border-b border-black/5`}>
+        {/* Header strip — brand aligned */}
+        <div className={`px-6 pt-6 pb-4 bg-primary border-b border-white/10`}>
           <DialogHeader>
             <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-full ${typeInfo.bg} border border-black/10`}>
-                <TypeIcon className={`w-5 h-5 ${typeInfo.text}`} />
+              <div className={`p-2 rounded-full bg-white/10 border border-white/10`}>
+                <TypeIcon className={`w-5 h-5 text-white`} />
               </div>
               <div className="flex-1 min-w-0">
-                <DialogTitle className="text-[#1A3F1C] text-lg leading-tight">{notification.title}</DialogTitle>
-                <p className={`text-xs font-medium mt-0.5 ${typeInfo.text}`}>{typeInfo.label}</p>
+                <DialogTitle className="text-white text-lg font-black tracking-tight leading-tight">{notification.title}</DialogTitle>
+                <p className={`text-xs font-bold mt-0.5 text-secondary`}>{typeInfo.label}</p>
               </div>
-              {!isRead && <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-blue-500 mt-1.5" title="Unread" />}
+              {!isRead && <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-blue-400 mt-1.5 shadow-[0_0_8px_rgba(96,165,250,0.6)]" title="Unread" />}
             </div>
           </DialogHeader>
           {/* Route: From → To */}
           <div className="flex items-center gap-2 mt-4 flex-wrap">
+            <span className="text-[10px] uppercase font-black tracking-widest text-white/40">From</span>
             <PortalBadge name={fromPortal} />
-            <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <ChevronRight className="w-3.5 h-3.5 text-white/30 shrink-0" />
+            <span className="text-[10px] uppercase font-black tracking-widest text-white/40">To</span>
             <PortalBadge name={toPortal} />
-            <span className="ml-auto text-xs text-gray-500">{formattedDate}</span>
+            <span className="ml-auto text-[10px] font-bold text-white/50">{formattedDate}</span>
           </div>
         </div>
 
