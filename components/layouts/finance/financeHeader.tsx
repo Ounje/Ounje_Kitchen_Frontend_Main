@@ -10,8 +10,7 @@ interface Props {
 export default function FinanceHeader({ onMenuClick }: Props) {
   return (
     <header
-      className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 sticky top-0 z-30"
-      style={{ backgroundColor: '#1A3F1C' }}
+      className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 sticky top-0 z-30 bg-[#1a3f1c] border-b border-transparent"
     >
       {/* Hamburger (mobile only) */}
       <button
@@ -24,7 +23,9 @@ export default function FinanceHeader({ onMenuClick }: Props) {
 
       <span className="text-white font-bold text-lg lg:ml-0">Ounjefood</span>
 
-      <NotificationBell portal="Finance" />
+      <div className="flex items-center gap-2">
+        <NotificationBell portal="Finance" className="text-white hover:bg-white/10" />
+      </div>
     </header>
   );
 }

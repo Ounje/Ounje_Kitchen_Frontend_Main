@@ -1,41 +1,31 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';  
+import { Card, CardContent } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
-import { ChartNoAxesColumnIncreasing } from 'lucide-react';
 
-interface StatCardProps {
-  // icon: LucideIcon;
-  icon: ReactNode;
+interface StatsCardProps {
+  icon: LucideIcon;
   value: string | number;
   label: string;
-  subtext?: string;
-  colorClass?: string;
 }
 
-export default function StatsCard({
-  // icon: Icon,
-  icon,
-  value,
-  label,
-  subtext,
-  colorClass = 'bg-chart-1',
-}: StatCardProps) {
+export default function StatsCard({ icon: Icon, value, label }: StatsCardProps) {
   return (
-    <div className="rounded-2xl p-6 flex items-start justify-between bg-[#98EF9B]">
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="text-3xl">{icon}</div>
-          {/* <Icon className="w-7 h-7" /> */}
-          <div className="text-4xl font-bold text-foreground">{value}</div>
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mb-1">{label}</h3>
-        {subtext && <p className="text-sm text-muted-foreground">{subtext}</p>}
+    <Card className="border border-border rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 bg-surface relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
+        <Icon className="w-24 h-24" />
       </div>
-      {/* <ChartNoAxesColumnIncreasing size={24} className="text-black font-bold mt-2" /> */}
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M17 1H15C14.7348 1 14.4804 1.10536 14.2929 1.29289C14.1054 1.48043 14 1.73478 14 2V18.992H18V2C18 1.73478 17.8946 1.48043 17.7071 1.29289C17.5196 1.10536 17.2652 1 17 1ZM11 7H9C8.73478 7 8.48043 7.10536 8.29289 7.29289C8.10536 7.48043 8 7.73478 8 8V18.992H12V8C12 7.73478 11.8946 7.48043 11.7071 7.29289C11.5196 7.10536 11.2652 7 11 7ZM5 13H3C2.73478 13 2.48043 13.1054 2.29289 13.2929C2.10536 13.4804 2 13.7348 2 14V18.992H6V14C6 13.7348 5.89464 13.4804 5.70711 13.2929C5.51957 13.1054 5.26522 13 5 13Z" fill="black"/>
-      </svg>
-    </div>
+      <CardContent className="p-6 flex flex-col justify-between h-full relative z-10 gap-6">
+        <div className="flex items-center justify-between">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/20 text-primary">
+            <Icon className="w-6 h-6" />
+          </div>
+        </div>
+        <div>
+          <h3 className="text-3xl font-black text-foreground tracking-tight leading-none mb-1.5">{value}</h3>
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

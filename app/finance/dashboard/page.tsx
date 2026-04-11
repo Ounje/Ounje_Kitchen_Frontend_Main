@@ -92,10 +92,10 @@ export default function FinanceDashboardPage() {
   // ✅ Graceful error views
   if (statsError instanceof PasswordChangeRequiredError || rowsError instanceof PasswordChangeRequiredError) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 bg-red-50 rounded-xl border border-red-100 mt-10 text-center">
-         <h2 className="text-xl font-bold text-red-600 mb-2">Security Action Required</h2>
-         <p className="text-gray-700">You must change your password before accessing the finance portal.</p>
-         <p className="text-sm text-gray-500 mt-2">Redirecting to account settings...</p>
+      <div className="flex flex-col items-center justify-center p-12 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/20 mt-10 text-center">
+         <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Security Action Required</h2>
+         <p className="text-foreground/80">You must change your password before accessing the finance portal.</p>
+         <p className="text-sm text-muted-foreground mt-2">Redirecting to account settings...</p>
       </div>
     );
   }
@@ -103,10 +103,10 @@ export default function FinanceDashboardPage() {
   if (statsError || rowsError) {
       const errMessage = (statsError as Error)?.message || (rowsError as Error)?.message || 'Something went wrong.';
       return (
-        <div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl shadow-sm border border-gray-100 mt-10 text-center">
-           <h2 className="text-xl font-bold text-red-600 mb-2">Error Loading Dashboard</h2>
-           <p className="text-gray-600 mb-4">{errMessage}</p>
-           <button onClick={() => window.location.reload()} className="px-5 py-2.5 bg-[#1A3F1C] text-white font-medium rounded-lg hover:bg-opacity-90 transition">
+        <div className="flex flex-col items-center justify-center p-12 bg-surface rounded-xl shadow-sm border border-border mt-10 text-center">
+           <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Error Loading Dashboard</h2>
+           <p className="text-muted-foreground mb-4">{errMessage}</p>
+           <button onClick={() => window.location.reload()} className="px-5 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-opacity-90 transition">
              Reload Dashboard
            </button>
         </div>
@@ -123,7 +123,7 @@ export default function FinanceDashboardPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: '#1A3F1C' }}>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-primary">
         Dashboard
       </h1>
 
@@ -131,7 +131,7 @@ export default function FinanceDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {loadingStats ? (
           [...Array(3)].map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-gray-200 animate-pulse" />
+            <div key={i} className="h-28 rounded-xl bg-surface-secondary animate-pulse" />
           ))
         ) : stats ? (
           STAT_CARDS.map((c) => (
@@ -149,20 +149,19 @@ export default function FinanceDashboardPage() {
       {/* Withdrawal table */}
       <div className="w-full">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold" style={{ color: '#1A3F1C' }}>Withdrawal</h2>
+          <h2 className="text-lg font-bold text-primary">Withdrawal</h2>
           <Link
             href="/finance/withdrawals"
-            className="px-4 py-1.5 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: '#1A3F1C' }}
+            className="px-4 py-1.5 rounded-lg text-primary-foreground text-sm font-semibold bg-primary hover:opacity-90 transition-opacity"
           >
             View All
           </Link>
         </div>
 
         {loadingRows ? (
-          <div className="bg-white rounded-xl p-6 space-y-3">
+          <div className="bg-surface rounded-xl p-6 space-y-3">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-12 bg-gray-100 rounded animate-pulse" />
+              <div key={i} className="h-12 bg-surface-secondary rounded animate-pulse" />
             ))}
           </div>
         ) : (

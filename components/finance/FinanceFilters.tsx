@@ -21,14 +21,14 @@ export function FinanceFilters({ onSearch, onExport }: Props) {
     setV(prev => ({ ...prev, [k]: e.target.value }));
 
   const inputCls =
-    'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]';
+    'w-full h-11 px-4 py-2 border border-border rounded-xl text-sm bg-surface transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-sm';
 
   return (
     <div className="mb-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
         {/* Name */}
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: '#1A3F1C' }}>Name</label>
+          <label className="block text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 ml-1">Name</label>
           <input
             type="text"
             value={v.name}
@@ -41,7 +41,7 @@ export function FinanceFilters({ onSearch, onExport }: Props) {
 
         {/* Role */}
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: '#1A3F1C' }}>Role</label>
+          <label className="block text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 ml-1">Role</label>
           <div className="relative">
             <select value={v.role} onChange={set('role')} className={inputCls + ' appearance-none pr-8'}>
               <option value="">All Roles</option>
@@ -54,7 +54,7 @@ export function FinanceFilters({ onSearch, onExport }: Props) {
 
         {/* Start Date */}
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: '#1A3F1C' }}>Start Date</label>
+          <label className="block text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 ml-1">Start Date</label>
           <div className="relative">
             <input type="date" value={v.startDate} onChange={set('startDate')} className={inputCls + ' pr-8'} />
             <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -63,7 +63,7 @@ export function FinanceFilters({ onSearch, onExport }: Props) {
 
         {/* End Date */}
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: '#1A3F1C' }}>End Date</label>
+          <label className="block text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 ml-1">End Date</label>
           <div className="relative">
             <input type="date" value={v.endDate} onChange={set('endDate')} className={inputCls + ' pr-8'} />
             <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -71,19 +71,17 @@ export function FinanceFilters({ onSearch, onExport }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 pt-3">
         <button
           onClick={() => onSearch(v)}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: '#1A3F1C' }}
+          className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-primary text-white text-sm font-black hover:opacity-90 transition-all shadow-md active:scale-95"
         >
           <Search className="w-4 h-4" />
           Search
         </button>
         <button
           onClick={onExport}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: '#1A3F1C' }}
+          className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-primary text-white text-sm font-black hover:opacity-90 transition-all shadow-md active:scale-95"
         >
           <Download className="w-4 h-4" />
           Export CSV

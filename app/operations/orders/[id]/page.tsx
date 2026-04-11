@@ -77,7 +77,6 @@ function statusLabel(status: string): string {
   return map[(status ?? "").toLowerCase()] ?? (status ?? "PENDING").toUpperCase();
 }
 
-// Payment status badge
 function paymentBadge(status: string) {
   const s = (status ?? "").toLowerCase();
   const color =
@@ -91,7 +90,6 @@ function paymentBadge(status: string) {
   );
 }
 
-// Format date to readable time
 function formatOrderTime(dateStr: string): string {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
@@ -106,7 +104,6 @@ function formatOrderTime(dateStr: string): string {
   });
 }
 
-// Make subStatus human-readable: "rider_assigned" → "Rider Assigned"
 function formatSubStatus(sub: string): string {
   if (!sub) return "—";
   return sub
@@ -216,8 +213,41 @@ export default function OrderDetailsPage({ params }: PageProps) {
 
   useEffect(() => { fetchOrder(); }, [fetchOrder]);
 
+  const handleRefreshStatus = useCallback(async () => {
+    toast.info("Refreshing order status…");
+    await fetchOrder();
+  }, [fetchOrder]);
+
+  const handleContactVendor = useCallback(() => {
+    const phone = (
+      order?.vendor?.phone ??
+      order?.vendor?.phoneNumber ??
+      ""
+    ).toString();
+    if (!phone) { toast.error("No vendor phone number available"); return; }
+    window.open(`tel:${phone}`);
+  }, [order]);
+
+  const handleContactRider = useCallback(() => {
+    const phone = (
+      order?.rider?.user?.phone ??
+      order?.rider?.user?.phoneNumber ??
+      order?.rider?.phone ??
+      order?.rider?.phoneNumber ??
+      ""
+    ).toString();
+    if (!phone) { toast.error("No rider phone number available"); return; }
+    window.open(`tel:${phone}`);
+  }, [order]);
+
+  // ── Early returns (must come after all hooks) ───────────────────────────────
+
   if (!shouldRender || Reloading) {
-    return <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="h-10 w-10 animate-spin text-[#1a3f1c]" /></div>;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#1a3f1c]" />
+      </div>
+    );
   }
 
   if (loading) return <Skeleton />;
@@ -226,7 +256,9 @@ export default function OrderDetailsPage({ params }: PageProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-gray-500">
         <p className="text-xl font-medium">Order not found</p>
-        <Button onClick={() => router.push("/operations/orders")} className="bg-[#1a3f1c] text-white">Back to Orders</Button>
+        <Button onClick={() => router.push("/operations/orders")} className="bg-[#1a3f1c] text-white">
+          Back to Orders
+        </Button>
       </div>
     );
   }
@@ -271,10 +303,10 @@ export default function OrderDetailsPage({ params }: PageProps) {
   const vendorPhoto   = resolvePhoto(vendor);
 
   // ── Rider ───────────────────────────────────────────────────────────────────
-  const hasRider    = !!order.rider;
-  const riderObj    = order.rider ?? {};
-  const riderName   = hasRider ? resolveName(riderObj.user ?? riderObj, "Rider") : "Not Assigned";
-  const riderPhone  = String(riderObj.user?.phone ?? riderObj.user?.phoneNumber ?? riderObj.phone ?? riderObj.phoneNumber ?? "");
+  const hasRider     = !!order.rider;
+  const riderObj     = order.rider ?? {};
+  const riderName    = hasRider ? resolveName(riderObj.user ?? riderObj, "Rider") : "Not Assigned";
+  const riderPhone   = String(riderObj.user?.phone ?? riderObj.user?.phoneNumber ?? riderObj.phone ?? riderObj.phoneNumber ?? "");
   const riderRating  = riderObj.ratings?.average ?? riderObj.averageRating ?? riderObj.rating ?? 0;
   const riderCount   = riderObj.ratings?.count   ?? riderObj.ratingCount   ?? 0;
   const riderZone    = (() => {
@@ -291,17 +323,23 @@ export default function OrderDetailsPage({ params }: PageProps) {
   const custLng   = order.deliveryLongitude ?? customer.longitude ?? 3.3692;
   const mapHtml   = buildMap(vendorLat, vendorLng, vendorAddress, custLat, custLng, customerAddress);
 
+  // ── Tabs ────────────────────────────────────────────────────────────────────
   const tabs = [
-    { id: "journey" as TabType, label: "Order Journey"           },
+    { id: "journey" as TabType, label: "Order Journey"          },
     { id: "content" as TabType, label: "Order Content"          },
     { id: "party"   as TabType, label: "Involved Party Details" },
     { id: "map"     as TabType, label: "Map Feature"            },
   ];
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-4 sm:space-y-5 max-w-4xl mx-auto">
+    <div className="space-y-4 sm:space-y-5 w-full mx-auto">
 
-      <Button onClick={() => router.push("/operations/orders")} variant="ghost" className="gap-2 hover:bg-[#98ef9b] text-[#1a3f1c] font-semibold">
+      <Button
+        onClick={() => router.push("/operations/orders")}
+        variant="ghost"
+        className="gap-2 hover:bg-[#98ef9b] text-[#1a3f1c] font-semibold"
+      >
         <ArrowLeft className="h-4 w-4" /> Back to Orders
       </Button>
 
@@ -313,11 +351,13 @@ export default function OrderDetailsPage({ params }: PageProps) {
           {orderImage ? (
             <img src={orderImage} alt="Order" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center text-white text-xs font-bold">IMG</div>
+            <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center text-white text-xs font-bold">
+              IMG
+            </div>
           )}
         </div>
         <div className="space-y-1.5 text-sm sm:text-base flex-1 min-w-0">
-          <p><span className="font-bold">Order ID:</span> <span className="text-gray-700">Order ID: {orderId}</span></p>
+          <p><span className="font-bold">Order ID:</span> <span className="text-gray-700">{orderId}</span></p>
           <p><span className="font-bold">Order Type:</span> <span className="text-gray-700">{orderType}</span></p>
           <p><span className="font-bold">Zone:</span> <span className="text-gray-700">{zone}</span></p>
           <p className="flex flex-wrap items-center gap-2">
@@ -336,12 +376,17 @@ export default function OrderDetailsPage({ params }: PageProps) {
       </div>
 
       {/* ── Tabs ── */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
         {tabs.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
             className={`py-3 px-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
-              tab === t.id ? "bg-[#1a3f1c] text-white" : "bg-[#98ef9b] text-[#1a3f1c] hover:bg-[#88df8b]"
-            }`}>
+              tab === t.id
+                ? "bg-[#1a3f1c] text-white"
+                : "bg-[#98ef9b] text-[#1a3f1c] hover:bg-[#88df8b]"
+            }`}
+          >
             {t.label}
           </button>
         ))}
@@ -372,11 +417,11 @@ export default function OrderDetailsPage({ params }: PageProps) {
                   </thead>
                   <tbody>
                     {items.map((item: any, i: number) => {
-                      const qty   = item.quantity ?? 1;
-                      const price = item.price    ?? 0;
-                      const total = qty * price;
-                      const name  = item.displayName ?? item.itemType ?? "Item";
-                      const unit  = item.unit ?? item.item?.unit ?? "";
+                      const qty        = item.quantity ?? 1;
+                      const price      = item.price    ?? 0;
+                      const total      = qty * price;
+                      const name       = item.displayName ?? item.itemType ?? "Item";
+                      const unit       = item.unit ?? item.item?.unit ?? "";
                       const itemLabel  = `${qty}x ${name}`;
                       const priceLabel = unit ? `${fmt(price)}/${unit}` : fmt(price);
                       return (
@@ -420,7 +465,10 @@ export default function OrderDetailsPage({ params }: PageProps) {
             )}
 
             {!hasRider && (
-              <Button onClick={() => setAssignOpen(true)} className="w-full bg-[#1a3f1c] hover:bg-[#164016] text-white h-11 mt-4">
+              <Button
+                onClick={() => setAssignOpen(true)}
+                className="w-full bg-[#1a3f1c] hover:bg-[#164016] text-white h-11 mt-4"
+              >
                 Assign a Rider
               </Button>
             )}
@@ -431,33 +479,42 @@ export default function OrderDetailsPage({ params }: PageProps) {
         {tab === "party" && (
           <>
             <div className={`grid gap-6 ${hasRider ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"}`}>
-              <PartyCard photo={customerPhoto} name={customerName}
+              <PartyCard
+                photo={customerPhoto}
+                name={customerName}
                 rows={[
-                  { icon: <Phone  className="h-3.5 w-3.5" />,                        text: customerPhone   },
-                  { icon: <Mail   className="h-3.5 w-3.5" />,                        text: customerEmail   },
-                  { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />,         text: customerAddress },
+                  { icon: <Phone  className="h-3.5 w-3.5" />,                text: customerPhone   },
+                  { icon: <Mail   className="h-3.5 w-3.5" />,                text: customerEmail   },
+                  { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />, text: customerAddress },
                 ]}
               />
-              <PartyCard photo={vendorPhoto} name={vendorName}
+              <PartyCard
+                photo={vendorPhoto}
+                name={vendorName}
                 rows={[
                   { icon: <Star className="h-3.5 w-3.5 fill-[#FFCA3A] stroke-[#FFCA3A]" />, text: vendorRating > 0 ? `Rating: ${Number(vendorRating).toFixed(1)}${vendorCount > 0 ? ` (${vendorCount})` : ""}` : "" },
-                  { icon: <Phone  className="h-3.5 w-3.5" />,                        text: vendorPhone   },
-                  { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />,         text: vendorAddress },
+                  { icon: <Phone  className="h-3.5 w-3.5" />,                text: vendorPhone   },
+                  { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />, text: vendorAddress },
                 ]}
               />
               {hasRider && (
-                <PartyCard photo={riderPhoto} name={riderName}
+                <PartyCard
+                  photo={riderPhoto}
+                  name={riderName}
                   rows={[
                     { icon: <Star className="h-3.5 w-3.5 fill-[#FFCA3A] stroke-[#FFCA3A]" />, text: riderRating > 0 ? `Rating: ${Number(riderRating).toFixed(1)}${riderCount > 0 ? ` (${riderCount})` : ""}` : "" },
-                    { icon: <Phone  className="h-3.5 w-3.5" />,                      text: riderPhone   },
-                    { icon: <span className="text-xs">🚗</span>,                     text: riderVehicle ? riderVehicle.charAt(0).toUpperCase() + riderVehicle.slice(1) : "" },
-                    { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />,       text: riderZone    },
+                    { icon: <Phone  className="h-3.5 w-3.5" />,              text: riderPhone   },
+                    { icon: <span className="text-xs">🚗</span>,             text: riderVehicle ? riderVehicle.charAt(0).toUpperCase() + riderVehicle.slice(1) : "" },
+                    { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />, text: riderZone  },
                   ]}
                 />
               )}
             </div>
             {!hasRider && (
-              <Button onClick={() => setAssignOpen(true)} className="w-full bg-[#1a3f1c] hover:bg-[#164016] text-white h-11 mt-6">
+              <Button
+                onClick={() => setAssignOpen(true)}
+                className="w-full bg-[#1a3f1c] hover:bg-[#164016] text-white h-11 mt-6"
+              >
                 Assign a Rider
               </Button>
             )}
@@ -466,25 +523,41 @@ export default function OrderDetailsPage({ params }: PageProps) {
 
         {/* MAP FEATURE */}
         {tab === "map" && (
-          <div className="flex flex-col sm:flex-row gap-4 h-full">
-            <div className="sm:w-52 flex-shrink-0 space-y-4 text-sm pt-1">
+          <div className="flex flex-col md:flex-row gap-6 h-[500px]">
+            <div className="md:w-64 flex-shrink-0 space-y-6 text-sm p-4 bg-surface-secondary rounded-2xl border border-border">
               {vendorAddress && (
                 <div>
-                  <p className="font-bold text-[#1a3f1c] mb-1">Vendor Address</p>
-                  <p className="text-gray-600 leading-relaxed">{vendorAddress}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPin className="h-4 w-4 text-orange-500" />
+                    <p className="font-bold text-foreground">Vendor Address</p>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">{vendorAddress}</p>
                 </div>
               )}
               {customerAddress && (
                 <div>
-                  <p className="font-bold text-[#1a3f1c] mb-1">Customer Address</p>
-                  <p className="text-gray-600 leading-relaxed">{customerAddress}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <p className="font-bold text-foreground">Customer Address</p>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">{customerAddress}</p>
                 </div>
               )}
             </div>
-            <div className="flex-1 rounded-xl overflow-hidden border border-gray-200" style={{ minHeight: 300 }}>
-              <iframe title="Delivery Map" width="100%" height="100%"
-                style={{ border: 0, display: "block", minHeight: 300 }}
-                srcDoc={mapHtml} sandbox="allow-scripts allow-same-origin" />
+            <div
+              className="flex-1 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-sm relative bg-slate-100 dark:bg-slate-900"
+              style={{ minHeight: 400 }}
+            >
+              <div className="absolute inset-0 pointer-events-none dark:bg-slate-900/10 mix-blend-color z-10" />
+              <iframe
+                title="Delivery Map"
+                width="100%"
+                height="100%"
+                style={{ border: 0, display: "block", minHeight: "100%", filter: "var(--tw-dark-map-invert, none)" }}
+                className="dark:invert dark:hue-rotate-180 dark:contrast-75"
+                srcDoc={mapHtml}
+                sandbox="allow-scripts allow-same-origin"
+              />
             </div>
           </div>
         )}
@@ -496,19 +569,40 @@ export default function OrderDetailsPage({ params }: PageProps) {
               <OrderTimeline order={order} />
             </div>
             <div className="md:col-span-2 space-y-6">
-              <div className="bg-[#98ef9b]/5 rounded-2xl p-6 border border-[#98ef9b]/10 backdrop-blur-sm">
-                <h3 className="text-sm font-black text-[#1a3f1c] uppercase tracking-widest mb-6">Payment Overview</h3>
+              <div className="bg-surface-secondary dark:bg-surface rounded-2xl p-6 border border-border shadow-sm relative overflow-hidden group">
+                <h3 className="text-xs font-black text-primary uppercase tracking-widest mb-6">
+                  Payment Overview
+                </h3>
                 <PaymentSummary order={order} />
               </div>
-              
-              <div className="p-6 rounded-2xl bg-[#1a3f1c] text-white shadow-lg space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider">Quick Operational Actions</h3>
-                <p className="text-[10px] text-white/60 leading-relaxed italic">These actions are based on the current live state of the order.</p>
-                <div className="grid grid-cols-2 gap-2">
-                   <Button variant="outline" className="text-[10px] h-8 bg-transparent border-white/20 text-white hover:bg-white hover:text-black transition-all">Resend OTP</Button>
-                   <Button variant="outline" className="text-[10px] h-8 bg-transparent border-white/20 text-white hover:bg-white hover:text-black transition-all">Refresh Status</Button>
-                   <Button variant="outline" className="text-[10px] h-8 bg-transparent border-white/20 text-white hover:bg-white hover:text-black transition-all">Contact Vendor</Button>
-                   <Button variant="outline" className="text-[10px] h-8 bg-transparent border-white/20 text-white hover:bg-white hover:text-black transition-all">Contact Rider</Button>
+
+              <div className="p-6 rounded-2xl bg-primary dark:bg-surface border-transparent dark:border-border text-primary-foreground dark:text-foreground shadow-lg space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-widest text-[#98ef9b] dark:text-primary">Quick Actions</h3>
+                <p className="text-[10px] text-primary-foreground/60 dark:text-muted-foreground font-medium leading-relaxed">
+                  These actions execute strictly contextually based on the live order state.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Button
+                    onClick={handleRefreshStatus}
+                    variant="outline"
+                    className="text-[10px] h-8 bg-current/5 border-current/20 hover:bg-foreground hover:text-background dark:hover:text-background transition-all font-bold"
+                  >
+                    Refresh Status
+                  </Button>
+                  <Button
+                    onClick={handleContactVendor}
+                    variant="outline"
+                    className="text-[10px] h-8 bg-current/5 border-current/20 hover:bg-foreground hover:text-background dark:hover:text-background transition-all font-bold"
+                  >
+                    Contact Vendor
+                  </Button>
+                  <Button
+                    onClick={handleContactRider}
+                    variant="outline"
+                    className="text-[10px] h-8 bg-current/5 border-current/20 hover:bg-foreground hover:text-background dark:hover:text-background transition-all font-bold"
+                  >
+                    Contact Rider
+                  </Button>
                 </div>
               </div>
             </div>

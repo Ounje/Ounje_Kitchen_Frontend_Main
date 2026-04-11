@@ -50,8 +50,8 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       {/* Overlay for Mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onClose}
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden bg-[#1A3F1C]"
+          onClick={onClose} 
         />
       )}
 
@@ -60,16 +60,15 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         className={`
           fixed lg:sticky top-0 left-0 z-50
           w-64 h-screen flex flex-col
-          shadow-xl
+          shadow-xl border-r border-transparent dark:border-slate-800
           transform transition-transform duration-300 ease-in-out
-          lg:translate-x-0
+          lg:translate-x-0 bg-[#1a3f1c] dark:bg-slate-900
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
-        style={{ backgroundColor: "#1a3f1c" }}
       >
         {/* Top bar */}
-        <div className="p-4 flex items-center justify-between">
-          <h1 className="text-white text-lg font-bold tracking-wide">
+        <div className="p-4 flex items-center justify-between bg-[#1a3f1c]">
+          <h1 className="text-white text-xl font-black tracking-tight">
             Ounjefood
           </h1>
 
@@ -84,8 +83,8 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         </div>
 
         {/* Profile */}
-        <div className="p-5 pb-6">
-          <div className="flex flex-col items-center gap-3 p-3 rounded-xl shadow-sm">
+        <div className="p-5 pb-6 bg-[#1a3f1c]">
+          <div className="flex flex-col items-center gap-3 p-3 rounded-xl shadow-sm bg-[#1a3f1c]">
             <Avatar className="h-12 w-12 bg-[#98ef9b] border-2 border-white/20">
               {/* ✅ Show actual avatar image if available */}
               {avatarUrl && (
@@ -110,13 +109,13 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             </Avatar>
 
             <div className="min-w-0 flex items-center text-center">
-              <p className="text-white text-sm">Welcome Back {firstName}</p>
+              <p className="text-white text-sm font-semibold">welcome Back {firstName}</p>
             </div>
           </div>
         </div>
 
         {/* Navigation Items */}
-        <ScrollArea className="flex-1 px-4 pb-6">
+        <ScrollArea className="flex-1 px-4 pb-6 bg-[#1a3f1c]">
           <nav className="flex flex-col gap-4 mt-2">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -138,8 +137,8 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     transition-all duration-200
                     ${
                       isActive
-                        ? "bg-[#ffca3a] text-[#1a3f1c]"
-                        : "bg-[#98ef9b] text-[#1a3f1c] hover:bg-[#88df8b]"
+                        ? "bg-[#ffca3a] text-[#1a3f1c] font-black shadow-lg"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
                     }
                   `}
                 >
@@ -152,7 +151,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         </ScrollArea>
 
         {/* Logout */}
-        <div className="p-2 bg-[#FFFFFF] border-t border-white/10 mb-4 mx-5 rounded-lg">
+       <div className="p-2 bg-[#FFFFFF] border-t border-white/10 mb-4 mx-5 rounded-lg">
           <Button
             onClick={logout}
             variant="ghost"
@@ -162,6 +161,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             <span className="text-lg text-[#000000] font-medium">Log Out</span>
           </Button>
         </div>
+
       </aside>
     </>
   );

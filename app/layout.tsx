@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${poppins.variable} antialiased`}>
         <Toaster richColors position="top-center" />
         <Providers>
-        <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </Providers>
       </body>
     </html>

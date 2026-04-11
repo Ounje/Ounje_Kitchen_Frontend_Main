@@ -50,12 +50,12 @@ export default function Pagination({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-between p-4 border-t bg-white">
+    <div className="flex items-center justify-between p-4 border-t border-border bg-surface">
       {/* Page Size Selector */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">Displays</span>
+        <span className="text-sm text-muted-foreground font-medium">Displays</span>
         <select
-          className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3f1c]"
+          className="border border-border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-secondary text-primary font-bold"
           value={pageSize}
           onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
         >
@@ -75,7 +75,7 @@ export default function Pagination({
           size="sm"
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
-          className="text-sm"
+          className="text-sm bg-secondary border-none text-primary hover:bg-secondary/80 font-bold px-4"
         >
           First
         </Button>
@@ -86,7 +86,7 @@ export default function Pagination({
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="text-sm"
+          className="text-sm bg-secondary border-none text-primary hover:bg-secondary/80 font-bold px-4"
         >
           Previous
         </Button>
@@ -98,12 +98,11 @@ export default function Pagination({
             variant={currentPage === pageNum ? "default" : "outline"}
             size="sm"
             onClick={() => onPageChange(pageNum)}
-            className="min-w-[2.5rem]"
-            style={
-              currentPage === pageNum
-                ? { backgroundColor: "#1a3f1c", color: "white" }
-                : undefined
-            }
+            className={`min-w-[2.5rem] font-bold border-none ${
+              currentPage === pageNum 
+                ? "bg-primary text-white hover:bg-primary/90" 
+                : "bg-secondary text-primary hover:bg-secondary/80"
+            }`}
           >
             {pageNum}
           </Button>
@@ -115,7 +114,7 @@ export default function Pagination({
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="text-sm"
+          className="text-sm bg-secondary border-none text-primary hover:bg-secondary/80 font-bold px-4"
         >
           Next
         </Button>
@@ -126,7 +125,7 @@ export default function Pagination({
           size="sm"
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage >= totalPages}
-          className="text-sm"
+          className="text-sm bg-secondary border-none text-primary hover:bg-secondary/80 font-bold px-4"
         >
           Last
         </Button>

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { NotificationItem } from "./NotificationItem";
+// import { NotificationItem } from "./NotificationItem";
+import NotificationItem from "./NotificationItem";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationDetailModal } from "@/components/ui/notification-detail-modal";
 import Link from "next/link";
@@ -15,24 +16,21 @@ export default function NotificationsList() {
 
   return (
     <>
-    <Card 
-      className="border-none shadow-sm"
-      style={{ backgroundColor: '#98ef9b' }}
-    >
-      <CardHeader className="pb-3">
+    <Card className="border border-border rounded-2xl shadow-sm bg-surface">
+      <CardHeader className="pb-4 border-b border-border/50 mb-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[#1a3f1c]">
-            Notifications/Alerts
+          <h2 className="text-lg font-bold text-foreground tracking-tight">
+            Recent Notifications
           </h2>
           <Link href="/admin/notifications">
-            <Button size="sm" className="h-8 bg-[#1a3f1c] hover:bg-[#2a5f2c] text-white">
-              Show all
+            <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-transparent border-border text-muted-foreground hover:bg-surface-secondary transition-all">
+              View All
             </Button>
           </Link>
         </div>
       </CardHeader>
 
-      <CardContent className="p-3 pt-0">
+      <CardContent className="p-3 pt-2">
         {isLoading && (
           <div className="flex items-center justify-center h-32">
             <div className="w-8 h-8 border-4 border-[#1a3f1c] border-t-transparent rounded-full animate-spin" />

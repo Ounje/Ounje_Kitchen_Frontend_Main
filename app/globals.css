@@ -1,13 +1,5 @@
 @import "tailwindcss";
 
-
-
-
-
-
-/* @import 'tailwindcss';
-@import 'tw-animate-css'; */
-
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -24,7 +16,7 @@
   --muted: #e0e0e0;
   --muted-foreground: #666666;
   --accent: #ffc107;
-  --accent-foreground: #1a1a1a;
+  --accent-foreground: #1a1a1a;  
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #e0e0e0;
@@ -98,6 +90,6 @@
 
 body {
   font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
-  background-color: #f5f5f5;
-  color: #1f2937;
+  /* background-color: #f5f5f5; */
+  /* color: #0f172a; */
 }

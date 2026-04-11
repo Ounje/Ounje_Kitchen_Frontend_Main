@@ -33,63 +33,63 @@ export function PaymentSummary({ order }: PaymentSummaryProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50/50">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/80 shadow-sm">
+        <div className="flex items-center gap-4">
           <div className={cn(
-            "p-2 rounded-full",
-            paymentStatus === "paid" ? "bg-green-100" : paymentStatus === "refunded" ? "bg-blue-100" : "bg-red-100"
+            "p-3 rounded-full flex-shrink-0",
+            paymentStatus === "paid" ? "bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400" : paymentStatus === "refunded" ? "bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400"
           )}>
             {getStatusIcon()}
           </div>
           <div>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Payment Status</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-1">Payment Status</p>
             <p className={cn(
-              "text-lg font-bold uppercase",
-              paymentStatus === "paid" ? "text-green-700" : paymentStatus === "refunded" ? "text-blue-700" : "text-red-700"
+              "text-xl font-black uppercase tracking-tight",
+              paymentStatus === "paid" ? "text-green-700 dark:text-green-400" : paymentStatus === "refunded" ? "text-blue-700 dark:text-blue-400" : "text-red-700 dark:text-red-400"
             )}>
               {paymentStatus}
             </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Total Amount</p>
-          <p className="text-2xl font-black text-[#1a3f1c]">₦{Number(amount).toLocaleString()}</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-1">Total Amount</p>
+          <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">₦{Number(amount).toLocaleString()}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 rounded-xl border border-gray-100 space-y-3">
-          <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
+        <div className="p-5 rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm space-y-3">
+          <div className="flex items-center gap-2 text-slate-900 dark:text-gray-100 font-bold text-sm tracking-tight">
             {getMethodIcon()}
             Payment Method
           </div>
-          <p className="text-sm text-gray-600">{paymentMethod}</p>
-          <div className="pt-2 border-t border-gray-50">
-             <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">Reference ID</p>
-             <p className="text-xs font-mono text-gray-600 truncate">{reference}</p>
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">{paymentMethod}</p>
+          <div className="pt-3 mt-3 border-t border-gray-100 dark:border-slate-700">
+             <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-widest mb-0.5">Reference ID</p>
+             <p className="text-xs font-mono font-medium text-slate-700 dark:text-slate-300 truncate">{reference}</p>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border border-gray-100 space-y-3">
-          <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
+        <div className="p-5 rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm space-y-3">
+          <div className="flex items-center gap-2 text-slate-900 dark:text-gray-100 font-bold text-sm tracking-tight">
             <Info className="w-4 h-4" />
             Payment History
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-400">Order Placed</span>
-              <span className="text-gray-600 font-medium">{order.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}</span>
+          <div className="space-y-2.5">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Order Placed</span>
+              <span className="text-slate-800 dark:text-slate-200 font-bold bg-slate-50 dark:bg-slate-700 px-2 py-0.5 rounded">{order.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}</span>
             </div>
             {order.paymentConfirmedAt && (
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-400">Payment Confirmed</span>
-                <span className="text-green-600 font-bold">{new Date(order.paymentConfirmedAt).toLocaleString()}</span>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Payment Confirmed</span>
+                <span className="text-green-700 dark:text-green-400 font-bold bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded">{new Date(order.paymentConfirmedAt).toLocaleString()}</span>
               </div>
             )}
             {order.refundedAt && (
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-400">Refund Processed</span>
-                <span className="text-blue-600 font-bold">{new Date(order.refundedAt).toLocaleString()}</span>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Refund Processed</span>
+                <span className="text-blue-700 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded">{new Date(order.refundedAt).toLocaleString()}</span>
               </div>
             )}
           </div>
@@ -97,11 +97,11 @@ export function PaymentSummary({ order }: PaymentSummaryProps) {
       </div>
 
       {order.paymentDetails && (
-        <div className="p-4 rounded-xl bg-[#98ef9b]/10 border border-[#98ef9b]/20">
-          <p className="text-xs font-bold text-[#1a3f1c] mb-2 flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3" /> Gateway Response Details
+        <div className="p-5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700">
+          <p className="text-xs font-bold text-slate-700 dark:text-gray-300 mb-3 flex items-center gap-2 uppercase tracking-widest">
+            <ShieldCheck className="w-3.5 h-3.5" /> Gateway Response Details
           </p>
-          <pre className="text-[10px] text-[#1a3f1c]/70 font-mono overflow-auto max-h-32">
+          <pre className="text-[10px] text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3 rounded-lg font-mono overflow-auto max-h-40">
             {JSON.stringify(order.paymentDetails, null, 2)}
           </pre>
         </div>

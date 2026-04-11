@@ -121,17 +121,18 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: '#1A3F1C' }}>
-        Transactions
-      </h1>
+    <div className="w-full space-y-8 animate-fadeIn">
+      <div>
+        <h1 className="text-3xl font-black text-foreground tracking-tight">Transactions</h1>
+        <p className="text-sm font-semibold text-muted-foreground mt-1">Review and manage financial records across portals.</p>
+      </div>
 
       <FinanceFilters onSearch={handleSearch} onExport={handleExport} />
 
       {loading ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-32 rounded-xl bg-gray-200 animate-pulse" />
+            <div key={i} className="h-32 rounded-2xl bg-muted/50 animate-pulse border border-border" />
           ))}
         </div>
       ) : (

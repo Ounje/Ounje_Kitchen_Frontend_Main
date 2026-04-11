@@ -31,20 +31,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#1A3F1C] border-b">
-      <div className="px-4 md:px-6 py-3 flex items-center justify-end gap-4">
+    <header className="sticky top-0 z-30 bg-[#1a3f1c] border-b border-white/10 shadow-sm">
+      <div className="px-4 md:px-6 py-3 flex items-center justify-end gap-3 sm:gap-4">
         {/* Mobile menu button */}
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden absolute left-4"
+          className="lg:hidden absolute left-4 text-white hover:bg-white/10"
           onClick={onMenuClick}
         >
           <Menu className="h-6 w-6 text-white font-bold" />
         </Button>
 
-        {/* Notification bell */}
-        <NotificationBell portal="Admin" className="text-[#FFFFFF] font-bold hover:bg-gray-100 relative h-9 w-9 sm:h-10 sm:w-10 touch-manipulation cursor-pointer" />
+        <NotificationBell portal="Admin" className="text-white hover:bg-white/10 relative h-9 w-9 sm:h-10 sm:w-10 touch-manipulation transition-colors rounded-full cursor-pointer" />
 
         {/* Period dropdown */}
         {/* <div className="relative" ref={dropdownRef}>

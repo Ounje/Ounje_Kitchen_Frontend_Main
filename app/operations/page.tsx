@@ -86,20 +86,24 @@ function StatCard({
   title: string; value: number | string; sub: string; icon: any; bg: string;
 }) {
   return (
-    <Card className="border-none shadow-sm hover:shadow-md transition-shadow"
-      style={{ backgroundColor: bg }}>
-      <CardContent className="p-5 sm:p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="p-2.5 rounded-lg bg-white/70">
-            <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-[#1a3f1c]" />
+    <Card className="border border-border rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 bg-surface relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
+        <Icon className="w-24 h-24" />
+      </div>
+      <CardContent className="p-5 sm:p-6 flex flex-col justify-between h-full relative z-10 gap-4">
+        <div className="flex items-start justify-between">
+          <div className="p-2.5 rounded-xl bg-surface-secondary">
+            <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
           </div>
-          <TrendingUp className="h-4 w-4 text-[#1a3f1c]/60" />
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </div>
-        <p className="text-3xl sm:text-4xl font-extrabold text-[#1a3f1c]">
-          {typeof value === "number" ? value.toLocaleString() : value}
-        </p>
-        <p className="text-sm font-semibold text-[#1a3f1c]/80 mt-0.5">{title}</p>
-        <p className="text-xs text-[#1a3f1c]/60 mt-0.5">{sub}</p>
+        <div>
+          <p className="text-3xl sm:text-4xl font-black text-foreground tracking-tight leading-none mb-1.5">
+            {typeof value === "number" ? value.toLocaleString() : value}
+          </p>
+          <p className="text-sm font-semibold text-foreground/80">{title}</p>
+          <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+        </div>
       </CardContent>
     </Card>
   );
@@ -109,16 +113,16 @@ function AlertRow({
   label, count, color,
 }: { label: string; count: number; color: string }) {
   return (
-    <Card className="border-none shadow-sm" style={{ backgroundColor: "#98ef9b" }}>
+    <Card className="border border-border rounded-xl shadow-sm bg-surface">
       <CardContent className="p-3 sm:p-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-full ${color}`}>
-              <AlertCircle className="h-4 w-4 text-[#1a3f1c]" />
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-full bg-surface-secondary ${color}`}>
+              <AlertCircle className="h-4 w-4 text-foreground/80" />
             </div>
-            <p className="text-sm font-medium text-[#1a3f1c]">{label}</p>
+            <p className="text-sm font-semibold text-foreground/90">{label}</p>
           </div>
-          <span className="text-sm font-bold text-[#1a3f1c] bg-white/60 px-3 py-1 rounded-full">
+          <span className="text-xs font-bold text-foreground bg-surface-secondary px-3 py-1.5 rounded-full border border-border">
             {count}
           </span>
         </div>
@@ -242,13 +246,15 @@ export default function OperationsDashboardPage() {
   ];
 
   return (
-    <div className="space-y-5 sm:space-y-7">
+    <div className="space-y-6 sm:space-y-8 animate-fadeIn pb-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500">
-          {overview.activeOrders ?? 0} active orders right now
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-8 mb-4">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Dashboard Overview</h1>
+          <p className="text-sm font-medium text-muted-foreground mt-1">
+            {overview.activeOrders ?? 0} active orders right now. Monitor operations live.
+          </p>
+        </div>
       </div>
 
       {/* Stat cards */}
@@ -260,46 +266,45 @@ export default function OperationsDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Recent Activity — takes 2 columns */}
-        <div className="lg:col-span-2 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Recent Activity / Feed</h2>
-            <Button variant="ghost" size="sm"
-              className="text-sm text-[#1a3f1c] hover:bg-[#98ef9b] h-9">
-              Show all
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-border">
+            <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">Recent Activity / Feed</h2>
+            <Button variant="outline" size="sm"
+              className="text-xs font-semibold text-foreground/80 border-border bg-transparent hover:bg-surface-secondary transition-all h-8">
+              View All
             </Button>
           </div>
 
           {recentActivity.length === 0 ? (
-            <Card className="border-none shadow-sm" style={{ backgroundColor: "#98ef9b" }}>
-              <CardContent className="p-6 text-center text-[#1a3f1c]/60 text-sm">
-                No recent activity
+            <Card className="border border-border rounded-xl shadow-sm bg-surface">
+              <CardContent className="p-8 text-center text-muted-foreground text-sm font-medium">
+                No recent activity to display.
               </CardContent>
             </Card>
           ) : (
             recentActivity.map((order: any, i: number) => (
               <Card key={order._id ?? i}
-                className="border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                style={{ backgroundColor: "#98ef9b" }}>
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-center justify-between gap-3">
+                className="border border-border rounded-xl shadow-sm bg-surface hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#1a3f1c] truncate">
+                      <p className="text-sm font-bold text-foreground truncate">
                         {resolveCustomerName(order)} placed an order from {resolveVendorName(order)}
                       </p>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs text-[#1a3f1c]/70">
-                          Order: {order.orderNumber ?? order._id?.slice(-8)?.toUpperCase() ?? "—"}
+                      <div className="flex items-center gap-x-3 gap-y-2 mt-2 flex-wrap">
+                        <span className="text-xs font-mono text-muted-foreground bg-surface-secondary px-2 py-1 rounded-md">
+                          #{order.orderNumber ?? order._id?.slice(-8)?.toUpperCase() ?? "—"}
                         </span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusBadge(order.status)}`}>
-                          {(order.status ?? "pending").toUpperCase()}
+                        <span className={`text-[10px] uppercase px-2.5 py-1 rounded-full font-black tracking-wider ${statusBadge(order.status)}`}>
+                          {(order.status ?? "pending")}
                         </span>
-                        <span className="text-xs text-[#1a3f1c]/50">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {timeAgo(order.createdAt)}
                         </span>
                       </div>
                     </div>
-                    <Button size="icon" variant="ghost"
-                      className="h-8 w-8 shrink-0 rounded-full bg-[#1a3f1c] text-white hover:bg-[#164016]">
+                    <Button size="icon" variant="outline"
+                      className="h-9 w-9 shrink-0 rounded-full border-border text-foreground/80 hover:bg-surface-secondary">
                       <Eye className="h-4 w-4" />
                     </Button>
                   </div>
@@ -310,46 +315,46 @@ export default function OperationsDashboardPage() {
         </div>
 
         {/* Alerts / Warnings */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Alert / Warning</h2>
-            <Button variant="ghost" size="sm"
-              className="text-sm text-[#1a3f1c] hover:bg-[#98ef9b] h-9">
-              Show all
+        <div className="space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-border">
+            <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">Alerts & Warnings</h2>
+            <Button variant="outline" size="sm"
+              className="text-xs font-semibold text-foreground/80 border-border bg-transparent hover:bg-surface-secondary transition-all h-8">
+              View All
             </Button>
           </div>
 
           <AlertRow
             label={`${alerts.suspendedCustomers ?? 0} suspended customer${(alerts.suspendedCustomers ?? 0) !== 1 ? "s" : ""}`}
             count={alerts.suspendedCustomers ?? 0}
-            color="bg-red-100"
+            color="text-red-500"
           />
           <AlertRow
             label={`${alerts.suspendedVendors ?? 0} suspended vendor${(alerts.suspendedVendors ?? 0) !== 1 ? "s" : ""}`}
             count={alerts.suspendedVendors ?? 0}
-            color="bg-orange-100"
+            color="text-orange-500"
           />
           <AlertRow
             label={`${alerts.suspendedRiders ?? 0} suspended rider${(alerts.suspendedRiders ?? 0) !== 1 ? "s" : ""}`}
             count={alerts.suspendedRiders ?? 0}
-            color="bg-yellow-100"
+            color="text-yellow-500"
           />
           <AlertRow
             label={`${alerts.openQueries ?? 0} open quer${(alerts.openQueries ?? 0) !== 1 ? "ies" : "y"}`}
             count={alerts.openQueries ?? 0}
-            color="bg-blue-100"
+            color="text-blue-500"
           />
 
           {/* Ratings summary */}
-          <Card className="border-none shadow-sm" style={{ backgroundColor: "#98ef9b" }}>
-            <CardContent className="p-4">
-              <p className="text-xs font-bold text-[#1a3f1c]/70 uppercase tracking-wide mb-2">
+          <Card className="border border-border rounded-2xl shadow-sm bg-surface mt-6 relative overflow-hidden group">
+            <CardContent className="p-6 relative z-10">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
                 Platform Ratings
               </p>
-              <p className="text-3xl font-extrabold text-[#1a3f1c]">
+              <p className="text-4xl font-black text-foreground tracking-tight mb-1">
                 {(overview.ratings ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-[#1a3f1c]/60 mt-0.5">Total reviews submitted</p>
+              <p className="text-xs font-medium text-muted-foreground">Total reviews submitted overall</p>
             </CardContent>
           </Card>
         </div>

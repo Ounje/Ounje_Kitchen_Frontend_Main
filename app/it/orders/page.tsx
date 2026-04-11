@@ -5,58 +5,47 @@ import { useRouter } from "next/navigation";
 import { itService } from "@/lib/api/services/it.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, Trash2, ChevronDown, Download } from "lucide-react";
+import { Eye, Trash2, ChevronDown, Download, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import Pagination from "@/components/Pagination";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type Period = "Daily" | "Weekly" | "Monthly" | "Yearly";
+type Period = "Daily" | "Weekly" | "Monthly" | "Yearly" | "All";
 
 // ── Date range helpers ────────────────────────────────────────────────────────
 // Returns { dateFrom, dateTo } ISO strings for the selected period window.
 // These are passed to the backend as query params so MongoDB filters by createdAt.
-function getDateRange(period: Period): { dateFrom: string; dateTo: string } {
+function getDateRange(period: Period): { dateFrom?: string; dateTo?: string } {
+  if (period === "All") return {};
   const now = new Date();
-
-  let from: Date;
-  let to:   Date;
+  let from: Date, to: Date;
 
   switch (period) {
-    case "Daily": {
-      // Today: 00:00:00 → 23:59:59
+    case "Daily":
       from = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
       to   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       break;
-    }
     case "Weekly": {
-      // Current week: Monday 00:00 → Sunday 23:59
-      const dayOfWeek = now.getDay();                          // 0=Sun … 6=Sat
-      const diffToMon = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // days back to Monday
-      from = new Date(now);
-      from.setDate(now.getDate() + diffToMon);
-      from.setHours(0, 0, 0, 0);
-      to = new Date(from);
-      to.setDate(from.getDate() + 6);
-      to.setHours(23, 59, 59, 999);
+      const day = now.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      from = new Date(now); from.setDate(now.getDate() + diff); from.setHours(0,0,0,0);
+      to   = new Date(from); to.setDate(from.getDate() + 6);    to.setHours(23,59,59,999);
       break;
     }
-    case "Monthly": {
-      // 1st of current month → last day of current month
+    case "Monthly":
       from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
       to   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
       break;
-    }
-    case "Yearly": {
-      // Jan 1 → Dec 31 of current year
+    case "Yearly":
       from = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
       to   = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
       break;
-    }
+    default: return {};
   }
 
   return {
-    dateFrom: from.toISOString(),
-    dateTo:   to.toISOString(),
+    dateFrom: from?.toISOString(),
+    dateTo:   to?.toISOString(),
   };
 }
 
@@ -67,14 +56,16 @@ function periodLabel(period: Period): string {
       return now.toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
     case "Weekly": {
       const { dateFrom, dateTo } = getDateRange("Weekly");
-      const f = new Date(dateFrom);
-      const t = new Date(dateTo);
+      const f = new Date(dateFrom || "");
+      const t = new Date(dateTo || "");
       return `${f.toLocaleDateString("en-NG", { day: "numeric", month: "short" })} – ${t.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}`;
     }
     case "Monthly":
       return now.toLocaleDateString("en-NG", { month: "long", year: "numeric" });
     case "Yearly":
       return String(now.getFullYear());
+    default:
+      return "All Records";
   }
 }
 
@@ -288,7 +279,7 @@ export default function ITOrdersPage() {
   const [pagination, setPagination] = useState({ page: 1, limit: 7, total: 0, pages: 1 });
 
   const [filters,         setFilters]         = useState({ name: "", vendor: "", rider: "", zone: "" });
-  const [period,          setPeriod]          = useState<Period>("Daily");
+  const [period,          setPeriod]          = useState<Period>("All");
   const [showPeriodDrop,  setShowPeriodDrop]  = useState(false);
   const [showExportDrop,  setShowExportDrop]  = useState(false);
 
@@ -442,14 +433,14 @@ export default function ITOrdersPage() {
           <div className="relative" ref={periodRef}>
             <button
               onClick={() => setShowPeriodDrop(p => !p)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#98ef9b] text-[#1a3f1c] rounded-lg text-sm font-semibold hover:bg-[#7de07f] transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-secondary text-primary rounded-lg text-sm font-black hover:brightness-95 transition-all shadow-sm border border-primary/5 uppercase tracking-wider"
             >
               <span>{period}</span>
               <ChevronDown className={`h-4 w-4 transition-transform ${showPeriodDrop ? "rotate-180" : ""}`} />
             </button>
             {showPeriodDrop && (
               <div className="absolute right-0 mt-1 w-36 bg-white border rounded-lg shadow-lg py-1 z-10">
-                {(["Daily","Weekly","Monthly","Yearly"] as Period[]).map(p => (
+                {(["Daily","Weekly","Monthly","Yearly","All"] as Period[]).map(p => (
                   <button key={p}
                     onClick={() => { setPeriod(p); setShowPeriodDrop(false); }}
                     className={`w-full px-4 py-2 text-left text-sm ${period === p ? "bg-[#98ef9b] text-[#1a3f1c] font-semibold" : "text-gray-700 hover:bg-gray-50"}`}
@@ -464,7 +455,7 @@ export default function ITOrdersPage() {
       </div>
 
       {/* ── Search Filters ── */}
-      <div className="bg-white border rounded-xl p-5 shadow-sm">
+      <div className="bg-surface border border-border/50 rounded-2xl p-6 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {[
             { key: "name",   label: "Name",   placeholder: "Search by name"   },
@@ -484,18 +475,25 @@ export default function ITOrdersPage() {
             </div>
           ))}
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button onClick={handleSearch} style={{ backgroundColor: "#1a3f1c" }}
-            className="text-white hover:opacity-90 h-9 px-5">
-            Search
-          </Button>
-          <Button onClick={handleReset} variant="outline" className="h-9 px-5">
-            Reset
-          </Button>
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mt-4">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Button 
+              onClick={handleSearch} 
+              className="bg-[#1a3f1c] text-white hover:bg-[#1a3f1c]/90 h-10 px-8 font-bold flex-1 sm:flex-initial shadow-sm transition-all"
+            >
+              Search
+            </Button>
+            <Button 
+              onClick={handleReset} 
+              variant="outline" 
+              className="h-10 px-8 border-gray-300 text-gray-600 hover:bg-gray-50 font-bold flex-1 sm:flex-initial transition-all"
+            >
+              Reset
+            </Button>
+          </div>
           <Button
             onClick={() => router.push("/it/orders/create")}
-            style={{ backgroundColor: "#4a7c4e" }}
-            className="text-white hover:opacity-90 h-9 px-5 ml-auto"
+            className="bg-[#4a7c4e] text-white hover:bg-[#4a7c4e]/90 h-10 px-8 font-bold shadow-md w-full sm:w-auto transition-all"
           >
             Create Order
           </Button>
@@ -504,10 +502,10 @@ export default function ITOrdersPage() {
 
       {/* ── Order count badge ── */}
       {!loading && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 font-medium italic">
           {pagination.total > 0
-            ? `Showing ${orders.length} of ${pagination.total} order${pagination.total !== 1 ? "s" : ""} for ${period.toLowerCase()} period`
-            : `No orders found for this ${period.toLowerCase()} period`
+            ? `Showing ${orders.length} of ${pagination.total} order${pagination.total !== 1 ? "s" : ""} for this ${period.toLowerCase()} period`
+            : `No orders matching filters for ${periodLabel(period)}`
           }
         </p>
       )}
@@ -520,9 +518,17 @@ export default function ITOrdersPage() {
             {[1,2,3].map(i => <SkeletonCard key={i} />)}
           </>
         ) : orders.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 bg-white rounded-xl border">
-            <p className="text-lg font-medium">No orders this {period.toLowerCase()}</p>
-            <p className="text-sm mt-1">{periodLabel(period)}</p>
+          <div className="text-center py-20 text-gray-400 bg-surface rounded-2xl border border-dashed border-border flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+              <ShoppingCart className="h-8 w-8 text-muted-foreground/30" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-foreground/70">No orders found</p>
+              <p className="text-sm mt-1 max-w-xs mx-auto">Try adjusting your filters or changing the time period (currently {period}).</p>
+            </div>
+            <Button onClick={handleReset} variant="outline" className="mt-2 border-primary/20 text-primary">
+              Clear all filters
+            </Button>
           </div>
         ) : (
           dateKeys.map(dateKey => (
@@ -538,7 +544,7 @@ export default function ITOrdersPage() {
 
                 return (
                   <div key={id}
-                    className="flex items-center gap-3 bg-[#98ef9b] rounded-xl p-3 mb-2 hover:bg-[#8de08f] transition-colors">
+                    className="flex items-center gap-4 bg-secondary rounded-2xl p-4 mb-3 hover:brightness-95 transition-all shadow-sm border border-primary/5 group">
                     {/* Food image */}
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
                       {image
@@ -563,11 +569,10 @@ export default function ITOrdersPage() {
                     <div className="flex gap-1.5 flex-shrink-0">
                       <button
                         onClick={() => router.push(`/it/orders/${id}`)}
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: "#1a3f1c" }}
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-primary hover:scale-105 transition-transform shadow-md"
                         title="View order"
                       >
-                        <Eye className="h-4 w-4 text-white" />
+                        <Eye className="h-5 w-5 text-white" />
                       </button>
                       <button
                         onClick={() => setDeleteId(id)}
