@@ -19,10 +19,10 @@ const AUDIENCE_COLORS: Record<string, string> = {
   Riders:     'bg-cyan-100 text-cyan-700',
   Operations: 'bg-blue-100 text-blue-700',
   Admin:      'bg-purple-100 text-purple-700',
-  Staff:      'bg-indigo-100 text-indigo-700',
+  Finance:    'bg-emerald-100 text-emerald-700',
 };
 
-export default function AdminNotificationsPage() {
+export default function NotificationsPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
@@ -68,7 +68,7 @@ export default function AdminNotificationsPage() {
       message: formData.get('message') as string,
       audience,
       type: 'general',
-      sourcePortal: 'Admin',
+      sourcePortal: 'Operations',
       targetPortal: audience,
     });
   };
@@ -78,12 +78,12 @@ export default function AdminNotificationsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A3F1C]">System Broadcasts</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Send targeted notifications to any portal or audience</p>
+          <h1 className="text-2xl font-bold text-[#1A3F1C]">Broadcasts</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Send targeted notifications from the Operations portal</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#1A3F1C] hover:bg-[#1A3F1C]/90 gap-2 shadow-sm cursor-pointer">
+            <Button className="bg-[#1A3F1C] hover:bg-[#1A3F1C]/90 gap-2 shadow-sm">
               <Plus className="w-4 h-4" /> New Broadcast
             </Button>
           </DialogTrigger>
@@ -105,7 +105,7 @@ export default function AdminNotificationsPage() {
                   <option value="Customers">👤 Customers</option>
                   <option value="Vendors">🏪 Vendors</option>
                   <option value="Riders">🏍️ Riders</option>
-                  <option value="Operations">⚙️ Operations</option>
+                  <option value="Admin">👑 Admin</option>
                   <option value="Finance">💰 Finance</option>
                 </select>
               </div>

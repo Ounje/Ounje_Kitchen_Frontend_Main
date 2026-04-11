@@ -1,5 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend.onrender.com',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend-kiwy.onrender.com',
+  //  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
   TIMEOUT: 30000,
   HEADERS: {
     'Content-Type': 'application/json',
@@ -7,6 +8,12 @@ export const API_CONFIG = {
 };
 
 export const ENDPOINTS = {
+  // ── Shared (Universal Access) ─────────────────────────────────────────────
+  SHARED: {
+    NOTIFICATIONS:       '/api/shared/notifications',
+    NOTIFICATION_DELETE: (id: string) => `/api/shared/notifications/${id}`,
+  },
+
   // ── Authentication ────────────────────────────────────────────────────────
   AUTH: {
     LOGIN:           '/api/auth/login',
@@ -65,6 +72,15 @@ export const ENDPOINTS = {
     CHANGE_PASSWORD: '/api/superadmin/change-password',
     VERIFY_OTP:      '/api/superadmin/verify-otp',
     RESEND_OTP:      '/api/superadmin/resend-otp',
+
+    // Promo Codes
+    PROMOS:       '/api/superadmin/promos',
+    PROMO_TOGGLE: (id: string) => `/api/superadmin/promos/${id}/toggle`,
+    PROMO_DELETE: (id: string) => `/api/superadmin/promos/${id}`,
+
+    // Notifications
+    NOTIFICATIONS:       '/api/superadmin/notifications',
+    NOTIFICATION_DELETE: (id: string) => `/api/superadmin/notifications/${id}`,
   },
 
   // ── IT Portal ─────────────────────────────────────────────────────────────
@@ -96,6 +112,10 @@ export const ENDPOINTS = {
     RIDER_DELETE:   (id: string) => `/api/it/riders/${id}`,
     RIDER_RESTORE:  (id: string) => `/api/it/riders/${id}/restore`,
 
+    // Orders
+    ORDERS:      '/api/it/orders',
+    ORDER_BY_ID: (id: string) => `/api/it/orders/${id}`,
+
     // Account management
     SUSPENDED_ACCOUNTS: '/api/it/suspended-accounts',
     DELETED_ACCOUNTS:   '/api/it/deleted-accounts',
@@ -106,6 +126,10 @@ export const ENDPOINTS = {
     CHANGE_PASSWORD: '/api/it/change-password',
     VERIFY_OTP:      '/api/it/verify-otp',
     RESEND_OTP:      '/api/it/resend-otp',
+
+    // Promo Codes (Read + Emergency Toggle)
+    PROMOS:       '/api/it/promos',
+    PROMO_TOGGLE: (id: string) => `/api/it/promos/${id}/toggle`,
   },
 
   // ── Staff Management ──────────────────────────────────────────────────────
@@ -175,6 +199,15 @@ export const ENDPOINTS = {
     CHANGE_PASSWORD: '/api/operations/change-password',
     VERIFY_OTP:      '/api/operations/verify-otp',
     RESEND_OTP:      '/api/operations/resend-otp',
+
+    // Promo Codes
+    PROMOS:       '/api/operations/promos',
+    PROMO_TOGGLE: (id: string) => `/api/operations/promos/${id}/toggle`,
+    PROMO_DELETE: (id: string) => `/api/operations/promos/${id}`,
+
+    // Notifications
+    NOTIFICATIONS:       '/api/operations/notifications',
+    NOTIFICATION_DELETE: (id: string) => `/api/operations/notifications/${id}`,
   },
 
   // ── Finance Portal ────────────────────────────────────────────────────────

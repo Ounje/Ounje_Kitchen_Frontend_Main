@@ -429,7 +429,8 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   value={editedData.firstName}
                   onChange={(e) => setEditedData({ ...editedData, firstName: e.target.value })}
                   disabled={!isEditMode}
-                  className={`mt-1 border border-[#000000] ${!isEditMode ? 'bg-white' : 'bg-white'}`}
+                  placeholder="#000000"
+                  className={`mt-1 border border-[#000000] ${!isEditMode ? 'bg-white text-[#000000]' : 'bg-white'}`}
                 />
                 <Label htmlFor="lastName" className="text-sm font-medium text-gray-700 mt-2">
                   Last Name

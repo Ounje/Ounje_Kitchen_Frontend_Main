@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/ui/notification-bell";
 
 interface OperationsHeaderProps {
   onMenuClick: () => void;
@@ -30,16 +31,7 @@ export default function OperationsHeader({ onMenuClick }: OperationsHeaderProps)
       <div className="hidden lg:block" />
 
       {/* Notification Icon */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-white hover:bg-white/10 active:bg-white/20 relative h-9 w-9 sm:h-10 sm:w-10 touch-manipulation"
-        aria-label="Notifications"
-      >
-        <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-        {/* Notification badge */}
-        <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
-      </Button>
+      <NotificationBell portal="Operations" />
     </header>
   );
 }

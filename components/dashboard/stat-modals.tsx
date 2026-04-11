@@ -1650,7 +1650,10 @@ export function OrdersModal({ isOpen, onClose, title }: BaseModalProps) {
               {orders.map((order) => (
                 <div key={order.id} className="bg-secondary rounded-xl p-4 flex flex-col gap-3">
                   <div className="w-full h-20 rounded-lg bg-primary/10 flex items-center justify-center text-3xl">
-                    📦
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="20" cy="20" r="20" fill="#FFCA3A"/>
+                  <path d="M29 24C29 19.375 25.493 15.559 21 15.059V13H19V15.059C14.507 15.559 11 19.375 11 24V26H29V24ZM10 27H30V29H10V27Z" fill="#1A3F1C"/>
+                  </svg>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-foreground text-sm truncate">

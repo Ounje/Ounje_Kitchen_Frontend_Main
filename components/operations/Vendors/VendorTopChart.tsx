@@ -32,7 +32,6 @@ export function VendorTopChart({ topVendors, loading = false }: VendorTopChartPr
         Vendor <span className="text-gray-500 font-normal">| Top Chart</span>
       </h2>
 
-      {/* 1 col mobile → 3 col sm+ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {topVendors.map((vendor) => {
           const config = getRankConfig(vendor.rank);
@@ -51,13 +50,23 @@ export function VendorTopChart({ topVendors, loading = false }: VendorTopChartPr
 
               {/* Info */}
               <div className="flex items-start gap-3">
-                <img
-                  src={vendor.avatar}
-                  alt={vendor.name}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white flex-shrink-0"
-                />
+                {/* Avatar — fallback to initial when src is empty/missing */}
+                {vendor.avatar ? (
+                  <img
+                    src={vendor.avatar}
+                    alt={vendor.name}
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white flex-shrink-0 bg-white/30 flex items-center justify-center text-white text-xl font-bold">
+                    {vendor.name?.charAt(0).toUpperCase() ?? '?'}
+                  </div>
+                )}
+
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-base sm:text-lg mb-0.5 text-white truncate">{vendor.name}</h3>
+                  <h3 className="font-bold text-base sm:text-lg mb-0.5 text-white truncate">
+                    {vendor.name}
+                  </h3>
                   <p className="text-sm mb-0.5 text-white">{vendor.phone}</p>
                   <div className="flex items-center gap-1 mb-1.5">
                     <MapPin className="w-3 h-3 text-white flex-shrink-0" />

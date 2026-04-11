@@ -16,6 +16,8 @@ import {
   UserCircle,
   LogOut,
   X,
+  Tag,
+  Radio,
 } from "lucide-react";
 
 const navigation = [
@@ -25,6 +27,8 @@ const navigation = [
   { name: "Vendors", href: "/operations/vendors", icon: Store },
   { name: "Riders", href: "/operations/riders", icon: Bike },
   { name: "Review & Rating", href: "/operations/reviews", icon: Star },
+  { name: "Promos", href: "/operations/promos", icon: Tag },
+  { name: "Broadcasts", href: "/operations/notifications", icon: Radio },
   { name: "Settings", href: "/operations/settings", icon: UserCircle },
 ];
 

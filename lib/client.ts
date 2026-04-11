@@ -1,4 +1,12 @@
 import { API_CONFIG } from "./config";
+import { toast } from 'sonner';
+
+export class PasswordChangeRequiredError extends Error {
+  constructor(message: string = "Password change required") {
+    super(message);
+    this.name = "PasswordChangeRequiredError";
+  }
+}
 
 // Lazy import so there is no circular dependency at module-load time.
 // authService is the single owner of the token; client.ts just asks for it.
@@ -40,8 +48,10 @@ class APIClient {
     return queryString ? `?${queryString}` : '';
   }
 
-  private async handleResponse<T>(response: Response): Promise<T> {
-    if (response.status === 401) {
+  private async handleResponse<T>(response: Response, options: RequestOptions = {}): Promise<T> {
+    const { requiresAuth = true } = options;
+
+    if (response.status === 401 && requiresAuth) {
       const { authService } = await import("@/lib/api/services/auth.service");
       authService.clearToken();
       if (typeof window !== "undefined") window.location.href = "/";
@@ -56,6 +66,23 @@ class APIClient {
       } catch {
         // not JSON – keep statusText
       }
+      
+      // ✅ GLOBAL INTERCEPTOR: Trap exact security requirements
+      if (response.status === 403 && message.toLowerCase().includes('password') && requiresAuth) {
+        if (typeof window !== "undefined") {
+            const portalRoute = window.location.pathname.split('/')[1] || '';
+            const settingsPath = portalRoute ? `/${portalRoute}/settings` : '/settings';
+            
+            toast.error(message || "Password change required. Please update your password.");
+            
+            // Allow toast to show briefly before navigating
+            setTimeout(() => {
+                window.location.href = settingsPath;
+            }, 1000);
+        }
+        throw new PasswordChangeRequiredError(message);
+      }
+
       throw new Error(message);
     }
 
@@ -94,7 +121,7 @@ class APIClient {
       headers,
     });
 
-    return this.handleResponse<T>(response);
+    return this.handleResponse<T>(response, options);
   }
 
   // ── convenience ─────────────────────────────────────────────────────────────

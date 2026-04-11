@@ -9,14 +9,23 @@ import {
   VendorReviewRow as VendorRow,
   RiderReviewRow as RiderRow,
 } from "@/lib/api/services/operations.service";
-import type { PaginatedResponse } from "@/types";
 import StatsCards from "@/components/operations/reviews/StatsCards";
 import ReviewFilters from "@/components/operations/reviews/ReviewFilters";
 import ReviewsTable from "@/components/operations/reviews/ReviewsTable";
 import ReviewDetailsModal from "@/components/operations/reviews/ReviewDetailsModal";
 
+// The backend returns pagination fields flat at the root, not nested.
+// This matches the actual API response shape.
+interface ReviewsApiResponse<T> {
+  data: T[];
+  page: number;
+  totalPages: number;
+  total: number;
+  limit: number;
+}
+
 export default function ReviewsPage() {
-  // ── State ───────────────────────────────────────────────
+  // ── State ────────────────────────────────────────────────
   const [type, setType] = useState<ReviewType>("rider");
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
 
@@ -38,7 +47,7 @@ export default function ReviewsPage() {
   const [modalId, setModalId] = useState<string | null>(null);
   const [modalFilter, setModalFilter] = useState<string | null>(null);
 
-  // ── Fetch Stats ─────────────────────────────────────────
+  // ── Fetch Stats ──────────────────────────────────────────
   useEffect(() => {
     setStatsLoading(true);
     operationsService.getReviewStats(type).then((s) => {
@@ -47,18 +56,24 @@ export default function ReviewsPage() {
     });
   }, [type]);
 
-  // ── Fetch Table ─────────────────────────────────────────
+  // ── Fetch Table ──────────────────────────────────────────
   const loadTable = useCallback(
     async (page: number, category: string, limit = pageSize) => {
       setTableLoading(true);
       try {
-        let res: PaginatedResponse<VendorRow | RiderRow>;
-        const params = { page, limit, ...(category ? { ratingCategory: category as any } : {}) };
-        if (type === "vendor") {
-          res = await operationsService.getVendorReviews(params);
-        } else {
-          res = await operationsService.getRiderReviews(params);
-        }
+        const queryParams = {
+          page,
+          limit,
+          ...(category ? { ratingCategory: category as any } : {}),
+        };
+
+        // Cast to the actual flat response shape the backend returns
+        const res = (
+          type === "vendor"
+            ? await operationsService.getVendorReviews(queryParams)
+            : await operationsService.getRiderReviews(queryParams)
+        ) as ReviewsApiResponse<VendorRow | RiderRow>;
+
         setRows(res.data);
         setPagination({
           page: res.page,
@@ -77,7 +92,7 @@ export default function ReviewsPage() {
     loadTable(1, ratingCategory);
   }, [type, loadTable]);
 
-  // ── Handlers ────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────
   const handleTypeChange = (t: ReviewType) => {
     setType(t);
     setTypeDropdownOpen(false);
@@ -147,13 +162,9 @@ export default function ReviewsPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
       <StatsCards stats={stats} loading={statsLoading} />
-
-      {/* Filters */}
       <ReviewFilters onSearch={handleSearch} onReset={handleReset} />
 
-      {/* Table */}
       <ReviewsTable
         type={type}
         rows={rows}
@@ -164,7 +175,6 @@ export default function ReviewsPage() {
         onOpenDetail={handleOpenDetail}
       />
 
-      {/* Detail Modal */}
       {modalOpen && modalId && (
         <ReviewDetailsModal
           type={type}

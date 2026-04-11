@@ -16,27 +16,35 @@ const PERIODS: { label: string; value: RevenuePeriod }[] = [
 
 const thCls = 'px-4 py-3 text-left text-sm font-semibold whitespace-nowrap';
 
+function unwrapRiders(res: any): TopRider[] {
+  if (Array.isArray(res))            return res as TopRider[];
+  if (Array.isArray(res?.data))      return res.data as TopRider[];
+  if (Array.isArray(res?.riders))    return res.riders as TopRider[];
+  return [];
+}
+
 export default function TopRidersPage() {
   const router = useRouter();
-  const [period, setPeriod]   = useState<RevenuePeriod>('daily');
-  const [riders, setRiders]   = useState<TopRider[]>([]);
+  const [period, setPeriod] = useState<RevenuePeriod>('daily');
+  const [riders, setRiders] = useState<TopRider[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async (p: RevenuePeriod) => {
     setLoading(true);
     try {
-      const data = await financeService.getTopRiders({ period: p });
-      setRiders(data);
+      const res = await financeService.getTopRiders({ period: p });
+      setRiders(unwrapRiders(res));
+    } catch {
+      setRiders([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(period); }, [period]);
+  useEffect(() => { load(period); }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="w-full">
-      {/* Back breadcrumb */}
       <p
         className="text-xs text-gray-400 mb-4 cursor-pointer hover:text-gray-600 transition-colors"
         onClick={() => router.back()}
@@ -44,12 +52,10 @@ export default function TopRidersPage() {
         ← Revenue / Riders details
       </p>
 
-      {/* Card */}
       <div
         className="w-full rounded-2xl overflow-hidden shadow-lg"
         style={{ backgroundColor: '#E8F7E8' }}
       >
-        {/* Card header */}
         <div className="px-5 sm:px-7 pt-6 pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
@@ -86,7 +92,6 @@ export default function TopRidersPage() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto px-4 pb-6">
           <table className="w-full min-w-[520px] rounded-xl overflow-hidden">
             <thead>
@@ -118,10 +123,10 @@ export default function TopRidersPage() {
                   <tr key={r.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
-                          {r.photo && (
-                            <img src={r.photo} alt={r.name} className="w-full h-full object-cover" />
-                          )}
+                        <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-500">
+                          {r.photo
+                            ? <img src={r.photo} alt={r.name} className="w-full h-full object-cover" />
+                            : r.name?.charAt(0).toUpperCase() ?? '?'}
                         </div>
                         <span className="text-sm font-medium" style={{ color: '#1A3F1C' }}>
                           {r.name}

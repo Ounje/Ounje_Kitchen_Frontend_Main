@@ -12,11 +12,11 @@ import financeService, {
 } from '@/lib/api/services/finance.service';
 
 export default function TransactionsPage() {
-  const [groups, setGroups]           = useState<TransactionGroup[]>([]);
-  const [loading, setLoading]         = useState(false);
-  const [filters, setFilters]         = useState<TransactionFilters>({ page: 1, limit: 10 });
-  const [pageSize, setPageSize]       = useState(10);
-  const [totalPages, setTotalPages]   = useState(1);
+  const [groups, setGroups]         = useState<TransactionGroup[]>([]);
+  const [loading, setLoading]       = useState(false);
+  const [filters, setFilters]       = useState<TransactionFilters>({ page: 1, limit: 10 });
+  const [pageSize, setPageSize]     = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Modal
   const [modalOpen, setModalOpen]       = useState(false);
@@ -26,9 +26,25 @@ export default function TransactionsPage() {
   const load = useCallback(async (f: TransactionFilters, limit = pageSize) => {
     setLoading(true);
     try {
-      const res = await financeService.getTransactions({ ...f, limit });
-      setGroups(res.data);
-      setTotalPages(res.totalPages);
+      const res: any = await financeService.getTransactions({ ...f, limit });
+
+      // Unwrap whichever shape the backend returns
+      const list: TransactionGroup[] =
+        Array.isArray(res)              ? res            :
+        Array.isArray(res?.data)        ? res.data       :
+        Array.isArray(res?.transactions)? res.transactions :
+        [];
+
+      setGroups(list);
+
+      // totalPages may be flat on the root or inside a pagination object
+      const pages: number =
+        res?.totalPages            ??
+        res?.pagination?.pages     ??
+        res?.pagination?.totalPages ??
+        1;
+
+      setTotalPages(pages);
     } finally {
       setLoading(false);
     }
@@ -36,10 +52,10 @@ export default function TransactionsPage() {
 
   const handleSearch = (v: FinanceFilterValues) => {
     const f: TransactionFilters = {
-      name:      v.name || undefined,
-      role:      (v.role || undefined) as TransactionFilters['role'],
+      name:      v.name      || undefined,
+      role:      (v.role     || undefined) as TransactionFilters['role'],
       startDate: v.startDate || undefined,
-      endDate:   v.endDate || undefined,
+      endDate:   v.endDate   || undefined,
       page: 1,
       limit: pageSize,
     };
@@ -48,14 +64,30 @@ export default function TransactionsPage() {
   };
 
   const handleExport = async () => {
-    const blob = await financeService.exportTransactionsCSV({
-      name: filters.name, role: filters.role,
-      startDate: filters.startDate, endDate: filters.endDate,
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'transactions.csv'; a.click();
-    URL.revokeObjectURL(url);
+    try {
+      // exportTransactionsCSV returns unknown from apiClient — cast to Blob
+      const res = await financeService.exportTransactionsCSV({
+        name:      filters.name,
+        role:      filters.role,
+        startDate: filters.startDate,
+        endDate:   filters.endDate,
+      });
+
+      // apiClient may return a Blob directly or wrap it; handle both
+      const blob: Blob =
+        res instanceof Blob   ? res              :
+        (res as any)?.data instanceof Blob ? (res as any).data :
+        new Blob([JSON.stringify(res)], { type: 'text/csv' });
+
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = 'transactions.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Export failed silently — optionally add a toast here
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -76,8 +108,8 @@ export default function TransactionsPage() {
     setModalDetail(null);
     setModalLoading(true);
     try {
-      const d = await financeService.getTransactionDetail(id);
-      setModalDetail(d);
+      const res = await financeService.getTransactionDetail(id);
+      setModalDetail(res as TransactionDetail);
     } finally {
       setModalLoading(false);
     }
@@ -85,12 +117,14 @@ export default function TransactionsPage() {
 
   const handlePrint = async (id: string) => {
     await openInfo(id);
-    // User clicks Download Slip inside modal to print
+    // User clicks Download Slip inside the modal to print
   };
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: '#1A3F1C' }}>Transactions</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: '#1A3F1C' }}>
+        Transactions
+      </h1>
 
       <FinanceFilters onSearch={handleSearch} onExport={handleExport} />
 
@@ -104,7 +138,7 @@ export default function TransactionsPage() {
         <TransactionList groups={groups} onInfo={openInfo} onPrint={handlePrint} />
       )}
 
-      {/* Pagination */}
+      {/* Pagination — only shown when there is more than one page */}
       {totalPages > 1 && (
         <div className="mt-4">
           <Pagination

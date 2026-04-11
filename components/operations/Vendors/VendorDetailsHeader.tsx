@@ -50,13 +50,22 @@ export function VendorDetailsHeader({ vendor }: VendorDetailsHeaderProps) {
     <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 w-full">
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
 
-        {/* Photo */}
+        {/* Photo — guard against empty/null src */}
         <div className="flex-shrink-0 flex sm:block justify-center">
-          <img
-            src={vendor.avatar}
-            alt={vendor.name}
-            className="w-40 h-36 sm:w-52 sm:h-44 rounded-xl object-cover"
-          />
+          {vendor.avatar ? (
+            <img
+              src={vendor.avatar}
+              alt={vendor.name}
+              className="w-40 h-36 sm:w-52 sm:h-44 rounded-xl object-cover"
+            />
+          ) : (
+            <div
+              className="w-40 h-36 sm:w-52 sm:h-44 rounded-xl flex items-center justify-center text-4xl font-bold"
+              style={{ backgroundColor: '#98EF9B', color: '#1A3F1C' }}
+            >
+              {(vendor.name ?? '?').charAt(0).toUpperCase()}
+            </div>
+          )}
         </div>
 
         {/* Details */}

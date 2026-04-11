@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/ui/notification-bell";
 
 interface ITHeaderProps {
   onMenuClick: () => void;
@@ -25,14 +26,7 @@ export default function ITHeader({ onMenuClick }: ITHeaderProps) {
         <div className="flex-1" />
 
         {/* Notification bell */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-        >
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
-        </Button>
+        <NotificationBell portal="IT" className="text-gray-700 hover:bg-gray-100 relative h-9 w-9 sm:h-10 sm:w-10 touch-manipulation" />
       </div>
     </header>
   );

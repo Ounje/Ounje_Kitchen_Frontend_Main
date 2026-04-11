@@ -12,11 +12,14 @@ export default function TransactionDetailPage() {
 
   const [detail, setDetail]   = useState<TransactionDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(false);
 
   useEffect(() => {
     if (!id) return;
+    setError(false);
     financeService.getTransactionDetail(id)
-      .then(setDetail)
+      .then((res) => setDetail(res as TransactionDetail))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -48,7 +51,7 @@ export default function TransactionDetailPage() {
             className="font-bold text-sm sm:text-base text-center break-all"
             style={{ color: '#1A3F1C' }}
           >
-            {loading ? '—' : detail?.orderId}
+            {loading ? '—' : detail?.orderId ?? '—'}
           </h1>
           <button
             onClick={() => router.back()}
@@ -65,9 +68,11 @@ export default function TransactionDetailPage() {
                 <div key={i} className="h-16 rounded-lg bg-gray-200 animate-pulse" />
               ))}
             </div>
-          ) : !detail ? (
+          ) : error || !detail ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">Transaction not found.</p>
+              <p className="text-gray-500 mb-4">
+                {error ? 'Failed to load transaction.' : 'Transaction not found.'}
+              </p>
               <button
                 onClick={() => router.back()}
                 className="px-6 py-2 rounded-lg text-white text-sm"
@@ -139,9 +144,7 @@ export default function TransactionDetailPage() {
                       <span className="font-medium">₦{value.toLocaleString()}</span>
                     </div>
                   ))}
-                  <div
-                    className="flex justify-between font-semibold pt-2 border-t border-[#1A3F1C]/30"
-                  >
+                  <div className="flex justify-between font-semibold pt-2 border-t border-[#1A3F1C]/30">
                     <span>Total</span>
                     <span>₦{detail.total.toLocaleString()}</span>
                   </div>

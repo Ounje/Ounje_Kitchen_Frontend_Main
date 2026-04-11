@@ -28,11 +28,19 @@ export function TopPerformerCard({ performer }: TopPerformerCardProps) {
 
       {/* Content */}
       <div className="flex items-start gap-3 sm:gap-4">
-        <img
-          src={performer.photo}
-          alt={performer.name}
-          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white flex-shrink-0"
-        />
+        {/* Photo — fallback to initial when src is empty/missing */}
+        {performer.photo ? (
+          <img
+            src={performer.photo}
+            alt={performer.name}
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white flex-shrink-0"
+          />
+        ) : (
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white flex-shrink-0 bg-white/30 flex items-center justify-center text-white text-xl font-bold">
+            {performer.name?.charAt(0).toUpperCase() ?? '?'}
+          </div>
+        )}
+
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-base sm:text-lg mb-0.5 text-white truncate">
             {performer.name}

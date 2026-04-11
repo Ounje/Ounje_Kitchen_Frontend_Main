@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FinanceFilters, type FinanceFilterValues } from '@/components/finance/FinanceFilters';
 import { WithdrawalList } from '@/components/finance/WithdrawalList';
 import { WithdrawalInfoModal } from '@/components/finance/WithdrawalInfoModal';
@@ -13,7 +13,7 @@ import financeService, {
 
 export default function WithdrawalsPage() {
   const [groups, setGroups]         = useState<WithdrawalGroup[]>([]);
-  const [loading, setLoading]       = useState(false);
+  const [loading, setLoading]       = useState(true);
   const [filters, setFilters]       = useState<WithdrawalFilters>({ page: 1, limit: 10 });
   const [pageSize, setPageSize]     = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -26,20 +26,29 @@ export default function WithdrawalsPage() {
   const load = useCallback(async (f: WithdrawalFilters, limit = pageSize) => {
     setLoading(true);
     try {
-      const res = await financeService.getWithdrawals({ ...f, limit });
-      setGroups(res.data);
-      setTotalPages(res.totalPages);
+      const res: any = await financeService.getWithdrawals({ ...f, limit });
+
+      // Backend shape: { success, message, data: [], page, limit, total, totalPages }
+      const list: WithdrawalGroup[] = Array.isArray(res?.data) ? res.data : [];
+
+      setGroups(list);
+      setTotalPages(res?.totalPages ?? 1);
     } finally {
       setLoading(false);
     }
   }, [pageSize]);
 
+  // ── Load on mount ─────────────────────────────────────────
+  useEffect(() => {
+    load({ page: 1, limit: pageSize });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSearch = (v: FinanceFilterValues) => {
     const f: WithdrawalFilters = {
-      name:      v.name || undefined,
-      role:      (v.role || undefined) as WithdrawalFilters['role'],
+      name:      v.name      || undefined,
+      role:      (v.role     || undefined) as WithdrawalFilters['role'],
       startDate: v.startDate || undefined,
-      endDate:   v.endDate || undefined,
+      endDate:   v.endDate   || undefined,
       page: 1,
       limit: pageSize,
     };
@@ -48,14 +57,28 @@ export default function WithdrawalsPage() {
   };
 
   const handleExport = async () => {
-    const blob = await financeService.exportWithdrawalsCSV({
-      name: filters.name, role: filters.role,
-      startDate: filters.startDate, endDate: filters.endDate,
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'withdrawals.csv'; a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const res = await financeService.exportWithdrawalsCSV({
+        name:      filters.name,
+        role:      filters.role,
+        startDate: filters.startDate,
+        endDate:   filters.endDate,
+      });
+
+      const blob: Blob =
+        res instanceof Blob                 ? res              :
+        (res as any)?.data instanceof Blob  ? (res as any).data :
+        new Blob([JSON.stringify(res)], { type: 'text/csv' });
+
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = 'withdrawals.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Export failed silently
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -76,8 +99,10 @@ export default function WithdrawalsPage() {
     setModalDetail(null);
     setModalLoading(true);
     try {
-      const d = await financeService.getWithdrawalDetail(id);
-      setModalDetail(d);
+      const res: any = await financeService.getWithdrawalDetail(id);
+      // Backend wraps single objects in { success, data: { ... } }
+      const detail = res?.data ?? res;
+      setModalDetail(detail as WithdrawalDetail);
     } finally {
       setModalLoading(false);
     }
@@ -85,7 +110,9 @@ export default function WithdrawalsPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: '#1A3F1C' }}>Withdrawals</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: '#1A3F1C' }}>
+        Withdrawals
+      </h1>
 
       <FinanceFilters onSearch={handleSearch} onExport={handleExport} />
 

@@ -84,32 +84,44 @@ export default function RevenuePage() {
   const [endDate, setEndDate]         = useState('');
 
   // Top performers modals
-  const [vendorsModal, setVendorsModal] = useState(false);
-  const [ridersModal, setRidersModal]   = useState(false);
-  const [vendorsPeriod, setVendorsPeriod] = useState<RevenuePeriod>('daily');
-  const [ridersPeriod, setRidersPeriod]   = useState<RevenuePeriod>('daily');
-  const [topVendors, setTopVendors] = useState<TopVendor[]>([]);
-  const [topRiders, setTopRiders]   = useState<TopRider[]>([]);
+  const [vendorsModal, setVendorsModal]     = useState(false);
+  const [ridersModal, setRidersModal]       = useState(false);
+  const [vendorsPeriod, setVendorsPeriod]   = useState<RevenuePeriod>('daily');
+  const [ridersPeriod, setRidersPeriod]     = useState<RevenuePeriod>('daily');
+  const [topVendors, setTopVendors]         = useState<TopVendor[]>([]);
+  const [topRiders, setTopRiders]           = useState<TopRider[]>([]);
   const [vendorsLoading, setVendorsLoading] = useState(false);
   const [ridersLoading, setRidersLoading]   = useState(false);
 
   const loadRevenue = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await financeService.getRevenueData({ startDate, endDate, period });
-      setRevenueData(data);
+      const res: any = await financeService.getRevenueData({ startDate, endDate, period });
+      // Backend wraps in { success, data: { stats, trend, distribution, ... } }
+      const payload: RevenueData = res?.data ?? res;
+      setRevenueData(payload);
+    } catch {
+      setRevenueData(null);
     } finally {
       setLoading(false);
     }
   }, [startDate, endDate, period]);
 
-  useEffect(() => { loadRevenue(); }, [period]);
+  // Load on mount and when period changes
+  useEffect(() => { loadRevenue(); }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadTopVendors = async (p: RevenuePeriod) => {
     setVendorsLoading(true);
     try {
-      const data = await financeService.getTopVendors({ period: p });
-      setTopVendors(data);
+      const res: any = await financeService.getTopVendors({ period: p });
+      const list: TopVendor[] =
+        Array.isArray(res?.data)    ? res.data    :
+        Array.isArray(res?.vendors) ? res.vendors :
+        Array.isArray(res)          ? res          :
+        [];
+      setTopVendors(list);
+    } catch {
+      setTopVendors([]);
     } finally {
       setVendorsLoading(false);
     }
@@ -118,8 +130,15 @@ export default function RevenuePage() {
   const loadTopRiders = async (p: RevenuePeriod) => {
     setRidersLoading(true);
     try {
-      const data = await financeService.getTopRiders({ period: p });
-      setTopRiders(data);
+      const res: any = await financeService.getTopRiders({ period: p });
+      const list: TopRider[] =
+        Array.isArray(res?.data)   ? res.data   :
+        Array.isArray(res?.riders) ? res.riders :
+        Array.isArray(res)         ? res         :
+        [];
+      setTopRiders(list);
+    } catch {
+      setTopRiders([]);
     } finally {
       setRidersLoading(false);
     }
@@ -132,24 +151,29 @@ export default function RevenuePage() {
 
   const statCards = stats
     ? [
-        { icon: '💰', value: stats.gross.amount,  label: 'Gross Revenue',    detail1: `${stats.gross.detail1}`, change: stats.gross.change },
-        { icon: '🏪', value: stats.vendor.amount, label: 'vendors Revenue',  detail1: `${stats.vendor.detail1}`, change: stats.vendor.change },
-        { icon: '🛵', value: stats.rider.amount,  label: 'Riders Revenue',   detail1: `${stats.rider.detail1}`, change: stats.rider.change },
-        { icon: '💹', value: stats.net.amount,    label: 'Net Revenue',       change: stats.net.change },
+        { icon: '💰', value: stats.gross.amount,  label: 'Gross Revenue',   detail1: stats.gross.detail1,  change: stats.gross.change },
+        { icon: '🏪', value: stats.vendor.amount, label: 'Vendors Revenue', detail1: stats.vendor.detail1, change: stats.vendor.change },
+        { icon: '🛵', value: stats.rider.amount,  label: 'Riders Revenue',  detail1: stats.rider.detail1,  change: stats.rider.change },
+        { icon: '💹', value: stats.net.amount,    label: 'Net Revenue',                                    change: stats.net.change },
       ]
     : [];
+
+  // Safe arrays — always defined even if backend omits the key
+  const trendData        = revenueData?.trend        ?? [];
+  const distributionData = revenueData?.distribution ?? [];
+  const topVendorNames   = (revenueData?.topVendors  ?? []).map(v => v.name);
+  const topRiderNames    = (revenueData?.topRiders   ?? []).map(r => r.name);
 
   return (
     <div className="w-full">
       {/* Header row */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>Revenue</h1>
-        {/* Period selector */}
         <div className="relative">
           <select
             value={period}
             onChange={e => setPeriod(e.target.value as RevenuePeriod)}
-            className="appearance-none flex items-center gap-2 pl-9 pr-8 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer"
+            className="appearance-none pl-9 pr-8 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer"
             style={{ backgroundColor: '#1A3F1C' }}
           >
             <option value="daily">Daily</option>
@@ -167,14 +191,15 @@ export default function RevenuePage() {
           ? [...Array(4)].map((_, i) => (
               <div key={i} className="h-28 rounded-xl bg-gray-200 animate-pulse" />
             ))
-          : statCards.map(c => (
-              <RevenueStatCard key={c.label} {...c} />
-            ))}
+          : statCards.length > 0
+            ? statCards.map(c => <RevenueStatCard key={c.label} {...c} />)
+            : [...Array(4)].map((_, i) => (
+                <div key={i} className="h-28 rounded-xl bg-gray-100 border border-gray-200" />
+              ))}
       </div>
 
       {/* Date filter row */}
       <div className="flex flex-wrap items-end gap-3 mb-6">
-        {/* Start date */}
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: '#1A3F1C' }}>Start Date</label>
           <div className="relative">
@@ -187,7 +212,6 @@ export default function RevenuePage() {
             <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
-        {/* End date */}
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: '#1A3F1C' }}>End Date</label>
           <div className="relative">
@@ -223,24 +247,24 @@ export default function RevenuePage() {
           <div className="h-72 rounded-xl bg-gray-200 animate-pulse" />
           <div className="h-72 rounded-xl bg-gray-200 animate-pulse" />
         </div>
-      ) : revenueData ? (
+      ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          <RevenueTrendChart data={revenueData.trend} />
-          <RevenueDistributionChart data={revenueData.distribution} />
+          {trendData.length > 0 && <RevenueTrendChart data={trendData} />}
+          {distributionData.length > 0 && <RevenueDistributionChart data={distributionData} />}
         </div>
-      ) : null}
+      )}
 
       {/* Top performers row */}
-      {revenueData && (
+      {revenueData && (topVendorNames.length > 0 || topRiderNames.length > 0) && (
         <div className="flex flex-col sm:flex-row gap-4">
           <TopSection
             title="Top 5 Vendors"
-            names={revenueData.topVendors.map(v => v.name)}
+            names={topVendorNames}
             onViewDetails={openVendors}
           />
           <TopSection
             title="Top 5 Riders"
-            names={revenueData.topRiders.map(r => r.name)}
+            names={topRiderNames}
             onViewDetails={openRiders}
           />
         </div>

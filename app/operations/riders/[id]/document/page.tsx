@@ -5,15 +5,18 @@ import { X } from 'lucide-react';
 import { useRiderDocument } from '@/hooks/useRiders';
 
 export default function RiderDocumentPage() {
-  const params = useParams();
-  const router = useRouter();
+  const params  = useParams();
+  const router  = useRouter();
   const riderId = params.id as string;
 
   const { data: document, isLoading, error } = useRiderDocument(riderId);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center" style={{ backgroundColor: '#E8F7E8' }}>
+      <div
+        className="min-h-screen w-full flex items-center justify-center"
+        style={{ backgroundColor: '#E8F7E8' }}
+      >
         <div className="text-center">
           <div
             className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
@@ -24,6 +27,22 @@ export default function RiderDocumentPage() {
       </div>
     );
   }
+
+  // Resolve document URL — backend may return documentUrl, url, nin, driversLicense etc.
+  const docUrl: string =
+    (document as any)?.documentUrl    ??
+    (document as any)?.url            ??
+    (document as any)?.nin            ??
+    (document as any)?.driversLicense ??
+    (document as any)?.fileUrl        ??
+    "";
+
+  // Detect type from extension or explicit field
+  const docType: string =
+    (document as any)?.documentType ??
+    (docUrl.toLowerCase().endsWith(".pdf") ? "pdf" : "image");
+
+  const hasDoc = !!docUrl;
 
   return (
     <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
@@ -51,9 +70,9 @@ export default function RiderDocumentPage() {
             Rider's NIN
           </h2>
 
-          {error || !document ? (
+          {error || !hasDoc ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">No document available</p>
+              <p className="text-gray-500 mb-4">No document available for this rider.</p>
               <button
                 onClick={() => router.back()}
                 className="px-6 py-2 rounded-lg text-white"
@@ -62,21 +81,20 @@ export default function RiderDocumentPage() {
                 Go Back
               </button>
             </div>
+          ) : docType === 'pdf' ? (
+            <iframe
+              src={docUrl}
+              className="w-full h-[500px] sm:h-[600px] border rounded-lg"
+              title="Rider Document"
+            />
           ) : (
+            /* Guard: only render img when docUrl is a non-empty string */
             <div className="flex justify-center">
-              {document.documentType === 'pdf' ? (
-                <iframe
-                  src={document.documentUrl}
-                  className="w-full h-[500px] sm:h-[600px] border rounded-lg"
-                  title="Rider Document"
-                />
-              ) : (
-                <img
-                  src={document.documentUrl}
-                  alt="Rider Document"
-                  className="max-w-full h-auto rounded-lg shadow-lg"
-                />
-              )}
+              <img
+                src={docUrl}
+                alt="Rider Document"
+                className="max-w-full h-auto rounded-lg shadow-lg"
+              />
             </div>
           )}
         </div>
