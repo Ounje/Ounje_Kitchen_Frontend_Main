@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Image from "next/image";
 import {
   Home,
   Users,
@@ -21,7 +22,7 @@ import {
 const navigation = [
   { name: "Home", href: "/admin", icon: Home },
   { name: "User & Staff", href: "/admin/users", icon: Users },
-  { name: "Finance", href: "/admin/finance", icon: DollarSign },
+  { name: "Revenue", href: "/admin/revenue", icon: DollarSign },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Notifications/Alerts", href: "/admin/notifications", icon: Bell },
   { name: "Permissions", href: "/admin/permissions", icon: Shield },
@@ -49,7 +50,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       {/* Overlay for Mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden bg-[#1a3f1c]"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden bg-[#1A3F1C]"
           onClick={onClose} 
         />
       )}
@@ -66,7 +67,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         `}
       >
         {/* Top bar */}
-        <div className="p-4 flex items-center justify-between border-b border-white/10 bg-[#1a3f1c]">
+        <div className="p-4 flex items-center justify-between bg-[#1a3f1c]">
           <h1 className="text-white text-xl font-black tracking-tight">
             Ounjefood
           </h1>
@@ -82,20 +83,28 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         </div>
 
         {/* Profile */}
-        <div className="p-5 pb-6 border-b border-white/10 bg-[#1a3f1c]">
+        <div className="p-5 pb-6 bg-[#1a3f1c]">
           <div className="flex flex-col items-center gap-3 p-3 rounded-xl shadow-sm bg-[#1a3f1c]">
             <Avatar className="h-12 w-12 bg-[#98ef9b] border-2 border-white/20">
               {/* ✅ Show actual avatar image if available */}
               {avatarUrl && (
                 <AvatarImage 
-                  src={avatarUrl} 
+                  src="../"
                   alt={`${firstName}'s avatar`}
                   className="object-cover"
                 />
               )}
               {/* ✅ Fallback to initials if no avatar */}
-              <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold text-sm">
-                {initials}
+              <AvatarFallback className=" text-[#1a3f1c] font-bold text-sm">
+                {/* {initials} */}
+                <Image
+                    src="/images/south.svg"
+                    alt="South"
+                    fill
+                    sizes="200px"
+                    className="object-cover"
+                    priority
+                  />
               </AvatarFallback>
             </Avatar>
 
@@ -142,16 +151,17 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         </ScrollArea>
 
         {/* Logout */}
-        <div className="p-4 border-t border-white/10 bg-[#1a3f1c]">
+       <div className="p-2 bg-[#FFFFFF] border-t border-white/10 mb-4 mx-5 rounded-lg">
           <Button
             onClick={logout}
             variant="ghost"
-            className="w-full flex items-center gap-3 text-white hover:bg-white/10"
+            className="w-full flex items-center gap-3 hover:bg-white/10 cursor-pointer"
           >
             <LogOut className="h-5 w-5" />
-            <span className="text-sm font-medium">Log Out</span>
+            <span className="text-lg text-[#000000] font-medium">Log Out</span>
           </Button>
         </div>
+
       </aside>
     </>
   );

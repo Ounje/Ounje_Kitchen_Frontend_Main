@@ -1,73 +1,95 @@
 @import "tailwindcss";
 
-@theme {
-  /* Core Ounje Brand Colors */
-  --color-primary: #1a3f1c;
-  --color-primary-dark: #0f2410;
-  --color-primary-light: #2a5f2c;
-
-  --color-secondary: #98ef9b;
-  --color-secondary-light: #b8ffbb;
-  --color-secondary-dark: #78cf7b;
-
-  --color-accent: #ffca3a;
-  --color-accent-light: #ffd95a;
-  --color-accent-dark: #dfaa1a;
-
-  --color-bg-mint: #e8f7e8;
-
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
-
-  /* Base Semantic Tokens (Theme-independent) */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-surface-foreground: var(--surface-foreground);
-  --color-surface-secondary: var(--surface-secondary);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-input-foreground: var(--input-foreground);
-  --color-ring: #1a3f1c;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  
-  --radius: 0.5rem;
-}
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Reverted to standard "Origin" look — Light mode as default */
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --surface: #ffffff;
-  --surface-foreground: #1e293b;
-  --surface-secondary: #f1f5f9;
-  --border: #e2e8f0;
-  --input: #ffffff;
-  --input-foreground: #1e293b;
-  --input-border: #cbd5e1;
+  --background: #f5f5f5;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #1A3F1C;
+  --primary-foreground: #ffffff;
+  --secondary: #98EF9B;
+  --secondary-foreground: #000000;
+  --muted: #e0e0e0;
+  --muted-foreground: #666666;
+  --accent: #ffc107;
+  --accent-foreground: #1a1a1a;  
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e0e0e0;
+  --input: #f5f5f5;
+  --ring: #1b4332;
+  --chart-1: #c8e6c9;
+  --chart-2: #a5d6a7;
+  --chart-3: #81c784;
+  --chart-4: #66bb6a;
+  --chart-5: #4caf50;
+  --radius: 0.625rem;
+  --sidebar: #1b4332;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #d4ef8f;
+  --sidebar-primary-foreground: #1b4332;
+  --sidebar-accent: #ffc107;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #2d5a3d;
+  --sidebar-ring: #d4ef8f;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@theme inline {
+  --font-sans: 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 body {
   font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-/* Utility Classes */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+  /* background-color: #f5f5f5; */
+  /* color: #0f172a; */
 }

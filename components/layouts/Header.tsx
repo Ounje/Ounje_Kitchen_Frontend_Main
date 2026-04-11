@@ -40,10 +40,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
           className="lg:hidden absolute left-4 text-white hover:bg-white/10"
           onClick={onMenuClick}
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6 text-white font-bold" />
         </Button>
 
-        <NotificationBell portal="Admin" className="text-white hover:bg-white/10 relative h-9 w-9 sm:h-10 sm:w-10 touch-manipulation transition-colors rounded-full" />
+        <NotificationBell portal="Admin" className="text-white hover:bg-white/10 relative h-9 w-9 sm:h-10 sm:w-10 touch-manipulation transition-colors rounded-full cursor-pointer" />
 
         {/* Period dropdown */}
         {/* <div className="relative" ref={dropdownRef}>

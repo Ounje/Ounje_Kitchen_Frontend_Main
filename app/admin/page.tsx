@@ -18,7 +18,7 @@ function DashboardSkeleton() {
       {/* Header */}
       <div className="mt-10 flex items-center justify-between flex-wrap gap-4">
         <div className="h-8 w-40 rounded-md bg-gray-200" />
-        <div className="h-10 w-32 rounded-md bg-gray-200" />
+        <div className="h-10 w-32 rounded-md bg-gray-200" /> 
       </div>
 
       {/* Stats grid */}

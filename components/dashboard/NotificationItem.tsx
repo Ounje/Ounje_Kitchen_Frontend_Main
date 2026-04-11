@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bell, CheckCircle, AlertCircle, Clock, Circle, DollarSign, Star } from "lucide-react";

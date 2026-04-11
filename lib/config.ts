@@ -50,6 +50,7 @@ export const ENDPOINTS = {
 
     // Staff
     STAFF:    '/api/superadmin/staff',
+    STAFF_BY_ID: (id: string) => `/api/superadmin/staff/{id}`,
 
     // Orders
     ORDERS:         '/api/superadmin/orders',

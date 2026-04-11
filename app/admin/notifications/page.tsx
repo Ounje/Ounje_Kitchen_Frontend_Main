@@ -85,7 +85,7 @@ export default function AdminNotificationsPage() {
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#1A3F1C] hover:bg-[#1A3F1C]/90 gap-2 shadow-sm">
+            <Button className="bg-[#1A3F1C] hover:bg-[#1A3F1C]/90 gap-2 shadow-sm cursor-pointer">
               <Plus className="w-4 h-4" /> New Broadcast
             </Button>
           </DialogTrigger>
