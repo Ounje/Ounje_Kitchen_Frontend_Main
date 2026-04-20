@@ -262,7 +262,7 @@ export default function UsersPage() {
 
     return rows.map((row, index) => (
       <tr
-        key={row.id}
+        key={row.id || (row as any)._id || index}
         onClick={() => handleRowClick(row)}
         className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
       >
