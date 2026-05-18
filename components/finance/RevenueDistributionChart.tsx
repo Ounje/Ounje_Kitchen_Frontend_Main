@@ -41,7 +41,7 @@ export function RevenueDistributionChart({ data }: Props) {
             tickLine={false}
           />
           <Tooltip
-            formatter={(value: number, name: string) => [`₦${value.toLocaleString()}`, name]}
+            formatter={(value: any, name: any) => [`₦${value.toLocaleString()}`, name]}
             contentStyle={{
               backgroundColor: '#fff',
               borderRadius: '8px',

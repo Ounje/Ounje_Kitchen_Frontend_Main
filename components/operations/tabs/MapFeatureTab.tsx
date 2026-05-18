@@ -118,6 +118,3 @@ export default function MapFeatureTab({ order }: MapFeatureTabProps) {
     </div>
   );
 }
-
-  );
-}

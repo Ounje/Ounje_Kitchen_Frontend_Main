@@ -48,7 +48,7 @@ export function RevenueTrendChart({ data }: Props) {
             tickLine={false}
           />
           <Tooltip
-            formatter={(value: number, name: string) => [
+            formatter={(value: any, name: any) => [
               `₦${value.toLocaleString()}`,
               name.charAt(0).toUpperCase() + name.slice(1),
             ]}

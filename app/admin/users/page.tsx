@@ -186,7 +186,7 @@ export default function UsersPage() {
 
       setRows(res.data ?? []);
       setTotal(res.total ?? 0);
-      setTotalPages(res.totalPages ?? Math.ceil((res.total ?? 0) / ITEMS_PER_PAGE));
+      setTotalPages(res.pages ?? Math.ceil((res.total ?? 0) / ITEMS_PER_PAGE));
     } catch (err: any) {
       const msg = err?.message || `Failed to load ${type}`;
       setError(msg);

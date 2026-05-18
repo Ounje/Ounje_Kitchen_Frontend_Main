@@ -246,7 +246,7 @@ export default function ReviewDetailsModal({
         ? operationsService.getVendorReviewDetail(id, params)
         : operationsService.getRiderReviewDetail(id, params);
 
-    request.then((d) => {
+    request.then((d: any) => {
       if (type === "vendor") setVendorDetail(d as VendorDetail);
       else setRiderDetail(d as RiderDetail);
       setReviews(d.reviews);
@@ -266,7 +266,7 @@ export default function ReviewDetailsModal({
         ? operationsService.getVendorReviewDetail(id, params)
         : operationsService.getRiderReviewDetail(id, params);
 
-    request.then((d) => {
+    request.then((d: any) => {
       setReviews(d.reviews);
       setReviewsLoading(false);
     });

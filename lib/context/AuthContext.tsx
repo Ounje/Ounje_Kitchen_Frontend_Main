@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       const endpoint = getProfileEndpoint(user);
-      const response = await apiClient.get(endpoint);
+      const response = await apiClient.get(endpoint) as any;
       const userData = response.user || response.data?.user || response;
       
       setUser(userData);

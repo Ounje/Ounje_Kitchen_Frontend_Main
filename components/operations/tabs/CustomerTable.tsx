@@ -66,7 +66,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
 
                 {/* Orders Count */}
                 <td className="px-4 py-4 text-sm font-medium" style={{ color: '#1A3F1C' }}>
-                  {customer.orders}
+                  {customer.totalOrders}
                 </td>
 
                 {/* Action Buttons */}

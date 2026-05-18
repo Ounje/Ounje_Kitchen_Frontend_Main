@@ -35,7 +35,7 @@ export function CustomerDetailsHeader({ customer }: CustomerDetailsHeaderProps) 
           </div>
           <div className="flex flex-wrap gap-x-1">
             <span className="font-semibold" style={{ color: '#1A3F1C' }}>Phone number:</span>
-            <span style={{ color: '#1A3F1C' }}>{customer.phoneNumber}</span>
+            <span style={{ color: '#1A3F1C' }}>{customer.phone}</span>
           </div>
           <div className="flex flex-wrap gap-x-1">
             <span className="font-semibold" style={{ color: '#1A3F1C' }}>Email:</span>
