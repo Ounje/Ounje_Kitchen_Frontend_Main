@@ -9,10 +9,15 @@ import { TopPerformersSkeleton, RidersTableSkeleton } from '@/components/operati
 import { ConfirmModal, SuccessModal } from '@/components/operations/riders/ActionModals';
 import Pagination from '@/components/Pagination';
 import type { RiderFilters } from '@/lib/api/services/rider.service';
+import { riderService } from '@/lib/api/services/rider.service';
+import { downloadCSV } from '@/lib/utils/exportCSV';
+import { Download, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function RidersPage() {
   const [filters, setFilters] = useState<RiderFilters>({ page: 1, limit: 8 });
   const [pageSize, setPageSize] = useState(8);
+  const [exporting, setExporting] = useState(false);
 
   // Action modal state
   const [suspendModal, setSuspendModal] = useState<{ isOpen: boolean; riderId: string | null }>({ isOpen: false, riderId: null });
@@ -54,6 +59,30 @@ export default function RidersPage() {
     setFilters((prev) => ({ ...prev, page: 1, limit: size }));
   };
 
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const data = await riderService.getRiders({ ...filters, page: 1, limit: 10000 });
+      const rows = data.riders.map((r) => ({
+        Name: r.name,
+        Phone: r.phone,
+        Zone: r.zone,
+        'Account Status': r.accountStatus,
+        'Rider Status': r.riderStatus,
+        'Mode of Delivery': r.modeOfDelivery,
+        'Successful Deliveries': r.successfulDeliveries,
+        'Cancelled Deliveries': r.cancelledDeliveries,
+        'Total Deliveries': r.totalDeliveries,
+      }));
+      downloadCSV(rows, `riders_${new Date().toISOString().slice(0, 10)}`);
+      toast.success('Riders exported successfully');
+    } catch (err: any) {
+      toast.error(err.message || 'Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   // ── Action handlers ──────────────────────────────────────
   const confirmSuspend = async () => {
     if (!suspendModal.riderId) return;
@@ -85,12 +114,21 @@ export default function RidersPage() {
 
         {/* Page Title */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>
-            Riders
-          </h1>
-          {ridersData?.total != null && (
-            <span className="text-sm text-gray-500">{ridersData.total} total</span>
-          )}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>Riders</h1>
+            {ridersData?.total != null && (
+              <span className="text-sm text-gray-500">{ridersData.total} total</span>
+            )}
+          </div>
+          <button
+            onClick={handleExportCSV}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+            style={{ backgroundColor: '#1A3F1C' }}
+          >
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {exporting ? 'Exporting...' : 'Download CSV'}
+          </button>
         </div>
 
         {/* Top Performers */}

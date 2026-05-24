@@ -8,6 +8,8 @@ import { CustomerFilters, type FilterValues } from '@/components/operations/Cust
 import { StatusBadge } from '@/components/operations/StatusBadge';
 import Pagination from '@/components/Pagination';
 import { toast } from 'sonner';
+import { downloadCSV } from '@/lib/utils/exportCSV';
+import { Download, Loader2 } from 'lucide-react';
 
 // ── Table Skeleton ─────────────────────────────────────────
 
@@ -34,7 +36,9 @@ export default function CustomersPage() {
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({ name: '', email: '', accountStatus: '' });
+  const [activeFilters, setActiveFilters] = useState<FilterValues>({ name: '', email: '', accountStatus: '' });
   const [pageSize, setPageSize] = useState(7);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -80,12 +84,14 @@ export default function CustomersPage() {
   // ── Handlers ─────────────────────────────────────────────
   const handleSearch = (newFilters: FilterValues) => {
     setFilters(newFilters);
+    setActiveFilters(newFilters);
     loadCustomers(1, newFilters);
   };
 
   const handleReset = () => {
     const empty: FilterValues = { name: '', email: '', accountStatus: '' };
     setFilters(empty);
+    setActiveFilters(empty);
     loadCustomers(1, empty);
   };
 
@@ -98,6 +104,34 @@ export default function CustomersPage() {
     loadCustomers(1, filters, size);
   };
 
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const res = await customerService.getCustomers({
+        page: 1,
+        limit: 10000,
+        ...(activeFilters.name ? { name: activeFilters.name } : {}),
+        ...(activeFilters.email ? { email: activeFilters.email } : {}),
+        ...(activeFilters.accountStatus
+          ? { accountStatus: activeFilters.accountStatus as 'active' | 'suspended' | 'unverified' }
+          : {}),
+      });
+      const rows = res.data.map((c) => ({
+        Name: c.name,
+        Email: c.email,
+        Phone: c.phone,
+        Status: c.accountStatus,
+        Joined: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '',
+      }));
+      downloadCSV(rows, `customers_${new Date().toISOString().slice(0, 10)}`);
+      toast.success('Customers exported successfully');
+    } catch (err: any) {
+      toast.error(err.message || 'Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   // ── Table header classes ──────────────────────────────────
   const thCls =
     'px-4 py-3 text-left text-sm font-semibold text-[#1A3F1C] bg-[#c8f0c8] whitespace-nowrap';
@@ -108,12 +142,19 @@ export default function CustomersPage() {
 
         {/* Page Title */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>
-            Customers
-          </h1>
-          <span className="text-sm text-gray-500">
-            {pagination.total} total
-          </span>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>Customers</h1>
+            <span className="text-sm text-gray-500">{pagination.total} total</span>
+          </div>
+          <button
+            onClick={handleExportCSV}
+            disabled={exporting || loading}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+            style={{ backgroundColor: '#1A3F1C' }}
+          >
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {exporting ? 'Exporting...' : 'Download CSV'}
+          </button>
         </div>
 
         {/* Filters */}

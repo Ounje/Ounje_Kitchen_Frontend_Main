@@ -8,12 +8,15 @@ import { VendorTable } from '@/components/operations/Vendors/VendorTable';
 import { VendorTableSkeleton } from '@/app/operations/vendors/loaders/VendorTableSkeleton';
 import Pagination from '@/components/Pagination';
 import { toast } from 'sonner';
+import { downloadCSV } from '@/lib/utils/exportCSV';
+import { Download, Loader2 } from 'lucide-react';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<any[]>([]);
   const [topVendors, setTopVendors] = useState<TopVendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [topVendorsLoading, setTopVendorsLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [filters, setFilters] = useState<FilterParams>({});
   const [pageSize, setPageSize] = useState(7);
   const [pagination, setPagination] = useState({
@@ -94,18 +97,51 @@ export default function VendorsPage() {
     loadVendors(1, filters, size);
   };
 
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const data = await vendorService.getVendors({ ...filters, page: 1, limit: 10000 });
+      const rows = data.vendors.map((v) => ({
+        Name: v.name,
+        Phone: v.phone,
+        Address: v.address,
+        'Account Status': v.accountStatus,
+        'Business Status': v.businessStatus,
+        Rating: v.rating,
+        'Total Orders': v.totalOrders,
+        'Successful Orders': v.successfulOrders,
+        'Cancelled Orders': v.cancelledOrders,
+      }));
+      downloadCSV(rows, `vendors_${new Date().toISOString().slice(0, 10)}`);
+      toast.success('Vendors exported successfully');
+    } catch (err: any) {
+      toast.error(err.message || 'Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
 
         {/* Page Title */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>
-            Vendors
-          </h1>
-          {pagination.total > 0 && (
-            <span className="text-sm text-gray-500">{pagination.total} total</span>
-          )}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>Vendors</h1>
+            {pagination.total > 0 && (
+              <span className="text-sm text-gray-500">{pagination.total} total</span>
+            )}
+          </div>
+          <button
+            onClick={handleExportCSV}
+            disabled={exporting || loading}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+            style={{ backgroundColor: '#1A3F1C' }}
+          >
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {exporting ? 'Exporting...' : 'Download CSV'}
+          </button>
         </div>
 
         {/* Top Chart */}
