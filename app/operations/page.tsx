@@ -14,7 +14,18 @@ import {
   AlertCircle,
   Eye,
   Loader2,
+  LineChart as LineChartIcon,
 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { useRouter } from "next/navigation";
 
 // ── Types matching dashboardController response exactly ───────────────────────
 interface DashboardOverview {
@@ -39,6 +50,7 @@ interface DashboardData {
   overview:       DashboardOverview;
   recentActivity: any[];   // populated Order documents
   alerts:         DashboardAlerts;
+  orderTrends:    any[];   // { date, successful, cancelled }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -150,6 +162,7 @@ function Skeleton() {
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function OperationsDashboardPage() {
+  const router = useRouter();
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
 
   const [data,    setData]    = useState<DashboardData | null>(null);
@@ -174,6 +187,7 @@ export default function OperationsDashboardPage() {
         overview:       d?.overview       ?? {},
         recentActivity: d?.recentActivity ?? [],
         alerts:         d?.alerts         ?? {},
+        orderTrends:    d?.orderTrends    ?? [],
       });
     } catch (err: any) {
       setError(err?.message || "Failed to load dashboard");
@@ -211,8 +225,7 @@ export default function OperationsDashboardPage() {
   }
 
   if (!data) return null;
-
-  const { overview, recentActivity, alerts } = data;
+  const { overview, recentActivity, alerts, orderTrends } = data;
 
   const stats = [
     {
@@ -262,6 +275,78 @@ export default function OperationsDashboardPage() {
         {stats.map((s, i) => <StatCard key={i} {...s} />)}
       </div>
 
+      {/* Orders Trend Chart */}
+      <Card className="border border-border rounded-2xl shadow-sm bg-surface overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <LineChartIcon className="w-5 h-5 text-[#1a3f1c]" />
+                Order Trends
+              </h2>
+              <p className="text-xs text-muted-foreground">Successful vs Cancelled orders (last 7 days)</p>
+            </div>
+            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#1a3f1c]" />
+                <span>Successful</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                <span>Cancelled</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={orderTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorSuc" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#1a3f1c" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#1a3f1c" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorCan" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f87171" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fontWeight: 600 }}
+                  dy={10}
+                  tickFormatter={(val) => new Date(val).toLocaleDateString("en-US", { weekday: "short" })}
+                />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600 }} />
+                <Tooltip
+                  contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}
+                  labelStyle={{ fontWeight: "bold", fontSize: "12px", marginBottom: "4px" }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="successful"
+                  stroke="#1a3f1c"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorSuc)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="cancelled"
+                  stroke="#f87171"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorCan)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Activity + Alerts grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -269,8 +354,12 @@ export default function OperationsDashboardPage() {
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-border">
             <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">Recent Activity / Feed</h2>
-            <Button variant="outline" size="sm"
-              className="text-xs font-semibold text-foreground/80 border-border bg-transparent hover:bg-surface-secondary transition-all h-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/operations/orders")}
+              className="text-xs font-semibold text-foreground/80 border-border bg-transparent hover:bg-surface-secondary transition-all h-8"
+            >
               View All
             </Button>
           </div>
@@ -303,8 +392,12 @@ export default function OperationsDashboardPage() {
                         </span>
                       </div>
                     </div>
-                    <Button size="icon" variant="outline"
-                      className="h-9 w-9 shrink-0 rounded-full border-border text-foreground/80 hover:bg-surface-secondary">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => router.push(`/operations/orders/${order._id}`)}
+                      className="h-9 w-9 shrink-0 rounded-full border-border text-foreground/80 hover:bg-surface-secondary"
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
                   </div>
@@ -318,8 +411,12 @@ export default function OperationsDashboardPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-border">
             <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">Alerts & Warnings</h2>
-            <Button variant="outline" size="sm"
-              className="text-xs font-semibold text-foreground/80 border-border bg-transparent hover:bg-surface-secondary transition-all h-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/operations/vendors")} // or a general reports page if exists
+              className="text-xs font-semibold text-foreground/80 border-border bg-transparent hover:bg-surface-secondary transition-all h-8"
+            >
               View All
             </Button>
           </div>
