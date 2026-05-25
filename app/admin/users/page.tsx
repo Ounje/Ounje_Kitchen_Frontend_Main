@@ -18,6 +18,8 @@ import {
   type Staff,
   type PaginationParams,
 } from '@/lib/api/api';
+import { downloadCSV } from '@/lib/utils/exportCSV';
+import { Download, Loader2 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -167,6 +169,7 @@ export default function UsersPage() {
   const [filterAddressOrPhone, setFilterAddressOrPhone] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   // Debounce timer
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -243,6 +246,39 @@ export default function UsersPage() {
   const handleRowClick = (row: TableRow) => {
     setSelectedRow(row);
     setModalOpen(true);
+  };
+
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const params: PaginationParams = { ...activeFilters(), limit: 10000, page: 1 };
+      let res;
+      if (userType === 'riders')    res = await superAdminApi.riders.getAll(params);
+      else if (userType === 'vendors')   res = await superAdminApi.vendors.getAll(params);
+      else if (userType === 'customers') res = await superAdminApi.customers.getAll(params);
+      else                           res = await superAdminApi.staff.getAll(params);
+
+      const data = res.data ?? [];
+      const flatData = data.map((row: any) => {
+        const obj: any = {
+          Name: getName(row),
+          Status: getStatus(row),
+        };
+        if (userType === 'customers' || userType === 'staff') obj.Email = row.email;
+        if (userType === 'riders' || userType === 'vendors') obj['Delivery Type'] = row.deliveryType;
+        if (userType === 'staff') obj.Department = row.department;
+        else obj.Address = row.address;
+        
+        return obj;
+      });
+
+      downloadCSV(flatData, `${userType}_export_${new Date().toISOString().slice(0, 10)}`);
+      toast.success('Export successful');
+    } catch (err: any) {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
   };
 
   // ── Render table body ─────────────────────────────────────────────────
@@ -352,6 +388,15 @@ export default function UsersPage() {
             <option value="customers">Customers</option>
             <option value="staff">Staff</option>
           </select>
+          <Button 
+            variant="outline" 
+            onClick={handleExportCSV} 
+            disabled={exporting || loading || rows.length === 0}
+            className="flex items-center gap-2"
+          >
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Export CSV
+          </Button>
         </div>
 
         {/* Filters */}

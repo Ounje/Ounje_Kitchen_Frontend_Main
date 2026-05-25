@@ -15,8 +15,8 @@ import { Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function RidersPage() {
-  const [filters, setFilters] = useState<RiderFilters>({ page: 1, limit: 8 });
-  const [pageSize, setPageSize] = useState(8);
+  const [filters, setFilters] = useState<RiderFilters>({ page: 1, limit: 7 });
+  const [pageSize, setPageSize] = useState(7);
   const [exporting, setExporting] = useState(false);
 
   // Action modal state

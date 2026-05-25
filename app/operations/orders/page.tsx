@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Loader2, RefreshCw } from "lucide-react";
+import { CalendarIcon, Loader2, RefreshCw, Download } from "lucide-react";
 import { format } from "date-fns";
 import Pagination from "@/components/Pagination";
 import { toast } from "sonner";
+import { downloadCSV } from "@/lib/utils/exportCSV";
 
 function getDateRange(period: string): { startDate: string; endDate: string } | null {
   if (period === "all") return null;
@@ -167,13 +168,14 @@ export default function OperationsOrdersPage() {
   const [orders,     setOrders]     = useState<any[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState<string | null>(null);
-  const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 1, limit: 10 });
+  const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 1, limit: 7 });
   const [period,     setPeriod]     = useState("all");
   const [filters,    setFilters]    = useState({
     name: "", vendor: "", zone: "", orderId: "", status: "all",
     dateFrom: undefined as Date | undefined,
     dateTo:   undefined as Date | undefined,
   });
+  const [exporting, setExporting] = useState(false);
 
   const fetchOrders = useCallback(async (page = 1, activeFilters = filters) => {
     setLoading(true);
@@ -208,6 +210,44 @@ export default function OperationsOrdersPage() {
       setLoading(false);
     }
   }, [period, pagination.limit, filters]);
+
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const dateRange = (filters.dateFrom && filters.dateTo)
+        ? { startDate: filters.dateFrom.toISOString(), endDate: filters.dateTo.toISOString() }
+        : (getDateRange(period) ?? {});
+
+      const params: any = { ...dateRange, limit: 10000 };
+      if (filters.status !== "all") params.status = filters.status;
+      if (filters.orderId)          params.search = filters.orderId;
+      if (filters.name)             params.search = filters.name;
+      if (filters.vendor)           params.vendor = filters.vendor;
+      if (filters.zone)             params.zone   = filters.zone;
+
+      const res: any = await operationsService.getOrders(params);
+      const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+      
+      const flatData = data.map((o: any) => ({
+        "Order ID": o.orderNumber ?? o._id ?? "",
+        "Customer": resolveName(o.customer),
+        "Vendor": o.vendor?.storeName ?? o.vendor?.businessName ?? o.vendor?.name ?? "—",
+        "Rider": o.rider ? resolveName(o.rider.user ?? o.rider, "Assigned") : "Not Assigned",
+        "Status": statusLabel(o.status),
+        "Sub-Status": formatSubStatus(o.subStatus),
+        "Payment": o.paymentStatus ?? "unpaid",
+        "Total (NGN)": (o.totalFee ?? o.total ?? o.totalPrice ?? 0),
+        "Date": o.createdAt ? new Date(o.createdAt).toLocaleString("en-NG") : "",
+      }));
+
+      downloadCSV(flatData, `orders_${period}_${new Date().toISOString().slice(0, 10)}`);
+      toast.success("CSV exported successfully");
+    } catch (err: any) {
+      toast.error("Failed to export CSV");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     if (shouldRender) fetchOrders(1);
@@ -248,6 +288,14 @@ export default function OperationsOrdersPage() {
             ))}
           </SelectContent>
         </Select>
+        <Button 
+          onClick={handleExportCSV} 
+          disabled={exporting || loading || orders.length === 0}
+          className="bg-[#1a3f1c] text-white hover:bg-[#1a3f1c]/90 h-10 px-6 font-bold shadow-sm rounded-xl flex items-center gap-2"
+        >
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          Export CSV
+        </Button>
       </div>
 
       {/* Filters */}

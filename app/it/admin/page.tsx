@@ -30,7 +30,7 @@ function getDisplayName(item: any, view: ViewType): string {
     return `${item.firstName ?? ""} ${item.lastName ?? ""}`.trim() || "—";
   if (view === "Customer") return item.user?.name || "—";
   if (view === "Vendor")   return item.name       || "—";
-  if (view === "Rider")    return `${item.firstName ?? ""} ${item.lastName ?? ""}`.trim() || "—";
+  if (view === "Rider")    return item.user?.name || item.name || `${item.firstName ?? ""} ${item.lastName ?? ""}`.trim() || "—";
   return "—";
 }
 
@@ -64,7 +64,7 @@ function extractPagination(res: any, currentLimit: number) {
     page:  p?.page  ?? 1,
     pages: p?.pages ?? 1,
     total: p?.total ?? 0,
-    limit: currentLimit,
+    limit: 7,
   };
 }
 

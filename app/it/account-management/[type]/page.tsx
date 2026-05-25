@@ -71,7 +71,7 @@ function unwrapPagination(res: any, currentLimit: number) {
 function resolveName(account: any, entityType: string): string {
   if (entityType === "customer") return account.user?.name  || account.name || "N/A";
   if (entityType === "vendor")   return account.name        || "N/A";
-  if (entityType === "rider")    return `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || "N/A";
+  if (entityType === "rider")    return account.user?.name || account.name || `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || "N/A";
   // staff / admin
   return `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || account.name || "N/A";
 }
