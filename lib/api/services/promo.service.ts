@@ -13,13 +13,14 @@ export const promoService = {
   async createPromo(data: {
     name: string;
     code: string;
-    discountType: string;
-    discountValue: number;
-    maxTotalUses: number;
+    type: string; // renamed from discountType
+    value: number; // renamed from discountValue
+    usageLimit: number; // renamed from maxTotalUses
     maxUsesPerUser: number;
     minOrderValue: number;
     eventName?: string;
     validUntil?: string;
+    applicableTo: string; // added
   }) {
     return await apiClient.post(ENDPOINTS.OPERATIONS.PROMOS, data);
   },
@@ -41,14 +42,15 @@ export const promoService = {
   async updatePromo(id: string, data: Partial<{
     name: string;
     code: string;
-    discountType: string;
-    discountValue: number;
-    maxTotalUses: number;
+    type: string;
+    value: number;
+    usageLimit: number;
     maxUsesPerUser: number;
     minOrderValue: number;
     eventName?: string;
     validUntil?: string;
     isActive: boolean;
+    applicableTo: string;
   }>) {
     return await apiClient.put(ENDPOINTS.OPERATIONS.PROMOS + `/${id}`, data);
   },

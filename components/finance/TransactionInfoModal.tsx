@@ -24,6 +24,8 @@ export function TransactionInfoModal({ isOpen, onClose, detail, loading, onDownl
     ? [
         { label: 'Order Cost',    value: detail.orderCost },
         { label: 'Service Cost',  value: detail.serviceCost },
+        { label: 'Platform Markup', value: detail.platformMarkup },
+        { label: 'Combo Markup',    value: detail.comboMarkup },
         { label: 'Delivery Fee',  value: detail.deliveryFee },
       ]
     : [];

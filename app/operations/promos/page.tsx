@@ -75,11 +75,12 @@ export default function PromosPage() {
       eventName:      f.get('eventName') as string,
       code:           f.get('code') as string,
       validUntil:     f.get('validUntil') as string,
-      discountType:   f.get('discountType') as string,
-      discountValue:  Number(f.get('discountValue')),
-      maxTotalUses:   Number(f.get('maxTotalUses')),
+      type:           f.get('type') as string,
+      value:          Number(f.get('value')),
+      usageLimit:     Number(f.get('usageLimit')),
       maxUsesPerUser: Number(f.get('maxUsesPerUser')),
       minOrderValue:  Number(f.get('minOrderValue')),
+      applicableTo:   f.get('applicableTo') as string,
     };
 
     if (selectedPromo) {
@@ -155,37 +156,53 @@ export default function PromosPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
-                  <Label htmlFor="discountType" className={labelCls}>Discount Type</Label>
-                  <select id="discountType" name="discountType" required defaultValue={selectedPromo?.discountType || 'percentage'}
+                  <Label htmlFor="type" className={labelCls}>Discount Type</Label>
+                  <select id="type" name="type" required defaultValue={selectedPromo?.type || selectedPromo?.discountType || 'percentage'}
                     className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1A3F1C]/30 focus:border-[#1A3F1C] transition">
                     <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount (₦)</option>
+                    <option value="fixed_amount">Fixed Amount (₦)</option>
                   </select>
                 </div>
                 <div className="grid gap-1.5">
-                  <Label htmlFor="discountValue" className={labelCls}>Value</Label>
-                  <Input id="discountValue" name="discountValue" type="number" step="0.01" required defaultValue={selectedPromo?.discountValue} placeholder="20" className={inputCls} />
+                  <Label htmlFor="value" className={labelCls}>Value</Label>
+                  <Input id="value" name="value" type="number" step="0.01" required defaultValue={selectedPromo?.value || selectedPromo?.discountValue} placeholder="20" className={inputCls} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
-                  <Label htmlFor="maxTotalUses" className={labelCls}>Max Total Uses</Label>
-                  <Input id="maxTotalUses" name="maxTotalUses" type="number" required defaultValue={selectedPromo?.maxTotalUses || 100} placeholder="100" className={inputCls} />
+                  <Label htmlFor="usageLimit" className={labelCls}>Max Total Uses</Label>
+                  <Input id="usageLimit" name="usageLimit" type="number" required defaultValue={selectedPromo?.usageLimit || selectedPromo?.maxTotalUses || 100} placeholder="100" className={inputCls} />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="maxUsesPerUser" className={labelCls}>Per User Limit</Label>
                   <Input id="maxUsesPerUser" name="maxUsesPerUser" type="number" required defaultValue={selectedPromo?.maxUsesPerUser || 1} placeholder="1" className={inputCls} />
                 </div>
               </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="minOrderValue" className={labelCls}>Minimum Order Value (₦)</Label>
-                <Input id="minOrderValue" name="minOrderValue" type="number" step="0.01" required defaultValue={selectedPromo?.minOrderValue || 0} placeholder="500" className={inputCls} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="minOrderValue" className={labelCls}>Min Order (₦)</Label>
+                  <Input id="minOrderValue" name="minOrderValue" type="number" step="0.01" required defaultValue={selectedPromo?.minOrderValue || 0} placeholder="500" className={inputCls} />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="applicableTo" className={labelCls}>Applicable To</Label>
+                  <select id="applicableTo" name="applicableTo" required defaultValue={selectedPromo?.applicableTo || 'all'}
+                    className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1A3F1C]/30 focus:border-[#1A3F1C] transition">
+                    <option value="all">Entire Order</option>
+                    <option value="combo">Combo Meals Only</option>
+                  </select>
+                </div>
               </div>
 
               {!selectedPromo && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700 flex items-start gap-2">
-                  <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                  <span>Promo codes are submitted for SuperAdmin approval before going live.</span>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-[10px] text-amber-700 space-y-1">
+                  <div className="flex items-start gap-2">
+                    <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <span>Promo codes require SuperAdmin approval before going live.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Tag className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <span><b>Tip:</b> For Combo-only promos, set value to <b>16.67%</b> to correctly reverse the platform markup.</span>
+                  </div>
                 </div>
               )}
 
@@ -244,8 +261,11 @@ export default function PromosPage() {
                       </td>
                       <td className="px-4 py-3.5 text-gray-600 text-xs">{promo.eventName || '—'}</td>
                       <td className="px-4 py-3.5 font-semibold text-gray-800">
-                        {promo.discountType === 'percentage' ? `${promo.discountValue}%` : `₦${promo.discountValue}`}
-                        <span className="text-xs text-gray-400 font-normal ml-1 capitalize">({promo.discountType})</span>
+                        {promo.type === 'percentage' ? `${promo.value}%` : `₦${promo.value}`}
+                        <span className="text-xs text-gray-400 font-normal ml-1 capitalize">({promo.type})</span>
+                        <div className="text-[10px] text-[#1A3F1C] font-normal uppercase">
+                          Applies to: {promo.applicableTo || 'all'}
+                        </div>
                       </td>
                       <td className="px-4 py-3.5 text-gray-600 text-xs">₦{promo.minOrderValue}</td>
                       <td className="px-4 py-3.5 text-gray-500 text-xs whitespace-nowrap">
@@ -256,7 +276,7 @@ export default function PromosPage() {
                       <td className="px-4 py-3.5 text-gray-500 text-xs whitespace-nowrap">
                         {promo.maxUsesPerUser}/user
                         <span className="text-gray-300 mx-1">·</span>
-                        {promo.maxTotalUses} total
+                        {promo.usageLimit || promo.maxTotalUses} total
                       </td>
                       <td className="px-4 py-3.5 text-gray-500 text-xs font-semibold">
                         {promo.uniqueUsersCount || 0} users

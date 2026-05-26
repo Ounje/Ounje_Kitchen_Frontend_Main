@@ -53,8 +53,10 @@ export interface TransactionDetail {
   paymentMethod: string;
   transactionId: string;
   amount: number;
-  orderCost: number;
-  serviceCost: number;
+  orderCost: number;     // vendor's original price
+  serviceCost: number;   // 10% checkout service fee
+  platformMarkup: number; // 10% standard markup
+  comboMarkup: number;    // 20% extra combo markup
   deliveryFee: number;
   total: number;
 }
@@ -117,10 +119,13 @@ export interface RevenueStatCard {
 }
 
 export interface RevenueStats {
-  gross:  RevenueStatCard;
-  vendor: RevenueStatCard;
-  rider:  RevenueStatCard;
-  net:    RevenueStatCard;
+  gross:         RevenueStatCard;
+  vendor:        RevenueStatCard;
+  rider:         RevenueStatCard;
+  net:           RevenueStatCard;
+  platformMarkup?: RevenueStatCard;
+  comboMarkup?:    RevenueStatCard;
+  serviceFee?:     RevenueStatCard;
 }
 
 export interface RevenueTrendPoint {
@@ -129,6 +134,9 @@ export interface RevenueTrendPoint {
   vendor: number;
   rider: number;
   net: number;
+  platformMarkup?: number;
+  comboMarkup?: number;
+  serviceFee?: number;
 }
 
 export interface RevenueDistributionPoint {

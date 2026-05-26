@@ -151,10 +151,13 @@ export default function RevenuePage() {
 
   const statCards = stats
     ? [
-        { icon: '💰', value: stats.gross.amount,  label: 'Gross Revenue',   detail1: stats.gross.detail1,  change: stats.gross.change },
-        { icon: '🏪', value: stats.vendor.amount, label: 'Vendors Revenue', detail1: stats.vendor.detail1, change: stats.vendor.change },
-        { icon: '🛵', value: stats.rider.amount,  label: 'Riders Revenue',  detail1: stats.rider.detail1,  change: stats.rider.change },
-        { icon: '💹', value: stats.net.amount,    label: 'Net Revenue',                                    change: stats.net.change },
+        { icon: '💰', value: stats.gross.amount,                    label: 'Gross Revenue',    detail1: stats.gross.detail1,          change: stats.gross.change },
+        { icon: '🏪', value: stats.vendor.amount,                   label: 'Vendors Revenue',  detail1: stats.vendor.detail1,         change: stats.vendor.change },
+        { icon: '🛵', value: stats.rider.amount,                    label: 'Riders Revenue',   detail1: stats.rider.detail1,          change: stats.rider.change },
+        { icon: '💹', value: stats.net.amount,                      label: 'Net Revenue',                                             change: stats.net.change },
+        ...(stats.platformMarkup ? [{ icon: '📈', value: stats.platformMarkup.amount, label: 'Platform Markup (10%)', change: stats.platformMarkup.change }] : []),
+        ...(stats.comboMarkup    ? [{ icon: '🍱', value: stats.comboMarkup.amount,    label: 'Combo Markup (20%)',    change: stats.comboMarkup.change    }] : []),
+        ...(stats.serviceFee     ? [{ icon: '🧾', value: stats.serviceFee.amount,     label: 'Service Fee (10%)',     change: stats.serviceFee.change     }] : []),
       ]
     : [];
 
