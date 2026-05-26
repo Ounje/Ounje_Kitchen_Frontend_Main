@@ -21,6 +21,19 @@ export default function PromosPage() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<any | null>(null);
+  const [formData, setFormData] = useState<any>({
+    name: '',
+    eventName: '',
+    code: '',
+    validUntil: '',
+    type: 'percentage',
+    value: '',
+    usageLimit: '100',
+    maxUsesPerUser: '1',
+    minOrderValue: '0',
+    applicableTo: 'all',
+  });
+  const [isDateConfirmed, setIsDateConfirmed] = useState(false);
 
   const { data: promos = [], isLoading } = useQuery({
     queryKey: ['promos'],
@@ -69,18 +82,13 @@ export default function PromosPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
     const data = {
-      name:           f.get('name') as string,
-      eventName:      f.get('eventName') as string,
-      code:           f.get('code') as string,
-      validUntil:     f.get('validUntil') as string,
-      type:           f.get('type') as string,
-      value:          Number(f.get('value')),
-      usageLimit:     Number(f.get('usageLimit')),
-      maxUsesPerUser: Number(f.get('maxUsesPerUser')),
-      minOrderValue:  Number(f.get('minOrderValue')),
-      applicableTo:   f.get('applicableTo') as string,
+      ...formData,
+      value:          Number(formData.value),
+      usageLimit:     Number(formData.usageLimit),
+      maxUsesPerUser: Number(formData.maxUsesPerUser),
+      minOrderValue:  Number(formData.minOrderValue),
+      startsAt:       new Date().toISOString(), // Default to now
     };
 
     if (selectedPromo) {
@@ -90,14 +98,45 @@ export default function PromosPage() {
     }
   };
 
+  const syncForm = (promo: any | null) => {
+    if (promo) {
+      setFormData({
+        name:           promo.name || '',
+        eventName:      promo.eventName || '',
+        code:           promo.code || '',
+        validUntil:     promo.validUntil ? new Date(promo.validUntil).toISOString().slice(0, 16) : '',
+        type:           promo.type || promo.discountType || 'percentage',
+        value:          promo.value || promo.discountValue || '',
+        usageLimit:     promo.usageLimit || promo.maxTotalUses || '100',
+        maxUsesPerUser: promo.maxUsesPerUser || '1',
+        minOrderValue:  promo.minOrderValue || '0',
+        applicableTo:   promo.applicableTo || 'all',
+      });
+      setIsDateConfirmed(!!promo.validUntil);
+    } else {
+      setFormData({
+        name: '', eventName: '', code: '', validUntil: '',
+        type: 'percentage', value: '', usageLimit: '100',
+        maxUsesPerUser: '1', minOrderValue: '0', applicableTo: 'all',
+      });
+      setIsDateConfirmed(false);
+    }
+  };
+
   const openCreate = () => {
     setSelectedPromo(null);
+    syncForm(null);
     setIsDialogOpen(true);
   };
 
   const openEdit = (promo: any) => {
     setSelectedPromo(promo);
+    syncForm(promo);
     setIsDialogOpen(true);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
   const inputCls = "bg-gray-50 border-gray-200 focus:border-[#1A3F1C] h-9 text-sm";
@@ -130,34 +169,54 @@ export default function PromosPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label htmlFor="name" className={labelCls}>Promo Name</Label>
-                  <Input id="name" name="name" required defaultValue={selectedPromo?.name} placeholder="e.g. Summer Special" className={inputCls} />
+                  <Input id="name" name="name" required value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="e.g. Summer Special" className={inputCls} />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="eventName" className={labelCls}>Event Name</Label>
-                  <Input id="eventName" name="eventName" defaultValue={selectedPromo?.eventName} placeholder="e.g. Christmas" className={inputCls} />
+                  <Input id="eventName" name="eventName" value={formData.eventName} onChange={(e) => handleInputChange('eventName', e.target.value)} placeholder="e.g. Christmas" className={inputCls} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label htmlFor="code" className={labelCls}>Promo Code</Label>
-                  <Input id="code" name="code" required defaultValue={selectedPromo?.code} placeholder="SUMMER20" className={`${inputCls} uppercase font-mono tracking-widest`} />
+                  <Input id="code" name="code" required value={formData.code} onChange={(e) => handleInputChange('code', e.target.value)} placeholder="SUMMER20" className={`${inputCls} uppercase font-mono tracking-widest`} />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="validUntil" className={labelCls}>Valid Until</Label>
-                  <Input 
-                    id="validUntil" 
-                    name="validUntil" 
-                    type="datetime-local" 
-                    required 
-                    defaultValue={selectedPromo?.validUntil ? new Date(selectedPromo.validUntil).toISOString().slice(0, 16) : ''}
-                    className={inputCls} 
-                  />
+                  <div className="flex gap-2">
+                    <Input 
+                      id="validUntil" 
+                      name="validUntil" 
+                      type="datetime-local" 
+                      required 
+                      value={formData.validUntil}
+                      onChange={(e) => {
+                        handleInputChange('validUntil', e.target.value);
+                        setIsDateConfirmed(false);
+                      }}
+                      className={`${inputCls} flex-1 ${isDateConfirmed ? 'border-green-500 bg-green-50' : ''}`} 
+                    />
+                    <Button 
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        if (formData.validUntil) {
+                          setIsDateConfirmed(true);
+                          toast.success("Date confirmed");
+                        }
+                      }}
+                      className={`h-9 px-3 ${isDateConfirmed ? 'bg-green-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                      {isDateConfirmed ? 'OK' : 'OK'}
+                    </Button>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label htmlFor="type" className={labelCls}>Discount Type</Label>
-                  <select id="type" name="type" required defaultValue={selectedPromo?.type || selectedPromo?.discountType || 'percentage'}
+                  <select id="type" name="type" required value={formData.type}
+                    onChange={(e) => handleInputChange('type', e.target.value)}
                     className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1A3F1C]/30 focus:border-[#1A3F1C] transition">
                     <option value="percentage">Percentage (%)</option>
                     <option value="fixed_amount">Fixed Amount (₦)</option>
@@ -165,27 +224,28 @@ export default function PromosPage() {
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="value" className={labelCls}>Value</Label>
-                  <Input id="value" name="value" type="number" step="0.01" required defaultValue={selectedPromo?.value || selectedPromo?.discountValue} placeholder="20" className={inputCls} />
+                  <Input id="value" name="value" type="number" step="0.01" required value={formData.value} onChange={(e) => handleInputChange('value', e.target.value)} placeholder="20" className={inputCls} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label htmlFor="usageLimit" className={labelCls}>Max Total Uses</Label>
-                  <Input id="usageLimit" name="usageLimit" type="number" required defaultValue={selectedPromo?.usageLimit || selectedPromo?.maxTotalUses || 100} placeholder="100" className={inputCls} />
+                  <Input id="usageLimit" name="usageLimit" type="number" required value={formData.usageLimit} onChange={(e) => handleInputChange('usageLimit', e.target.value)} placeholder="100" className={inputCls} />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="maxUsesPerUser" className={labelCls}>Per User Limit</Label>
-                  <Input id="maxUsesPerUser" name="maxUsesPerUser" type="number" required defaultValue={selectedPromo?.maxUsesPerUser || 1} placeholder="1" className={inputCls} />
+                  <Input id="maxUsesPerUser" name="maxUsesPerUser" type="number" required value={formData.maxUsesPerUser} onChange={(e) => handleInputChange('maxUsesPerUser', e.target.value)} placeholder="1" className={inputCls} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
                   <Label htmlFor="minOrderValue" className={labelCls}>Min Order (₦)</Label>
-                  <Input id="minOrderValue" name="minOrderValue" type="number" step="0.01" required defaultValue={selectedPromo?.minOrderValue || 0} placeholder="500" className={inputCls} />
+                  <Input id="minOrderValue" name="minOrderValue" type="number" step="0.01" required value={formData.minOrderValue} onChange={(e) => handleInputChange('minOrderValue', e.target.value)} placeholder="500" className={inputCls} />
                 </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="applicableTo" className={labelCls}>Applicable To</Label>
-                  <select id="applicableTo" name="applicableTo" required defaultValue={selectedPromo?.applicableTo || 'all'}
+                  <select id="applicableTo" name="applicableTo" required value={formData.applicableTo}
+                    onChange={(e) => handleInputChange('applicableTo', e.target.value)}
                     className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1A3F1C]/30 focus:border-[#1A3F1C] transition">
                     <option value="all">Entire Order</option>
                     <option value="combo">Combo Meals Only</option>
