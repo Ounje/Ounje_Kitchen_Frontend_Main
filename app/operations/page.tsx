@@ -395,7 +395,7 @@ export default function OperationsDashboardPage() {
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => router.push(`/operations/orders/${order._id}`)}
+                      onClick={() => router.push(`/operations/orders/${order._id ?? order.id}`)}
                       className="h-9 w-9 shrink-0 rounded-full border-border text-foreground/80 hover:bg-surface-secondary"
                     >
                       <Eye className="h-4 w-4" />
