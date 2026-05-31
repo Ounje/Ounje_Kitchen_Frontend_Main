@@ -407,8 +407,8 @@ export default function OperationsOrdersPage() {
         <table className="modern-table min-w-[900px]">
           <thead>
             <tr>
-              {["Order ID", "Customer", "Vendor", "Rider", "Status", "Sub-status", "Payment", "Placed", ""].map(h => (
-                <th key={h}>{h}</th>
+              {["", "Order ID", "Customer", "Vendor", "Rider", "Status", "Sub-status", "Payment", "Placed", ""].map((h, i) => (
+                <th key={i}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -416,14 +416,14 @@ export default function OperationsOrdersPage() {
             {loading ? (
               <>{[0,1,2,3,4,5].map(i => (
                 <tr key={i}>
-                  {[0,1,2,3,4,5,6,7,8].map(j => (
+                  {[0,1,2,3,4,5,6,7,8,9].map(j => (
                     <td key={j}><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>
                   ))}
                 </tr>
               ))}</>
             ) : error ? (
               <tr>
-                <td colSpan={9} className="p-12 text-center">
+                <td colSpan={10} className="p-12 text-center">
                   <p className="text-red-500 font-medium mb-3">{error}</p>
                   <Button onClick={() => fetchOrders(1)} className="bg-[#1a3f1c] text-white gap-2">
                     <RefreshCw className="h-4 w-4" /> Retry
@@ -432,7 +432,7 @@ export default function OperationsOrdersPage() {
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={9} className="p-12 text-center text-gray-400">
+                <td colSpan={10} className="p-12 text-center text-gray-400">
                   <p className="text-base font-medium">No orders found</p>
                   <p className="text-sm mt-1">Try adjusting the filters or period</p>
                 </td>
@@ -440,6 +440,7 @@ export default function OperationsOrdersPage() {
             ) : (
               orders.map((order: any) => {
                 const id            = order._id ?? order.id ?? "";
+                const image         = resolveOrderImage(order);
                 const status        = order.status        ?? "pending";
                 const subStatus     = order.subStatus     ?? "";
                 const paymentStatus = order.paymentStatus ?? "unpaid";
@@ -456,6 +457,13 @@ export default function OperationsOrdersPage() {
                     className="cursor-pointer"
                     onClick={() => router.push(`/operations/orders/${id}`)}
                   >
+                    <td>
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        {image
+                          ? <img src={image} alt="order" className="w-full h-full object-cover" />
+                          : <div className="w-full h-full bg-gradient-to-br from-[#98ef9b]/50 to-[#1a3f1c]/50" />}
+                      </div>
+                    </td>
                     <td className="font-mono text-xs text-gray-600 whitespace-nowrap">
                       {order.orderNumber ?? id?.toString().slice(-8).toUpperCase() ?? "—"}
                     </td>
