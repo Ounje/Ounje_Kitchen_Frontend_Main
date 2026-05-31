@@ -402,35 +402,44 @@ export default function OperationsOrdersPage() {
         </p>
       )}
 
-      {/* Order list */}
-      <div className="space-y-6">
-        {loading ? (
-          <>{[0,1,2].map(i => <SkeletonCard key={i} />)}</>
-        ) : error ? (
-          <Card className="border-none shadow-sm">
-            <CardContent className="p-12 text-center space-y-4">
-              <p className="text-lg font-medium text-red-500">Failed to load orders</p>
-              <p className="text-sm text-gray-400">{error}</p>
-              <Button onClick={() => fetchOrders(1)} className="bg-[#1a3f1c] hover:bg-[#164016] text-white gap-2">
-                <RefreshCw className="h-4 w-4" /> Retry
-              </Button>
-            </CardContent>
-          </Card>
-        ) : orders.length === 0 ? (
-          <Card className="border-none shadow-sm">
-            <CardContent className="p-12 text-center text-gray-400">
-              <p className="text-lg font-medium">No orders found</p>
-              <p className="text-sm mt-1">Try adjusting the filters or period</p>
-            </CardContent>
-          </Card>
-        ) : (
-          dateKeys.map(dateKey => (
-            <div key={dateKey} className="space-y-3">
-              <h2 className="text-lg font-bold text-gray-900">{formatGroupDate(dateKey)}</h2>
-
-              {grouped[dateKey].map((order: any) => {
+      {/* Orders Table */}
+      <div className="modern-table-container">
+        <table className="modern-table min-w-[900px]">
+          <thead>
+            <tr>
+              {["Order ID", "Customer", "Vendor", "Rider", "Status", "Sub-status", "Payment", "Placed", ""].map(h => (
+                <th key={h}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <>{[0,1,2,3,4,5].map(i => (
+                <tr key={i}>
+                  {[0,1,2,3,4,5,6,7,8].map(j => (
+                    <td key={j}><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>
+                  ))}
+                </tr>
+              ))}</>
+            ) : error ? (
+              <tr>
+                <td colSpan={9} className="p-12 text-center">
+                  <p className="text-red-500 font-medium mb-3">{error}</p>
+                  <Button onClick={() => fetchOrders(1)} className="bg-[#1a3f1c] text-white gap-2">
+                    <RefreshCw className="h-4 w-4" /> Retry
+                  </Button>
+                </td>
+              </tr>
+            ) : orders.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="p-12 text-center text-gray-400">
+                  <p className="text-base font-medium">No orders found</p>
+                  <p className="text-sm mt-1">Try adjusting the filters or period</p>
+                </td>
+              </tr>
+            ) : (
+              orders.map((order: any) => {
                 const id            = order._id ?? order.id ?? "";
-                const image         = resolveOrderImage(order);
                 const status        = order.status        ?? "pending";
                 const subStatus     = order.subStatus     ?? "";
                 const paymentStatus = order.paymentStatus ?? "unpaid";
@@ -442,82 +451,54 @@ export default function OperationsOrdersPage() {
                 const riderLabel    = rider ? resolveName(rider.user ?? rider, "Assigned") : "Not Assigned";
 
                 return (
-                  <div
+                  <tr
                     key={id || Math.random()}
-                    className="glass-card hover-lift rounded-2xl overflow-hidden cursor-pointer bg-[#98ef9b]/10 group"
+                    className="cursor-pointer"
                     onClick={() => router.push(`/operations/orders/${id}`)}
                   >
-                    <div className="p-4 sm:p-5 flex items-start gap-3 sm:gap-5">
-
-                      {/* Food image */}
-                      <div className="w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 shadow-sm mt-1">
-                        {image ? (
-                          <img src={image} alt="food" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-[#98ef9b]/50 to-[#1a3f1c]/50 flex items-center justify-center text-[#1a3f1c] text-xs font-bold">IMG</div>
-                        )}
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0 space-y-1">
-
-                        {/* Mobile: single column. Desktop: two columns */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-                          <InfoRow label="Customer">{resolveName(customer)}</InfoRow>
-                          <InfoRow label="Vendor">{vendorName}</InfoRow>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-                          <InfoRow label="Order ID">{order.orderNumber ?? id?.toString().slice(-8).toUpperCase() ?? "—"}</InfoRow>
-                          <InfoRow label="Rider">{riderLabel}</InfoRow>
-                        </div>
-                        <div className="grid grid-cols-2 gap-x-4">
-                          <InfoRow label="Status">
-                            <span className={`uppercase text-[10px] ${statusBadgeColor(status)}`}>
-                              {statusLabel(status)}
-                            </span>
-                          </InfoRow>
-                          <InfoRow label="Sub-status">
-                            <span className="text-[10px] text-gray-700">{formatSubStatus(subStatus)}</span>
-                          </InfoRow>
-                        </div>
-                        <div className="grid grid-cols-2 gap-x-4">
-                          <InfoRow label="Payment">
-                            <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${paymentBadgeClass(paymentStatus)}`}>
-                              {paymentStatus}
-                            </span>
-                          </InfoRow>
-                          <InfoRow label="Placed">
-                            <span className="text-[10px] text-gray-600">{formatOrderTime(orderTime)}</span>
-                          </InfoRow>
-                        </div>
-
-                        {/* Details button — inline on mobile, hidden on desktop */}
-                        <div className="pt-2 sm:hidden">
-                          <Button
-                            className="bg-white/80 hover:bg-[#1a3f1c] text-[#1a3f1c] hover:text-white border border-[#1a3f1c]/20 h-9 px-5 text-xs font-bold rounded-xl shadow-sm w-full"
-                            onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}
-                          >
-                            Details
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Details button — side on desktop, hidden on mobile */}
-                      <div className="hidden sm:flex flex-col justify-center self-stretch ml-auto pl-4 border-l border-white/40">
-                        <Button
-                          className="bg-white/80 hover:bg-[#1a3f1c] text-[#1a3f1c] hover:text-white border border-[#1a3f1c]/20 h-10 px-6 text-sm font-bold rounded-xl shadow-sm transition-all duration-300 group-hover:shadow-md"
-                          onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}
-                        >
-                          Details
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                    <td className="font-mono text-xs text-gray-600 whitespace-nowrap">
+                      {order.orderNumber ?? id?.toString().slice(-8).toUpperCase() ?? "—"}
+                    </td>
+                    <td className="text-xs font-semibold text-gray-800 whitespace-nowrap">
+                      {resolveName(customer)}
+                    </td>
+                    <td className="text-xs text-gray-700 max-w-[130px] truncate">
+                      {vendorName}
+                    </td>
+                    <td className="text-xs text-gray-600 whitespace-nowrap">
+                      {riderLabel}
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <span className={`uppercase text-[11px] font-bold ${statusBadgeColor(status)}`}>
+                        {statusLabel(status)}
+                      </span>
+                    </td>
+                    <td className="text-xs text-gray-500 whitespace-nowrap">
+                      {formatSubStatus(subStatus)}
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border ${paymentBadgeClass(paymentStatus)}`}>
+                        {paymentStatus}
+                      </span>
+                    </td>
+                    <td className="text-[11px] text-gray-500 whitespace-nowrap">
+                      {formatOrderTime(orderTime)}
+                    </td>
+                    <td onClick={e => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        className="bg-[#1a3f1c] hover:bg-[#164016] text-white h-8 px-4 text-xs font-bold rounded-lg"
+                        onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}
+                      >
+                        Details
+                      </Button>
+                    </td>
+                  </tr>
                 );
-              })}
-            </div>
-          ))
-        )}
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
       {!loading && !error && pagination.pages > 1 && (
