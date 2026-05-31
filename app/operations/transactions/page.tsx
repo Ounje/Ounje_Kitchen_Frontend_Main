@@ -66,9 +66,9 @@ function StatCard({
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
           {icon}
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
-          <p className="text-2xl font-extrabold text-gray-900 leading-tight">{value}</p>
+          <p className="text-lg sm:text-2xl font-extrabold text-gray-900 leading-tight break-all">{value}</p>
           {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
         </div>
       </CardContent>

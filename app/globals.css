@@ -211,8 +211,9 @@
 
 /* ── Modern Table Utilities ──────────────────────────────────────────────── */
 .modern-table-container {
-  @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden;
+  @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
   box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04);
+  overflow-x: auto;
 }
 .modern-table {
   @apply w-full text-sm text-left border-collapse;
