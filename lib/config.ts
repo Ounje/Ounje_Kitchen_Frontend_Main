@@ -1,8 +1,9 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend.pxxl.pro',
-  // BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend-kiwy.onrender.com',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend-kiwy.onrender.com',
+  // 'https://ounje-kitchen-backend.pxxl.pro',
   //  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
   TIMEOUT: 30000,
+  
   HEADERS: {
     'Content-Type': 'application/json',
   },
@@ -236,9 +237,11 @@ export const ENDPOINTS = {
     TRANSACTIONS_EXPORT: '/api/finance/transactions/export',
 
     // Withdrawals
-    WITHDRAWALS:        '/api/finance/withdrawals',
-    WITHDRAWAL_BY_ID:   (id: string) => `/api/finance/withdrawals/${id}`,
-    WITHDRAWALS_EXPORT: '/api/finance/withdrawals/export',
+    WITHDRAWALS:           '/api/finance/withdrawals',
+    WITHDRAWAL_BY_ID:      (id: string) => `/api/finance/withdrawals/${id}`,
+    WITHDRAWALS_EXPORT:    '/api/finance/withdrawals/export',
+    WITHDRAWAL_APPROVE:    (id: string) => `/api/finance/withdrawals/${id}/approve`,
+    WITHDRAWAL_REJECT:     (id: string) => `/api/finance/withdrawals/${id}/reject`,
 
     // Revenue
     REVENUE:             '/api/finance/revenue',

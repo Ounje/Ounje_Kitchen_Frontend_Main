@@ -95,7 +95,7 @@ export interface WithdrawalDetail {
   accountNumber: string;
   paymentMethod: string;
   amount: number;
-  status: 'PASS' | 'FAIL';
+  status: 'PASS' | 'FAIL' | 'PENDING';
   note: string;
 }
 
@@ -245,6 +245,16 @@ export const financeService = {
     const res = await apiClient.get(ENDPOINTS.FINANCE.WITHDRAWALS_EXPORT, {
       params: filters,
     } as any);
+    return res;
+  },
+
+  async approveWithdrawal(id: string, note?: string) {
+    const res = await apiClient.put(ENDPOINTS.FINANCE.WITHDRAWAL_APPROVE(id), { note });
+    return res;
+  },
+
+  async rejectWithdrawal(id: string, note?: string) {
+    const res = await apiClient.put(ENDPOINTS.FINANCE.WITHDRAWAL_REJECT(id), { note });
     return res;
   },
 
