@@ -46,9 +46,7 @@ export default function FinanceSidebar({ isOpen, onClose }: FinanceSidebarProps)
         {/* Brand */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#ffca3a] flex items-center justify-center shrink-0">
-              <span className="text-[#1a3f1c] font-black text-sm">O</span>
-            </div>
+            <img src="/images/mamput.png" alt="Ounje Logo" className="w-8 h-8 rounded-lg object-cover shrink-0" />
             <span className="text-white font-black text-lg tracking-tight">Ounjefood</span>
           </div>
           <button type="button" onClick={onClose} title="Close menu" aria-label="Close menu"
