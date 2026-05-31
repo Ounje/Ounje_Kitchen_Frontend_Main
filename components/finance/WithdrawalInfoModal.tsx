@@ -12,11 +12,10 @@ interface Props {
   onDownload?: () => void;
 }
 
-function StatusBadge({ status }: { status: 'PASS' | 'FAIL' }) {
+function StatusBadge({ status }: { status: 'PASS' | 'FAIL' | 'PENDING' }) {
+  const bg = status === 'PASS' ? 'bg-[#1a3f1c]' : status === 'PENDING' ? 'bg-yellow-500' : 'bg-red-600';
   return (
-    <span
-      className={`px-2.5 py-0.5 rounded text-xs font-bold text-white ${status === "PASS" ? "bg-[#1a3f1c]" : "bg-red-600"}`}
-    >
+    <span className={`px-2.5 py-0.5 rounded text-xs font-bold text-white ${bg}`}>
       {status}
     </span>
   );
