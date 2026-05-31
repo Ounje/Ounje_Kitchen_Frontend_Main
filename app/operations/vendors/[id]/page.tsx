@@ -50,25 +50,17 @@ export default function VendorDetailsPage() {
     fetchMostFrequentBuyer();
   }, [vendorId]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
-        <VendorDetailsSkeleton />
-      </div>
-    );
-  }
+  if (loading) return <VendorDetailsSkeleton />;
 
   if (!vendor) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ backgroundColor: '#E8F7E8' }}>
+      <div className="flex items-center justify-center min-h-75">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4" style={{ color: '#1A3F1C' }}>
-            Vendor not found
-          </h2>
+          <p className="text-gray-500 mb-4">Vendor not found.</p>
           <button
+            type="button"
             onClick={() => router.push('/operations/vendors')}
-            className="px-6 py-2 rounded-lg text-white"
-            style={{ backgroundColor: '#1A3F1C' }}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1a3f1c]"
           >
             Back to Vendors
           </button>
@@ -78,38 +70,23 @@ export default function VendorDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
-
-        {/* Header with Close Button */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>
-            Vendor's Details
-          </h1>
-          <button
-            onClick={() => router.push('/operations/vendors')}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/60 transition-colors flex-shrink-0"
-          >
-            <X className="w-6 h-6" style={{ color: '#1A3F1C' }} />
-          </button>
-        </div>
-
-        {/* Vendor Details Header */}
-        <VendorDetailsHeader vendor={vendor} />
-
-        {/* Performance Metrics */}
-        <VendorMetrics vendor={vendor} />
-
-        {/* Most Frequent Buyer */}
-        <VendorBuyerCard buyer={buyer} loading={buyerLoading} />
-
-        {/* Action Buttons */}
-        <ActionButtons
-          vendorId={vendor.id}
-          accountStatus={vendor.accountStatus}
-        />
-
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-lg font-black text-[#1a3f1c]">Vendor Details</h1>
+        <button
+          type="button"
+          onClick={() => router.push('/operations/vendors')}
+          aria-label="Back to vendors"
+          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+        >
+          <X className="w-4 h-4 text-gray-600" />
+        </button>
       </div>
+
+      <VendorDetailsHeader vendor={vendor} />
+      <VendorMetrics vendor={vendor} />
+      <VendorBuyerCard buyer={buyer} loading={buyerLoading} />
+      <ActionButtons vendorId={vendor.id} accountStatus={vendor.accountStatus} />
     </div>
   );
 }

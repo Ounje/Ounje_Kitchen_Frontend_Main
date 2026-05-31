@@ -1,80 +1,64 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Menu, ChevronDown } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/ui/notification-bell";
+import { useAuth } from "@/lib/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+const PAGE_TITLES: Record<string, string> = {
+  "/admin":               "Dashboard",
+  "/admin/users":         "User & Staff",
+  "/admin/revenue":       "Revenue",
+  "/admin/orders":        "Orders",
+  "/admin/notifications": "Notifications",
+  "/admin/permissions":   "Permissions",
+  "/admin/settings":      "Settings",
+};
+
+function getPageTitle(pathname: string): string {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  const base = Object.keys(PAGE_TITLES)
+    .filter(k => k !== "/admin")
+    .find(k => pathname.startsWith(k));
+  return base ? PAGE_TITLES[base] : "Admin Portal";
+}
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export default function Header({ onMenuClick }: HeaderProps) {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState("Weekly");
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handlePeriodSelect = (period: string) => {
-    setSelectedPeriod(period);
-    setShowDropdown(false);
-  };
+  const pageTitle = getPageTitle(pathname);
+  const initials  = user?.firstName && user?.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : "AD";
+  const fullName  = user?.firstName ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "Admin";
 
   return (
-    <header className="sticky top-0 z-30 bg-[#1a3f1c] border-b border-white/10 shadow-sm">
-      <div className="px-4 md:px-6 py-3 flex items-center justify-end gap-3 sm:gap-4">
-        {/* Mobile menu button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden absolute left-4 text-white hover:bg-white/10"
-          onClick={onMenuClick}
-        >
-          <Menu className="h-6 w-6 text-white font-bold" />
-        </Button>
+    <header className="sticky top-0 z-30 h-14 bg-white border-b border-gray-100 shadow-sm flex items-center px-4 sm:px-6 gap-3">
+      <Button variant="ghost" size="icon"
+        className="lg:hidden h-9 w-9 text-gray-600 hover:bg-gray-100 shrink-0"
+        onClick={onMenuClick} aria-label="Open menu">
+        <Menu className="h-5 w-5" />
+      </Button>
 
-        <NotificationBell portal="Admin" className="text-white hover:bg-white/10 relative h-9 w-9 sm:h-10 sm:w-10 touch-manipulation transition-colors rounded-full cursor-pointer" />
+      <div className="flex-1 min-w-0">
+        <h2 className="text-base font-bold text-gray-800 truncate">{pageTitle}</h2>
+      </div>
 
-        {/* Period dropdown */}
-        {/* <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#98ef9b] hover:bg-[#88df8b] rounded-md transition-colors text-sm font-medium text-[#1a3f1c]"
-          >
-            <span>{selectedPeriod}</span>
-            <ChevronDown 
-              className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} 
-            />
-          </button>
-
-          {showDropdown && (
-            <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border py-1 z-50">
-              {['Daily', 'Weekly', 'Monthly', 'Yearly'].map((period) => (
-                <button
-                  key={period}
-                  onClick={() => handlePeriodSelect(period)}
-                  className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                    selectedPeriod === period
-                      ? 'bg-[#98ef9b] text-[#1a3f1c] font-medium'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {period}
-                </button>
-              ))}
-            </div>
-          )}
-        </div> */}
+      <div className="flex items-center gap-2 shrink-0">
+        <NotificationBell portal="Admin" className="text-gray-600 hover:bg-gray-100" />
+        <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200">
+          <Avatar className="h-7 w-7 shrink-0">
+            {user?.avatar && <AvatarImage src={user.avatar} alt={fullName} className="object-cover" />}
+            <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold text-xs">{initials}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-semibold text-gray-700 max-w-30 truncate">{fullName}</span>
+        </div>
       </div>
     </header>
   );

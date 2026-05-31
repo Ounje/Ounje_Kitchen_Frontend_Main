@@ -111,6 +111,37 @@ export const operationsService = {
     return res;
   },
 
+  async remindVendor(orderId: string) {
+    const res = await apiClient.put(ENDPOINTS.OPERATIONS.ORDER_REMIND_VENDOR(orderId));
+    return res;
+  },
+
+  async remindRider(orderId: string) {
+    const res = await apiClient.put(ENDPOINTS.OPERATIONS.ORDER_REMIND_RIDER(orderId));
+    return res;
+  },
+
+  // ==================== TRANSACTIONS ====================
+  async getTransactionStats(params?: { startDate?: string; endDate?: string }) {
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTIONS_STATS, { params });
+    return res;
+  },
+
+  async getTransactions(params?: { page?: number; limit?: number; status?: string; startDate?: string; endDate?: string; search?: string }) {
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTIONS, { params });
+    return res;
+  },
+
+  async getTransaction(id: string) {
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTION_BY_ID(id));
+    return res;
+  },
+
+  async exportTransactions(params?: { startDate?: string; endDate?: string; status?: string }) {
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTIONS_EXPORT, { params, responseType: 'blob' });
+    return res;
+  },
+
   // ==================== CUSTOMERS ====================
   async getCustomers(params?: PaginationParams & { name?: string; email?: string }) {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.CUSTOMERS, { params });

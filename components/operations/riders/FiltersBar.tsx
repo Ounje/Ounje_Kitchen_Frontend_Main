@@ -36,13 +36,13 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
   const labelCls = 'block text-sm font-medium mb-1.5';
 
   return (
-    <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 w-full">
+    <div className="glass-card p-4 sm:p-6 mb-6 w-full">
       {/* 1 col → 2 col → 5 col (name spans 2) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
 
         {/* Name — wider on large screens */}
         <div className="lg:col-span-2">
-          <label className={labelCls} style={{ color: '#1A3F1C' }}>Name</label>
+          <label className={labelCls} className="text-[#1a3f1c]">Name</label>
           <input
             type="text"
             value={filters.name}
@@ -55,7 +55,7 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
 
         {/* Rider Status */}
         <div>
-          <label className={labelCls} style={{ color: '#1A3F1C' }}>Rider Status</label>
+          <label className={labelCls} className="text-[#1a3f1c]">Rider Status</label>
           <select
             value={filters.status}
             onChange={(e) => handleInputChange('status', e.target.value)}
@@ -69,7 +69,7 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
 
         {/* Mode of Delivery */}
         <div>
-          <label className={labelCls} style={{ color: '#1A3F1C' }}>Mode of Delivery</label>
+          <label className={labelCls} className="text-[#1a3f1c]">Mode of Delivery</label>
           <select
             value={filters.modeOfDelivery}
             onChange={(e) => handleInputChange('modeOfDelivery', e.target.value)}
@@ -86,15 +86,13 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
         <div className="flex gap-3 items-end sm:col-span-2 lg:col-span-1">
           <button
             onClick={handleSearch}
-            className="flex-1 px-4 py-2.5 text-white rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
-            style={{ backgroundColor: '#1A3F1C' }}
+            className="flex-1 h-[42px] px-4 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300 bg-gradient-to-r from-[#1a3f1c] to-[#2a5c2d]"
           >
             Search
           </button>
           <button
             onClick={handleReset}
-            className="flex-1 px-4 py-2.5 text-white rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
-            style={{ backgroundColor: '#1A3F1C' }}
+            className="flex-1 h-[42px] px-4 text-[#1a3f1c] rounded-xl text-sm font-bold border border-[#1a3f1c]/20 hover:bg-[#1a3f1c]/5 active:scale-95 transition-all duration-300 bg-white shadow-sm"
           >
             Reset
           </button>

@@ -50,25 +50,17 @@ export default function CustomerDetailsPage() {
     fetchMostUsedVendor();
   }, [customerId]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
-        <CustomerDetailsSkeleton />
-      </div>
-    );
-  }
+  if (loading) return <CustomerDetailsSkeleton />;
 
   if (!customer) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ backgroundColor: '#E8F7E8' }}>
+      <div className="flex items-center justify-center min-h-75">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4" style={{ color: '#1A3F1C' }}>
-            Customer not found
-          </h2>
+          <p className="text-gray-500 mb-4">Customer not found.</p>
           <button
+            type="button"
             onClick={() => router.push('/operations/customers')}
-            className="px-6 py-2 rounded-lg text-white"
-            style={{ backgroundColor: '#1A3F1C' }}
+            className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1a3f1c]"
           >
             Back to Customers
           </button>
@@ -78,37 +70,23 @@ export default function CustomerDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
-
-        {/* Header with Close Button */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>
-            Customer's Details
-          </h1>
-          <button
-            onClick={() => router.push('/operations/customers')}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/60 transition-colors flex-shrink-0"
-          >
-            <X className="w-6 h-6" style={{ color: '#1A3F1C' }} />
-          </button>
-        </div>
-
-        {/* Customer Details Header */}
-        <CustomerDetailsHeader customer={customer} />
-
-        {/* Activities Stats */}
-        <CustomerStats customer={customer} />
-
-        {/* Most Used Vendor */}
-        <CustomerVendorCard vendor={vendor} loading={vendorLoading} />
-
-        {/* Action Buttons */}
-        <ActionButtons
-          customerId={customer.id}
-          accountStatus={customer.accountStatus}
-        />
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-lg font-black text-[#1a3f1c]">Customer Details</h1>
+        <button
+          type="button"
+          onClick={() => router.push('/operations/customers')}
+          aria-label="Back to customers"
+          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+        >
+          <X className="w-4 h-4 text-gray-600" />
+        </button>
       </div>
+
+      <CustomerDetailsHeader customer={customer} />
+      <CustomerStats customer={customer} />
+      <CustomerVendorCard vendor={vendor} loading={vendorLoading} />
+      <ActionButtons customerId={customer.id} accountStatus={customer.accountStatus} />
     </div>
   );
 }

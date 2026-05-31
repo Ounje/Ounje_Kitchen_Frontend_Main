@@ -18,9 +18,9 @@ export function RidersTableSkeleton() {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px]">
           <thead>
-            <tr style={{ backgroundColor: '#98EF9B' }}>
+            <tr className="bg-gray-50 border-b border-gray-100">
               {['S/N', 'Name', 'Phone Number', 'Zones', 'Account Status', 'Rider Status', 'Mode of Delivery', 'Actions'].map((h) => (
-                <th key={h} className={thCls} style={{ color: '#1A3F1C' }}>{h}</th>
+                <th key={h} className={thCls} className="text-[#1a3f1c]">{h}</th>
               ))}
             </tr>
           </thead>

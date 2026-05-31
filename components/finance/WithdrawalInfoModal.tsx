@@ -16,7 +16,7 @@ function StatusBadge({ status }: { status: 'PASS' | 'FAIL' }) {
   return (
     <span
       className="px-2.5 py-0.5 rounded text-xs font-bold text-white"
-      style={{ backgroundColor: status === 'PASS' ? '#1A3F1C' : '#D00000' }}
+      className={status === "PASS" ? "bg-[#1a3f1c]" : "bg-red-600"}
     >
       {status}
     </span>

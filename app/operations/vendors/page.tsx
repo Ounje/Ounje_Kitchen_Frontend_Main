@@ -9,7 +9,8 @@ import { VendorTableSkeleton } from '@/app/operations/vendors/loaders/VendorTabl
 import Pagination from '@/components/Pagination';
 import { toast } from 'sonner';
 import { downloadCSV } from '@/lib/utils/exportCSV';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Store } from 'lucide-react';
+import { formatNigerianPhone } from '@/lib/utils/formatPhone';
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<any[]>([]);
@@ -103,7 +104,7 @@ export default function VendorsPage() {
       const data = await vendorService.getVendors({ ...filters, page: 1, limit: 10000 });
       const rows = data.vendors.map((v) => ({
         Name: v.name,
-        Phone: v.phone,
+        Phone: formatNigerianPhone(v.phone),
         Address: v.address,
         'Account Status': v.accountStatus,
         'Business Status': v.businessStatus,
@@ -122,25 +123,23 @@ export default function VendorsPage() {
   };
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
-
+    <div className="space-y-5">
         {/* Page Title */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>Vendors</h1>
-            {pagination.total > 0 && (
-              <span className="text-sm text-gray-500">{pagination.total} total</span>
-            )}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#1a3f1c]/10 flex items-center justify-center shrink-0">
+              <Store className="h-5 w-5 text-[#1a3f1c]" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-gray-900">Vendors</h1>
+              {pagination.total > 0 && <p className="text-xs text-gray-400">{pagination.total.toLocaleString()} total vendors</p>}
+            </div>
           </div>
-          <button
-            onClick={handleExportCSV}
-            disabled={exporting || loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
-            style={{ backgroundColor: '#1A3F1C' }}
-          >
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {exporting ? 'Exporting...' : 'Download CSV'}
+          <button type="button"
+            onClick={handleExportCSV} disabled={exporting || loading}
+            className="inline-flex items-center gap-2 h-9 px-4 bg-[#1a3f1c] text-white text-sm font-semibold rounded-lg hover:bg-[#163318] active:scale-[0.98] transition-all disabled:opacity-50 shrink-0">
+            {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            {exporting ? "Exporting…" : "Export CSV"}
           </button>
         </div>
 
@@ -172,7 +171,6 @@ export default function VendorsPage() {
           </div>
         )}
 
-      </div>
     </div>
   );
 }

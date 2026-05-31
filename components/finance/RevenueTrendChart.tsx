@@ -31,7 +31,7 @@ function formatY(v: number) {
 export function RevenueTrendChart({ data }: Props) {
   return (
     <div className="bg-white rounded-xl p-4 sm:p-5 w-full">
-      <h3 className="text-sm font-bold mb-3" style={{ color: '#1A3F1C' }}>Revenue Trend</h3>
+      <h3 className="text-sm font-bold mb-3" className="text-[#1a3f1c]">Revenue Trend</h3>
       <ResponsiveContainer width="100%" height={240}>
         <LineChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />

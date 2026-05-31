@@ -17,7 +17,7 @@ function ModalHeader({ title, subtitle, period, onPeriodChange, onClose }: Modal
     <div className="px-6 pt-6 pb-4">
       <div className="flex items-start justify-between mb-1">
         <div>
-          <h2 className="text-xl font-bold" style={{ color: '#1A3F1C' }}>{title}</h2>
+          <h2 className="text-xl font-bold" className="text-[#1a3f1c]">{title}</h2>
           <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
         </div>
         <div className="flex items-center gap-2 ml-4">
@@ -27,7 +27,7 @@ function ModalHeader({ title, subtitle, period, onPeriodChange, onClose }: Modal
               value={period}
               onChange={e => onPeriodChange(e.target.value as RevenuePeriod)}
               className="appearance-none flex items-center gap-2 px-3 py-1.5 rounded-lg text-white text-sm font-semibold pr-7 cursor-pointer"
-              style={{ backgroundColor: '#1A3F1C' }}
+              className="bg-[#1a3f1c]"
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -65,7 +65,7 @@ export function TopVendorsModal({ isOpen, onClose, vendors, period, onPeriodChan
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div
         className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl"
-        style={{ backgroundColor: '#E8F7E8' }}
+        className="bg-gray-50"
       >
         <ModalHeader
           title="Top 5 Vendors"
@@ -78,9 +78,9 @@ export function TopVendorsModal({ isOpen, onClose, vendors, period, onPeriodChan
         <div className="overflow-x-auto px-4 pb-6">
           <table className="w-full min-w-[540px] rounded-xl overflow-hidden">
             <thead>
-              <tr style={{ backgroundColor: '#98EF9B' }}>
+              <tr className="bg-gray-50 border-b border-gray-100">
                 {['Vendor Name', 'Orders', 'Revenue', 'Commission', 'AOV'].map(h => (
-                  <th key={h} className={thCls} style={{ color: '#1A3F1C' }}>{h}</th>
+                  <th key={h} className={thCls} className="text-[#1a3f1c]">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -102,13 +102,13 @@ export function TopVendorsModal({ isOpen, onClose, vendors, period, onPeriodChan
                       <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
                         {v.photo ? <img src={v.photo} alt={v.name} className="w-full h-full object-cover" /> : null}
                       </div>
-                      <span className="text-sm font-medium" style={{ color: '#1A3F1C' }}>{v.name}</span>
+                      <span className="text-sm font-medium" className="text-[#1a3f1c]">{v.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>{v.orders}</td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>₦{v.revenue.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>₦{v.commission.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>₦{v.aov.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">{v.orders}</td>
+                  <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">₦{v.revenue.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">₦{v.commission.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">₦{v.aov.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -135,7 +135,7 @@ export function TopRidersModal({ isOpen, onClose, riders, period, onPeriodChange
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div
         className="w-full max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-2xl"
-        style={{ backgroundColor: '#E8F7E8' }}
+        className="bg-gray-50"
       >
         <ModalHeader
           title="Top 5 Riders"
@@ -148,9 +148,9 @@ export function TopRidersModal({ isOpen, onClose, riders, period, onPeriodChange
         <div className="overflow-x-auto px-4 pb-6">
           <table className="w-full min-w-[520px] rounded-xl overflow-hidden">
             <thead>
-              <tr style={{ backgroundColor: '#98EF9B' }}>
+              <tr className="bg-gray-50 border-b border-gray-100">
                 {['Rider Name', 'Deliveries', 'Earnings', 'Completion', 'Rating'].map(h => (
-                  <th key={h} className={thCls} style={{ color: '#1A3F1C' }}>{h}</th>
+                  <th key={h} className={thCls} className="text-[#1a3f1c]">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -172,14 +172,14 @@ export function TopRidersModal({ isOpen, onClose, riders, period, onPeriodChange
                       <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
                         {r.photo ? <img src={r.photo} alt={r.name} className="w-full h-full object-cover" /> : null}
                       </div>
-                      <span className="text-sm font-medium" style={{ color: '#1A3F1C' }}>{r.name}</span>
+                      <span className="text-sm font-medium" className="text-[#1a3f1c]">{r.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>{r.deliveries}</td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>₦{r.earnings.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>{r.completion}%</td>
+                  <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">{r.deliveries}</td>
+                  <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">₦{r.earnings.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">{r.completion}%</td>
                   <td className="px-4 py-3">
-                    <span className="flex items-center gap-1 text-sm" style={{ color: '#1A3F1C' }}>
+                    <span className="flex items-center gap-1 text-sm" className="text-[#1a3f1c]">
                       <Star className="w-4 h-4 fill-[#FFCA3A] stroke-[#FFCA3A]" />
                       {r.rating.toFixed(1)}
                     </span>

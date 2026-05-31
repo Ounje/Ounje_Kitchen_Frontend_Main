@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend.pxxl.pro',
-  // BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend-kiwy.onrender.com',
+  // BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend.pxxl.pro',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend-kiwy.onrender.com',
   //  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
   TIMEOUT: 30000,
   HEADERS: {
@@ -161,6 +161,14 @@ export const ENDPOINTS = {
     ORDER_AVAILABLE_RIDERS: (id: string) => `/api/operations/orders/${id}/available-riders`,
     ORDER_ASSIGN_RIDER:     (id: string) => `/api/operations/orders/${id}/assign-rider`,
     ORDER_STATUS:           (id: string) => `/api/operations/orders/${id}/status`,
+    ORDER_REMIND_VENDOR:    (id: string) => `/api/operations/orders/${id}/remind-vendor`,
+    ORDER_REMIND_RIDER:     (id: string) => `/api/operations/orders/${id}/remind-rider`,
+
+    // Transactions (temporary module until migration to Admin Portal)
+    TRANSACTIONS:           '/api/operations/transactions',
+    TRANSACTIONS_STATS:     '/api/operations/transactions/stats',
+    TRANSACTION_BY_ID:      (id: string) => `/api/operations/transactions/${id}`,
+    TRANSACTIONS_EXPORT:    '/api/operations/transactions/export',
 
     // Customers
     CUSTOMERS:         '/api/operations/customers',

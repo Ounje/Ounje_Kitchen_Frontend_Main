@@ -1,4 +1,5 @@
-import { Vendor } from '@/lib/api/services/vendor.service';
+import { Vendor } from "@/lib/api/services/vendor.service";
+import { ShoppingBag, XCircle, Clock, Hash } from "lucide-react";
 
 interface VendorMetricsProps {
   vendor: Vendor;
@@ -6,50 +7,30 @@ interface VendorMetricsProps {
 
 export function VendorMetrics({ vendor }: VendorMetricsProps) {
   const metrics = [
-    { value: vendor.successfulOrders, label: 'successful orders', bgColor: '#1A3F1C', textColor: 'white' },
-    { value: vendor.cancelledOrders,  label: 'cancelled orders',  bgColor: '#D00000', textColor: 'white' },
-    { value: vendor.pendingOrders,    label: 'pending orders',    bgColor: '#FFCA3A', textColor: '#1A3F1C' },
-    { value: vendor.totalOrders,      label: 'Total',             bgColor: '#98EF9B', textColor: '#1A3F1C' },
-  ];
-
-  const legend = [
-    { color: '#1A3F1C', label: 'successful orders' },
-    { color: '#D00000', label: 'cancelled orders' },
-    { color: '#FFCA3A', label: 'pending orders' },
+    { label: "Successful", value: vendor.successfulOrders, icon: ShoppingBag, color: "text-green-700",  bg: "bg-green-50",       border: "border-green-100"       },
+    { label: "Cancelled",  value: vendor.cancelledOrders,  icon: XCircle,     color: "text-red-700",    bg: "bg-red-50",         border: "border-red-100"         },
+    { label: "Pending",    value: vendor.pendingOrders,     icon: Clock,       color: "text-amber-700",  bg: "bg-amber-50",       border: "border-amber-100"       },
+    { label: "Total",      value: vendor.totalOrders,       icon: Hash,        color: "text-[#1a3f1c]",  bg: "bg-[#98ef9b]/20",   border: "border-[#98ef9b]/40"    },
   ];
 
   return (
-    <div className="mb-6 w-full">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4" style={{ color: '#1A3F1C' }}>
-        Performance Metrics
-      </h2>
-
-      {/* 2 cols mobile → 4 cols md+ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        {metrics.map((m, i) => (
-          <div
-            key={i}
-            className="rounded-xl p-4 sm:p-6 flex flex-col items-center justify-center min-h-[100px]"
-            style={{ backgroundColor: m.bgColor }}
-          >
-            <div className="text-3xl sm:text-5xl font-bold mb-1 sm:mb-2" style={{ color: m.textColor }}>
-              {m.value}
+    <div className="mb-4">
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Performance Metrics</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {metrics.map((m) => {
+          const Icon = m.icon;
+          return (
+            <div key={m.label} className={`glass-card hover-lift p-4 flex items-center gap-4 ${m.border}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${m.bg} ${m.color} shrink-0`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div>
+                <p className={`text-2xl font-black ${m.color} leading-none`}>{m.value ?? 0}</p>
+                <p className="text-xs font-bold text-gray-500 mt-1">{m.label}</p>
+              </div>
             </div>
-            <div className="text-xs sm:text-sm font-medium text-center leading-tight" style={{ color: m.textColor }}>
-              {m.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 sm:gap-4 mt-4">
-        {legend.map((item) => (
-          <div key={item.label} className="flex items-center gap-2">
-            <div className="w-3.5 h-3.5 rounded flex-shrink-0" style={{ backgroundColor: item.color }} />
-            <span className="text-xs sm:text-sm" style={{ color: '#1A3F1C' }}>{item.label}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

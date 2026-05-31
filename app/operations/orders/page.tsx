@@ -171,7 +171,7 @@ export default function OperationsOrdersPage() {
   const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 1, limit: 7 });
   const [period,     setPeriod]     = useState("all");
   const [filters,    setFilters]    = useState({
-    name: "", vendor: "", zone: "", orderId: "", status: "all",
+    name: "", vendor: "", zone: "", orderId: "", status: "all", paymentStatus: "all", failedPayment: false,
     dateFrom: undefined as Date | undefined,
     dateTo:   undefined as Date | undefined,
   });
@@ -186,11 +186,16 @@ export default function OperationsOrdersPage() {
         : (getDateRange(period) ?? {});
 
       const params: any = { page, limit: pagination.limit, ...dateRange };
-      if (activeFilters.status !== "all") params.status = activeFilters.status;
-      if (activeFilters.orderId)          params.search = activeFilters.orderId;
-      if (activeFilters.name)             params.search = activeFilters.name;
-      if (activeFilters.vendor)           params.vendor = activeFilters.vendor;
-      if (activeFilters.zone)             params.zone   = activeFilters.zone;
+      if (activeFilters.failedPayment) {
+        params.failedPayment = "true";
+      } else {
+        if (activeFilters.status !== "all")        params.status        = activeFilters.status;
+        if (activeFilters.paymentStatus !== "all") params.paymentStatus = activeFilters.paymentStatus;
+      }
+      if (activeFilters.orderId)  params.search = activeFilters.orderId;
+      if (activeFilters.name)     params.search = activeFilters.name;
+      if (activeFilters.vendor)   params.search = activeFilters.vendor;
+      if (activeFilters.zone)     params.zone   = activeFilters.zone;
 
       const res: any = await operationsService.getOrders(params);
       const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
@@ -219,11 +224,16 @@ export default function OperationsOrdersPage() {
         : (getDateRange(period) ?? {});
 
       const params: any = { ...dateRange, limit: 10000 };
-      if (filters.status !== "all") params.status = filters.status;
-      if (filters.orderId)          params.search = filters.orderId;
-      if (filters.name)             params.search = filters.name;
-      if (filters.vendor)           params.vendor = filters.vendor;
-      if (filters.zone)             params.zone   = filters.zone;
+      if (filters.failedPayment) {
+        params.failedPayment = "true";
+      } else {
+        if (filters.status !== "all")        params.status        = filters.status;
+        if (filters.paymentStatus !== "all") params.paymentStatus = filters.paymentStatus;
+      }
+      if (filters.orderId)  params.search = filters.orderId;
+      if (filters.name)     params.search = filters.name;
+      if (filters.vendor)   params.search = filters.vendor;
+      if (filters.zone)     params.zone   = filters.zone;
 
       const res: any = await operationsService.getOrders(params);
       const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
@@ -255,7 +265,7 @@ export default function OperationsOrdersPage() {
 
   const handleSearch = () => fetchOrders(1, filters);
   const handleReset  = () => {
-    const cleared = { name: "", vendor: "", zone: "", orderId: "", status: "all", dateFrom: undefined, dateTo: undefined };
+    const cleared = { name: "", vendor: "", zone: "", orderId: "", status: "all", paymentStatus: "all", failedPayment: false, dateFrom: undefined, dateTo: undefined };
     setFilters(cleared);
     fetchOrders(1, cleared);
   };
@@ -323,11 +333,34 @@ export default function OperationsOrdersPage() {
               <Select value={filters.status} onValueChange={v => setFilters(f => ({ ...f, status: v }))}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {["all","pending","confirming","assigned","preparing","riding","in_transit","delivered","cancelled"].map(v => (
+                  {["all","pending","confirming","assigned","preparing","riding","in_transit","delivered","cancelled","declined"].map(v => (
                     <SelectItem key={v} value={v}>
                       {v === "in_transit" ? "In Transit" : v.charAt(0).toUpperCase() + v.slice(1)}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-gray-700">Payment Status</Label>
+              <Select
+                value={filters.failedPayment ? "failed_payment" : filters.paymentStatus}
+                onValueChange={v => {
+                  if (v === "failed_payment") {
+                    setFilters(f => ({ ...f, failedPayment: true, paymentStatus: "all", status: "all" }));
+                  } else {
+                    setFilters(f => ({ ...f, failedPayment: false, paymentStatus: v }));
+                  }
+                }}
+              >
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Payments</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="unpaid">Unpaid</SelectItem>
+                  <SelectItem value="refunded">Refunded</SelectItem>
+                  <SelectItem value="failed_payment">Failed Payment</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -411,17 +444,17 @@ export default function OperationsOrdersPage() {
                 return (
                   <div
                     key={id || Math.random()}
-                    className="rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer bg-secondary border border-primary/5 hover:border-primary/20 group"
+                    className="glass-card hover-lift rounded-2xl overflow-hidden cursor-pointer bg-[#98ef9b]/10 group"
                     onClick={() => router.push(`/operations/orders/${id}`)}
                   >
-                    <div className="p-3 sm:p-4 flex items-start gap-3 sm:gap-4">
+                    <div className="p-4 sm:p-5 flex items-start gap-4 sm:gap-5">
 
                       {/* Food image */}
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 mt-0.5">
+                      <div className="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 shadow-sm mt-1">
                         {image ? (
-                          <img src={image} alt="food" className="w-full h-full object-cover" />
+                          <img src={image} alt="food" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-green-300 to-green-500 flex items-center justify-center text-white text-xs font-bold">IMG</div>
+                          <div className="w-full h-full bg-gradient-to-br from-[#98ef9b]/50 to-[#1a3f1c]/50 flex items-center justify-center text-[#1a3f1c] text-xs font-bold">IMG</div>
                         )}
                       </div>
 
@@ -467,12 +500,14 @@ export default function OperationsOrdersPage() {
                       </div>
 
                       {/* Details button */}
-                      <Button
-                        className="bg-primary hover:scale-105 text-white h-10 px-6 flex-shrink-0 text-sm font-black rounded-xl shadow-md transition-all self-center"
-                        onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}
-                      >
-                        Details
-                      </Button>
+                      <div className="flex flex-col justify-center self-stretch ml-auto pl-4 border-l border-white/40">
+                        <Button
+                          className="bg-white/80 hover:bg-[#1a3f1c] text-[#1a3f1c] hover:text-white border border-[#1a3f1c]/20 h-10 px-6 text-sm font-bold rounded-xl shadow-sm transition-all duration-300 group-hover:shadow-md"
+                          onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}
+                        >
+                          Details
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );

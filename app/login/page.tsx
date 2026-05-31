@@ -3,191 +3,206 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, getPortalRoute } from "@/lib/context/AuthContext";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
+import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
   const { login, user, loading } = useAuth();
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email,      setEmail]      = useState("");
+  const [password,   setPassword]   = useState("");
+  const [showPass,   setShowPass]   = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error,      setError]      = useState("");
 
-  // ✅ ALL HOOKS MUST BE AT THE TOP - NO EARLY RETURNS BEFORE THEM
-  
-  // Redirect logged in user
   useEffect(() => {
-    if (!loading && user) {
-      router.push(getPortalRoute(user));
-    }
+    if (!loading && user) router.push(getPortalRoute(user));
   }, [user, loading, router]);
-
-  // ✅ AFTER all early returns, add remaining logic
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(""); // ✅ Clear error on new submit
-
+    setSubmitting(true);
+    setError("");
     try {
       await login({ email, password, rememberMe });
       toast.success("Login successful!");
     } catch (err: any) {
-      let message = "Login failed. Please try again.";
-      
-      if (err?.message) {
-        const msg = err.message.toLowerCase();
-        if (msg.includes("invalid") || msg.includes("incorrect")) {
-          message = "Invalid email or password";
-        } else if (msg.includes("deactivated")) {
-          message = "Account deactivated. Contact IT support.";
-        } else if (msg.includes("suspended")) {
-          message = "Account suspended. Contact support.";
-        } else {
-          message = err.message;
-        }
-      }
-
-      setError(message);
-      toast.error(message);
-      setPassword(""); // Clear password field
+      const msg = err?.message?.toLowerCase() ?? "";
+      const friendly =
+        msg.includes("invalid") || msg.includes("incorrect") ? "Invalid email or password." :
+        msg.includes("deactivated")                           ? "Account deactivated. Contact IT support." :
+        msg.includes("suspended")                             ? "Account suspended. Contact support." :
+        err?.message || "Login failed. Please try again.";
+      setError(friendly);
+      setPassword("");
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
-  // ✅ Clear error when user types (using change handlers instead of useEffect)
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    if (error) setError(""); // Clear error when typing
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    if (error) setError(""); // Clear error when typing
-  };
-
-  // ✅ NOW it's safe to have conditional renders
   if (loading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#e8f7e8" }}
-      >
-        <div className="w-12 h-12 border-4 border-[#1a3f1c] border-t-transparent rounded-full animate-spin" />
+      <div className="login-loading-bg min-h-screen flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-[#1a3f1c]" />
       </div>
     );
   }
-
-  // Don't render login if user is already logged in
   if (user) return null;
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: "#e8f7e8" }}
-    >
-      <Card className="w-full max-w-sm border-none shadow-none bg-transparent">
-        <CardContent className="pt-8 pb-6 px-6 space-y-6">
-          
+    <div className="min-h-screen flex">
+
+      {/* ── Left panel ── */}
+      <div
+        className="login-brand-panel hidden lg:flex lg:w-[52%] flex-col items-center justify-center p-12 relative overflow-hidden"
+      >
+        {/* Decorative blobs */}
+        <div className="login-blob-gold absolute -top-32 -left-32 w-96 h-96 rounded-full" />
+        <div className="login-blob-green absolute -bottom-20 -right-20 w-72 h-72 rounded-full" />
+        <div className="login-blob-white absolute top-1/2 right-12 w-40 h-40 rounded-full" />
+
+        <div className="relative z-10 text-center space-y-8 max-w-sm">
           {/* Logo */}
-          <div className="flex justify-center mb-2">
-            <div className="w-24 h-24 relative rounded-full overflow-hidden">
-              <Image
-                src="/images/mamput.png"
-                alt="Ounje Logo"
-                fill
-                sizes="96px"
-                className="object-cover"
-                priority
-              />
-            </div>
+          <div className="w-28 h-28 mx-auto rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white/20">
+            <Image
+              src="/images/mamput.png"
+              alt="Ounje Logo"
+              width={112}
+              height={112}
+              className="object-cover w-full h-full"
+              priority
+            />
           </div>
 
-          {/* Title */}
-          <h1 className="text-center text-xl font-bold text-gray-900">
-            Welcome Back
-          </h1>
+          <div>
+            <h1 className="text-5xl font-black text-white tracking-tight">Ounjefood</h1>
+            <p className="text-white/60 mt-3 text-base leading-relaxed">
+              Internal operations platform for managing orders, vendors, riders and more.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4 mt-4">
+            {[
+              "Real-time order monitoring",
+              "Vendor & rider management",
+              "Finance & revenue insights",
+            ].map((f) => (
+              <div key={f} className="flex items-center gap-3 text-left">
+                <div className="login-check-circle w-6 h-6 rounded-full flex items-center justify-center shrink-0">
+                  <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                    <path d="M1 4.5L4 7.5L10 1.5" stroke="#1a3f1c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <span className="text-white/80 text-sm font-medium">{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Right panel ── */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 bg-white">
+        <div className="w-full max-w-md space-y-8">
+
+          {/* Mobile logo */}
+          <div className="lg:hidden flex flex-col items-center gap-3">
+            <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-[#1a3f1c]/20 shadow-md">
+              <Image src="/images/mamput.png" alt="Ounje Logo" width={64} height={64} className="object-cover w-full h-full" priority />
+            </div>
+            <h1 className="text-2xl font-black text-[#1a3f1c]">Ounjefood</h1>
+          </div>
+
+          {/* Heading */}
+          <div className="space-y-1">
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900">Welcome back</h2>
+            <p className="text-gray-500 text-base">Sign in to your staff account</p>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span className="font-medium">{error}</span>
+            </div>
+          )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm text-gray-700">
-                Email
-              </Label>
+              <Label htmlFor="email" className="text-sm font-bold text-gray-800">Email address</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
-                onChange={handleEmailChange}
-                disabled={isSubmitting}
+                onChange={e => { setEmail(e.target.value); if (error) setError(""); }}
+                disabled={submitting}
                 required
-                className="h-10 bg-white border border-gray-300"
+                placeholder="you@ounjefood.com"
+                className="h-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:bg-white text-sm"
               />
             </div>
 
-            {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm text-gray-700">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-                disabled={isSubmitting}
-                required
-                className="h-10 bg-white border border-gray-300"
-              />
+              <Label htmlFor="password" className="text-sm font-bold text-gray-800">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPass ? "text" : "password"}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); if (error) setError(""); }}
+                  disabled={submitting}
+                  required
+                  placeholder="••••••••"
+                  className="h-12 bg-gray-50 border-gray-200 text-gray-900 focus:bg-white text-sm pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(v => !v)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPass ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
             </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2.5">
               <Checkbox
                 id="remember"
                 checked={rememberMe}
-                onCheckedChange={(checked) =>
-                  setRememberMe(checked === true)
-                }
-                disabled={isSubmitting}
+                onCheckedChange={v => setRememberMe(v === true)}
+                disabled={submitting}
               />
-              <Label
-                htmlFor="remember"
-                className="text-sm font-normal text-gray-700 cursor-pointer"
-              >
-                Keep me logged in
+              <Label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer font-normal select-none">
+                Keep me signed in for 30 days
               </Label>
             </div>
 
-            {/* Error */}
-            {error && (
-              <div className="bg-red-100 border border-red-200 text-red-700 p-3 text-sm rounded-md">
-                {error}
-              </div>
-            )}
-
-            {/* Button */}
-            <Button
+            <button
               type="submit"
-              className="w-full h-10 bg-[#1a3f1c] text-white hover:bg-[#164016]"
-              disabled={isSubmitting}
+              disabled={submitting}
+              className="login-submit-btn w-full h-12 rounded-xl text-white font-bold text-base transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isSubmitting ? "Logging in..." : "Log In"}
-            </Button>
+              {submitting
+                ? <><Loader2 className="h-5 w-5 animate-spin" /> Signing in…</>
+                : "Sign In"
+              }
+            </button>
           </form>
-        </CardContent>
-      </Card>
+
+          <p className="text-center text-sm text-gray-400">
+            Having trouble?{" "}
+            <span className="font-semibold text-[#1a3f1c]">Contact IT support</span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

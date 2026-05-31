@@ -650,7 +650,7 @@ export default function EntityDetailPage({ params }: { params: Promise<{ id: str
       <div className="grid grid-cols-2 gap-3">
         <button onClick={handleToggleSuspend} disabled={actioning}
           className="w-full py-3.5 rounded-xl text-base font-bold text-[#1a3f1c] transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ backgroundColor: "#FFCA3A" }}>
+          className="bg-amber-400">
           {actioning
             ? <div className="w-5 h-5 border-2 border-[#1a3f1c] border-t-transparent rounded-full animate-spin" />
             : isActive ? "Suspend Account" : "Activate Account"

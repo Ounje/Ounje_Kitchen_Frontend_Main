@@ -54,12 +54,12 @@ export default function TopRidersPage() {
 
       <div
         className="w-full rounded-2xl overflow-hidden shadow-lg"
-        style={{ backgroundColor: '#E8F7E8' }}
+        className="bg-gray-50"
       >
         <div className="px-5 sm:px-7 pt-6 pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold mb-1" style={{ color: '#1A3F1C' }}>
+              <h1 className="text-xl sm:text-2xl font-bold mb-1" className="text-[#1a3f1c]">
                 Top 5 Riders
               </h1>
               <p className="text-sm text-gray-500">
@@ -73,7 +73,7 @@ export default function TopRidersPage() {
                   value={period}
                   onChange={e => setPeriod(e.target.value as RevenuePeriod)}
                   className="appearance-none pl-8 pr-6 py-1.5 rounded-lg text-white text-sm font-semibold cursor-pointer"
-                  style={{ backgroundColor: '#1A3F1C' }}
+                  className="bg-[#1a3f1c]"
                 >
                   {PERIODS.map(p => (
                     <option key={p.value} value={p.value}>{p.label}</option>
@@ -95,9 +95,9 @@ export default function TopRidersPage() {
         <div className="overflow-x-auto px-4 pb-6">
           <table className="w-full min-w-[520px] rounded-xl overflow-hidden">
             <thead>
-              <tr style={{ backgroundColor: '#98EF9B' }}>
+              <tr className="bg-gray-50 border-b border-gray-100">
                 {['Rider Name', 'Deliveries', 'Earnings', 'Completion', 'Rating'].map(h => (
-                  <th key={h} className={thCls} style={{ color: '#1A3F1C' }}>{h}</th>
+                  <th key={h} className={thCls} className="text-[#1a3f1c]">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -128,16 +128,16 @@ export default function TopRidersPage() {
                             ? <img src={r.photo} alt={r.name} className="w-full h-full object-cover" />
                             : r.name?.charAt(0).toUpperCase() ?? '?'}
                         </div>
-                        <span className="text-sm font-medium" style={{ color: '#1A3F1C' }}>
+                        <span className="text-sm font-medium" className="text-[#1a3f1c]">
                           {r.name}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>{r.deliveries}</td>
-                    <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>₦{r.earnings.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-sm" style={{ color: '#1A3F1C' }}>{r.completion}%</td>
+                    <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">{r.deliveries}</td>
+                    <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">₦{r.earnings.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">{r.completion}%</td>
                     <td className="px-4 py-3">
-                      <span className="flex items-center gap-1 text-sm" style={{ color: '#1A3F1C' }}>
+                      <span className="flex items-center gap-1 text-sm" className="text-[#1a3f1c]">
                         <Star className="w-4 h-4 fill-[#FFCA3A] stroke-[#FFCA3A] flex-shrink-0" />
                         {r.rating.toFixed(1)}
                       </span>

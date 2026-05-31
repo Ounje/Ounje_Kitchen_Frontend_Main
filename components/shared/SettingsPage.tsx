@@ -415,7 +415,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
         {/* Profile Form Card */}
         <Card 
           className="border shadow-sm" 
-          style={{ backgroundColor: isEditMode ? '#98ef9b' : '#98EF9B' }}
+          className="bg-[#98ef9b]/50"
         >
           <CardContent className="p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">

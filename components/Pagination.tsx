@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 interface PaginationProps {
   currentPage: number;
@@ -19,116 +19,83 @@ export default function Pagination({
   onPageSizeChange,
   pageSizeOptions = [7, 10, 20, 50],
 }: PaginationProps) {
-  // Calculate which page numbers to show (max 7 buttons)
   const getPageNumbers = () => {
-    const maxButtons = 7;
+    const maxButtons = 5;
     const pages: number[] = [];
-
     if (totalPages <= maxButtons) {
-      // Show all pages if total is less than max
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
-      // Show pages with current page in middle when possible
-      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-      let endPage = Math.min(totalPages, startPage + maxButtons - 1);
-
-      // Adjust start if we're near the end
-      if (endPage - startPage < maxButtons - 1) {
-        startPage = Math.max(1, endPage - maxButtons + 1);
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
+      let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+      let end   = Math.min(totalPages, start + maxButtons - 1);
+      if (end - start < maxButtons - 1) start = Math.max(1, end - maxButtons + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
     }
-
     return pages;
   };
 
   const pageNumbers = getPageNumbers();
+  const btnBase = "inline-flex items-center justify-center h-8 rounded-lg text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed";
+  const btnIcon = `${btnBase} w-8 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50`;
 
   return (
-    <div className="flex items-center justify-between p-4 border-t border-border bg-surface">
-      {/* Page Size Selector */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground font-medium">Displays</span>
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 bg-white">
+
+      {/* Page size + count */}
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <span>Show</span>
         <select
-          className="border border-border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-secondary text-primary font-bold"
           value={pageSize}
-          onChange={(e) => onPageSizeChange(parseInt(e.target.value))}
+          onChange={e => onPageSizeChange(parseInt(e.target.value))}
+          title="Rows per page"
+          aria-label="Rows per page"
+          className="h-8 px-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 font-semibold focus:outline-none focus:ring-2 focus:ring-[#1a3f1c]/30 cursor-pointer"
         >
-          {pageSizeOptions.map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
+          {pageSizeOptions.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
+        <span>per page</span>
+        <span className="hidden sm:inline text-gray-300">·</span>
+        <span className="hidden sm:inline">Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong></span>
       </div>
 
-      {/* Page Navigation */}
+      {/* Navigation */}
       <div className="flex items-center gap-1">
-        {/* First Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(1)}
-          disabled={currentPage === 1}
-          className="text-sm bg-secondary border-none text-primary hover:bg-secondary/80 font-bold px-4"
-        >
-          First
-        </Button>
+        <button type="button" onClick={() => onPageChange(1)} disabled={currentPage === 1} className={btnIcon} title="First page">
+          <ChevronsLeft className="h-3.5 w-3.5" />
+        </button>
+        <button type="button" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className={btnIcon} title="Previous page">
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </button>
 
-        {/* Previous Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="text-sm bg-secondary border-none text-primary hover:bg-secondary/80 font-bold px-4"
-        >
-          Previous
-        </Button>
+        {pageNumbers[0] > 1 && (
+          <>
+            <button type="button" onClick={() => onPageChange(1)} className={`${btnBase} w-8 border border-gray-200 bg-white text-gray-600 hover:bg-gray-50`}>1</button>
+            {pageNumbers[0] > 2 && <span className="text-gray-400 text-sm px-1">…</span>}
+          </>
+        )}
 
-        {/* Page Number Buttons */}
-        {pageNumbers.map((pageNum) => (
-          <Button
-            key={pageNum}
-            variant={currentPage === pageNum ? "default" : "outline"}
-            size="sm"
-            onClick={() => onPageChange(pageNum)}
-            className={`min-w-[2.5rem] font-bold border-none ${
-              currentPage === pageNum 
-                ? "bg-primary text-white hover:bg-primary/90" 
-                : "bg-secondary text-primary hover:bg-secondary/80"
+        {pageNumbers.map(n => (
+          <button key={n} type="button" onClick={() => onPageChange(n)}
+            className={`${btnBase} w-8 border ${
+              currentPage === n
+                ? "bg-[#1a3f1c] text-white border-[#1a3f1c] shadow-sm"
+                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
-          >
-            {pageNum}
-          </Button>
+          >{n}</button>
         ))}
 
-        {/* Next Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage >= totalPages}
-          className="text-sm bg-secondary border-none text-primary hover:bg-secondary/80 font-bold px-4"
-        >
-          Next
-        </Button>
+        {pageNumbers[pageNumbers.length - 1] < totalPages && (
+          <>
+            {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <span className="text-gray-400 text-sm px-1">…</span>}
+            <button type="button" onClick={() => onPageChange(totalPages)} className={`${btnBase} w-8 border border-gray-200 bg-white text-gray-600 hover:bg-gray-50`}>{totalPages}</button>
+          </>
+        )}
 
-        {/* Last Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(totalPages)}
-          disabled={currentPage >= totalPages}
-          className="text-sm bg-secondary border-none text-primary hover:bg-secondary/80 font-bold px-4"
-        >
-          Last
-        </Button>
+        <button type="button" onClick={() => onPageChange(currentPage + 1)} disabled={currentPage >= totalPages} className={btnIcon} title="Next page">
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+        <button type="button" onClick={() => onPageChange(totalPages)} disabled={currentPage >= totalPages} className={btnIcon} title="Last page">
+          <ChevronsRight className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   );

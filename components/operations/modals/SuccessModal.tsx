@@ -20,7 +20,7 @@ export function SuccessModal({
     >
       <div
         className="w-full max-w-sm rounded-2xl p-8 shadow-2xl space-y-6 text-center"
-        style={{ backgroundColor: '#1A3F1C' }}
+        className="bg-[#1a3f1c]"
       >
         {/* Check icon */}
         <div className="flex justify-center">

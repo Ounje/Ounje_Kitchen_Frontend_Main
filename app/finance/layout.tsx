@@ -51,7 +51,7 @@ export default function FinanceLayout({ children }: { children: React.ReactNode 
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: '#E8F7E8' }}>
+    <div className="flex min-h-screen" className="bg-gray-50">
       <FinanceSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

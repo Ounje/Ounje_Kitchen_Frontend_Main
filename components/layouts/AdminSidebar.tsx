@@ -4,29 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Image from "next/image";
-import {
-  Home,
-  Users,
-  DollarSign,
-  ShoppingCart,
-  Bell,
-  Shield,
-  Settings,
-  LogOut,
-  X,
-} from "lucide-react";
+import { Home, Users, DollarSign, ShoppingCart, Bell, Shield, Settings, LogOut, X } from "lucide-react";
 
 const navigation = [
-  { name: "Home", href: "/admin", icon: Home },
-  { name: "User & Staff", href: "/admin/users", icon: Users },
-  { name: "Revenue", href: "/admin/revenue", icon: DollarSign },
-  { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
-  { name: "Notifications/Alerts", href: "/admin/notifications", icon: Bell },
-  { name: "Permissions", href: "/admin/permissions", icon: Shield },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
+  { name: "Home",          href: "/admin",               icon: Home         },
+  { name: "User & Staff",  href: "/admin/users",         icon: Users        },
+  { name: "Revenue",       href: "/admin/revenue",       icon: DollarSign   },
+  { name: "Orders",        href: "/admin/orders",        icon: ShoppingCart },
+  { name: "Notifications", href: "/admin/notifications", icon: Bell         },
+  { name: "Permissions",   href: "/admin/permissions",   icon: Shield       },
+  { name: "Settings",      href: "/admin/settings",      icon: Settings     },
 ];
 
 interface AdminSidebarProps {
@@ -38,130 +26,86 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  const initials = user
-    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-    : "AD";
-
-  const firstName = user?.firstName || "Admin";
-  const avatarUrl = user?.avatar; // ✅ Get avatar from user
+  const initials  = user?.firstName && user?.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : "AD";
+  const fullName  = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Admin";
+  const avatarUrl = user?.avatar;
 
   return (
     <>
-      {/* Overlay for Mobile */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden bg-[#1A3F1C]"
-          onClick={onClose} 
-        />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={onClose} />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 z-50
-          w-64 h-screen flex flex-col
-          shadow-xl border-r border-transparent dark:border-slate-800
-          transform transition-transform duration-300 ease-in-out
-          lg:translate-x-0 bg-[#1a3f1c] dark:bg-slate-900
+          fixed lg:sticky top-0 left-0 z-50 h-screen
+          w-64 flex flex-col sidebar-gradient shadow-2xl
+          transition-transform duration-300 ease-in-out lg:translate-x-0
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {/* Top bar */}
-        <div className="p-4 flex items-center justify-between bg-[#1a3f1c]">
-          <h1 className="text-white text-xl font-black tracking-tight">
-            Ounjefood
-          </h1>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-white hover:bg-white/10"
-            onClick={onClose}
-          >
-            <X className="h-5 w-5" />
-          </Button>
+        {/* Brand */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#ffca3a] flex items-center justify-center shrink-0">
+              <span className="text-[#1a3f1c] font-black text-sm">O</span>
+            </div>
+            <span className="text-white font-black text-lg tracking-tight">Ounjefood</span>
+          </div>
+          <button type="button" onClick={onClose} title="Close menu" aria-label="Close menu"
+            className="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-colors">
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
         {/* Profile */}
-        <div className="p-5 pb-6 bg-[#1a3f1c]">
-          <div className="flex flex-col items-center gap-3 p-3 rounded-xl shadow-sm bg-[#1a3f1c]">
-            <Avatar className="h-12 w-12 bg-[#98ef9b] border-2 border-white/20">
-              {/* ✅ Show actual avatar image if available */}
-              {avatarUrl && (
-                <AvatarImage 
-                  src="../"
-                  alt={`${firstName}'s avatar`}
-                  className="object-cover"
-                />
-              )}
-              {/* ✅ Fallback to initials if no avatar */}
-              <AvatarFallback className=" text-[#1a3f1c] font-bold text-sm">
-                {/* {initials} */}
-                <Image
-                    src="/images/south.svg"
-                    alt="South"
-                    fill
-                    sizes="200px"
-                    className="object-cover"
-                    priority
-                  />
-              </AvatarFallback>
+        <div className="px-4 py-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 shrink-0 ring-2 ring-white/20">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName} className="object-cover" />}
+              <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold text-sm">{initials}</AvatarFallback>
             </Avatar>
-
-            <div className="min-w-0 flex items-center text-center">
-              <p className="text-white text-sm font-semibold">welcome Back {firstName}</p>
+            <div className="min-w-0">
+              <p className="text-white font-semibold text-sm truncate">{fullName}</p>
+              <span className="inline-block mt-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#ffca3a]/20 text-[#ffca3a] px-2 py-0.5 rounded-full">
+                Super Admin
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Navigation Items */}
-        <ScrollArea className="flex-1 px-4 pb-6 bg-[#1a3f1c]">
-          <nav className="flex flex-col gap-4 mt-2">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => {
-                    if (window.innerWidth < 1024) onClose();
-                  }}
-                  className={`
-                    flex items-center gap-3
-                    px-4 py-3
-                    rounded-lg
-                    h-12 w-[92%] mx-auto
-                    text-sm font-medium
-                    transition-all duration-200
-                    ${
-                      isActive
-                        ? "bg-[#ffca3a] text-[#1a3f1c] font-black shadow-lg"
-                        : "text-white/70 hover:text-white hover:bg-white/10"
-                    }
-                  `}
-                >
-                  <Icon className="h-5 w-5 shrink-0" />
-                  <span className="truncate">{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
+        {/* Navigation */}
+        <ScrollArea className="flex-1 sidebar-scroll">
+          <div className="px-3 py-3">
+            <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest px-3 mb-2">Menu</p>
+            <nav className="flex flex-col gap-0.5">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+                return (
+                  <Link key={item.name} href={item.href}
+                    onClick={() => { if (window.innerWidth < 1024) onClose(); }}
+                    className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group
+                      ${isActive ? "bg-[#ffca3a] text-[#1a3f1c] font-bold shadow-sm" : "text-white/65 hover:text-white hover:bg-white/8"}`}
+                  >
+                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-[#1a3f1c]" : "text-white/50 group-hover:text-white/80"}`} />
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
         </ScrollArea>
 
         {/* Logout */}
-       <div className="p-2 bg-[#FFFFFF] border-t border-white/10 mb-4 mx-5 rounded-lg">
-          <Button
-            onClick={logout}
-            variant="ghost"
-            className="w-full flex items-center gap-3 hover:bg-white/10 cursor-pointer"
-          >
-            <LogOut className="h-5 w-5" />
-            <span className="text-lg text-[#000000] font-medium">Log Out</span>
-          </Button>
+        <div className="px-3 py-3 border-t border-white/10">
+          <button type="button" onClick={logout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/8 transition-all duration-150 group">
+            <LogOut className="h-4 w-4 shrink-0 group-hover:text-red-400 transition-colors" />
+            <span>Log Out</span>
+          </button>
         </div>
-
       </aside>
     </>
   );

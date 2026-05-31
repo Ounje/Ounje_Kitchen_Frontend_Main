@@ -67,20 +67,22 @@ export default function ReviewsPage() {
           ...(category ? { ratingCategory: category as any } : {}),
         };
 
-        // Cast to the actual flat response shape the backend returns
         const res = (
           type === "vendor"
             ? await operationsService.getVendorReviews(queryParams)
             : await operationsService.getRiderReviews(queryParams)
         ) as ReviewsApiResponse<VendorRow | RiderRow>;
 
-        setRows(res.data);
+        setRows(Array.isArray(res.data) ? res.data : []);
         setPagination({
-          page: res.page,
-          totalPages: res.totalPages,
-          total: res.total,
-          limit: res.limit,
+          page: res.page ?? 1,
+          totalPages: res.totalPages ?? 1,
+          total: res.total ?? 0,
+          limit: res.limit ?? limit,
         });
+      } catch (err: any) {
+        toast.error(err?.message || "Failed to load reviews");
+        setRows([]);
       } finally {
         setTableLoading(false);
       }
@@ -127,30 +129,30 @@ export default function ReviewsPage() {
 
   // ── Render ───────────────────────────────────────────────
   return (
-    <div className="px-4 sm:px-8 xl:px-14 py-6 min-h-screen bg-white">
+    <div className="px-4 sm:px-6 py-6 min-h-screen bg-white">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Reviews &amp; Rating</h1>
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-lg font-black text-[#1a3f1c]">Reviews &amp; Ratings</h1>
 
         {/* Type Dropdown */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setTypeDropdownOpen((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
           >
             {type === "vendor" ? "Vendor" : "Rider"}
-            <ChevronDown size={16} className="text-gray-500" />
+            <ChevronDown size={14} className="text-gray-400" />
           </button>
           {typeDropdownOpen && (
-            <ul className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-md z-10 overflow-hidden">
+            <ul className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-md z-10 overflow-hidden">
               {(["vendor", "rider"] as ReviewType[]).map((t) => (
                 <li key={t}>
                   <button
+                    type="button"
                     onClick={() => handleTypeChange(t)}
-                    className={`w-full text-left px-4 py-2.5 text-sm capitalize hover:bg-[#e8f8e8] transition-colors ${
-                      type === t
-                        ? "bg-[#e8f8e8] font-semibold text-[#1A3F1C]"
-                        : "text-gray-700"
+                    className={`w-full text-left px-3 py-2 text-sm capitalize hover:bg-[#e8f8e8] transition-colors ${
+                      type === t ? "bg-[#e8f8e8] font-semibold text-[#1A3F1C]" : "text-gray-700"
                     }`}
                   >
                     {t.charAt(0).toUpperCase() + t.slice(1)}

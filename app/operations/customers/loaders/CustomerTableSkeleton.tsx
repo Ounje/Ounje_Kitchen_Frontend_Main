@@ -5,7 +5,7 @@ export function CustomerTableSkeleton() {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr style={{ backgroundColor: '#37A449' }}>
+            <tr className="bg-green-600">
               <th className="px-4 py-3 text-left text-white font-medium text-sm">S/N</th>
               <th className="px-4 py-3 text-left text-white font-medium text-sm">Name</th>
               <th className="px-4 py-3 text-left text-white font-medium text-sm">Email</th>

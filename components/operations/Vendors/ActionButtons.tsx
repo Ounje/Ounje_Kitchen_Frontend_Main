@@ -12,18 +12,22 @@ export function ActionButtons({ vendorId, accountStatus }: ActionButtonsProps) {
   const isSuspended = accountStatus === 'suspended';
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full mt-2">
+    <div className="flex gap-3 pt-4 mt-4 border-t border-gray-100">
       <button
+        type="button"
         onClick={() => router.push(`/operations/vendors/${vendorId}/actions/${isSuspended ? 'activate' : 'suspend'}`)}
-        className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold text-[#1A3F1C] hover:opacity-90 active:scale-95 transition-all"
-        style={{ backgroundColor: '#FFCA3A' }}
+        className={`px-5 py-2.5 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity ${
+          isSuspended
+            ? 'bg-[#1a3f1c] text-white'
+            : 'bg-amber-400 text-[#1a3f1c]'
+        }`}
       >
         {isSuspended ? 'Activate Account' : 'Suspend Account'}
       </button>
       <button
+        type="button"
         onClick={() => router.push(`/operations/vendors/${vendorId}/actions/delete`)}
-        className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold text-white hover:opacity-90 active:scale-95 transition-all"
-        style={{ backgroundColor: '#D00000' }}
+        className="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-600 text-white hover:opacity-90 transition-opacity"
       >
         Delete Account
       </button>

@@ -28,7 +28,7 @@ export function VendorTopChart({ topVendors, loading = false }: VendorTopChartPr
 
   return (
     <div className="mb-6 w-full">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4" style={{ color: '#1A3F1C' }}>
+      <h2 className="text-xl sm:text-2xl font-bold mb-4" className="text-[#1a3f1c]">
         Vendor <span className="text-gray-500 font-normal">| Top Chart</span>
       </h2>
 

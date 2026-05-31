@@ -85,11 +85,149 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.015em;
   }
 }
 
-body {
-  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
-  /* background-color: #f5f5f5; */
-  /* color: #0f172a; */
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* Sidebar scrollbar (thinner, lighter) */
+.sidebar-scroll::-webkit-scrollbar { width: 3px; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+
+/* ── Transitions ─────────────────────────────────────────────────────────── */
+.page-transition { animation: fadeSlideIn 0.18s ease-out both; }
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
 }
+
+@layer components {
+  /* ── Sidebar gradient ──────────────────────────────────────────────────── */
+  .sidebar-gradient {
+    background: linear-gradient(180deg, #1e4820 0%, #152e17 100%);
+  }
+
+  /* ── Login page ────────────────────────────────────────────────────────── */
+  .login-loading-bg {
+    background: #f0f4f0;
+  }
+  .login-brand-panel {
+    background: linear-gradient(135deg, #1e4820 0%, #0d2210 100%);
+  }
+  .login-blob-gold {
+    background: #ffca3a;
+    opacity: 0.10;
+  }
+  .login-blob-green {
+    background: #98ef9b;
+    opacity: 0.10;
+  }
+  .login-blob-white {
+    background: #ffffff;
+    opacity: 0.05;
+  }
+  .login-check-circle {
+    background: #ffca3a;
+  }
+  .login-submit-btn {
+    background: linear-gradient(135deg, #1e4820 0%, #1a3f1c 100%);
+    box-shadow: 0 4px 14px rgba(26, 63, 28, 0.35);
+  }
+  .login-submit-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2a5c2d 0%, #1e4820 100%);
+    box-shadow: 0 6px 18px rgba(26, 63, 28, 0.45);
+  }
+  .login-submit-btn:disabled {
+    background: #4a7a4d;
+    box-shadow: none;
+  }
+}
+
+/* ── Card polish ─────────────────────────────────────────────────────────── */
+.card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card-hover:hover {
+  box-shadow: 0 8px 24px -4px rgba(26, 63, 28, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ── Premium UI Utilities ────────────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(26, 63, 28, 0.05);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -8px rgba(26, 63, 28, 0.15);
+}
+
+.pulse-glow {
+  position: relative;
+}
+.pulse-glow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background-color: inherit;
+  z-index: -1;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+
+/* ── Modern Table Utilities ──────────────────────────────────────────────── */
+.modern-table-container {
+  @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04);
+}
+.modern-table {
+  @apply w-full text-sm text-left border-collapse;
+}
+.modern-table thead th {
+  @apply px-5 py-4 font-bold text-[11px] uppercase tracking-wider text-gray-500 bg-gray-50/80 border-b border-gray-100;
+  backdrop-filter: blur(8px);
+}
+.modern-table tbody tr {
+  @apply border-b border-gray-50 hover:bg-primary/5 transition-all duration-200 cursor-default;
+}
+.modern-table tbody tr:hover td {
+  @apply text-gray-900;
+}
+.modern-table tbody td {
+  @apply px-5 py-4 align-middle transition-colors duration-200;
+}
+

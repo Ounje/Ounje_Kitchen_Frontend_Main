@@ -12,7 +12,7 @@ function StatusBadge({ status }: { status: 'PASS' | 'FAIL' }) {
   return (
     <span
       className="inline-block px-2 py-0.5 rounded text-xs font-bold text-white whitespace-nowrap"
-      style={{ backgroundColor: status === 'PASS' ? '#1A3F1C' : '#D00000' }}
+      className={status === "PASS" ? "bg-[#1a3f1c]" : "bg-red-600"}
     >
       {status}
     </span>
@@ -32,11 +32,11 @@ export function WithdrawalList({ groups, onInfo, onPrint }: Props) {
     <div className="space-y-4 w-full">
       {groups.map(group => (
         <div key={group.date}>
-          <p className="text-sm font-semibold mb-2" style={{ color: '#1A3F1C' }}>
+          <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">
             {group.date}
           </p>
 
-          <div className="rounded-xl overflow-hidden" style={{ backgroundColor: '#98EF9B' }}>
+          <div className="rounded-xl overflow-hidden" className="bg-gray-50 border-b border-gray-100">
             {group.withdrawals.map((wd, idx) => (
               <div
                 key={wd.id}
@@ -52,7 +52,7 @@ export function WithdrawalList({ groups, onInfo, onPrint }: Props) {
                 </div>
 
                 {/* Left info */}
-                <div className="flex-1 min-w-0 text-xs sm:text-sm" style={{ color: '#1A3F1C' }}>
+                <div className="flex-1 min-w-0 text-xs sm:text-sm" className="text-[#1a3f1c]">
                   <p className="font-semibold truncate">{wd.userName} made a withdrawal</p>
                   <p className="truncate">Bank: {wd.bankName}</p>
                   <p className="flex items-center gap-1.5 flex-wrap">
@@ -61,7 +61,7 @@ export function WithdrawalList({ groups, onInfo, onPrint }: Props) {
                 </div>
 
                 {/* Right info */}
-                <div className="hidden sm:block flex-1 min-w-0 text-xs sm:text-sm" style={{ color: '#1A3F1C' }}>
+                <div className="hidden sm:block flex-1 min-w-0 text-xs sm:text-sm" className="text-[#1a3f1c]">
                   <p>Amount: ₦{wd.amount.toLocaleString()}</p>
                   <p>Narration: {wd.narration}</p>
                   <p className="flex items-center gap-1">
@@ -74,14 +74,14 @@ export function WithdrawalList({ groups, onInfo, onPrint }: Props) {
                   <button
                     onClick={() => onInfo(wd.id)}
                     className="px-4 py-1.5 rounded text-xs font-semibold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#1A3F1C' }}
+                    className="bg-[#1a3f1c]"
                   >
                     Info
                   </button>
                   <button
                     onClick={() => onPrint(wd.id)}
                     className="px-4 py-1.5 rounded text-xs font-semibold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#1A3F1C' }}
+                    className="bg-[#1a3f1c]"
                   >
                     Print
                   </button>

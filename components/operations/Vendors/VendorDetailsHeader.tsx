@@ -1,14 +1,29 @@
-'use client';
+"use client";
 
-import { Star } from 'lucide-react';
-import { useState } from 'react';
-import { vendorService, Vendor } from '@/lib/api/services/vendor.service';
-import { StatusBadge } from './StatusBadge';
-import { CACBadge } from './CACBadge';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Star, Phone, MapPin, Building2 } from "lucide-react";
+import { vendorService, Vendor } from "@/lib/api/services/vendor.service";
+import { StatusBadge } from "./StatusBadge";
+import { CACBadge } from "./CACBadge";
+import { formatNigerianPhone } from "@/lib/utils/formatPhone";
+import { toast } from "sonner";
 
 interface VendorDetailsHeaderProps {
   vendor: Vendor;
+}
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star
+          key={i}
+          className={`w-3.5 h-3.5 ${i <= Math.round(rating) ? "fill-[#ffca3a] text-[#ffca3a]" : "text-gray-200"}`}
+        />
+      ))}
+      <span className="ml-1 text-xs text-gray-500 tabular-nums">{rating > 0 ? rating.toFixed(1) : "No ratings"}</span>
+    </div>
+  );
 }
 
 export function VendorDetailsHeader({ vendor }: VendorDetailsHeaderProps) {
@@ -18,105 +33,69 @@ export function VendorDetailsHeader({ vendor }: VendorDetailsHeaderProps) {
     try {
       setAlerting(true);
       await vendorService.alertVendor(vendor.id);
-      toast.success('Vendor has been alerted successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to alert vendor');
+      toast.success("Vendor alerted successfully");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to alert vendor");
     } finally {
       setAlerting(false);
     }
   };
 
-  const renderStars = () => {
-    const fullStars = Math.floor(vendor.rating);
-    const hasHalf = vendor.rating % 1 >= 0.5;
-    return [0, 1, 2, 3, 4].map((i) => {
-      if (i < fullStars)
-        return <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-[#FFCA3A] text-[#FFCA3A]" />;
-      if (i === fullStars && hasHalf)
-        return (
-          <Star
-            key={i}
-            className="w-4 h-4 sm:w-5 sm:h-5 fill-[#FFCA3A] text-[#FFCA3A]"
-            style={{ clipPath: 'inset(0 50% 0 0)' }}
-          />
-        );
-      return <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 text-[#FFCA3A]" />;
-    });
-  };
-
-  const isRegistered = vendor.businessStatus === 'registered' && vendor.cacNumber;
+  const isRegistered = vendor.businessStatus === "registered" && vendor.cacNumber;
 
   return (
-    <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 w-full">
-      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-
-        {/* Photo — guard against empty/null src */}
-        <div className="flex-shrink-0 flex sm:block justify-center">
+    <div className="glass-card hover-lift p-6 mb-5">
+      <div className="flex items-start gap-4">
+        {/* Avatar */}
+        <div className="shrink-0">
           {vendor.avatar ? (
-            <img
-              src={vendor.avatar}
-              alt={vendor.name}
-              className="w-40 h-36 sm:w-52 sm:h-44 rounded-xl object-cover"
-            />
+            <img src={vendor.avatar} alt={vendor.name} className="w-16 h-16 rounded-xl object-cover ring-2 ring-gray-100" />
           ) : (
-            <div
-              className="w-40 h-36 sm:w-52 sm:h-44 rounded-xl flex items-center justify-center text-4xl font-bold"
-              style={{ backgroundColor: '#98EF9B', color: '#1A3F1C' }}
-            >
-              {(vendor.name ?? '?').charAt(0).toUpperCase()}
+            <div className="w-16 h-16 rounded-xl bg-[#98ef9b]/40 flex items-center justify-center text-xl font-bold text-[#1a3f1c]">
+              {(vendor.name ?? "?").charAt(0).toUpperCase()}
             </div>
           )}
         </div>
 
-        {/* Details */}
-        <div className="flex-1 min-w-0 space-y-2 text-sm">
-          <div className="flex flex-wrap gap-x-1">
-            <span className="font-semibold" style={{ color: '#1A3F1C' }}>Name:</span>
-            <span className="break-words" style={{ color: '#1A3F1C' }}>{vendor.name}</span>
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <h2 className="text-base font-bold text-gray-900 truncate">{vendor.name}</h2>
+            <StatusBadge status={vendor.accountStatus} size="sm" />
           </div>
-          <div className="flex flex-wrap gap-x-1">
-            <span className="font-semibold" style={{ color: '#1A3F1C' }}>Phone number:</span>
-            <span style={{ color: '#1A3F1C' }}>{vendor.phone}</span>
-          </div>
-          {vendor.serviceType && (
-            <div className="flex flex-wrap gap-x-1">
-              <span className="font-semibold" style={{ color: '#1A3F1C' }}>Service Type:</span>
-              <span style={{ color: '#1A3F1C' }}>{vendor.serviceType}</span>
+
+          <StarRating rating={vendor.rating ?? 0} />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1.5 gap-x-6 mt-2.5">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <span className="tabular-nums">{formatNigerianPhone(vendor.phone) || "—"}</span>
             </div>
-          )}
-          <div className="flex flex-wrap items-center gap-x-2">
-            <span className="font-semibold" style={{ color: '#1A3F1C' }}>Rating:</span>
-            <div className="flex items-center gap-0.5">{renderStars()}</div>
-          </div>
-          <div className="flex flex-wrap gap-x-1">
-            <span className="font-semibold" style={{ color: '#1A3F1C' }}>Address:</span>
-            <span className="break-words" style={{ color: '#1A3F1C' }}>{vendor.address}</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold" style={{ color: '#1A3F1C' }}>CAC:</span>
-            {vendor.cacNumber && (
-              <span style={{ color: '#1A3F1C' }}>{vendor.cacNumber}</span>
-            )}
-            <CACBadge isRegistered={!!isRegistered} />
-            {isRegistered && (
-              <button
-                onClick={handleAlertVendor}
-                disabled={alerting}
-                className="px-3 py-1 rounded text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-                style={{ backgroundColor: '#1A3F1C' }}
-              >
-                {alerting ? 'Alerting...' : 'Alert Vendor'}
-              </button>
-            )}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Building2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <CACBadge isRegistered={!!isRegistered} />
+              {vendor.cacNumber && <span className="text-xs text-gray-400 ml-1">{vendor.cacNumber}</span>}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 sm:col-span-2">
+              <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <span className="truncate">{vendor.address || "—"}</span>
+            </div>
           </div>
         </div>
-
-        {/* Status Badge */}
-        <div className="flex sm:items-start justify-center sm:justify-end flex-shrink-0">
-          <StatusBadge status={vendor.accountStatus} size="lg" />
-        </div>
-
       </div>
+
+      {isRegistered && (
+        <div className="mt-3 pt-3 border-t border-gray-100 flex justify-end">
+          <button
+            type="button"
+            onClick={handleAlertVendor}
+            disabled={alerting}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#1a3f1c] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+          >
+            {alerting ? "Alerting…" : "Alert Vendor"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

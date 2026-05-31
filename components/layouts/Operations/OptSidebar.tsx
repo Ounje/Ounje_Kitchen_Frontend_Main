@@ -7,29 +7,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Home,
-  ShoppingCart,
-  Users,
-  Store,
-  Bike,
-  Star,
-  UserCircle,
-  LogOut,
-  X,
-  Tag,
-  Radio,
+  Home, ShoppingCart, Users, Store, Bike,
+  Star, UserCircle, LogOut, X, Tag, Radio, CreditCard,
 } from "lucide-react";
 
 const navigation = [
-  { name: "Home", href: "/operations", icon: Home },
-  { name: "Orders", href: "/operations/orders", icon: ShoppingCart },
-  { name: "Customers", href: "/operations/customers", icon: Users },
-  { name: "Vendors", href: "/operations/vendors", icon: Store },
-  { name: "Riders", href: "/operations/riders", icon: Bike },
-  { name: "Review & Rating", href: "/operations/reviews", icon: Star },
-  { name: "Promos", href: "/operations/promos", icon: Tag },
-  { name: "Broadcasts", href: "/operations/notifications", icon: Radio },
-  { name: "Settings", href: "/operations/settings", icon: UserCircle },
+  { name: "Home",           href: "/operations",               icon: Home        },
+  { name: "Orders",         href: "/operations/orders",        icon: ShoppingCart },
+  { name: "Customers",      href: "/operations/customers",     icon: Users        },
+  { name: "Vendors",        href: "/operations/vendors",       icon: Store        },
+  { name: "Riders",         href: "/operations/riders",        icon: Bike         },
+  { name: "Review & Rating",href: "/operations/reviews",       icon: Star         },
+  { name: "Promo Codes",    href: "/operations/promos",        icon: Tag          },
+  { name: "Transactions",   href: "/operations/transactions",  icon: CreditCard   },
+  { name: "Broadcasts",     href: "/operations/notifications", icon: Radio        },
+  { name: "Settings",       href: "/operations/settings",      icon: UserCircle   },
 ];
 
 interface OperationsSidebarProps {
@@ -41,129 +33,117 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  const initials =
-    user?.firstName && user?.lastName
-      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-      : "OP";
-
-  const firstName = user?.firstName || "User";
+  const initials = user?.firstName && user?.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : "OP";
+  const fullName  = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Operations";
   const avatarUrl = user?.avatar;
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={onClose}
-          aria-label="Close sidebar"
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 z-50
-          h-screen
-          w-[280px] sm:w-64
-          flex flex-col
-          shadow-xl border-r border-transparent
+          fixed lg:sticky top-0 left-0 z-50 h-screen
+          w-64 flex flex-col
+          bg-[#1a3f1c]/95 backdrop-blur-xl border-r border-white/10
+          shadow-[0_0_40px_rgba(26,63,28,0.2)]
           transition-transform duration-300 ease-in-out
-          lg:translate-x-0 bg-[#1a3f1c]
+          lg:translate-x-0
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {/* Header */}
-        <div className="p-3 sm:p-4 flex items-center justify-between border-b border-white/10 min-h-[64px] bg-[#1a3f1c]">
-          <h1 className="text-white text-xl font-black tracking-tight">
-            Ounjefood
-          </h1>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-white hover:bg-white/10 h-9 w-9"
+        {/* ── Brand ─────────────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#ffca3a] flex items-center justify-center flex-shrink-0">
+              <span className="text-[#1a3f1c] font-black text-sm">O</span>
+            </div>
+            <span className="text-white font-black text-lg tracking-tight">Ounjefood</span>
+          </div>
+          <button
+            type="button"
             onClick={onClose}
+            title="Close menu"
             aria-label="Close menu"
+            className="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-colors"
           >
-            <X className="h-5 w-5" />
-          </Button>
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        {/* Profile Card */}
-        <div className="p-4 sm:p-5 pb-4 sm:pb-6 border-b border-white/10 bg-[#1a3f1c]">
-          <div className="flex flex-col items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl shadow-sm bg-[#1a3f1c]">
-            <Avatar className="h-14 w-14 sm:h-12 sm:w-12 bg-[#98ef9b] border-2 border-white/20">
-              {avatarUrl && (
-                <AvatarImage 
-                  src={avatarUrl} 
-                  alt={`${firstName}'s avatar`}
-                  className="object-cover"
-                />
-              )}
+        {/* ── Profile ───────────────────────────────────────────────────── */}
+        <div className="px-4 py-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-white/20">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName} className="object-cover" />}
               <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold text-sm">
                 {initials}
               </AvatarFallback>
             </Avatar>
-
-            <div className="min-w-0 flex items-center text-center">
-              <p className="text-white text-xs sm:text-sm font-semibold">
-                welcome Back {firstName}
-              </p>
+            <div className="min-w-0">
+              <p className="text-white font-semibold text-sm truncate">{fullName}</p>
+              <span className="inline-block mt-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#ffca3a]/20 text-[#ffca3a] px-2 py-0.5 rounded-full">
+                Operations
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Navigation */}
-        <ScrollArea className="flex-1 px-3 sm:px-4 pb-6 bg-[#1a3f1c]">
-          <nav className="flex flex-col gap-3 sm:gap-4 mt-2 sm:mt-3">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/operations" && pathname.startsWith(item.href));
+        {/* ── Navigation ────────────────────────────────────────────────── */}
+        <ScrollArea className="flex-1 sidebar-scroll">
+          <div className="px-3 py-3">
+            <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest px-3 mb-2">Menu</p>
+            <nav className="flex flex-col gap-0.5">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== "/operations" && pathname.startsWith(item.href));
 
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => {
-                    if (window.innerWidth < 1024) onClose();
-                  }}
-                  className={`
-                    flex items-center gap-3
-                    px-3 sm:px-4 py-3 sm:py-3
-                    rounded-lg
-                    min-h-[48px] sm:h-12
-                    w-full sm:w-[92%] mx-auto
-                    text-xs sm:text-sm font-medium
-                    transition-all duration-200
-                    touch-manipulation
-                    ${
-                      isActive
-                        ? "bg-[#ffca3a] text-[#1a3f1c] font-black shadow-lg"
-                        : "text-white/70 hover:text-white hover:bg-white/10"
-                    }
-                  `}
-                >
-                  <Icon className="h-5 w-5 shrink-0" />
-                  <span className="truncate">{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => { if (window.innerWidth < 1024) onClose(); }}
+                    className={`
+                      relative flex items-center gap-3 px-3 py-3 rounded-xl
+                      text-sm font-semibold transition-all duration-300 group overflow-hidden
+                      ${isActive
+                        ? "bg-gradient-to-r from-[#ffca3a]/90 to-[#ffca3a] text-[#1a3f1c] shadow-[0_4px_12px_rgba(255,202,58,0.3)] hover-lift"
+                        : "text-white/60 hover:text-white hover:bg-white/10"
+                      }
+                    `}
+                  >
+                    {isActive && (
+                      <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#1a3f1c]/30" />
+                    )}
+                    <Icon className={`h-[18px] w-[18px] flex-shrink-0 transition-transform duration-300 ${isActive ? "text-[#1a3f1c] scale-110" : "text-white/50 group-hover:text-white/80 group-hover:scale-110"}`} />
+                    <span className="truncate tracking-wide">{item.name}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
         </ScrollArea>
 
-        {/* Logout */}
-        <div className="p-3 sm:p-4 border-t border-white/10 bg-[#1a3f1c]">
-          <Button
+        {/* ── Logout ────────────────────────────────────────────────────── */}
+        <div className="px-3 py-3 border-t border-white/10">
+          <button
+            type="button"
             onClick={logout}
-            variant="ghost"
-            className="w-full flex items-center justify-start gap-3 text-white hover:bg-white/10 active:bg-white/20 rounded-lg min-h-[48px] sm:h-12 px-3 sm:px-4 touch-manipulation"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/8 transition-all duration-150 group"
           >
-            <LogOut className="h-5 w-5" />
-            <span className="text-xs sm:text-sm font-medium">Log Out</span>
-          </Button>
+            <LogOut className="h-4 w-4 flex-shrink-0 group-hover:text-red-400 transition-colors" />
+            <span>Log Out</span>
+          </button>
         </div>
       </aside>
     </>

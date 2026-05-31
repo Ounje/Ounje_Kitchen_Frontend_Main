@@ -11,7 +11,8 @@ import Pagination from '@/components/Pagination';
 import type { RiderFilters } from '@/lib/api/services/rider.service';
 import { riderService } from '@/lib/api/services/rider.service';
 import { downloadCSV } from '@/lib/utils/exportCSV';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Bike } from 'lucide-react';
+import { formatNigerianPhone } from '@/lib/utils/formatPhone';
 import { toast } from 'sonner';
 
 export default function RidersPage() {
@@ -65,7 +66,7 @@ export default function RidersPage() {
       const data = await riderService.getRiders({ ...filters, page: 1, limit: 10000 });
       const rows = data.riders.map((r) => ({
         Name: r.name,
-        Phone: r.phone,
+        Phone: formatNigerianPhone(r.phone),
         Zone: r.zone,
         'Account Status': r.accountStatus,
         'Rider Status': r.riderStatus,
@@ -109,25 +110,22 @@ export default function RidersPage() {
   const totalPages = ridersData?.totalPages ?? 1;
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
-
+    <div className="space-y-5">
         {/* Page Title */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>Riders</h1>
-            {ridersData?.total != null && (
-              <span className="text-sm text-gray-500">{ridersData.total} total</span>
-            )}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#1a3f1c]/10 flex items-center justify-center shrink-0">
+              <Bike className="h-5 w-5 text-[#1a3f1c]" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-gray-900">Riders</h1>
+              {ridersData?.total != null && <p className="text-xs text-gray-400">{ridersData.total.toLocaleString()} total riders</p>}
+            </div>
           </div>
-          <button
-            onClick={handleExportCSV}
-            disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
-            style={{ backgroundColor: '#1A3F1C' }}
-          >
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {exporting ? 'Exporting...' : 'Download CSV'}
+          <button type="button" onClick={handleExportCSV} disabled={exporting}
+            className="inline-flex items-center gap-2 h-9 px-4 bg-[#1a3f1c] text-white text-sm font-semibold rounded-lg hover:bg-[#163318] active:scale-[0.98] transition-all disabled:opacity-50 shrink-0">
+            {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            {exporting ? "Exporting…" : "Export CSV"}
           </button>
         </div>
 
@@ -198,7 +196,6 @@ export default function RidersPage() {
           onClose={() => setSuccessModal({ isOpen: false, message: '' })}
         />
 
-      </div>
     </div>
   );
 }

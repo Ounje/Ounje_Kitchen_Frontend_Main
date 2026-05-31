@@ -6,6 +6,7 @@ import { useRouteGuard } from "@/hooks/useRouteGuard";
 import { operationsService } from "@/lib/api/services/operations.service";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Phone, Mail, MapPin, Star, Loader2 } from "lucide-react";
+import { formatNigerianPhone } from "@/lib/utils/formatPhone";
 import { toast } from "sonner";
 import AssignRiderModal from "@/components/operations/modals/AssignRiderModal";
 import { OrderTimeline } from "@/components/operations/OrderTimeline";
@@ -218,6 +219,9 @@ export default function OrderDetailsPage({ params }: PageProps) {
     await fetchOrder();
   }, [fetchOrder]);
 
+  const [remindingVendor, setRemindingVendor] = useState(false);
+  const [remindingRider,  setRemindingRider]  = useState(false);
+
   const handleContactVendor = useCallback(() => {
     const phone = (
       order?.vendor?.phone ??
@@ -239,6 +243,36 @@ export default function OrderDetailsPage({ params }: PageProps) {
     if (!phone) { toast.error("No rider phone number available"); return; }
     window.open(`tel:${phone}`);
   }, [order]);
+
+  const handleRemindVendor = useCallback(async () => {
+    if (remindingVendor) return;
+    setRemindingVendor(true);
+    try {
+      const res: any = await operationsService.remindVendor(id);
+      const count = res?.data?.reminderCount ?? res?.reminderCount;
+      toast.success(count ? `Vendor reminded (×${count})` : "Reminder sent to vendor");
+      await fetchOrder();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to remind vendor");
+    } finally {
+      setRemindingVendor(false);
+    }
+  }, [id, remindingVendor, fetchOrder]);
+
+  const handleRemindRider = useCallback(async () => {
+    if (remindingRider) return;
+    setRemindingRider(true);
+    try {
+      const res: any = await operationsService.remindRider(id);
+      const count = res?.data?.reminderCount ?? res?.reminderCount;
+      toast.success(count ? `Rider reminded (×${count})` : "Reminder sent to rider");
+      await fetchOrder();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to remind rider");
+    } finally {
+      setRemindingRider(false);
+    }
+  }, [id, remindingRider, fetchOrder]);
 
   // ── Early returns (must come after all hooks) ───────────────────────────────
 
@@ -285,7 +319,7 @@ export default function OrderDetailsPage({ params }: PageProps) {
   // ── Customer ────────────────────────────────────────────────────────────────
   const customer        = order.customer ?? {};
   const customerName    = resolveName(customer, "Unknown");
-  const customerPhone   = String(customer.phone ?? customer.phoneNumber ?? customer.user?.phone ?? customer.user?.phoneNumber ?? "");
+  const customerPhone   = formatNigerianPhone(customer.phone ?? customer.phoneNumber ?? customer.user?.phone ?? customer.user?.phoneNumber ?? "");
   const customerEmail   = customer.email ?? customer.user?.email ?? "";
   const customerAddress = resolveAddress(
     customer.primaryAddress ?? customer.address ?? customer.user?.address ??
@@ -296,7 +330,7 @@ export default function OrderDetailsPage({ params }: PageProps) {
   // ── Vendor ──────────────────────────────────────────────────────────────────
   const vendor        = order.vendor ?? {};
   const vendorName    = vendor.storeName ?? vendor.businessName ?? vendor.name ?? "—";
-  const vendorPhone   = String(vendor.phone ?? vendor.phoneNumber ?? "");
+  const vendorPhone   = formatNigerianPhone(vendor.phone ?? vendor.phoneNumber ?? "");
   const vendorAddress = resolveAddress(vendor.address ?? "");
   const vendorRating  = vendor.rating      ?? vendor.averageRating ?? 0;
   const vendorCount   = vendor.ratingCount ?? vendor.totalRatings  ?? 0;
@@ -306,7 +340,7 @@ export default function OrderDetailsPage({ params }: PageProps) {
   const hasRider     = !!order.rider;
   const riderObj     = order.rider ?? {};
   const riderName    = hasRider ? resolveName(riderObj.user ?? riderObj, "Rider") : "Not Assigned";
-  const riderPhone   = String(riderObj.user?.phone ?? riderObj.user?.phoneNumber ?? riderObj.phone ?? riderObj.phoneNumber ?? "");
+  const riderPhone   = formatNigerianPhone(riderObj.user?.phone ?? riderObj.user?.phoneNumber ?? riderObj.phone ?? riderObj.phoneNumber ?? "");
   const riderRating  = riderObj.ratings?.average ?? riderObj.averageRating ?? riderObj.rating ?? 0;
   const riderCount   = riderObj.ratings?.count   ?? riderObj.ratingCount   ?? 0;
   const riderZone    = (() => {
@@ -464,14 +498,12 @@ export default function OrderDetailsPage({ params }: PageProps) {
               </>
             )}
 
-            {!hasRider && (
-              <Button
-                onClick={() => setAssignOpen(true)}
-                className="w-full bg-[#1a3f1c] hover:bg-[#164016] text-white h-11 mt-4"
-              >
-                Assign a Rider
-              </Button>
-            )}
+            <Button
+              onClick={() => setAssignOpen(true)}
+              className="w-full bg-[#1a3f1c] hover:bg-[#164016] text-white h-11 mt-4"
+            >
+              {hasRider ? "Reassign Rider" : "Assign a Rider"}
+            </Button>
           </div>
         )}
 
@@ -510,14 +542,12 @@ export default function OrderDetailsPage({ params }: PageProps) {
                 />
               )}
             </div>
-            {!hasRider && (
-              <Button
-                onClick={() => setAssignOpen(true)}
-                className="w-full bg-[#1a3f1c] hover:bg-[#164016] text-white h-11 mt-6"
-              >
-                Assign a Rider
-              </Button>
-            )}
+            <Button
+              onClick={() => setAssignOpen(true)}
+              className="w-full bg-[#1a3f1c] hover:bg-[#164016] text-white h-11 mt-6"
+            >
+              {hasRider ? "Reassign Rider" : "Assign a Rider"}
+            </Button>
           </>
         )}
 
@@ -581,7 +611,7 @@ export default function OrderDetailsPage({ params }: PageProps) {
                 <p className="text-[10px] text-primary-foreground/60 dark:text-muted-foreground font-medium leading-relaxed">
                   These actions execute strictly contextually based on the live order state.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <Button
                     onClick={handleRefreshStatus}
                     variant="outline"
@@ -602,6 +632,45 @@ export default function OrderDetailsPage({ params }: PageProps) {
                     className="text-[10px] h-8 bg-current/5 border-current/20 hover:bg-foreground hover:text-background dark:hover:text-background transition-all font-bold"
                   >
                     Contact Rider
+                  </Button>
+                  <div className="flex flex-col gap-0.5">
+                    <Button
+                      onClick={handleRemindVendor}
+                      disabled={remindingVendor}
+                      variant="outline"
+                      className="text-[10px] h-8 bg-yellow-500/10 border-yellow-400/40 text-yellow-200 hover:bg-yellow-500/20 transition-all font-bold disabled:opacity-50"
+                    >
+                      {remindingVendor ? "Sending…" : "Remind Vendor"}
+                    </Button>
+                    {(order?.vendorReminderCount > 0) && (
+                      <p className="text-[9px] text-yellow-300/60 text-center leading-tight">
+                        ×{order.vendorReminderCount} sent
+                        {order.lastVendorReminderAt ? ` · ${new Date(order.lastVendorReminderAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit", hour12: true })}` : ""}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <Button
+                      onClick={handleRemindRider}
+                      disabled={remindingRider || !hasRider}
+                      variant="outline"
+                      className="text-[10px] h-8 bg-yellow-500/10 border-yellow-400/40 text-yellow-200 hover:bg-yellow-500/20 transition-all font-bold disabled:opacity-50"
+                    >
+                      {remindingRider ? "Sending…" : "Remind Rider"}
+                    </Button>
+                    {(order?.riderReminderCount > 0) && (
+                      <p className="text-[9px] text-yellow-300/60 text-center leading-tight">
+                        ×{order.riderReminderCount} sent
+                        {order.lastRiderReminderAt ? ` · ${new Date(order.lastRiderReminderAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit", hour12: true })}` : ""}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    onClick={() => setAssignOpen(true)}
+                    variant="outline"
+                    className="text-[10px] h-8 bg-current/5 border-current/20 hover:bg-foreground hover:text-background dark:hover:text-background transition-all font-bold"
+                  >
+                    {hasRider ? "Reassign Rider" : "Assign Rider"}
                   </Button>
                 </div>
               </div>

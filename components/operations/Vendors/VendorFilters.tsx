@@ -36,13 +36,13 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
   const labelCls = 'block text-sm font-medium mb-1.5';
 
   return (
-    <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 w-full">
+    <div className="glass-card p-4 sm:p-6 mb-6 w-full">
       {/* 1 col → 2 col → 4 col */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         {/* Name */}
         <div>
-          <label className={labelCls} style={{ color: '#1A3F1C' }}>Name</label>
+          <label className={labelCls} className="text-[#1a3f1c]">Name</label>
           <input
             type="text"
             value={filters.name}
@@ -55,7 +55,7 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
 
         {/* Account Status */}
         <div>
-          <label className={labelCls} style={{ color: '#1A3F1C' }}>Account Status</label>
+          <label className={labelCls} className="text-[#1a3f1c]">Account Status</label>
           <select
             value={filters.accountStatus}
             onChange={(e) => handleInputChange('accountStatus', e.target.value)}
@@ -69,7 +69,7 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
 
         {/* Business Status */}
         <div>
-          <label className={labelCls} style={{ color: '#1A3F1C' }}>Business Status</label>
+          <label className={labelCls} className="text-[#1a3f1c]">Business Status</label>
           <select
             value={filters.businessStatus}
             onChange={(e) => handleInputChange('businessStatus', e.target.value)}
@@ -86,15 +86,13 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
         <div className="flex gap-3 items-end">
           <button
             onClick={handleSearch}
-            className="flex-1 px-4 py-2.5 text-white rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
-            style={{ backgroundColor: '#1A3F1C' }}
+            className="flex-1 h-[42px] px-4 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300 bg-gradient-to-r from-[#1a3f1c] to-[#2a5c2d]"
           >
             Search
           </button>
           <button
             onClick={handleReset}
-            className="flex-1 px-4 py-2.5 text-white rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
-            style={{ backgroundColor: '#1A3F1C' }}
+            className="flex-1 h-[42px] px-4 text-[#1a3f1c] rounded-xl text-sm font-bold border border-[#1a3f1c]/20 hover:bg-[#1a3f1c]/5 active:scale-95 transition-all duration-300 bg-white shadow-sm"
           >
             Reset
           </button>

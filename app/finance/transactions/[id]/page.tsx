@@ -36,11 +36,11 @@ export default function TransactionDetailPage() {
   return (
     <div
       className="min-h-screen w-full flex items-start justify-center py-6 px-4 print:p-0"
-      style={{ backgroundColor: '#E8F7E8' }}
+      className="bg-gray-50"
     >
       <div
         className="relative w-full max-w-2xl rounded-2xl overflow-hidden shadow-xl print:shadow-none print:rounded-none print:max-w-full"
-        style={{ backgroundColor: '#E8F7E8' }}
+        className="bg-gray-50"
         id="transaction-slip"
       >
         <ModalWatermark />
@@ -49,7 +49,7 @@ export default function TransactionDetailPage() {
         <div className="relative flex items-center justify-center px-12 py-5 border-b border-[#98EF9B]/50">
           <h1
             className="font-bold text-sm sm:text-base text-center break-all"
-            style={{ color: '#1A3F1C' }}
+            className="text-[#1a3f1c]"
           >
             {loading ? '—' : detail?.orderId ?? '—'}
           </h1>
@@ -57,7 +57,7 @@ export default function TransactionDetailPage() {
             onClick={() => router.back()}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors print:hidden"
           >
-            <X className="w-5 h-5" style={{ color: '#1A3F1C' }} />
+            <X className="w-5 h-5" className="text-[#1a3f1c]" />
           </button>
         </div>
 
@@ -76,7 +76,7 @@ export default function TransactionDetailPage() {
               <button
                 onClick={() => router.back()}
                 className="px-6 py-2 rounded-lg text-white text-sm"
-                style={{ backgroundColor: '#1A3F1C' }}
+                className="bg-[#1a3f1c]"
               >
                 Go Back
               </button>
@@ -85,20 +85,20 @@ export default function TransactionDetailPage() {
             <>
               {/* Personal Details */}
               <section>
-                <p className="text-sm font-semibold mb-2" style={{ color: '#1A3F1C' }}>
+                <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">
                   Personal Details
                 </p>
                 <div
                   className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm"
-                  style={{ backgroundColor: '#98EF9B' }}
+                  className="bg-gray-50 border-b border-gray-100"
                 >
-                  <span style={{ color: '#1A3F1C' }}>
+                  <span className="text-[#1a3f1c]">
                     <b>Customer:</b> {detail.customerName}
                   </span>
-                  <span style={{ color: '#1A3F1C' }}>
+                  <span className="text-[#1a3f1c]">
                     <b>Vendor:</b> {detail.vendorName}
                   </span>
-                  <span style={{ color: '#1A3F1C' }}>
+                  <span className="text-[#1a3f1c]">
                     <b>Order Type:</b> {detail.orderType}
                   </span>
                 </div>
@@ -106,23 +106,23 @@ export default function TransactionDetailPage() {
 
               {/* Transaction Details */}
               <section>
-                <p className="text-sm font-semibold mb-2" style={{ color: '#1A3F1C' }}>
+                <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">
                   Transaction Details
                 </p>
                 <div
                   className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"
-                  style={{ backgroundColor: '#98EF9B' }}
+                  className="bg-gray-50 border-b border-gray-100"
                 >
-                  <span style={{ color: '#1A3F1C' }}>
+                  <span className="text-[#1a3f1c]">
                     <b>Order ID:</b> {detail.orderId}
                   </span>
-                  <span style={{ color: '#1A3F1C' }}>
+                  <span className="text-[#1a3f1c]">
                     <b>Payment Method:</b> {detail.paymentMethod}
                   </span>
-                  <span className="break-all" style={{ color: '#1A3F1C' }}>
+                  <span className="break-all" className="text-[#1a3f1c]">
                     <b>Transaction ID:</b> {detail.transactionId}
                   </span>
-                  <span style={{ color: '#1A3F1C' }}>
+                  <span className="text-[#1a3f1c]">
                     <b>Amount:</b> ₦{detail.amount.toLocaleString()}
                   </span>
                 </div>
@@ -130,12 +130,12 @@ export default function TransactionDetailPage() {
 
               {/* Order Details */}
               <section>
-                <p className="text-sm font-semibold mb-2" style={{ color: '#1A3F1C' }}>
+                <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">
                   Order Details
                 </p>
                 <div
                   className="rounded-lg px-4 py-4 space-y-2 text-sm"
-                  style={{ backgroundColor: '#98EF9B', color: '#1A3F1C' }}
+                  className="bg-[#98ef9b]/40 text-[#1a3f1c]"
                 >
                   {costRows.map(({ label, value }) => (
                     <div key={label} className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export default function TransactionDetailPage() {
             <button
               onClick={handleDownload}
               className="w-full py-3.5 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity print:hidden"
-              style={{ backgroundColor: '#1A3F1C' }}
+              className="bg-[#1a3f1c]"
             >
               Download Slip
             </button>

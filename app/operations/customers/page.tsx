@@ -1,26 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { customerService, type Customer } from '@/lib/api/services/customer.service';
-import { CustomerFilters, type FilterValues } from '@/components/operations/CustomerFilters';
-import { StatusBadge } from '@/components/operations/StatusBadge';
-import Pagination from '@/components/Pagination';
-import { toast } from 'sonner';
-import { downloadCSV } from '@/lib/utils/exportCSV';
-import { Download, Loader2 } from 'lucide-react';
-
-// ── Table Skeleton ─────────────────────────────────────────
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { customerService, type Customer } from "@/lib/api/services/customer.service";
+import { CustomerFilters, type FilterValues } from "@/components/operations/CustomerFilters";
+import { StatusBadge } from "@/components/operations/StatusBadge";
+import Pagination from "@/components/Pagination";
+import { toast } from "sonner";
+import { downloadCSV } from "@/lib/utils/exportCSV";
+import { formatNigerianPhone } from "@/lib/utils/formatPhone";
+import { Download, Loader2, ChevronRight, Users } from "lucide-react";
 
 function TableSkeleton() {
   return (
     <>
       {[...Array(7)].map((_, i) => (
-        <tr key={i} className="border-b border-gray-100 animate-pulse">
-          {[...Array(6)].map((_, j) => (
-            <td key={j} className="px-4 py-3">
-              <div className="h-4 bg-gray-200 rounded w-full" />
+        <tr key={i} className="animate-pulse">
+          {[...Array(8)].map((_, j) => (
+            <td key={j}>
+              <div className="h-4 bg-gray-100 rounded-full w-3/4" />
             </td>
           ))}
         </tr>
@@ -29,232 +28,157 @@ function TableSkeleton() {
   );
 }
 
-// ── Main Page ──────────────────────────────────────────────
-
 export default function CustomersPage() {
   const router = useRouter();
 
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [exporting, setExporting] = useState(false);
-  const [filters, setFilters] = useState<FilterValues>({ name: '', email: '', accountStatus: '' });
-  const [activeFilters, setActiveFilters] = useState<FilterValues>({ name: '', email: '', accountStatus: '' });
-  const [pageSize, setPageSize] = useState(7);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    totalPages: 1,
-    total: 0,
-    limit: 7,
-  });
+  const [customers,  setCustomers]  = useState<Customer[]>([]);
+  const [loading,    setLoading]    = useState(true);
+  const [exporting,  setExporting]  = useState(false);
+  const [filters,    setFilters]    = useState<FilterValues>({ name: "", email: "", accountStatus: "" });
+  const [activeFilters, setActiveFilters] = useState<FilterValues>({ name: "", email: "", accountStatus: "" });
+  const [pageSize,   setPageSize]   = useState(10);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit: 10 });
 
-  // ── Fetch ────────────────────────────────────────────────
-  const loadCustomers = useCallback(
-    async (page: number, activeFilters: FilterValues, limit = pageSize) => {
-      setLoading(true);
-      try {
-        const res = await customerService.getCustomers({
-          page,
-          limit,
-          ...(activeFilters.name ? { name: activeFilters.name } : {}),
-          ...(activeFilters.email ? { email: activeFilters.email } : {}),
-          ...(activeFilters.accountStatus
-            ? { accountStatus: activeFilters.accountStatus as 'active' | 'suspended' | 'unverified' }
-            : {}),
-        });
-        setCustomers(res.data);
-        setPagination({
-          page: res.page,
-          totalPages: res.totalPages,
-          total: res.total,
-          limit: res.limit,
-        });
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to load customers');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [pageSize]
-  );
+  const loadCustomers = useCallback(async (page: number, f: FilterValues, limit = pageSize) => {
+    setLoading(true);
+    try {
+      const res = await customerService.getCustomers({
+        page, limit,
+        ...(f.name          ? { name: f.name }                                                   : {}),
+        ...(f.email         ? { email: f.email }                                                 : {}),
+        ...(f.accountStatus ? { accountStatus: f.accountStatus as "active"|"suspended"|"unverified" } : {}),
+      });
+      setCustomers(res.data);
+      setPagination({ page: res.page, totalPages: res.totalPages, total: res.total, limit: res.limit });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to load customers");
+    } finally {
+      setLoading(false);
+    }
+  }, [pageSize]);
 
-  useEffect(() => {
-    loadCustomers(1, filters);
-  }, []);// eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { loadCustomers(1, filters); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Handlers ─────────────────────────────────────────────
-  const handleSearch = (newFilters: FilterValues) => {
-    setFilters(newFilters);
-    setActiveFilters(newFilters);
-    loadCustomers(1, newFilters);
-  };
-
-  const handleReset = () => {
-    const empty: FilterValues = { name: '', email: '', accountStatus: '' };
-    setFilters(empty);
-    setActiveFilters(empty);
-    loadCustomers(1, empty);
-  };
-
-  const handlePageChange = (page: number) => {
-    loadCustomers(page, filters);
-  };
-
-  const handlePageSizeChange = (size: number) => {
-    setPageSize(size);
-    loadCustomers(1, filters, size);
-  };
+  const handleSearch = (f: FilterValues) => { setFilters(f); setActiveFilters(f); loadCustomers(1, f); };
+  const handleReset  = () => { const e: FilterValues = { name: "", email: "", accountStatus: "" }; setFilters(e); setActiveFilters(e); loadCustomers(1, e); };
 
   const handleExportCSV = async () => {
     setExporting(true);
     try {
       const res = await customerService.getCustomers({
-        page: 1,
-        limit: 10000,
-        ...(activeFilters.name ? { name: activeFilters.name } : {}),
-        ...(activeFilters.email ? { email: activeFilters.email } : {}),
-        ...(activeFilters.accountStatus
-          ? { accountStatus: activeFilters.accountStatus as 'active' | 'suspended' | 'unverified' }
-          : {}),
+        page: 1, limit: 10000,
+        ...(activeFilters.name          ? { name: activeFilters.name }                                                          : {}),
+        ...(activeFilters.email         ? { email: activeFilters.email }                                                        : {}),
+        ...(activeFilters.accountStatus ? { accountStatus: activeFilters.accountStatus as "active"|"suspended"|"unverified" }   : {}),
       });
-      const rows = res.data.map((c) => ({
-        Name: c.name,
-        Email: c.email,
-        Phone: c.phone,
-        Status: c.accountStatus,
-        Joined: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '',
-      }));
-      downloadCSV(rows, `customers_${new Date().toISOString().slice(0, 10)}`);
-      toast.success('Customers exported successfully');
+      downloadCSV(
+        res.data.map(c => ({
+          Name:   c.name,
+          Email:  c.email,
+          Phone:  formatNigerianPhone(c.phone),
+          Status: c.accountStatus,
+          Joined: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "",
+        })),
+        `customers_${new Date().toISOString().slice(0, 10)}`,
+      );
+      toast.success("Exported successfully");
     } catch (err: any) {
-      toast.error(err.message || 'Export failed');
+      toast.error(err.message || "Export failed");
     } finally {
       setExporting(false);
     }
   };
 
-  // ── Table header classes ──────────────────────────────────
-  const thCls =
-    'px-4 py-3 text-left text-sm font-semibold text-[#1A3F1C] bg-[#c8f0c8] whitespace-nowrap';
-
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: '#E8F7E8' }}>
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
+    <div className="space-y-5">
 
-        {/* Page Title */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>Customers</h1>
-            <span className="text-sm text-gray-500">{pagination.total} total</span>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#1a3f1c]/10 flex items-center justify-center shrink-0">
+            <Users className="h-5 w-5 text-[#1a3f1c]" />
           </div>
-          <button
-            onClick={handleExportCSV}
-            disabled={exporting || loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
-            style={{ backgroundColor: '#1A3F1C' }}
-          >
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {exporting ? 'Exporting...' : 'Download CSV'}
-          </button>
+          <div>
+            <h1 className="text-xl font-black text-gray-900">Customers</h1>
+            <p className="text-xs text-gray-400">{pagination.total.toLocaleString()} total customers</p>
+          </div>
         </div>
+        <button type="button" onClick={handleExportCSV} disabled={exporting || loading}
+          className="inline-flex items-center gap-2 h-9 px-4 bg-[#1a3f1c] text-white text-sm font-semibold rounded-lg hover:bg-[#163318] active:scale-[0.98] transition-all disabled:opacity-50 shrink-0">
+          {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+          {exporting ? "Exporting…" : "Export CSV"}
+        </button>
+      </div>
 
-        {/* Filters */}
-        <CustomerFilters onSearch={handleSearch} onReset={handleReset} />
+      {/* Filters */}
+      <CustomerFilters onSearch={handleSearch} onReset={handleReset} />
 
-        {/* Table Card */}
-        <div className="bg-white rounded-xl overflow-hidden border border-gray-200 w-full">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full min-w-[640px]">
-              <thead>
+      {/* Table */}
+      <div className="modern-table-container">
+        <div className="overflow-x-auto">
+          <table className="modern-table min-w-[800px]">
+            <thead>
+              <tr>
+                <th className="w-12">#</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Joined</th>
+                <th className="text-center">Orders</th>
+                <th>Status</th>
+                <th className="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? <TableSkeleton /> :
+               customers.length === 0 ? (
                 <tr>
-                  <th className={`${thCls} rounded-tl-xl`} style={{ width: 48 }}>S/N</th>
-                  <th className={thCls} style={{ width: 200 }}>Name</th>
-                  <th className={thCls}>Email</th>
-                  <th className={thCls} style={{ width: 140 }}>Phone</th>
-                  <th className={thCls} style={{ width: 120 }}>Status</th>
-                  <th className={`${thCls} rounded-tr-xl`} style={{ width: 100 }}>Actions</th>
+                  <td colSpan={8} className="py-16 text-center">
+                    <Users className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-400">No customers found</p>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <TableSkeleton />
-                ) : customers.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-16 text-center text-gray-400 text-sm">
-                      No customers found.
+               ) : customers.map((c, idx) => {
+                const sn = (pagination.page - 1) * pagination.limit + idx + 1;
+                return (
+                  <tr key={c.id}>
+                    <td className="text-gray-400 tabular-nums">{sn}</td>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 bg-[#98ef9b]/40 ring-2 ring-white shadow-sm">
+                          <Image src={c.avatar || "/placeholder-avatar.png"} alt={c.name}
+                            fill className="object-cover" unoptimized />
+                        </div>
+                        <span className="font-bold text-gray-900">{c.name}</span>
+                      </div>
+                    </td>
+                    <td className="text-gray-500 max-w-[180px] truncate">{c.email}</td>
+                    <td className="text-gray-600 font-medium tabular-nums">{formatNigerianPhone(c.phone)}</td>
+                    <td className="text-gray-500 whitespace-nowrap">
+                      {c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                    </td>
+                    <td className="text-center">
+                      <span className="inline-block text-xs font-black text-[#1a3f1c] bg-[#98ef9b]/40 px-2.5 py-1 rounded-full tabular-nums">
+                        {c.totalOrders ?? 0}
+                      </span>
+                    </td>
+                    <td><StatusBadge status={c.accountStatus} size="sm" /></td>
+                    <td className="text-right">
+                      <button type="button"
+                        onClick={() => router.push(`/operations/customers/${c.id}`)}
+                        className="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-gray-50 text-xs font-bold text-[#1a3f1c] hover:bg-[#1a3f1c] hover:text-white transition-all">
+                        Details <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  customers.map((customer, idx) => {
-                    const sn = (pagination.page - 1) * pagination.limit + idx + 1;
-                    return (
-                      <tr
-                        key={customer.id}
-                        className="border-b border-gray-100 hover:bg-[#f7fdf7] transition-colors"
-                      >
-                        {/* S/N */}
-                        <td className="px-4 py-3 text-sm text-gray-600">{sn}</td>
-
-                        {/* Name + Avatar */}
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className="relative w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                              <Image
-                                src={customer.avatar || '/placeholder-avatar.png'}
-                                alt={customer.name}
-                                fill
-                                className="object-cover"
-                                unoptimized
-                              />
-                            </div>
-                            <span className="text-sm font-medium text-gray-800 truncate">
-                              {customer.name}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Email */}
-                        <td className="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate">
-                          {customer.email}
-                        </td>
-
-                        {/* Phone */}
-                        <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                          {customer.phone}
-                        </td>
-
-                        {/* Status */}
-                        <td className="px-4 py-3">
-                          <StatusBadge status={customer.accountStatus} size="sm" />
-                        </td>
-
-                        {/* View Details */}
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => router.push(`/operations/customers/${customer.id}`)}
-                            className="text-sm font-semibold hover:underline whitespace-nowrap"
-                            style={{ color: '#1A3F1C' }}
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* ── Reusable Pagination ── */}
-          <Pagination
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-          />
+                );
+               })}
+            </tbody>
+          </table>
         </div>
-
+        <Pagination currentPage={pagination.page} totalPages={pagination.totalPages}
+          pageSize={pageSize} onPageChange={p => loadCustomers(p, activeFilters)}
+          onPageSizeChange={s => { setPageSize(s); loadCustomers(1, activeFilters, s); }} />
       </div>
     </div>
   );

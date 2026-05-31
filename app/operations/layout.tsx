@@ -79,7 +79,7 @@ export default function OperationsLayout({
         />
         
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto bg-gray-50 page-transition">
           {children}
         </main>
       </div>

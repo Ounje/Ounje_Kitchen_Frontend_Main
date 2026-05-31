@@ -1,33 +1,61 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/ui/notification-bell";
+import { useAuth } from "@/lib/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+const PAGE_TITLES: Record<string, string> = {
+  "/it":                    "Dashboard",
+  "/it/admin":              "Admin Accounts",
+  "/it/orders":             "Orders",
+  "/it/account-management": "Account Management",
+  "/it/settings":           "Settings",
+};
+
+function getPageTitle(pathname: string): string {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  const base = Object.keys(PAGE_TITLES)
+    .filter(k => k !== "/it")
+    .find(k => pathname.startsWith(k));
+  return base ? PAGE_TITLES[base] : "IT Portal";
+}
 
 interface ITHeaderProps {
   onMenuClick: () => void;
 }
 
 export default function ITHeader({ onMenuClick }: ITHeaderProps) {
+  const pathname = usePathname();
+  const { user } = useAuth();
+
+  const pageTitle = getPageTitle(pathname);
+  const initials  = user?.firstName && user?.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : "IT";
+  const fullName  = user?.firstName ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "User";
+
   return (
-    <header className="sticky top-0 z-30 bg-[#1a3f1c] border-b border-white/10 shadow-sm">
-      <div className="px-4 md:px-6 py-3 flex items-center justify-between">
-        {/* Mobile menu button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden text-white hover:bg-white/10"
-          onClick={onMenuClick}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+    <header className="sticky top-0 z-30 h-14 bg-white border-b border-gray-100 shadow-sm flex items-center px-4 sm:px-6 gap-3">
+      <Button variant="ghost" size="icon"
+        className="lg:hidden h-9 w-9 text-gray-600 hover:bg-gray-100 shrink-0"
+        onClick={onMenuClick} aria-label="Open menu">
+        <Menu className="h-5 w-5" />
+      </Button>
 
-        {/* Spacer */}
-        <div className="flex-1" />
+      <div className="flex-1 min-w-0">
+        <h2 className="text-base font-bold text-gray-800 truncate">{pageTitle}</h2>
+      </div>
 
-        {/* Notification bell */}
-        <div className="flex items-center gap-2">
-          <NotificationBell portal="IT" className="text-white hover:bg-white/10 relative h-9 w-9 sm:h-10 sm:w-10 touch-manipulation transition-colors rounded-full" />
+      <div className="flex items-center gap-2 shrink-0">
+        <NotificationBell portal="IT" className="text-gray-600 hover:bg-gray-100" />
+        <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200">
+          <Avatar className="h-7 w-7 shrink-0">
+            {user?.avatar && <AvatarImage src={user.avatar} alt={fullName} className="object-cover" />}
+            <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold text-xs">{initials}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-semibold text-gray-700 max-w-30 truncate">{fullName}</span>
         </div>
       </div>
     </header>

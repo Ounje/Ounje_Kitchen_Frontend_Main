@@ -17,7 +17,7 @@ export function ConfirmActionModal({ isOpen, title = 'Are you sure?', loading = 
       style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="w-full max-w-sm rounded-2xl p-8 shadow-2xl space-y-6 text-center"
-        style={{ backgroundColor: '#1A3F1C' }}>
+        className="bg-[#1a3f1c]">
         <div className="flex justify-center">
           <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
             <span className="text-3xl">⚠️</span>

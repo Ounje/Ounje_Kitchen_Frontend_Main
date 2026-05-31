@@ -21,26 +21,22 @@ function RevenueStatCard({
   detail1?: string; detail2?: string; change?: number;
 }) {
   return (
-    <div className="rounded-xl p-4 relative" style={{ backgroundColor: '#98EF9B' }}>
-      <div className="absolute top-3 right-3 opacity-50">
-        <TrendingUp className="w-5 h-5" style={{ color: '#1A3F1C' }} />
+    <div className="rounded-xl p-4 relative bg-[#98ef9b]/60 border border-[#98ef9b]">
+      <div className="absolute top-3 right-3 opacity-40">
+        <TrendingUp className="w-5 h-5 text-[#1a3f1c]" />
       </div>
       <div className="flex items-center gap-2 mb-1">
         <span className="text-xl">{icon}</span>
-        <span className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>
+        <span className="text-2xl sm:text-3xl font-bold text-[#1a3f1c]">
           {value >= 1000 ? value.toLocaleString() : value}
         </span>
       </div>
-      <p className="text-sm font-semibold mb-1" style={{ color: '#1A3F1C' }}>{label}</p>
+      <p className="text-sm font-semibold mb-1 text-[#1a3f1c]">{label}</p>
       {(detail1 || detail2) && (
-        <p className="text-xs" style={{ color: '#1A3F1C' }}>
-          {detail1} {detail2}
-        </p>
+        <p className="text-xs text-[#1a3f1c]/80">{detail1} {detail2}</p>
       )}
       {change !== undefined && (
-        <p className="text-xs font-semibold mt-1" style={{ color: '#1A3F1C' }}>
-          ↑ +{change}%
-        </p>
+        <p className="text-xs font-semibold mt-1 text-[#1a3f1c]">↑ +{change}%</p>
       )}
     </div>
   );
@@ -52,23 +48,16 @@ function TopSection({
 }: { title: string; names: string[]; onViewDetails: () => void }) {
   return (
     <div className="bg-white rounded-xl p-4 sm:p-5 flex-1">
-      <p className="text-sm font-bold mb-3" style={{ color: '#1A3F1C' }}>{title}</p>
+      <p className="text-sm font-bold mb-3 text-[#1a3f1c]">{title}</p>
       <div className="flex flex-wrap gap-2 mb-4">
         {names.map((n, i) => (
-          <span
-            key={i}
-            className="px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium"
-            style={{ color: '#1A3F1C' }}
-          >
+          <span key={i} className="px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium text-[#1a3f1c]">
             {n}
           </span>
         ))}
       </div>
-      <button
-        onClick={onViewDetails}
-        className="w-full py-2.5 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-        style={{ backgroundColor: '#1A3F1C' }}
-      >
+      <button type="button" onClick={onViewDetails}
+        className="w-full h-9 rounded-lg bg-[#1a3f1c] text-white text-sm font-semibold hover:bg-[#163318] transition-colors">
         View Details
       </button>
     </div>
@@ -171,13 +160,12 @@ export default function RevenuePage() {
     <div className="w-full">
       {/* Header row */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#1A3F1C' }}>Revenue</h1>
+        <h1 className="text-xl font-black text-gray-900">Revenue</h1>
         <div className="relative">
           <select
             value={period}
             onChange={e => setPeriod(e.target.value as RevenuePeriod)}
-            className="appearance-none pl-9 pr-8 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer"
-            style={{ backgroundColor: '#1A3F1C' }}
+            className="appearance-none bg-[#1a3f1c] pl-9 pr-8 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer"
           >
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
@@ -204,7 +192,7 @@ export default function RevenuePage() {
       {/* Date filter row */}
       <div className="flex flex-wrap items-end gap-3 mb-6">
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: '#1A3F1C' }}>Start Date</label>
+          <label className="block text-xs font-medium mb-1" className="text-[#1a3f1c]">Start Date</label>
           <div className="relative">
             <input
               type="date"
@@ -216,7 +204,7 @@ export default function RevenuePage() {
           </div>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: '#1A3F1C' }}>End Date</label>
+          <label className="block text-xs font-medium mb-1" className="text-[#1a3f1c]">End Date</label>
           <div className="relative">
             <input
               type="date"
@@ -230,14 +218,14 @@ export default function RevenuePage() {
         <button
           onClick={loadRevenue}
           className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: '#1A3F1C' }}
+          className="bg-[#1a3f1c]"
         >
           <Search className="w-4 h-4" />
           Search
         </button>
         <button
           className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: '#1A3F1C' }}
+          className="bg-[#1a3f1c]"
         >
           <Download className="w-4 h-4" />
           Export CSV

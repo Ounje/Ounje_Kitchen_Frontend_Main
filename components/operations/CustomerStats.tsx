@@ -1,81 +1,36 @@
-import { Customer } from '@/lib/api/services/customer.service';
+import { Customer } from "@/lib/api/services/customer.service";
+import { ShoppingBag, XCircle, Clock, Hash } from "lucide-react";
 
 interface CustomerStatsProps {
   customer: Customer;
 }
 
+const stats = (c: Customer) => [
+  { label: "Successful", value: c.successfulOrders, icon: ShoppingBag, color: "text-green-700", bg: "bg-green-50", border: "border-green-100" },
+  { label: "Cancelled",  value: c.cancelledOrders,  icon: XCircle,     color: "text-red-700",   bg: "bg-red-50",   border: "border-red-100"   },
+  { label: "Pending",    value: c.pendingOrders,     icon: Clock,       color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-100" },
+  { label: "Total",      value: c.totalOrders,       icon: Hash,        color: "text-[#1a3f1c]", bg: "bg-[#98ef9b]/20", border: "border-[#98ef9b]/40" },
+];
+
 export function CustomerStats({ customer }: CustomerStatsProps) {
-  const stats = [
-    {
-      value: customer.successfulOrders,
-      label: 'successful orders',
-      bgColor: '#1A3F1C',
-      textColor: 'white',
-    },
-    {
-      value: customer.cancelledOrders,
-      label: 'cancelled orders',
-      bgColor: '#D00000',
-      textColor: 'white',
-    },
-    {
-      value: customer.pendingOrders,
-      label: 'pending orders',
-      bgColor: '#FFCA3A',
-      textColor: '#1A3F1C',
-    },
-    {
-      value: customer.totalOrders,
-      label: 'Total',
-      bgColor: '#98EF9B',
-      textColor: '#1A3F1C',
-    },
-  ];
-
-  const legend = [
-    { color: '#1A3F1C', label: 'successful orders' },
-    { color: '#D00000', label: 'cancelled orders' },
-    { color: '#FFCA3A', label: 'pending orders' },
-  ];
-
   return (
-    <div className="mb-6 w-full">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4" style={{ color: '#1A3F1C' }}>
-        Activities
-      </h2>
-
-      {/* Stat cards — 2 cols on mobile, 4 on md+ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="rounded-xl p-4 sm:p-6 flex flex-col items-center justify-center min-h-[100px]"
-            style={{ backgroundColor: stat.bgColor }}
-          >
-            <div
-              className="text-3xl sm:text-5xl font-bold mb-1 sm:mb-2"
-              style={{ color: stat.textColor }}
-            >
-              {stat.value}
+    <div className="mb-4">
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Order Activity</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {stats(customer).map((s) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className={`glass-card hover-lift p-4 flex items-center gap-4 ${s.border}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.bg} ${s.color} shrink-0`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div>
+                <p className={`text-2xl font-black ${s.color} leading-none`}>{s.value ?? 0}</p>
+                <p className="text-xs font-bold text-gray-500 mt-1">{s.label}</p>
+              </div>
             </div>
-            <div
-              className="text-xs sm:text-sm font-medium text-center leading-tight"
-              style={{ color: stat.textColor }}
-            >
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 sm:gap-4 mt-4">
-        {legend.map((item) => (
-          <div key={item.label} className="flex items-center gap-2">
-            <div className="w-3.5 h-3.5 rounded flex-shrink-0" style={{ backgroundColor: item.color }} />
-            <span className="text-xs sm:text-sm" style={{ color: '#1A3F1C' }}>{item.label}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

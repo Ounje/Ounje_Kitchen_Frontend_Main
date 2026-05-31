@@ -214,7 +214,7 @@ export default function OperationsDashboardPage() {
           <div>
             <p className="font-bold text-red-900">Error loading dashboard</p>
             <p className="text-sm text-red-700 mt-1">{error}</p>
-            <button onClick={fetchDashboard}
+            <button type="button" onClick={fetchDashboard}
               className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-900">
               Try again
             </button>
@@ -299,6 +299,12 @@ export default function OperationsDashboardPage() {
           </div>
 
           <div className="h-[300px] w-full">
+            {orderTrends.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
+                <LineChartIcon className="w-10 h-10 opacity-20" />
+                <p className="text-sm font-medium">No order data for the last 7 days</p>
+              </div>
+            ) : (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={orderTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
@@ -343,6 +349,7 @@ export default function OperationsDashboardPage() {
                 />
               </AreaChart>
             </ResponsiveContainer>
+            )}
           </div>
         </CardContent>
       </Card>

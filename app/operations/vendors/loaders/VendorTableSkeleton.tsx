@@ -4,7 +4,7 @@ export function VendorTableSkeleton() {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px]">
           <thead>
-            <tr style={{ backgroundColor: '#37A449' }}>
+            <tr className="bg-green-600">
               {['S/N','Name','Phone Number','Address','Business Status','Account Status','Actions'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-white font-medium text-sm">{h}</th>
               ))}
