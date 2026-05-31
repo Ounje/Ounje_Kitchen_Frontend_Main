@@ -447,10 +447,10 @@ export default function OperationsOrdersPage() {
                     className="glass-card hover-lift rounded-2xl overflow-hidden cursor-pointer bg-[#98ef9b]/10 group"
                     onClick={() => router.push(`/operations/orders/${id}`)}
                   >
-                    <div className="p-4 sm:p-5 flex items-start gap-4 sm:gap-5">
+                    <div className="p-4 sm:p-5 flex items-start gap-3 sm:gap-5">
 
                       {/* Food image */}
-                      <div className="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 shadow-sm mt-1">
+                      <div className="w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 shadow-sm mt-1">
                         {image ? (
                           <img src={image} alt="food" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
@@ -458,22 +458,18 @@ export default function OperationsOrdersPage() {
                         )}
                       </div>
 
-                      {/* Info — all fields labelled */}
+                      {/* Info */}
                       <div className="flex-1 min-w-0 space-y-1">
 
-                        {/* Row 1: Customer + Vendor */}
-                        <div className="grid grid-cols-2 gap-x-4">
+                        {/* Mobile: single column. Desktop: two columns */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
                           <InfoRow label="Customer">{resolveName(customer)}</InfoRow>
                           <InfoRow label="Vendor">{vendorName}</InfoRow>
                         </div>
-
-                        {/* Row 2: Order ID + Rider */}
-                        <div className="grid grid-cols-2 gap-x-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
                           <InfoRow label="Order ID">{order.orderNumber ?? id?.toString().slice(-8).toUpperCase() ?? "—"}</InfoRow>
                           <InfoRow label="Rider">{riderLabel}</InfoRow>
                         </div>
-
-                        {/* Row 3: Status + Sub-status */}
                         <div className="grid grid-cols-2 gap-x-4">
                           <InfoRow label="Status">
                             <span className={`uppercase text-[10px] ${statusBadgeColor(status)}`}>
@@ -484,8 +480,6 @@ export default function OperationsOrdersPage() {
                             <span className="text-[10px] text-gray-700">{formatSubStatus(subStatus)}</span>
                           </InfoRow>
                         </div>
-
-                        {/* Row 4: Payment + Time */}
                         <div className="grid grid-cols-2 gap-x-4">
                           <InfoRow label="Payment">
                             <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${paymentBadgeClass(paymentStatus)}`}>
@@ -497,10 +491,19 @@ export default function OperationsOrdersPage() {
                           </InfoRow>
                         </div>
 
+                        {/* Details button — inline on mobile, hidden on desktop */}
+                        <div className="pt-2 sm:hidden">
+                          <Button
+                            className="bg-white/80 hover:bg-[#1a3f1c] text-[#1a3f1c] hover:text-white border border-[#1a3f1c]/20 h-9 px-5 text-xs font-bold rounded-xl shadow-sm w-full"
+                            onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}
+                          >
+                            Details
+                          </Button>
+                        </div>
                       </div>
 
-                      {/* Details button */}
-                      <div className="flex flex-col justify-center self-stretch ml-auto pl-4 border-l border-white/40">
+                      {/* Details button — side on desktop, hidden on mobile */}
+                      <div className="hidden sm:flex flex-col justify-center self-stretch ml-auto pl-4 border-l border-white/40">
                         <Button
                           className="bg-white/80 hover:bg-[#1a3f1c] text-[#1a3f1c] hover:text-white border border-[#1a3f1c]/20 h-10 px-6 text-sm font-bold rounded-xl shadow-sm transition-all duration-300 group-hover:shadow-md"
                           onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}

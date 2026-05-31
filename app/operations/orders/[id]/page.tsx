@@ -553,8 +553,8 @@ export default function OrderDetailsPage({ params }: PageProps) {
 
         {/* MAP FEATURE */}
         {tab === "map" && (
-          <div className="flex flex-col md:flex-row gap-6 h-[500px]">
-            <div className="md:w-64 flex-shrink-0 space-y-6 text-sm p-4 bg-surface-secondary rounded-2xl border border-border">
+          <div className="flex flex-col md:flex-row gap-4 md:h-[500px]">
+            <div className="md:w-64 flex-shrink-0 space-y-4 text-sm p-4 bg-surface-secondary rounded-2xl border border-border">
               {vendorAddress && (
                 <div>
                   <div className="flex items-center gap-2 mb-2">
@@ -574,16 +574,13 @@ export default function OrderDetailsPage({ params }: PageProps) {
                 </div>
               )}
             </div>
-            <div
-              className="flex-1 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-sm relative bg-slate-100 dark:bg-slate-900"
-              style={{ minHeight: 400 }}
-            >
+            <div className="h-[280px] md:h-auto md:flex-1 rounded-2xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-sm relative bg-slate-100 dark:bg-slate-900">
               <div className="absolute inset-0 pointer-events-none dark:bg-slate-900/10 mix-blend-color z-10" />
               <iframe
                 title="Delivery Map"
                 width="100%"
                 height="100%"
-                style={{ border: 0, display: "block", minHeight: "100%", filter: "var(--tw-dark-map-invert, none)" }}
+                style={{ border: 0, display: "block", height: "100%" }}
                 className="dark:invert dark:hue-rotate-180 dark:contrast-75"
                 srcDoc={mapHtml}
                 sandbox="allow-scripts allow-same-origin"
