@@ -192,7 +192,7 @@ export default function RevenuePage() {
       {/* Date filter row */}
       <div className="flex flex-wrap items-end gap-3 mb-6">
         <div>
-          <label className="block text-xs font-medium mb-1" className="text-[#1a3f1c]">Start Date</label>
+          <label className="block text-xs font-medium mb-1 text-[#1a3f1c]">Start Date</label>
           <div className="relative">
             <input
               type="date"
@@ -204,7 +204,7 @@ export default function RevenuePage() {
           </div>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" className="text-[#1a3f1c]">End Date</label>
+          <label className="block text-xs font-medium mb-1 text-[#1a3f1c]">End Date</label>
           <div className="relative">
             <input
               type="date"
@@ -217,15 +217,13 @@ export default function RevenuePage() {
         </div>
         <button
           onClick={loadRevenue}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-          className="bg-[#1a3f1c]"
+          className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity bg-[#1a3f1c]"
         >
           <Search className="w-4 h-4" />
           Search
         </button>
         <button
-          className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-          className="bg-[#1a3f1c]"
+          className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity bg-[#1a3f1c]"
         >
           <Download className="w-4 h-4" />
           Export CSV

@@ -15,8 +15,7 @@ interface Props {
 function StatusBadge({ status }: { status: 'PASS' | 'FAIL' }) {
   return (
     <span
-      className="px-2.5 py-0.5 rounded text-xs font-bold text-white"
-      className={status === "PASS" ? "bg-[#1a3f1c]" : "bg-red-600"}
+      className={`px-2.5 py-0.5 rounded text-xs font-bold text-white ${status === "PASS" ? "bg-[#1a3f1c]" : "bg-red-600"}`}
     >
       {status}
     </span>

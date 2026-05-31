@@ -33,37 +33,35 @@ export function TransactionInfoModal({ isOpen, onClose, detail, loading, onDownl
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div
-        className="relative w-full max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-2xl"
-        className="bg-gray-50"
+        className="relative w-full max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-2xl bg-gray-50"
       >
         <ModalWatermark />
 
         {/* Header */}
         <div className="relative flex items-center justify-between px-6 py-4 border-b border-[#98EF9B]/50">
-          <h2 className="font-bold text-base sm:text-lg text-center flex-1 pr-8" className="text-[#1a3f1c]">
+          <h2 className="font-bold text-base sm:text-lg text-center flex-1 pr-8 text-[#1a3f1c]">
             {detail?.orderId ?? '—'}
           </h2>
           <button
             onClick={onClose}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors"
           >
-            <X className="w-5 h-5" className="text-[#1a3f1c]" />
+            <X className="w-5 h-5 text-[#1a3f1c]" />
           </button>
         </div>
 
         <div className="relative px-5 sm:px-8 py-5 space-y-5">
           {loading ? (
             <div className="py-16 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2" className="border-[#1a3f1c]" />
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1a3f1c]" />
             </div>
           ) : detail ? (
             <>
               {/* Personal Details */}
               <div>
-                <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">Personal Details</p>
+                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Personal Details</p>
                 <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm"
-                  className="bg-gray-50 border-b border-gray-100"
+                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-gray-50 border-b border-gray-100"
                 >
                   <span className="text-[#1a3f1c]"><b>Customer:</b> {detail.customerName}</span>
                   <span className="text-[#1a3f1c]"><b>Vendor:</b> {detail.vendorName}</span>
@@ -73,14 +71,13 @@ export function TransactionInfoModal({ isOpen, onClose, detail, loading, onDownl
 
               {/* Transaction Details */}
               <div>
-                <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">Transaction Details</p>
+                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Transaction Details</p>
                 <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm"
-                  className="bg-gray-50 border-b border-gray-100"
+                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm bg-gray-50 border-b border-gray-100"
                 >
                   <span className="text-[#1a3f1c]"><b>Order ID:</b> {detail.orderId}</span>
                   <span className="text-[#1a3f1c]"><b>Payment Method:</b> {detail.paymentMethod}</span>
-                  <span className="break-all" className="text-[#1a3f1c]">
+                  <span className="break-all text-[#1a3f1c]">
                     <b>Transaction ID:</b> {detail.transactionId}
                   </span>
                   <span className="text-[#1a3f1c]"><b>Amount:</b> ₦{detail.amount.toLocaleString()}</span>
@@ -89,10 +86,9 @@ export function TransactionInfoModal({ isOpen, onClose, detail, loading, onDownl
 
               {/* Order Details */}
               <div>
-                <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">Order Details</p>
+                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Order Details</p>
                 <div
-                  className="rounded-lg px-4 py-3 text-sm space-y-2"
-                  className="bg-[#98ef9b]/40 text-[#1a3f1c]"
+                  className="rounded-lg px-4 py-3 text-sm space-y-2 bg-[#98ef9b]/40 text-[#1a3f1c]"
                 >
                   {rows.map(({ label, value }) => (
                     <div key={label} className="flex items-center justify-between">
@@ -114,8 +110,7 @@ export function TransactionInfoModal({ isOpen, onClose, detail, loading, onDownl
 
           <button
             onClick={handleDownload}
-            className="w-full py-3.5 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity"
-            className="bg-[#1a3f1c]"
+            className="w-full py-3.5 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity bg-[#1a3f1c]"
           >
             Download Slip
           </button>

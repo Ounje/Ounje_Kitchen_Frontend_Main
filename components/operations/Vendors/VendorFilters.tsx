@@ -42,7 +42,7 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
 
         {/* Name */}
         <div>
-          <label className={labelCls} className="text-[#1a3f1c]">Name</label>
+          <label className={"labelCls text-[#1a3f1c]"}>Name</label>
           <input
             type="text"
             value={filters.name}
@@ -55,7 +55,7 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
 
         {/* Account Status */}
         <div>
-          <label className={labelCls} className="text-[#1a3f1c]">Account Status</label>
+          <label className={"labelCls text-[#1a3f1c]"}>Account Status</label>
           <select
             value={filters.accountStatus}
             onChange={(e) => handleInputChange('accountStatus', e.target.value)}
@@ -69,7 +69,7 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
 
         {/* Business Status */}
         <div>
-          <label className={labelCls} className="text-[#1a3f1c]">Business Status</label>
+          <label className={"labelCls text-[#1a3f1c]"}>Business Status</label>
           <select
             value={filters.businessStatus}
             onChange={(e) => handleInputChange('businessStatus', e.target.value)}

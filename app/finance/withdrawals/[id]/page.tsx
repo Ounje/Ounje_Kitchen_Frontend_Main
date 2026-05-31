@@ -9,8 +9,7 @@ import financeService, { type WithdrawalDetail } from '@/lib/api/services/financ
 function StatusBadge({ status }: { status: 'PASS' | 'FAIL' }) {
   return (
     <span
-      className="px-2.5 py-0.5 rounded text-xs font-bold text-white"
-      className={status === "PASS" ? "bg-[#1a3f1c]" : "bg-red-600"}
+      className={`px-2.5 py-0.5 rounded text-xs font-bold text-white ${status === "PASS" ? "bg-[#1a3f1c]" : "bg-red-600"}`}
     >
       {status}
     </span>
@@ -42,12 +41,10 @@ export default function WithdrawalDetailPage() {
 
   return (
     <div
-      className="min-h-screen w-full flex items-start justify-center py-6 px-4 print:p-0"
-      className="bg-gray-50"
+      className="min-h-screen w-full flex items-start justify-center py-6 px-4 print:p-0 bg-gray-50"
     >
       <div
-        className="relative w-full max-w-2xl rounded-2xl overflow-hidden shadow-xl print:shadow-none print:rounded-none print:max-w-full"
-        className="bg-gray-50"
+        className="relative w-full max-w-2xl rounded-2xl overflow-hidden shadow-xl print:shadow-none print:rounded-none print:max-w-full bg-gray-50"
         id="withdrawal-slip"
       >
         <ModalWatermark />
@@ -55,8 +52,7 @@ export default function WithdrawalDetailPage() {
         {/* Header */}
         <div className="relative flex items-center justify-center px-12 py-5 border-b border-[#98EF9B]/50">
           <h1
-            className="font-bold text-sm sm:text-base text-center break-all"
-            className="text-[#1a3f1c]"
+            className="font-bold text-sm sm:text-base text-center break-all text-[#1a3f1c]"
           >
             {loading ? '—' : detail?.withdrawalId ?? '—'}
           </h1>
@@ -64,7 +60,7 @@ export default function WithdrawalDetailPage() {
             onClick={() => router.back()}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors print:hidden"
           >
-            <X className="w-5 h-5" className="text-[#1a3f1c]" />
+            <X className="w-5 h-5 text-[#1a3f1c]" />
           </button>
         </div>
 
@@ -82,8 +78,7 @@ export default function WithdrawalDetailPage() {
               </p>
               <button
                 onClick={() => router.back()}
-                className="px-6 py-2 rounded-lg text-white text-sm"
-                className="bg-[#1a3f1c]"
+                className="px-6 py-2 rounded-lg text-white text-sm bg-[#1a3f1c]"
               >
                 Go Back
               </button>
@@ -92,12 +87,11 @@ export default function WithdrawalDetailPage() {
             <>
               {/* Personal Details */}
               <section>
-                <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">
+                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">
                   Personal Details
                 </p>
                 <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm"
-                  className="bg-[#98ef9b]/40"
+                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-[#98ef9b]/40"
                 >
                   <span className="text-[#1a3f1c]">
                     <b>Vendor:</b> {detail.vendorName}
@@ -117,21 +111,20 @@ export default function WithdrawalDetailPage() {
                   <p className="text-sm font-semibold underline decoration-blue-500 text-blue-600 cursor-default">
                     Transaction Details
                   </p>
-                  <p className="text-sm" className="text-[#1a3f1c]">
+                  <p className="text-sm text-[#1a3f1c]">
                     Payment Method: {detail.paymentMethod}
                   </p>
                 </div>
                 <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm"
-                  className="bg-[#98ef9b]/40"
+                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-[#98ef9b]/40"
                 >
-                  <span className="break-all" className="text-[#1a3f1c]">
+                  <span className="break-all text-[#1a3f1c]">
                     <b>Withdrawal ID:</b> {detail.withdrawalId}
                   </span>
                   <span className="text-[#1a3f1c]">
                     <b>Amount:</b> ₦{detail.amount.toLocaleString()}
                   </span>
-                  <span className="flex items-center gap-2" className="text-[#1a3f1c]">
+                  <span className="flex items-center gap-2 text-[#1a3f1c]">
                     <b>Status:</b>
                     <StatusBadge status={detail.status} />
                   </span>
@@ -140,12 +133,11 @@ export default function WithdrawalDetailPage() {
 
               {/* Note */}
               <section>
-                <p className="text-sm font-semibold mb-2" className="text-[#1a3f1c]">
+                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">
                   Note
                 </p>
                 <div
-                  className="rounded-lg px-4 py-3 text-sm"
-                  className="bg-[#98ef9b]/40 text-[#1a3f1c]"
+                  className="rounded-lg px-4 py-3 text-sm bg-[#98ef9b]/40 text-[#1a3f1c]"
                 >
                   {detail.note}
                 </div>
@@ -156,8 +148,7 @@ export default function WithdrawalDetailPage() {
           {!loading && detail && (
             <button
               onClick={handleDownload}
-              className="w-full py-3.5 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity print:hidden"
-              className="bg-[#1a3f1c]"
+              className="w-full py-3.5 rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity print:hidden bg-[#1a3f1c]"
             >
               Download Slip
             </button>

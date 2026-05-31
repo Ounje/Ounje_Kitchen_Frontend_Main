@@ -70,7 +70,7 @@ export function TopPerformerCard({ performer }: TopPerformerCardProps) {
 export function TopPerformersSection({ performers }: { performers: TopPerformer[] }) {
   return (
     <div className="mb-6 w-full">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4" className="text-[#1a3f1c]">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 text-[#1a3f1c]">
         Rider <span className="text-gray-500 font-normal">| Top Chart</span>
       </h2>
       {/* 1 col → 2 col sm → 3 col lg */}

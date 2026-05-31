@@ -53,13 +53,12 @@ export default function TopVendorsPage() {
       </p>
 
       <div
-        className="w-full rounded-2xl overflow-hidden shadow-lg"
-        className="bg-gray-50"
+        className="w-full rounded-2xl overflow-hidden shadow-lg bg-gray-50"
       >
         <div className="px-5 sm:px-7 pt-6 pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold mb-1" className="text-[#1a3f1c]">
+              <h1 className="text-xl sm:text-2xl font-bold mb-1 text-[#1a3f1c]">
                 Top 5 Vendors
               </h1>
               <p className="text-sm text-gray-500">
@@ -72,8 +71,7 @@ export default function TopVendorsPage() {
                 <select
                   value={period}
                   onChange={e => setPeriod(e.target.value as RevenuePeriod)}
-                  className="appearance-none pl-8 pr-6 py-1.5 rounded-lg text-white text-sm font-semibold cursor-pointer"
-                  className="bg-[#1a3f1c]"
+                  className="appearance-none pl-8 pr-6 py-1.5 rounded-lg text-white text-sm font-semibold cursor-pointer bg-[#1a3f1c]"
                 >
                   {PERIODS.map(p => (
                     <option key={p.value} value={p.value}>{p.label}</option>
@@ -97,7 +95,7 @@ export default function TopVendorsPage() {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 {['Vendor Name', 'Orders', 'Revenue', 'Commission', 'AOV'].map(h => (
-                  <th key={h} className={thCls} className="text-[#1a3f1c]">{h}</th>
+                  <th key={h} className={`${thCls} text-[#1a3f1c]`}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -128,15 +126,15 @@ export default function TopVendorsPage() {
                             ? <img src={v.photo} alt={v.name} className="w-full h-full object-cover" />
                             : v.name?.charAt(0).toUpperCase() ?? '?'}
                         </div>
-                        <span className="text-sm font-medium" className="text-[#1a3f1c]">
+                        <span className="text-sm font-medium text-[#1a3f1c]">
                           {v.name}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">{v.orders}</td>
-                    <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">₦{v.revenue.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">₦{v.commission.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-sm" className="text-[#1a3f1c]">₦{v.aov.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-sm text-[#1a3f1c]">{v.orders}</td>
+                    <td className="px-4 py-3 text-sm text-[#1a3f1c]">₦{v.revenue.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-sm text-[#1a3f1c]">₦{v.commission.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-sm text-[#1a3f1c]">₦{v.aov.toLocaleString()}</td>
                   </tr>
                 ))
               )}

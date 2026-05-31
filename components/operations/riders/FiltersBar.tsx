@@ -42,7 +42,7 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
 
         {/* Name — wider on large screens */}
         <div className="lg:col-span-2">
-          <label className={labelCls} className="text-[#1a3f1c]">Name</label>
+          <label className={"labelCls text-[#1a3f1c]"}>Name</label>
           <input
             type="text"
             value={filters.name}
@@ -55,7 +55,7 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
 
         {/* Rider Status */}
         <div>
-          <label className={labelCls} className="text-[#1a3f1c]">Rider Status</label>
+          <label className={"labelCls text-[#1a3f1c]"}>Rider Status</label>
           <select
             value={filters.status}
             onChange={(e) => handleInputChange('status', e.target.value)}
@@ -69,7 +69,7 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
 
         {/* Mode of Delivery */}
         <div>
-          <label className={labelCls} className="text-[#1a3f1c]">Mode of Delivery</label>
+          <label className={"labelCls text-[#1a3f1c]"}>Mode of Delivery</label>
           <select
             value={filters.modeOfDelivery}
             onChange={(e) => handleInputChange('modeOfDelivery', e.target.value)}

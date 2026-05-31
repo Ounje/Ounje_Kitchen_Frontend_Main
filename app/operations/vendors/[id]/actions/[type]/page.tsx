@@ -70,7 +70,7 @@ export default function VendorActionPage() {
   const config = actionConfig[actionType];
 
   return (
-    <div className="min-h-screen w-full" className="bg-gray-50">
+    <div className="min-h-screen w-full bg-gray-50">
       <ConfirmActionModal
         isOpen={showConfirm}
         onClose={handleCancel}

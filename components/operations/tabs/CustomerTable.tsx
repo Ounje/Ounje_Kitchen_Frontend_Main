@@ -36,7 +36,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                 }}
               >
                 {/* Serial Number */}
-                <td className="px-4 py-4 text-sm" className="text-[#1a3f1c]">
+                <td className="px-4 py-4 text-sm text-[#1a3f1c]">
                   {(currentPage - 1) * 8 + index + 1}
                 </td>
 
@@ -48,14 +48,14 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                       alt={customer.name}
                       className="w-10 h-10 rounded-full object-cover"
                     />
-                    <span className="text-sm font-medium" className="text-[#1a3f1c]">
+                    <span className="text-sm font-medium text-[#1a3f1c]">
                       {customer.name}
                     </span>
                   </div>
                 </td>
 
                 {/* Email */}
-                <td className="px-4 py-4 text-sm" className="text-[#1a3f1c]">
+                <td className="px-4 py-4 text-sm text-[#1a3f1c]">
                   {customer.email}
                 </td>
 
@@ -65,7 +65,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                 </td>
 
                 {/* Orders Count */}
-                <td className="px-4 py-4 text-sm font-medium" className="text-[#1a3f1c]">
+                <td className="px-4 py-4 text-sm font-medium text-[#1a3f1c]">
                   {customer.totalOrders}
                 </td>
 
@@ -75,8 +75,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                     {/* View Button - Green Circle */}
                     <Link
                       href={`/operations/customers/${customer.id}`}
-                      className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
-                      className="bg-green-600"
+                      className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity bg-green-600"
                       title="View Details"
                     >
                       <Eye className="w-4 h-4 text-white" />
@@ -86,8 +85,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                     {customer.accountStatus === 'active' ? (
                       <Link
                         href={`/operations/customers/${customer.id}/actions/suspend`}
-                        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
-                        className="bg-amber-400"
+                        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity bg-amber-400"
                         title="Suspend Account"
                       >
                         <PauseCircle className="w-4 h-4 text-white" />
@@ -95,16 +93,14 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                     ) : customer.accountStatus === 'suspended' ? (
                       <Link
                         href={`/operations/customers/${customer.id}/actions/activate`}
-                        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
-                        className="bg-amber-400"
+                        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity bg-amber-400"
                         title="Activate Account"
                       >
                         <PlayCircle className="w-4 h-4 text-white" />
                       </Link>
                     ) : (
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center opacity-50 cursor-not-allowed"
-                        className="bg-amber-400"
+                        className="w-8 h-8 rounded-full flex items-center justify-center opacity-50 cursor-not-allowed bg-amber-400"
                         title="Unverified - Lock"
                       >
                         <Lock className="w-4 h-4 text-white" />
@@ -114,8 +110,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                     {/* Delete Button - Red Circle */}
                     <Link
                       href={`/operations/customers/${customer.id}/actions/delete`}
-                      className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
-                      className="bg-red-600"
+                      className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity bg-red-600"
                       title="Delete Account"
                     >
                       <Trash2 className="w-4 h-4 text-white" />

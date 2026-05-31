@@ -12,8 +12,7 @@ interface Props {
 function StatusBadge({ status }: { status: 'Successful' | 'Failed' }) {
   return (
     <span
-      className="px-3 py-1 rounded text-xs font-semibold text-white whitespace-nowrap"
-      className={status === "Successful" ? "bg-[#1a3f1c]" : "bg-red-600"}
+      className={`px-3 py-1 rounded text-xs font-semibold text-white whitespace-nowrap ${status === "Successful" ? "bg-[#1a3f1c]" : "bg-red-600"}`}
     >
       {status}
     </span>

@@ -138,7 +138,7 @@ export const operationsService = {
   },
 
   async exportTransactions(params?: { startDate?: string; endDate?: string; status?: string }) {
-    const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTIONS_EXPORT, { params, responseType: 'blob' });
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTIONS_EXPORT, { params } as any);
     return res;
   },
 

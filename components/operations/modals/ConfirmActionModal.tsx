@@ -26,8 +26,7 @@ export function ConfirmActionModal({
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="w-full max-w-sm rounded-2xl p-8 shadow-2xl space-y-6 text-center"
-        className="bg-[#1a3f1c]"
+        className="w-full max-w-sm rounded-2xl p-8 shadow-2xl space-y-6 text-center bg-[#1a3f1c]"
       >
         {/* Icon */}
         <div className="flex justify-center">

@@ -110,7 +110,7 @@ export default function WithdrawalsPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6" className="text-[#1a3f1c]">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-[#1a3f1c]">
         Withdrawals
       </h1>
 

@@ -20,7 +20,7 @@ export function RidersTableSkeleton() {
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
               {['S/N', 'Name', 'Phone Number', 'Zones', 'Account Status', 'Rider Status', 'Mode of Delivery', 'Actions'].map((h) => (
-                <th key={h} className={thCls} className="text-[#1a3f1c]">{h}</th>
+                <th key={h} className={`${thCls} text-[#1a3f1c]`}>{h}</th>
               ))}
             </tr>
           </thead>

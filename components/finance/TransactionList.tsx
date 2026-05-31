@@ -46,7 +46,7 @@ export function TransactionList({ groups, onInfo, onPrint }: Props) {
                 </div>
 
                 {/* Info left */}
-                <div className="flex-1 min-w-0 text-xs sm:text-sm" className="text-[#1a3f1c]">
+                <div className="flex-1 min-w-0 text-xs sm:text-sm text-[#1a3f1c]">
                   <p className="font-semibold truncate">
                     {tx.customerName} made payment of ₦{tx.amount.toLocaleString()}
                   </p>
@@ -55,7 +55,7 @@ export function TransactionList({ groups, onInfo, onPrint }: Props) {
                 </div>
 
                 {/* Info right */}
-                <div className="hidden sm:block flex-1 min-w-0 text-xs sm:text-sm" className="text-[#1a3f1c]">
+                <div className="hidden sm:block flex-1 min-w-0 text-xs sm:text-sm text-[#1a3f1c]">
                   <p className="truncate">Order ID: {tx.orderId}</p>
                   <p className="truncate">Payment Method: {tx.paymentMethod}</p>
                   <p className="truncate">Transaction ID: {tx.transactionId}</p>
@@ -71,8 +71,7 @@ export function TransactionList({ groups, onInfo, onPrint }: Props) {
                   </button>
                   <button
                     onClick={() => onPrint(tx.id)}
-                    className="px-4 py-1.5 rounded text-xs font-semibold text-white hover:opacity-90 transition-opacity"
-                    className="bg-[#1a3f1c]"
+                    className="px-4 py-1.5 rounded text-xs font-semibold text-white hover:opacity-90 transition-opacity bg-[#1a3f1c]"
                   >
                     Print
                   </button>
