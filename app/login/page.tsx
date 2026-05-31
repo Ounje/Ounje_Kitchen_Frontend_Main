@@ -69,16 +69,14 @@ export default function LoginPage() {
 
         <div className="relative z-10 text-center space-y-8 max-w-sm">
           {/* Logo */}
-          <div className="w-28 h-28 mx-auto rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white/20">
-            <Image
-              src="/images/mamput.png"
-              alt="Ounje Logo"
-              width={112}
-              height={112}
-              className="object-cover w-full h-full"
-              priority
-            />
-          </div>
+          <Image
+            src="/images/mamput.png"
+            alt="Ounje Logo"
+            width={112}
+            height={112}
+            className="mx-auto"
+            priority
+          />
 
           <div>
             <h1 className="text-5xl font-black text-white tracking-tight">Ounjefood</h1>
@@ -112,9 +110,7 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lg:hidden flex flex-col items-center gap-3">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-[#1a3f1c]/20 shadow-md">
-              <Image src="/images/mamput.png" alt="Ounje Logo" width={64} height={64} className="object-cover w-full h-full" priority />
-            </div>
+            <Image src="/images/mamput.png" alt="Ounje Logo" width={64} height={64} priority />
             <h1 className="text-2xl font-black text-[#1a3f1c]">Ounjefood</h1>
           </div>
 
