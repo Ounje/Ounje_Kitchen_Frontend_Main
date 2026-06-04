@@ -32,7 +32,7 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', portal],
     queryFn: async () => {
-      const res: any = await notificationService.getAllNotifications(portal);
+      const res: any = await notificationService.getAllNotifications(portal ? { targetPortal: portal } : undefined);
       return (
         Array.isArray(res) ? res :
         Array.isArray(res?.data) ? res.data :
