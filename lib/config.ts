@@ -1,5 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ounje-kitchen-backend-kiwy.onrender.com',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 
+  'https://ounje-kitchen-backend-kiwy.onrender.com',
   // 'https://ounje-kitchen-backend.pxxl.pro',
   //  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
   TIMEOUT: 30000,
