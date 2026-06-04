@@ -204,7 +204,7 @@ export default function OperationsOrdersPage() {
         page:  res?.page  ?? 1,
         pages: res?.pages ?? res?.totalPages ?? 1,
         total: res?.total ?? 0,
-        limit: pagination.limit,
+        limit,
       });
     } catch (err: any) {
       const msg = err?.message || "Failed to load orders. Check if the server is running.";

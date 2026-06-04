@@ -130,12 +130,12 @@ export default function OperationsTransactionsPage() {
     }
   }, [filters]);
 
-  const fetchTransactions = useCallback(async (page = 1, tab = activeTab, f = filters) => {
+  const fetchTransactions = useCallback(async (page = 1, tab = activeTab, f = filters, limit = pagination.limit) => {
     setLoading(true);
     setError(null);
     try {
-      const params: any = { page, limit: pagination.limit };
-      if (tab !== "all") params.status = tab;
+      const params: any = { page, limit };
+      if (tab !== "all") params.status    = tab;
       if (f.search)      params.search    = f.search;
       if (f.dateFrom)    params.startDate = f.dateFrom.toISOString();
       if (f.dateTo)      params.endDate   = f.dateTo.toISOString();
@@ -144,9 +144,9 @@ export default function OperationsTransactionsPage() {
       setTransactions(Array.isArray(res?.data) ? res.data : []);
       setPagination({
         page:  res?.page  ?? 1,
-        pages: res?.pages ?? 1,
+        pages: res?.pages ?? res?.totalPages ?? 1,
         total: res?.total ?? 0,
-        limit: pagination.limit,
+        limit,
       });
     } catch (err: any) {
       const msg = err?.message || "Failed to load transactions";
@@ -416,15 +416,15 @@ export default function OperationsTransactionsPage() {
         </div>
       </div>
 
-      {!loading && !error && pagination.pages > 1 && (
+      {!loading && !error && pagination.total > 0 && (
         <Pagination
           currentPage={pagination.page}
           totalPages={pagination.pages}
           pageSize={pagination.limit}
-          onPageChange={p => fetchTransactions(p)}
+          onPageChange={p => fetchTransactions(p, activeTab, filters, pagination.limit)}
           onPageSizeChange={size => {
             setPagination(prev => ({ ...prev, limit: size, page: 1 }));
-            fetchTransactions(1);
+            fetchTransactions(1, activeTab, filters, size);
           }}
         />
       )}

@@ -131,13 +131,19 @@ export default function ReviewsTable({
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="relative w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                          <Image
-                            src={row.photo}
-                            alt={row.name}
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
+                          {row.photo ? (
+                            <Image
+                              src={row.photo}
+                              alt={row.name}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-bold">
+                              {row.name?.charAt(0)?.toUpperCase() || "?"}
+                            </div>
+                          )}
                         </div>
                         <span className="text-sm font-medium text-gray-800">
                           {row.name}

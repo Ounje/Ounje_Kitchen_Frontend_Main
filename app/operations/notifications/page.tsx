@@ -428,15 +428,13 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={s => { setPageSize(s); setPage(1); }}
-        />
-      )}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+      />
 
       <NotificationDetailModal
         notification={selected}
