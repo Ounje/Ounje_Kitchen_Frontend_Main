@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Tag, Plus, Trash2, ToggleLeft, ToggleRight, Clock, Calendar, Edit2 } from 'lucide-react';
+import Pagination from '@/components/Pagination';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   active:           { label: 'Active',           className: 'bg-green-100 text-green-700' },
@@ -21,6 +22,8 @@ export default function PromosPage() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<any | null>(null);
+  const [page, setPage]         = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [formData, setFormData] = useState<any>({
     name: '',
     eventName: '',
@@ -35,7 +38,7 @@ export default function PromosPage() {
   });
   const [isDateConfirmed, setIsDateConfirmed] = useState(false);
 
-  const { data: promos = [], isLoading } = useQuery({
+  const { data: allPromos = [], isLoading } = useQuery({
     queryKey: ['promos'],
     queryFn: async () => {
       const res: any = await promoService.getAllPromos();
@@ -47,6 +50,9 @@ export default function PromosPage() {
       ) as any[];
     }
   });
+
+  const totalPages  = Math.max(1, Math.ceil(allPromos.length / pageSize));
+  const promos      = allPromos.slice((page - 1) * pageSize, page * pageSize);
 
   const createMutation = useMutation({
     mutationFn: (data: any) => promoService.createPromo(data),
@@ -391,6 +397,16 @@ export default function PromosPage() {
           </div>
         )}
       </div>
+
+      {!isLoading && allPromos.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+        />
+      )}
     </div>
   );
 }

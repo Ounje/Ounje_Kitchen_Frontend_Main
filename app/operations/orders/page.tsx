@@ -177,7 +177,7 @@ export default function OperationsOrdersPage() {
   });
   const [exporting, setExporting] = useState(false);
 
-  const fetchOrders = useCallback(async (page = 1, activeFilters = filters) => {
+  const fetchOrders = useCallback(async (page = 1, activeFilters = filters, limit = pagination.limit) => {
     setLoading(true);
     setError(null);
     try {
@@ -185,7 +185,7 @@ export default function OperationsOrdersPage() {
         ? { startDate: activeFilters.dateFrom.toISOString(), endDate: activeFilters.dateTo.toISOString() }
         : (getDateRange(period) ?? {});
 
-      const params: any = { page, limit: pagination.limit, ...dateRange };
+      const params: any = { page, limit, ...dateRange };
       if (activeFilters.failedPayment) {
         params.failedPayment = "true";
       } else {
@@ -509,15 +509,15 @@ export default function OperationsOrdersPage() {
         </table>
       </div>
 
-      {!loading && !error && pagination.pages > 1 && (
+      {!loading && !error && pagination.total > 0 && (
         <Pagination
           currentPage={pagination.page}
           totalPages={pagination.pages}
           pageSize={pagination.limit}
-          onPageChange={p => fetchOrders(p)}
+          onPageChange={p => fetchOrders(p, filters, pagination.limit)}
           onPageSizeChange={size => {
             setPagination(prev => ({ ...prev, limit: size, page: 1 }));
-            fetchOrders(1);
+            fetchOrders(1, filters, size);
           }}
         />
       )}
