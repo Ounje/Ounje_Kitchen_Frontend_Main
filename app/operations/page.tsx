@@ -121,25 +121,64 @@ function StatCard({
   );
 }
 
-function AlertRow({
-  label, count, color,
-}: { label: string; count: number; color: string }) {
+function ActivityTable({ orders, onView }: { orders: any[]; onView: (id: string) => void }) {
+  if (orders.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-2">
+        <ShoppingCart className="w-8 h-8 opacity-20" />
+        <p className="text-sm font-medium">No recent activity</p>
+      </div>
+    );
+  }
   return (
-    <Card className="border border-border rounded-xl shadow-sm bg-surface">
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-full bg-surface-secondary ${color}`}>
-              <AlertCircle className="h-4 w-4 text-foreground/80" />
-            </div>
-            <p className="text-sm font-semibold text-foreground/90">{label}</p>
-          </div>
-          <span className="text-xs font-bold text-foreground bg-surface-secondary px-3 py-1.5 rounded-full border border-border">
-            {count}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-gray-100 bg-gray-50/80">
+            {["Order", "Customer", "Vendor", "Status", "Time", ""].map((h, i) => (
+              <th key={i} className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map((order: any, i: number) => (
+            <tr key={order._id ?? i} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
+              <td className="px-4 py-3.5">
+                <span className="font-mono text-[11px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  #{order.orderNumber ?? order._id?.slice(-6)?.toUpperCase() ?? "—"}
+                </span>
+              </td>
+              <td className="px-4 py-3.5 font-semibold text-gray-800 text-xs max-w-[130px] truncate">
+                {resolveCustomerName(order)}
+              </td>
+              <td className="px-4 py-3.5 text-gray-500 text-xs max-w-[120px] truncate">
+                {resolveVendorName(order)}
+              </td>
+              <td className="px-4 py-3.5">
+                <span className={`text-[10px] uppercase px-2 py-0.5 rounded-full font-black tracking-wider ${statusBadge(order.status)}`}>
+                  {order.status ?? "pending"}
+                </span>
+              </td>
+              <td className="px-4 py-3.5 text-gray-400 text-xs whitespace-nowrap">
+                {timeAgo(order.createdAt)}
+              </td>
+              <td className="px-4 py-3.5">
+                <button
+                  type="button"
+                  aria-label="View order"
+                  onClick={() => onView(order._id ?? order.id)}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#1a3f1c] transition-colors"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -357,108 +396,82 @@ export default function OperationsDashboardPage() {
       {/* Activity + Alerts grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Recent Activity — takes 2 columns */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-border">
-            <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">Recent Activity / Feed</h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/operations/orders")}
-              className="text-xs font-semibold text-foreground/80 border-border bg-transparent hover:bg-surface-secondary transition-all h-8"
-            >
-              View All
-            </Button>
-          </div>
+        {/* Recent Activity — table, takes 2 columns */}
+        <Card className="lg:col-span-2 border border-border rounded-2xl shadow-sm bg-surface overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[#1a3f1c]" />
+                <h2 className="text-base font-bold text-foreground">Recent Activity</h2>
+                <span className="text-xs text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full font-medium">
+                  {recentActivity.length} orders
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/operations/orders")}
+                className="text-xs font-semibold h-8"
+              >
+                View All
+              </Button>
+            </div>
+            <ActivityTable
+              orders={recentActivity}
+              onView={(id) => router.push(`/operations/orders/${id}`)}
+            />
+          </CardContent>
+        </Card>
 
-          {recentActivity.length === 0 ? (
-            <Card className="border border-border rounded-xl shadow-sm bg-surface">
-              <CardContent className="p-8 text-center text-muted-foreground text-sm font-medium">
-                No recent activity to display.
-              </CardContent>
-            </Card>
-          ) : (
-            recentActivity.map((order: any, i: number) => (
-              <Card key={order._id ?? i}
-                className="border border-border rounded-xl shadow-sm bg-surface hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">
-                        {resolveCustomerName(order)} placed an order from {resolveVendorName(order)}
-                      </p>
-                      <div className="flex items-center gap-x-3 gap-y-2 mt-2 flex-wrap">
-                        <span className="text-xs font-mono text-muted-foreground bg-surface-secondary px-2 py-1 rounded-md">
-                          #{order.orderNumber ?? order._id?.slice(-8)?.toUpperCase() ?? "—"}
-                        </span>
-                        <span className={`text-[10px] uppercase px-2.5 py-1 rounded-full font-black tracking-wider ${statusBadge(order.status)}`}>
-                          {(order.status ?? "pending")}
-                        </span>
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {timeAgo(order.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => router.push(`/operations/orders/${order._id ?? order.id}`)}
-                      className="h-9 w-9 shrink-0 rounded-full border-border text-foreground/80 hover:bg-surface-secondary"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
-
-        {/* Alerts / Warnings */}
+        {/* Alerts & Ratings — right column */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-border">
-            <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">Alerts & Warnings</h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/operations/vendors")} // or a general reports page if exists
-              className="text-xs font-semibold text-foreground/80 border-border bg-transparent hover:bg-surface-secondary transition-all h-8"
-            >
-              View All
-            </Button>
-          </div>
+          {/* Alerts panel */}
+          <Card className="border border-border rounded-2xl shadow-sm bg-surface overflow-hidden">
+            <CardContent className="p-0">
+              {/* Panel header */}
+              <div className="flex items-center justify-between px-5 py-4 bg-amber-50 border-b border-amber-100">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  <h2 className="text-sm font-bold text-amber-800">Alerts & Warnings</h2>
+                </div>
+                <span className="text-xs font-black text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">
+                  {(alerts.suspendedCustomers ?? 0) + (alerts.suspendedVendors ?? 0) + (alerts.suspendedRiders ?? 0) + (alerts.openQueries ?? 0)} total
+                </span>
+              </div>
 
-          <AlertRow
-            label={`${alerts.suspendedCustomers ?? 0} suspended customer${(alerts.suspendedCustomers ?? 0) !== 1 ? "s" : ""}`}
-            count={alerts.suspendedCustomers ?? 0}
-            color="text-red-500"
-          />
-          <AlertRow
-            label={`${alerts.suspendedVendors ?? 0} suspended vendor${(alerts.suspendedVendors ?? 0) !== 1 ? "s" : ""}`}
-            count={alerts.suspendedVendors ?? 0}
-            color="text-orange-500"
-          />
-          <AlertRow
-            label={`${alerts.suspendedRiders ?? 0} suspended rider${(alerts.suspendedRiders ?? 0) !== 1 ? "s" : ""}`}
-            count={alerts.suspendedRiders ?? 0}
-            color="text-yellow-500"
-          />
-          <AlertRow
-            label={`${alerts.openQueries ?? 0} open quer${(alerts.openQueries ?? 0) !== 1 ? "ies" : "y"}`}
-            count={alerts.openQueries ?? 0}
-            color="text-blue-500"
-          />
+              {/* Alert rows */}
+              {[
+                { label: "Suspended Customers", count: alerts.suspendedCustomers ?? 0, bar: "bg-red-500",    path: "/operations/customers" },
+                { label: "Suspended Vendors",   count: alerts.suspendedVendors   ?? 0, bar: "bg-orange-500", path: "/operations/vendors"   },
+                { label: "Suspended Riders",    count: alerts.suspendedRiders    ?? 0, bar: "bg-yellow-500", path: "/operations/riders"    },
+                { label: "Open Queries",         count: alerts.openQueries        ?? 0, bar: "bg-blue-500",   path: "/operations/orders"    },
+              ].map((item, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => router.push(item.path)}
+                  className="w-full flex items-center justify-between px-5 py-3.5 border-b border-gray-50 hover:bg-gray-50 transition-colors text-left last:border-0 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-1 h-7 rounded-full ${item.bar}`} />
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{item.label}</span>
+                  </div>
+                  <span className={`text-xs font-black px-2.5 py-1 rounded-full text-white ${item.count > 0 ? item.bar : "bg-gray-300"}`}>
+                    {item.count}
+                  </span>
+                </button>
+              ))}
+            </CardContent>
+          </Card>
 
-          {/* Ratings summary */}
-          <Card className="border border-border rounded-2xl shadow-sm bg-surface mt-6 relative overflow-hidden group">
-            <CardContent className="p-6 relative z-10">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
-                Platform Ratings
-              </p>
-              <p className="text-4xl font-black text-foreground tracking-tight mb-1">
+          {/* Platform Ratings */}
+          <Card className="border border-border rounded-2xl shadow-sm overflow-hidden bg-[#1a3f1c]">
+            <CardContent className="p-5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-2">Platform Ratings</p>
+              <p className="text-4xl font-black text-white tracking-tight">
                 {(overview.ratings ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs font-medium text-muted-foreground">Total reviews submitted overall</p>
+              <p className="text-xs text-white/50 mt-1">Total reviews submitted</p>
             </CardContent>
           </Card>
         </div>
