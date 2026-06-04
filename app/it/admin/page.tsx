@@ -62,9 +62,9 @@ function extractPagination(res: any, currentLimit: number) {
   const p = d?.pagination ?? d;
   return {
     page:  p?.page  ?? 1,
-    pages: p?.pages ?? 1,
+    pages: p?.pages ?? p?.totalPages ?? 1,
     total: p?.total ?? 0,
-    limit: 7,
+    limit: p?.limit ?? currentLimit,
   };
 }
 
@@ -141,10 +141,10 @@ export default function ITAdminPage() {
   }, []);
 
   // ── Main data fetch ───────────────────────────────────────────────────────
-  const fetchData = useCallback(async (page = 1) => {
+  const fetchData = useCallback(async (page = 1, limit = pagination.limit) => {
     setLoading(true);
     try {
-      const base = { page, limit: pagination.limit, ...searchFilters };
+      const base = { page, limit, ...searchFilters };
 
       let res: any;
       switch (currentView) {
@@ -528,10 +528,10 @@ export default function ITAdminPage() {
               currentPage={pagination.page}
               totalPages={pagination.pages}
               pageSize={pagination.limit}
-              onPageChange={fetchData}
+              onPageChange={(p) => fetchData(p, pagination.limit)}
               onPageSizeChange={size => {
                 setPagination(p => ({ ...p, limit: size, page: 1 }));
-                setTimeout(() => fetchData(1), 0);
+                fetchData(1, size);
               }}
             />
           )}

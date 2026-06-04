@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Bell, Plus, Trash2, Users, Mail, MessageSquare, User, Search, X } from 'lucide-react';
 import { NotificationDetailModal } from '@/components/ui/notification-detail-modal';
+import Pagination from '@/components/Pagination';
 
 const AUDIENCE_COLORS: Record<string, string> = {
   All:        'bg-gray-100 text-gray-700',
@@ -37,6 +38,9 @@ export default function NotificationsPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
+  const [page, setPage]           = useState(1);
+  const [pageSize, setPageSize]   = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   // form state
   const [isIndividual, setIsIndividual] = useState(false);
@@ -90,13 +94,14 @@ export default function NotificationsPage() {
   };
 
   const { data: notifications = [], isLoading } = useQuery({
-    queryKey: ['notifications'],
+    queryKey: ['notifications', page, pageSize],
     queryFn: async () => {
-      const res: any = await notificationService.getAllNotifications();
+      const res: any = await notificationService.getAllNotifications({ page, limit: pageSize });
+      setTotalPages(res?.totalPages ?? res?.data?.totalPages ?? 1);
       return (
-        Array.isArray(res) ? res :
-        Array.isArray(res?.data) ? res.data :
         Array.isArray(res?.notifications) ? res.notifications :
+        Array.isArray(res?.data) ? res.data :
+        Array.isArray(res) ? res :
         []
       ) as any[];
     }
@@ -422,6 +427,16 @@ export default function NotificationsPage() {
           </div>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={s => { setPageSize(s); setPage(1); }}
+        />
+      )}
 
       <NotificationDetailModal
         notification={selected}
