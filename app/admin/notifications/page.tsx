@@ -38,9 +38,8 @@ export default function AdminNotificationsPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
-  const [page, setPage]             = useState(1);
-  const [pageSize, setPageSize]     = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage]         = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // form state
   const [isIndividual, setIsIndividual] = useState(false);
@@ -94,24 +93,18 @@ export default function AdminNotificationsPage() {
     setShowDropdown(false);
   };
 
-  const { data: notifications = [], isLoading } = useQuery({
+  const { data: queryData, isLoading } = useQuery({
     queryKey: ['admin-notifications', page, pageSize],
-    queryFn: async () => {
-      const res: any = await notificationService.getAllNotifications({ page, limit: pageSize });
-      setTotalPages(res?.totalPages ?? res?.data?.totalPages ?? 1);
-      return (
-        Array.isArray(res?.notifications) ? res.notifications :
-        Array.isArray(res?.data) ? res.data :
-        Array.isArray(res) ? res :
-        []
-      ) as any[];
-    }
+    queryFn: () => notificationService.getAllNotifications({ page, limit: pageSize }),
   });
+
+  const notifications: any[] = (queryData as any)?.notifications ?? [];
+  const totalPages: number   = (queryData as any)?.totalPages   ?? 1;
 
   const createMutation = useMutation({
     mutationFn: (data: any) => notificationService.createBroadcast(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-notifications'] });
       toast.success('Broadcast sent successfully');
       setOpen(false);
       resetForm();
@@ -122,7 +115,7 @@ export default function AdminNotificationsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => notificationService.deleteBroadcast(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-notifications'] });
       toast.success('Broadcast deleted');
     },
     onError: (err: any) => toast.error(err.message || 'Failed to delete broadcast')
