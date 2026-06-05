@@ -72,7 +72,7 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
         address: form.address || undefined,
         modeOfDelivery: form.modeOfDelivery || undefined,
         operatingArea: form.operatingArea
-          ? form.operatingArea.split(",").map(s => s.trim()).filter(Boolean)
+          ? form.operatingArea.split(",").map((s: string) => s.trim()).filter(Boolean)
           : undefined,
         driversLicense: form.driversLicense || undefined,
         nin:            form.nin            || undefined,
