@@ -47,7 +47,7 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
     // Store
     storeName:     store.storeName          ?? "",
     storeType:     store.storeType          ?? "",
-    servicesOffered: (store.servicesOffered ?? []).join(", "),
+    servicesOffered: Array.isArray(store.servicesOffered) ? store.servicesOffered.join(", ") : (store.servicesOffered ?? ""),
     ninID:         store.ninID              ?? "",
     CACNumber:     store.CACNumber          ?? "",
     // Location
