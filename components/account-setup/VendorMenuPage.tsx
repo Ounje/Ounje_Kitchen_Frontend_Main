@@ -327,7 +327,7 @@ export default function VendorMenuPage({ vendorId, portal }: Props) {
                 <tr className="bg-gray-50/80 border-b border-gray-100">
                   <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Name</th>
                   {tab === "food-items" && (
-                    <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Category</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Variants</th>
                   )}
                   <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Price</th>
                   <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
@@ -337,12 +337,24 @@ export default function VendorMenuPage({ vendorId, portal }: Props) {
               <tbody>
                 {items.map((item: any) => (
                   <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="px-4 py-3.5 font-semibold text-gray-800">{item.name}</td>
+                    <td className="px-4 py-3.5 font-semibold text-gray-800">
+                      {tab === "food-items"
+                        ? (item.category || item.name || "—")
+                        : (item.name || item.comboName || "—")}
+                    </td>
                     {tab === "food-items" && (
-                      <td className="px-4 py-3.5 text-gray-500 text-xs">{item.category ?? "—"}</td>
+                      <td className="px-4 py-3.5 text-gray-500 text-xs">
+                        {item.subCategory?.length ?? 0} item{item.subCategory?.length !== 1 ? "s" : ""}
+                      </td>
                     )}
                     <td className="px-4 py-3.5 text-gray-700 text-xs font-semibold">
-                      ₦{item.price?.toLocaleString()}
+                      {tab === "food-items"
+                        ? (item.subCategory?.[0]?.price
+                            ? `₦${Number(item.subCategory[0].price).toLocaleString()}`
+                            : item.price ? `₦${Number(item.price).toLocaleString()}` : "—")
+                        : (item.price ?? item.basePrice)
+                            ? `₦${Number(item.price ?? item.basePrice).toLocaleString()}`
+                            : "—"}
                     </td>
                     <td className="px-4 py-3.5">
                       <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
