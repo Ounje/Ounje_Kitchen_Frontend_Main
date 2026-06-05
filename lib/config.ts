@@ -225,6 +225,28 @@ export const ENDPOINTS = {
     NOTIFICATION_DELETE: (id: string) => `/api/operations/notifications/${id}`,
   },
 
+  // ── Account Setup (IT + Operations) ──────────────────────────────────────────
+  ACCOUNTS: {
+    CUSTOMERS:        '/api/accounts/customers',
+    CUSTOMER_UPDATE:  (id: string) => `/api/accounts/customers/${id}`,
+
+    VENDORS:          '/api/accounts/vendors',
+    VENDOR_BY_ID:     (id: string) => `/api/accounts/vendors/${id}`,
+    VENDOR_UPDATE:    (id: string) => `/api/accounts/vendors/${id}`,
+
+    FOOD_ITEMS:       (vendorId: string) => `/api/accounts/vendors/${vendorId}/food-items`,
+    FOOD_ITEM:        (vendorId: string, itemId: string) => `/api/accounts/vendors/${vendorId}/food-items/${itemId}`,
+    FOOD_ITEM_TOGGLE: (vendorId: string, itemId: string) => `/api/accounts/vendors/${vendorId}/food-items/${itemId}/toggle`,
+
+    COMBOS:           (vendorId: string) => `/api/accounts/vendors/${vendorId}/combos`,
+    COMBO:            (vendorId: string, comboId: string) => `/api/accounts/vendors/${vendorId}/combos/${comboId}`,
+    COMBO_TOGGLE:     (vendorId: string, comboId: string) => `/api/accounts/vendors/${vendorId}/combos/${comboId}/toggle`,
+
+    RIDERS:           '/api/accounts/riders',
+    RIDER_BY_ID:      (id: string) => `/api/accounts/riders/${id}`,
+    RIDER_UPDATE:     (id: string) => `/api/accounts/riders/${id}`,
+  },
+
   // ── Finance Portal ────────────────────────────────────────────────────────
   FINANCE: {
     // Dashboard

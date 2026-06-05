@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Home, ShoppingCart, Users, Store, Bike,
-  Star, UserCircle, LogOut, X, Tag, Radio, CreditCard,
+  Star, UserCircle, LogOut, X, Tag, Radio, CreditCard, UserPlus,
 } from "lucide-react";
 
 const navigation = [
@@ -17,6 +17,7 @@ const navigation = [
   { name: "Customers",      href: "/operations/customers",     icon: Users        },
   { name: "Vendors",        href: "/operations/vendors",       icon: Store        },
   { name: "Riders",         href: "/operations/riders",        icon: Bike         },
+  { name: "Account Setup",  href: "/operations/account-setup", icon: UserPlus     },
   { name: "Review & Rating",href: "/operations/reviews",       icon: Star         },
   { name: "Promo Codes",    href: "/operations/promos",        icon: Tag          },
   { name: "Transactions",   href: "/operations/transactions",  icon: CreditCard   },

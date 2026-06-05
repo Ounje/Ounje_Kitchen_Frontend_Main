@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Users, ShoppingCart, FolderLock, UserCircle, LogOut, X, ScrollText } from "lucide-react";
+import { Home, Users, ShoppingCart, FolderLock, UserCircle, LogOut, X, ScrollText, UserPlus } from "lucide-react";
 
 const navigation = [
   { name: "Home",               href: "/it",                    icon: Home        },
   { name: "Admin",              href: "/it/admin",              icon: Users       },
   { name: "Orders",             href: "/it/orders",             icon: ShoppingCart },
   { name: "Account Management", href: "/it/account-management", icon: FolderLock  },
+  { name: "Account Setup",      href: "/it/account-setup",      icon: UserPlus    },
   { name: "Audit Logs",         href: "/it/audit-logs",         icon: ScrollText  },
   { name: "Settings",           href: "/it/settings",           icon: UserCircle  },
 ];
