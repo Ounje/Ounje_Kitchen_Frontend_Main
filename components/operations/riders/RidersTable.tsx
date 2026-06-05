@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, Lock, Unlock, Trash2, Bike } from "lucide-react";
+import { ChevronRight, Bike } from "lucide-react";
 import { AccountStatusBadge, RiderStatusBadge } from "./StatusBadge";
 import { formatNigerianPhone } from "@/lib/utils/formatPhone";
 import { Rider } from "@/lib/api/services/rider.service";
@@ -21,25 +21,23 @@ const MODE_LABEL: Record<string, string> = {
   car:        "Car",
 };
 
-export function RidersTable({ riders, currentPage, pageLimit, onSuspend, onActivate, onDelete }: RidersTableProps) {
-  const thCls = "px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap";
-
+export function RidersTable({ riders, currentPage, pageLimit }: RidersTableProps) {
   return (
-    <div className="overflow-x-auto w-full">
-      <table className="w-full min-w-[900px]">
+    <div className="overflow-x-auto">
+      <table className="modern-table min-w-225">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-100">
-            <th className={thCls}>#</th>
-            <th className={thCls}>Rider</th>
-            <th className={thCls}>Phone</th>
-            <th className={thCls}>Zone</th>
-            <th className={thCls}>Account</th>
-            <th className={thCls}>Status</th>
-            <th className={thCls}>Mode</th>
-            <th className={thCls}>Actions</th>
+          <tr>
+            <th className="w-12">#</th>
+            <th>Rider</th>
+            <th>Phone</th>
+            <th>Zone</th>
+            <th>Account</th>
+            <th>Status</th>
+            <th>Mode</th>
+            <th className="text-right">Action</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody>
           {riders.length === 0 ? (
             <tr>
               <td colSpan={8} className="py-16 text-center">
@@ -48,38 +46,32 @@ export function RidersTable({ riders, currentPage, pageLimit, onSuspend, onActiv
               </td>
             </tr>
           ) : riders.map((r, i) => (
-            <tr key={r.id} className="hover:bg-gray-50/60 transition-colors group">
-              <td className="px-4 py-3.5 text-sm text-gray-400 tabular-nums">{(currentPage - 1) * pageLimit + i + 1}</td>
-              <td className="px-4 py-3.5 text-sm font-medium text-gray-800">{r.name}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap tabular-nums">{formatNigerianPhone(r.phone)}</td>
-              <td className="px-4 py-3.5 text-sm text-gray-500 max-w-40 truncate">{r.zone}</td>
-              <td className="px-4 py-3.5"><AccountStatusBadge status={r.accountStatus} /></td>
-              <td className="px-4 py-3.5"><RiderStatusBadge status={r.riderStatus} /></td>
-              <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap">{MODE_LABEL[r.modeOfDelivery] ?? r.modeOfDelivery}</td>
-              <td className="px-4 py-3.5">
-                <div className="flex items-center gap-1.5">
-                  <Link href={`/operations/riders/${r.id}`} title="View Details"
-                    className="w-7 h-7 rounded-lg bg-[#1a3f1c] flex items-center justify-center hover:opacity-80 transition-opacity shrink-0">
-                    <Eye className="w-3.5 h-3.5 text-white" />
-                  </Link>
-
-                  {r.accountStatus === "active" ? (
-                    <button type="button" onClick={() => onSuspend(r.id)} title="Suspend"
-                      className="w-7 h-7 rounded-lg bg-amber-400 flex items-center justify-center hover:opacity-80 transition-opacity shrink-0">
-                      <Lock className="w-3.5 h-3.5 text-white" />
-                    </button>
-                  ) : (
-                    <button type="button" onClick={() => onActivate(r.id)} title="Activate"
-                      className="w-7 h-7 rounded-lg bg-green-500 flex items-center justify-center hover:opacity-80 transition-opacity shrink-0">
-                      <Unlock className="w-3.5 h-3.5 text-white" />
-                    </button>
-                  )}
-
-                  <button type="button" onClick={() => onDelete(r.id)} title="Delete"
-                    className="w-7 h-7 rounded-lg bg-red-500 flex items-center justify-center hover:opacity-80 transition-opacity shrink-0">
-                    <Trash2 className="w-3.5 h-3.5 text-white" />
-                  </button>
+            <tr key={r.id}>
+              <td className="text-gray-400 tabular-nums">{(currentPage - 1) * pageLimit + i + 1}</td>
+              <td>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-[#98ef9b]/40 ring-2 ring-white shadow-sm flex items-center justify-center">
+                    {r.photo ? (
+                      <img src={r.photo} alt={r.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-[10px] font-black text-[#1a3f1c] select-none">
+                        {(r.name || "?").split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-bold text-gray-900">{r.name}</span>
                 </div>
+              </td>
+              <td className="text-gray-600 font-medium tabular-nums">{formatNigerianPhone(r.phone)}</td>
+              <td className="text-gray-500 max-w-40 truncate">{r.zone || "—"}</td>
+              <td><AccountStatusBadge status={r.accountStatus} /></td>
+              <td><RiderStatusBadge status={r.riderStatus} /></td>
+              <td className="text-gray-500 whitespace-nowrap">{MODE_LABEL[r.modeOfDelivery] ?? r.modeOfDelivery}</td>
+              <td className="text-right">
+                <Link href={`/operations/riders/${r.id}`}
+                  className="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-gray-50 text-xs font-bold text-[#1a3f1c] hover:bg-[#1a3f1c] hover:text-white transition-all">
+                  Details <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
               </td>
             </tr>
           ))}

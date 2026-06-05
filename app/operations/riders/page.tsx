@@ -143,7 +143,7 @@ export default function RidersPage() {
         {ridersLoading ? (
           <RidersTableSkeleton />
         ) : ridersData?.riders && ridersData.riders.length > 0 ? (
-          <div className="bg-white rounded-xl overflow-hidden border border-gray-200 w-full">
+          <div className="modern-table-container">
             <RidersTable
               riders={ridersData.riders}
               currentPage={currentPage}
@@ -152,8 +152,6 @@ export default function RidersPage() {
               onActivate={(id) => setActivateModal({ isOpen: true, riderId: id })}
               onDelete={(id) => setDeleteModal({ isOpen: true, riderId: id })}
             />
-
-            {/* ── Reusable Pagination ── */}
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

@@ -153,14 +153,12 @@ export default function VendorsPage() {
         {loading ? (
           <VendorTableSkeleton />
         ) : (
-          <div className="bg-white rounded-xl overflow-hidden border border-gray-200 w-full">
+          <div className="modern-table-container">
             <VendorTable
               vendors={vendors}
               currentPage={pagination.page}
               pageLimit={pagination.limit}
             />
-
-            {/* ── Reusable Pagination ── */}
             <Pagination
               currentPage={pagination.page}
               totalPages={pagination.totalPages}
