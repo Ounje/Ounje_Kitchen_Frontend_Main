@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useRiders, useTopPerformers, useSuspendRider, useActivateRider, useDeleteRider } from '@/hooks/useRiders';
-import { TopPerformersSection } from '@/components/operations/riders/TopPerformerCard';
+import { TopChart, type TopChartEntry } from '@/components/operations/TopChart';
 import { FiltersBar, type FilterValues } from '@/components/operations/riders/FiltersBar';
 import { RidersTable } from '@/components/operations/riders/RidersTable';
-import { TopPerformersSkeleton, RidersTableSkeleton } from '@/components/operations/riders/SkeletonLoaders';
+import { RidersTableSkeleton } from '@/components/operations/riders/SkeletonLoaders';
 import { ConfirmModal, SuccessModal } from '@/components/operations/riders/ActionModals';
 import Pagination from '@/components/Pagination';
 import type { RiderFilters } from '@/lib/api/services/rider.service';
@@ -129,12 +129,16 @@ export default function RidersPage() {
           </button>
         </div>
 
-        {/* Top Performers */}
-        {topPerformersLoading ? (
-          <TopPerformersSkeleton />
-        ) : topPerformers && topPerformers.length > 0 ? (
-          <TopPerformersSection performers={topPerformers} />
-        ) : null}
+        {/* Top Chart */}
+        <TopChart
+          title="Rider"
+          statLabel="Deliveries"
+          loading={topPerformersLoading}
+          items={(topPerformers ?? []).map((r): TopChartEntry => ({
+            id: r.id, name: r.name, avatar: r.photo, phone: r.phone,
+            location: r.location, stat: r.completedOrders, rank: r.rank,
+          }))}
+        />
 
         {/* Filters */}
         <FiltersBar onSearch={handleSearch} onReset={handleReset} />

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { customerService, type Customer } from "@/lib/api/services/customer.service";
+import { customerService, type Customer, type TopCustomer } from "@/lib/api/services/customer.service";
+import { TopChart, type TopChartEntry } from "@/components/operations/TopChart";
 import { CustomerFilters, type FilterValues } from "@/components/operations/CustomerFilters";
 import { StatusBadge } from "@/components/operations/StatusBadge";
 import Pagination from "@/components/Pagination";
@@ -30,13 +31,15 @@ function TableSkeleton() {
 export default function CustomersPage() {
   const router = useRouter();
 
-  const [customers,  setCustomers]  = useState<Customer[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [exporting,  setExporting]  = useState(false);
-  const [filters,    setFilters]    = useState<FilterValues>({ name: "", email: "", accountStatus: "" });
+  const [customers,    setCustomers]    = useState<Customer[]>([]);
+  const [loading,      setLoading]      = useState(true);
+  const [exporting,    setExporting]    = useState(false);
+  const [filters,      setFilters]      = useState<FilterValues>({ name: "", email: "", accountStatus: "" });
   const [activeFilters, setActiveFilters] = useState<FilterValues>({ name: "", email: "", accountStatus: "" });
-  const [pageSize,   setPageSize]   = useState(10);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit: 10 });
+  const [pageSize,     setPageSize]     = useState(10);
+  const [pagination,   setPagination]   = useState({ page: 1, totalPages: 1, total: 0, limit: 10 });
+  const [topCustomers, setTopCustomers] = useState<TopCustomer[]>([]);
+  const [topLoading,   setTopLoading]   = useState(true);
 
   const loadCustomers = useCallback(async (page: number, f: FilterValues, limit = pageSize) => {
     setLoading(true);
@@ -56,7 +59,13 @@ export default function CustomersPage() {
     }
   }, [pageSize]);
 
-  useEffect(() => { loadCustomers(1, filters); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    loadCustomers(1, filters);
+    customerService.getTopCustomers()
+      .then(setTopCustomers)
+      .catch(() => setTopCustomers([]))
+      .finally(() => setTopLoading(false));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = (f: FilterValues) => { setFilters(f); setActiveFilters(f); loadCustomers(1, f); };
   const handleReset  = () => { const e: FilterValues = { name: "", email: "", accountStatus: "" }; setFilters(e); setActiveFilters(e); loadCustomers(1, e); };
@@ -109,13 +118,29 @@ export default function CustomersPage() {
         </button>
       </div>
 
+      {/* Top Chart */}
+      <TopChart
+        title="Customer"
+        statLabel="Completed"
+        loading={topLoading}
+        items={topCustomers.map((c): TopChartEntry => ({
+          id:       c.id,
+          name:     c.name,
+          avatar:   c.avatar,
+          phone:    c.phone,
+          location: c.address,
+          stat:     c.completedOrders,
+          rank:     c.rank,
+        }))}
+      />
+
       {/* Filters */}
       <CustomerFilters onSearch={handleSearch} onReset={handleReset} />
 
       {/* Table */}
       <div className="modern-table-container">
         <div className="overflow-x-auto">
-          <table className="modern-table min-w-[800px]">
+          <table className="modern-table min-w-200">
             <thead>
               <tr>
                 <th className="w-12">#</th>
@@ -156,7 +181,7 @@ export default function CustomersPage() {
                         <span className="font-bold text-gray-900">{c.name}</span>
                       </div>
                     </td>
-                    <td className="text-gray-500 max-w-[180px] truncate">{c.email}</td>
+                    <td className="text-gray-500 max-w-45 truncate">{c.email}</td>
                     <td className="text-gray-600 font-medium tabular-nums">{formatNigerianPhone(c.phone)}</td>
                     <td className="text-gray-500 whitespace-nowrap">
                       {c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" }) : "—"}

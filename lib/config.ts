@@ -173,6 +173,7 @@ export const ENDPOINTS = {
 
     // Customers
     CUSTOMERS:         '/api/operations/customers',
+    CUSTOMERS_TOP:     '/api/operations/customers/top',
     CUSTOMER_BY_ID:    (id: string) => `/api/operations/customers/${id}`,
     CUSTOMER_SUSPEND:  (id: string) => `/api/operations/customers/${id}/suspend`,
     CUSTOMER_ACTIVATE: (id: string) => `/api/operations/customers/${id}/activate`,

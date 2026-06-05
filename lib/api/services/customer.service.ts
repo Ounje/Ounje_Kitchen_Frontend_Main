@@ -38,6 +38,16 @@ export interface Vendor {
   ordersCount: number;
 }
 
+export interface TopCustomer {
+  id: string;
+  name: string;
+  avatar: string;
+  phone: string;
+  address: string;
+  completedOrders: number;
+  rank: 1 | 2 | 3;
+}
+
 export interface CustomerFilters {
   name?:          string;
   email?:         string;
@@ -156,6 +166,25 @@ export const customerService = {
   async getMostUsedVendor(id: string): Promise<Vendor | null> {
     const customer = await customerService.getCustomerById(id);
     return customer.mostUsedVendor ?? null;
+  },
+
+  // Top 3 customers by completed (delivered) orders — server-side aggregate
+  async getTopCustomers(): Promise<TopCustomer[]> {
+    try {
+      const res = await apiClient.get(ENDPOINTS.OPERATIONS.CUSTOMERS_TOP) as any;
+      const rows: any[] = res?.data ?? res?.customers ?? [];
+      return rows.map((r: any, i: number) => ({
+        id:              String(r.id ?? r._id ?? ''),
+        name:            r.name   ?? '',
+        avatar:          r.avatar ?? '',
+        phone:           r.phone  ?? '',
+        address:         r.address ?? '',
+        completedOrders: r.completedOrders ?? 0,
+        rank:            (i + 1) as 1 | 2 | 3,
+      }));
+    } catch {
+      return [];
+    }
   },
 
   async suspendCustomer(id: string, reason?: string): Promise<{ message: string }> {

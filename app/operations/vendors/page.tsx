@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { vendorService, type VendorFilters as FilterParams, type TopVendor } from '@/lib/api/services/vendor.service';
-import { VendorTopChart } from '@/components/operations/Vendors/VendorTopChart';
+import { TopChart, type TopChartEntry } from '@/components/operations/TopChart';
 import { VendorFilters, type FilterValues } from '@/components/operations/Vendors/VendorFilters';
 import { VendorTable } from '@/components/operations/Vendors/VendorTable';
 import { VendorTableSkeleton } from '@/app/operations/vendors/loaders/VendorTableSkeleton';
@@ -144,7 +144,15 @@ export default function VendorsPage() {
         </div>
 
         {/* Top Chart */}
-        <VendorTopChart topVendors={topVendors} loading={topVendorsLoading} />
+        <TopChart
+          title="Vendor"
+          statLabel="Completed"
+          loading={topVendorsLoading}
+          items={topVendors.map((v): TopChartEntry => ({
+            id: v.id, name: v.name, avatar: v.avatar, phone: v.phone,
+            location: v.location, stat: v.completedOrders, rank: v.rank,
+          }))}
+        />
 
         {/* Filters */}
         <VendorFilters onSearch={handleSearch} onReset={handleReset} />
