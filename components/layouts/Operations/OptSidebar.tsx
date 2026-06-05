@@ -7,16 +7,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Home, ShoppingCart, Users, Store, Bike,
+  Home, ShoppingCart, Users,
   Star, UserCircle, LogOut, X, Tag, Radio, CreditCard, UserPlus,
 } from "lucide-react";
 
 const navigation = [
   { name: "Home",           href: "/operations",               icon: Home        },
   { name: "Orders",         href: "/operations/orders",        icon: ShoppingCart },
-  { name: "Customers",      href: "/operations/customers",     icon: Users        },
-  { name: "Vendors",        href: "/operations/vendors",       icon: Store        },
-  { name: "Riders",         href: "/operations/riders",        icon: Bike         },
+  { name: "Users",           href: "/operations/users",         icon: Users        },
   { name: "Account Setup",  href: "/operations/account-setup", icon: UserPlus     },
   { name: "Review & Rating",href: "/operations/reviews",       icon: Star         },
   { name: "Promo Codes",    href: "/operations/promos",        icon: Tag          },

@@ -69,7 +69,7 @@ function normaliseCustomer(raw: any): Customer {
   const name  = raw.user?.name   ?? raw.name   ?? '';
   const email = raw.user?.email  ?? raw.email  ?? '';
   const phone = raw.user?.phone  ?? raw.phone  ?? '';
-  const avatar = raw.user?.avatar ?? raw.avatar ?? raw.photo ?? '';
+  const avatar = raw.user?.img ?? raw.user?.avatar ?? raw.img ?? raw.avatar ?? raw.photo ?? '';
   const address =
     raw.savedAddresses?.[0]?.address ??
     raw.savedAddresses?.[0]?.label   ??

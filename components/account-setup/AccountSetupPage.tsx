@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, Search, RefreshCw, Users, Store, Bike, ChevronRight, Eye } from "lucide-react";
+import { Plus, Search, RefreshCw, Users, Store, Bike, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Pagination from "@/components/Pagination";
@@ -148,12 +148,11 @@ export default function AccountSetupPage({ portal }: AccountSetupPageProps) {
                   {tab === "vendors" && <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Store</th>}
                   {tab === "riders"  && <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Mode</th>}
                   <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                  <th className="px-4 py-3" />
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item: any) => {
-                  // resolve name/email/phone per entity type
                   const name  = tab === "customers" ? item.name :
                                 tab === "vendors"   ? item.name :
                                                       item.user?.name ?? "—";
@@ -189,7 +188,7 @@ export default function AccountSetupPage({ portal }: AccountSetupPageProps) {
                         </span>
                       </td>
                       <td className="px-4 py-3.5">
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center gap-1">
                           {tab === "vendors" && (
                             <Button
                               size="sm"

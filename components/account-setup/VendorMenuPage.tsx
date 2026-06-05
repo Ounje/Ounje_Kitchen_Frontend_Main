@@ -377,10 +377,11 @@ function ComboForm({
 }) {
   const isEdit = !!existing;
   const [form, setForm] = useState({
-    name:        existing?.name        ?? "",
+    name:        existing?.name || existing?.comboName || "",
     description: existing?.description ?? "",
-    price:       existing?.price?.toString() ?? "",
-    imageUrl:    existing?.imageUrl    ?? "",
+    price:       (existing?.price ?? existing?.basePrice)?.toString() ?? "",
+    imageUrl:    existing?.img || existing?.imageUrl || "",
+    time:        existing?.time ?? "20 mins",
   });
   const [saving, setSaving] = useState(false);
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
@@ -388,13 +389,15 @@ function ComboForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.price) { toast.error("Name and price are required"); return; }
+    if (!form.imageUrl.trim()) { toast.error("Image URL is required"); return; }
     setSaving(true);
     try {
       const payload = {
         name:        form.name,
         description: form.description || undefined,
         price:       parseFloat(form.price),
-        imageUrl:    form.imageUrl    || undefined,
+        imageUrl:    form.imageUrl,
+        time:        form.time || "20 mins",
       };
       if (isEdit) {
         await comboService.update(vendorId, existing._id, payload);
@@ -434,9 +437,13 @@ function ComboForm({
               <Input type="number" value={form.price} onChange={e => set("price", e.target.value)} placeholder="3500" min={0} />
             </div>
             <div className="space-y-1.5">
-              <Label>Image URL</Label>
-              <Input value={form.imageUrl} onChange={e => set("imageUrl", e.target.value)} placeholder="https://…" />
+              <Label>Prep Time</Label>
+              <Input value={form.time} onChange={e => set("time", e.target.value)} placeholder="e.g. 20 mins" />
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Image URL <span className="text-red-500">*</span></Label>
+            <Input value={form.imageUrl} onChange={e => set("imageUrl", e.target.value)} placeholder="https://…" />
           </div>
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="outline" className="flex-1" onClick={onClose} disabled={saving}>Cancel</Button>

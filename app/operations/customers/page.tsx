@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { customerService, type Customer } from "@/lib/api/services/customer.service";
 import { CustomerFilters, type FilterValues } from "@/components/operations/CustomerFilters";
 import { StatusBadge } from "@/components/operations/StatusBadge";
@@ -145,9 +144,14 @@ export default function CustomersPage() {
                     <td className="text-gray-400 tabular-nums">{sn}</td>
                     <td>
                       <div className="flex items-center gap-3">
-                        <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 bg-[#98ef9b]/40 ring-2 ring-white shadow-sm">
-                          <Image src={c.avatar || "/placeholder-avatar.png"} alt={c.name}
-                            fill className="object-cover" unoptimized />
+                        <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-[#98ef9b]/40 ring-2 ring-white shadow-sm flex items-center justify-center">
+                          {c.avatar ? (
+                            <img src={c.avatar} alt={c.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-[10px] font-black text-[#1a3f1c] select-none">
+                              {(c.name || "?").split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()}
+                            </span>
+                          )}
                         </div>
                         <span className="font-bold text-gray-900">{c.name}</span>
                       </div>
