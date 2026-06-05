@@ -134,7 +134,10 @@ function FoodItemForm({
   const isEdit = !!existing;
   const [form, setForm] = useState({
     category:    existing?.category ?? "",
-    isAvailable: existing?.isAvailable !== false ? "true" : "false",
+    dishName:    "",
+    price:       "",
+    imageUrl:    "",
+    isAvailable: "true",
   });
   const [saving, setSaving] = useState(false);
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
@@ -144,19 +147,30 @@ function FoodItemForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.category) { toast.error("Category is required"); return; }
+    if (!isEdit && !form.dishName.trim()) { toast.error("Dish name is required"); return; }
+    if (!isEdit && !form.price) { toast.error("Price is required"); return; }
     setSaving(true);
     try {
-      const payload = {
-        category:    form.category,
-        isAvailable: form.isAvailable === "true",
-        subCategory: existing?.subCategory ?? [],
-      };
       if (isEdit) {
-        await foodItemService.update(vendorId, existing._id, payload);
+        await foodItemService.update(vendorId, existing._id, {
+          isAvailable: form.isAvailable === "true",
+        });
         toast.success("Food item updated");
       } else {
-        await foodItemService.create(vendorId, payload);
-        toast.success("Food item category created");
+        await foodItemService.create(vendorId, {
+          category: form.category,
+          isAvailable: form.isAvailable === "true",
+          subCategory: [{
+            name: form.category,
+            items: [{
+              name:        form.dishName,
+              price:       parseFloat(form.price),
+              img:         form.imageUrl || undefined,
+              isAvailable: true,
+            }],
+          }],
+        });
+        toast.success("Food item added");
       }
       onSuccess();
     } catch (err: any) {
@@ -168,16 +182,11 @@ function FoodItemForm({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-[#1a3f1c] font-black">
-            {isEdit ? "Edit Food Category" : "Add Food Category"}
+            {isEdit ? "Edit Food Item" : "Add Food Item"}
           </DialogTitle>
-          {!isEdit && (
-            <p className="text-xs text-gray-400 mt-1">
-              Individual dishes are added by the vendor through the mobile app.
-            </p>
-          )}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-1.5">
@@ -185,7 +194,7 @@ function FoodItemForm({
             <select
               value={form.category}
               onChange={e => set("category", e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3f1c]/20 capitalize"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3f1c]/20"
               disabled={isEdit}
               title="Food category"
             >
@@ -195,6 +204,40 @@ function FoodItemForm({
               ))}
             </select>
           </div>
+
+          {!isEdit && (
+            <>
+              <div className="space-y-1.5">
+                <Label>Dish Name <span className="text-red-500">*</span></Label>
+                <Input
+                  value={form.dishName}
+                  onChange={e => set("dishName", e.target.value)}
+                  placeholder="e.g. Okro Soup, Jollof Rice"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Price (₦) <span className="text-red-500">*</span></Label>
+                  <Input
+                    type="number"
+                    value={form.price}
+                    onChange={e => set("price", e.target.value)}
+                    placeholder="2000"
+                    min={0}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Image URL</Label>
+                  <Input
+                    value={form.imageUrl}
+                    onChange={e => set("imageUrl", e.target.value)}
+                    placeholder="https://…"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
           <div className="space-y-1.5">
             <Label>Availability</Label>
             <select
@@ -207,10 +250,11 @@ function FoodItemForm({
               <option value="false">Hidden</option>
             </select>
           </div>
+
           <div className="flex gap-2 pt-1">
             <Button type="button" variant="outline" className="flex-1" onClick={onClose} disabled={saving}>Cancel</Button>
             <Button type="submit" className="flex-1 bg-[#1a3f1c] hover:bg-[#1a3f1c]/90" disabled={saving}>
-              {saving ? "Saving…" : isEdit ? "Save Changes" : "Add Category"}
+              {saving ? "Saving…" : isEdit ? "Save Changes" : "Add Food Item"}
             </Button>
           </div>
         </form>
@@ -428,7 +472,7 @@ export default function VendorMenuPage({ vendorId, portal }: Props) {
                   )}
                   <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Price</th>
                   <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                  <th className="px-4 py-3" />
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
                 </tr>
               </thead>
               <tbody>
