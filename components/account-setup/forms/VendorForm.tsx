@@ -87,7 +87,7 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
         storeName:    form.storeName   || undefined,
         storeType:    form.storeType   || undefined,
         servicesOffered: form.servicesOffered
-          ? form.servicesOffered.split(",").map(s => s.trim()).filter(Boolean)
+          ? form.servicesOffered.split(",").map((s: string) => s.trim()).filter(Boolean)
           : undefined,
         ninID:     form.ninID     || undefined,
         CACNumber: form.CACNumber || undefined,
