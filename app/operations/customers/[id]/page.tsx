@@ -59,7 +59,7 @@ export default function CustomerDetailsPage() {
           <p className="text-gray-500 mb-4">Customer not found.</p>
           <button
             type="button"
-            onClick={() => router.push('/operations/customers')}
+            onClick={() => router.back()}
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1a3f1c]"
           >
             Back to Customers
@@ -75,7 +75,7 @@ export default function CustomerDetailsPage() {
         <h1 className="text-lg font-black text-[#1a3f1c]">Customer Details</h1>
         <button
           type="button"
-          onClick={() => router.push('/operations/customers')}
+          onClick={() => router.back()}
           aria-label="Back to customers"
           className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
         >

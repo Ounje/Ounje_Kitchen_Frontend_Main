@@ -40,7 +40,7 @@ export default function RiderDetailsPage() {
   const confirmDelete = async () => {
     await deleteMutation.mutateAsync(riderId);
     setDeleteModal(false);
-    router.push("/operations/riders");
+    router.back();
   };
 
   if (isLoading) return <RiderDetailsSkeleton />;
@@ -50,7 +50,7 @@ export default function RiderDetailsPage() {
       <div className="flex items-center justify-center min-h-75">
         <div className="text-center">
           <p className="text-gray-500 mb-4">Rider not found.</p>
-          <button type="button" onClick={() => router.push("/operations/riders")}
+          <button type="button" onClick={() => router.back()}
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1a3f1c]">
             Back to Riders
           </button>
@@ -71,7 +71,7 @@ export default function RiderDetailsPage() {
         {/* Page header */}
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-lg font-black text-[#1a3f1c]">Rider Details</h1>
-          <button type="button" onClick={() => router.push("/operations/riders")}
+          <button type="button" onClick={() => router.back()}
             aria-label="Back to riders"
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
             <X className="w-4 h-4 text-gray-600" />
@@ -178,7 +178,7 @@ export default function RiderDetailsPage() {
       <ConfirmModal isOpen={activateModal} onClose={() => setActivateModal(false)} onConfirm={confirmActivate} title="Activate this rider?" loading={activateMutation.isPending} />
       <ConfirmModal isOpen={deleteModal}   onClose={() => setDeleteModal(false)}   onConfirm={confirmDelete}   title="Delete this account?" loading={deleteMutation.isPending} />
       <SuccessModal isOpen={successModal.isOpen} title={successModal.message}
-        onClose={() => { setSuccessModal({ isOpen: false, message: "" }); router.push("/operations/riders"); }} />
+        onClose={() => { setSuccessModal({ isOpen: false, message: "" }); router.back(); }} />
     </div>
   );
 }

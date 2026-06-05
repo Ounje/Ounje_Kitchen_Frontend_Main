@@ -59,7 +59,7 @@ export default function VendorDetailsPage() {
           <p className="text-gray-500 mb-4">Vendor not found.</p>
           <button
             type="button"
-            onClick={() => router.push('/operations/vendors')}
+            onClick={() => router.back()}
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#1a3f1c]"
           >
             Back to Vendors
@@ -75,7 +75,7 @@ export default function VendorDetailsPage() {
         <h1 className="text-lg font-black text-[#1a3f1c]">Vendor Details</h1>
         <button
           type="button"
-          onClick={() => router.push('/operations/vendors')}
+          onClick={() => router.back()}
           aria-label="Back to vendors"
           className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
         >
