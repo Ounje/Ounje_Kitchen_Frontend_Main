@@ -1,9 +1,10 @@
 import VendorMenuPage from "@/components/account-setup/VendorMenuPage";
 
 interface Props {
-  params: { vendorId: string };
+  params: Promise<{ vendorId: string }>;
 }
 
-export default function OperationsVendorMenuPage({ params }: Props) {
-  return <VendorMenuPage vendorId={params.vendorId} portal="operations" />;
+export default async function OperationsVendorMenuPage({ params }: Props) {
+  const { vendorId } = await params;
+  return <VendorMenuPage vendorId={vendorId} portal="operations" />;
 }
