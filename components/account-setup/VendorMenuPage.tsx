@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, RefreshCw, ArrowLeft, Utensils, Package, Trash2, ToggleLeft, ToggleRight, Eye } from "lucide-react";
+import { Plus, RefreshCw, ArrowLeft, Utensils, Package, Trash2, ToggleLeft, ToggleRight, Eye, Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -43,77 +43,177 @@ function getTotalItems(item: any): number {
   );
 }
 
-// ── Food Item View Modal ───────────────────────────────────────────────────────
-function FoodItemViewModal({ item, onClose }: { item: any; onClose: () => void }) {
+// ── Food Item View/Edit Modal ──────────────────────────────────────────────────
+function FoodItemViewModal({
+  item,
+  vendorId,
+  onClose,
+  onSaved,
+}: {
+  item: any;
+  vendorId: string;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [subCategories, setSubCategories] = useState<any[]>(
+    JSON.parse(JSON.stringify(item.subCategory ?? []))
+  );
+  const [editingKey, setEditingKey]   = useState<string | null>(null); // "si-di"
+  const [editForm,   setEditForm]     = useState({ name: "", price: "", imageUrl: "" });
+  const [saving,     setSaving]       = useState(false);
+  const [dirty,      setDirty]        = useState(false);
+
+  const startEdit = (si: number, di: number, dish: any) => {
+    setEditingKey(`${si}-${di}`);
+    setEditForm({ name: dish.name ?? "", price: dish.price?.toString() ?? "", imageUrl: dish.img ?? "" });
+  };
+
+  const cancelEdit = () => setEditingKey(null);
+
+  const saveEdit = (si: number, di: number) => {
+    const updated = subCategories.map((sc, s) => s !== si ? sc : {
+      ...sc,
+      items: sc.items.map((dish: any, d: number) => d !== di ? dish : {
+        ...dish,
+        name:  editForm.name,
+        price: parseFloat(editForm.price) || dish.price,
+        img:   editForm.imageUrl || dish.img,
+      }),
+    });
+    setSubCategories(updated);
+    setEditingKey(null);
+    setDirty(true);
+  };
+
+  const deleteDish = (si: number, di: number) => {
+    const updated = subCategories.map((sc, s) => s !== si ? sc : {
+      ...sc,
+      items: sc.items.filter((_: any, d: number) => d !== di),
+    }).filter(sc => sc.items.length > 0);
+    setSubCategories(updated);
+    setDirty(true);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await foodItemService.update(vendorId, item._id, { subCategory: subCategories });
+      toast.success("Menu updated");
+      setDirty(false);
+      onSaved();
+    } catch (err: any) {
+      toast.error(err?.message || "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const totalDishes = subCategories.reduce((sum, sc) => sum + (sc.items?.length ?? 0), 0);
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-lg p-0">
         <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="text-[#1a3f1c] font-black capitalize">
-            {capitalize(item.category)} — Items Breakdown
+            {capitalize(item.category)} — {totalDishes} dish{totalDishes !== 1 ? "es" : ""}
           </DialogTitle>
-          <p className="text-xs text-gray-400 mt-1">
-            {getTotalItems(item)} dish{getTotalItems(item) !== 1 ? "es" : ""} across {item.subCategory?.length ?? 0} sub-group{item.subCategory?.length !== 1 ? "s" : ""}
-          </p>
+          <p className="text-xs text-gray-400 mt-1">Click the pencil icon to edit a dish's name, price, or image.</p>
         </DialogHeader>
-        <ScrollArea className="max-h-[65vh] px-6 pb-6">
+
+        <ScrollArea className="max-h-[60vh] px-6 pb-2">
           <div className="space-y-5 pt-4">
-            {(item.subCategory ?? []).length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">No items added yet.</p>
-            ) : (
-              (item.subCategory ?? []).map((sc: any, si: number) => (
-                <div key={si}>
-                  {/* Sub-group header */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{capitalize(sc.name)}</span>
-                    <div className="flex-1 h-px bg-gray-100" />
-                    <span className="text-[10px] text-gray-400">{sc.items?.length ?? 0} item{sc.items?.length !== 1 ? "s" : ""}</span>
-                  </div>
-                  {/* Items */}
-                  <div className="space-y-2">
-                    {(sc.items ?? []).length === 0 ? (
-                      <p className="text-xs text-gray-300 pl-2">No items in this group.</p>
-                    ) : (
-                      (sc.items ?? []).map((dish: any, di: number) => (
-                        <div
-                          key={di}
-                          className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2.5"
-                        >
-                          {dish.img && (
-                            <img
-                              src={dish.img}
-                              alt={dish.name}
-                              className="w-10 h-10 rounded-lg object-cover shrink-0"
-                            />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-800 truncate">{dish.name || "—"}</p>
-                            {dish.description && (
-                              <p className="text-xs text-gray-400 truncate">{dish.description}</p>
-                            )}
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-sm font-black text-[#1a3f1c]">
-                              {dish.price ? `₦${Number(dish.price).toLocaleString()}` : "—"}
-                            </p>
-                            {dish.originalPrice && dish.originalPrice !== dish.price && (
-                              <p className="text-[10px] text-gray-400 line-through">
-                                ₦{Number(dish.originalPrice).toLocaleString()}
-                              </p>
-                            )}
-                            <span className={`text-[9px] font-black uppercase ${dish.isAvailable !== false ? "text-green-600" : "text-gray-400"}`}>
-                              {dish.isAvailable !== false ? "available" : "hidden"}
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+            {subCategories.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-8">No dishes in this category.</p>
+            ) : subCategories.map((sc: any, si: number) => (
+              <div key={si}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{capitalize(sc.name)}</span>
+                  <div className="flex-1 h-px bg-gray-100" />
+                  <span className="text-[10px] text-gray-400">{sc.items?.length ?? 0} dish{sc.items?.length !== 1 ? "es" : ""}</span>
                 </div>
-              ))
-            )}
+
+                <div className="space-y-2">
+                  {(sc.items ?? []).map((dish: any, di: number) => {
+                    const key = `${si}-${di}`;
+                    const isEditing = editingKey === key;
+                    return (
+                      <div key={di} className="bg-gray-50 rounded-xl px-3 py-2.5">
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full"
+                                placeholder="Dish name"
+                                value={editForm.name}
+                                onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                              />
+                              <input
+                                className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full"
+                                placeholder="Price (₦)"
+                                type="number"
+                                value={editForm.price}
+                                onChange={e => setEditForm(f => ({ ...f, price: e.target.value }))}
+                              />
+                            </div>
+                            <input
+                              className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full"
+                              placeholder="Image URL"
+                              value={editForm.imageUrl}
+                              onChange={e => setEditForm(f => ({ ...f, imageUrl: e.target.value }))}
+                            />
+                            <div className="flex gap-2 justify-end">
+                              <Button size="sm" variant="ghost" className="h-7 gap-1 text-gray-400" onClick={cancelEdit}>
+                                <X className="w-3 h-3" /> Cancel
+                              </Button>
+                              <Button size="sm" className="h-7 gap-1 bg-[#1a3f1c] hover:bg-[#1a3f1c]/90" onClick={() => saveEdit(si, di)}>
+                                <Check className="w-3 h-3" /> Done
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3">
+                            {dish.img && (
+                              <img src={dish.img} alt={dish.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-800 truncate">{dish.name || "—"}</p>
+                              {dish.description && <p className="text-xs text-gray-400 truncate">{dish.description}</p>}
+                            </div>
+                            <div className="text-right shrink-0 mr-2">
+                              <p className="text-sm font-black text-[#1a3f1c]">
+                                {dish.price ? `₦${Number(dish.price).toLocaleString()}` : "—"}
+                              </p>
+                              <span className={`text-[9px] font-black uppercase ${dish.isAvailable !== false ? "text-green-600" : "text-gray-400"}`}>
+                                {dish.isAvailable !== false ? "available" : "hidden"}
+                              </span>
+                            </div>
+                            <div className="flex gap-1 shrink-0">
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-[#1a3f1c]" onClick={() => startEdit(si, di, dish)}>
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-red-500" onClick={() => deleteDish(si, di)}>
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </ScrollArea>
+
+        <div className="flex gap-2 px-6 pb-6 pt-3 border-t border-gray-100">
+          <Button variant="outline" className="flex-1" onClick={onClose}>Close</Button>
+          {dirty && (
+            <Button className="flex-1 bg-[#1a3f1c] hover:bg-[#1a3f1c]/90" onClick={handleSave} disabled={saving}>
+              {saving ? "Saving…" : "Save Changes"}
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -551,7 +651,12 @@ export default function VendorMenuPage({ vendorId, portal }: Props) {
 
       {/* View Items Modal */}
       {viewTarget && (
-        <FoodItemViewModal item={viewTarget} onClose={() => setViewTarget(null)} />
+        <FoodItemViewModal
+          item={viewTarget}
+          vendorId={vendorId}
+          onClose={() => setViewTarget(null)}
+          onSaved={() => { setViewTarget(null); fetch(); }}
+        />
       )}
 
       {/* Create / Edit Modals */}
