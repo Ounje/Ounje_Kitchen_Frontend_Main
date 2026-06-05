@@ -607,7 +607,7 @@ export default function VendorMenuPage({ vendorId, portal }: Props) {
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex items-center justify-end gap-1">
-                          {tab === "food-items" && (
+                          {tab === "food-items" ? (
                             <Button
                               size="sm"
                               variant="ghost"
@@ -615,6 +615,16 @@ export default function VendorMenuPage({ vendorId, portal }: Props) {
                               onClick={() => setViewTarget(item)}
                             >
                               <Eye className="w-3.5 h-3.5" /> View
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0 text-gray-400 hover:text-[#1a3f1c]"
+                              onClick={() => { setEditTarget(item); setShowForm(true); }}
+                              title="Edit combo"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
                             </Button>
                           )}
                           <Button

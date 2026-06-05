@@ -154,6 +154,14 @@ class APIClient {
   delete<T>(ep: string, opts?: RequestOptions) {
     return this.request<T>(ep, { ...opts, method: "DELETE" });
   }
+
+  patch<T>(ep: string, data?: unknown, opts?: RequestOptions) {
+    return this.request<T>(ep, {
+      ...opts,
+      method: "PATCH",
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
 }
 
 export const apiClient = new APIClient(API_CONFIG.BASE_URL);
