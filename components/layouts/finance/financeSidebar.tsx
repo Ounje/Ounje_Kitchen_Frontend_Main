@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, ArrowLeftRight, ArrowDownToLine, TrendingUp, Settings, LogOut, X } from "lucide-react";
+import { Home, ArrowLeftRight, ArrowDownToLine, TrendingUp, Settings, LogOut, X, Wallet } from "lucide-react";
 
 const NAV = [
   { href: "/finance/dashboard",    name: "Home",         icon: Home            },
   { href: "/finance/transactions", name: "Transactions", icon: ArrowLeftRight  },
   { href: "/finance/withdrawals",  name: "Withdrawal",   icon: ArrowDownToLine },
+  { href: "/finance/payouts",      name: "Payouts",      icon: Wallet          },
   { href: "/finance/revenue",      name: "Revenue",      icon: TrendingUp      },
   { href: "/finance/settings",     name: "Settings",     icon: Settings        },
 ];

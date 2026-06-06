@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Calendar, Search, Download, User } from 'lucide-react';
+import { Calendar, Search, Download, User, Loader2 } from 'lucide-react';
+import { downloadCSV } from '@/lib/utils/exportCSV';
 import { TrendingUp } from 'lucide-react';
 import { RevenueTrendChart } from '@/components/finance/RevenueTrendChart';
 import { RevenueDistributionChart } from '@/components/finance/RevenueDistributionChart';
@@ -68,6 +69,7 @@ function TopSection({
 export default function RevenuePage() {
   const [revenueData, setRevenueData] = useState<RevenueData | null>(null);
   const [loading, setLoading]         = useState(true);
+  const [exporting, setExporting]     = useState(false);
   const [period, setPeriod]           = useState<RevenuePeriod>('daily');
   const [startDate, setStartDate]     = useState('');
   const [endDate, setEndDate]         = useState('');
@@ -98,6 +100,32 @@ export default function RevenuePage() {
 
   // Load on mount and when period changes
   useEffect(() => { loadRevenue(); }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleExportCSV = () => {
+    if (!revenueData) return;
+    setExporting(true);
+    try {
+      const rows = (revenueData.trend ?? []).map(t => ({
+        Period:         t.label,
+        'Gross Revenue':  t.gross,
+        'Vendor Revenue': t.vendor,
+        'Rider Revenue':  t.rider,
+        'Net Revenue':    t.net,
+      }));
+      if (revenueData.stats) {
+        const s = revenueData.stats;
+        rows.push(
+          { Period: 'TOTAL — Gross',          'Gross Revenue': s.gross.amount,  'Vendor Revenue': 0, 'Rider Revenue': 0, 'Net Revenue': 0 },
+          { Period: 'TOTAL — Vendor',         'Gross Revenue': 0, 'Vendor Revenue': s.vendor.amount, 'Rider Revenue': 0, 'Net Revenue': 0 },
+          { Period: 'TOTAL — Rider',          'Gross Revenue': 0, 'Vendor Revenue': 0, 'Rider Revenue': s.rider.amount, 'Net Revenue': 0 },
+          { Period: 'TOTAL — Net',            'Gross Revenue': 0, 'Vendor Revenue': 0, 'Rider Revenue': 0, 'Net Revenue': s.net.amount },
+        );
+      }
+      downloadCSV(rows, `revenue_${period}_${new Date().toISOString().slice(0, 10)}`);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const loadTopVendors = async (p: RevenuePeriod) => {
     setVendorsLoading(true);
@@ -164,6 +192,8 @@ export default function RevenuePage() {
         <div className="relative">
           <select
             value={period}
+            title="Revenue period"
+            aria-label="Revenue period"
             onChange={e => setPeriod(e.target.value as RevenuePeriod)}
             className="appearance-none bg-[#1a3f1c] pl-9 pr-8 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer"
           >
@@ -192,10 +222,12 @@ export default function RevenuePage() {
       {/* Date filter row */}
       <div className="flex flex-wrap items-end gap-3 mb-6">
         <div>
-          <label className="block text-xs font-medium mb-1 text-[#1a3f1c]">Start Date</label>
+          <label htmlFor="rev-start" className="block text-xs font-medium mb-1 text-[#1a3f1c]">Start Date</label>
           <div className="relative">
             <input
+              id="rev-start"
               type="date"
+              title="Start date"
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
               className="px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
@@ -204,10 +236,12 @@ export default function RevenuePage() {
           </div>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1 text-[#1a3f1c]">End Date</label>
+          <label htmlFor="rev-end" className="block text-xs font-medium mb-1 text-[#1a3f1c]">End Date</label>
           <div className="relative">
             <input
+              id="rev-end"
               type="date"
+              title="End date"
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
               className="px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
@@ -216,6 +250,7 @@ export default function RevenuePage() {
           </div>
         </div>
         <button
+          type="button"
           onClick={loadRevenue}
           className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity bg-[#1a3f1c]"
         >
@@ -223,10 +258,13 @@ export default function RevenuePage() {
           Search
         </button>
         <button
-          className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity bg-[#1a3f1c]"
+          type="button"
+          onClick={handleExportCSV}
+          disabled={exporting || !revenueData}
+          className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity bg-[#1a3f1c] disabled:opacity-50"
         >
-          <Download className="w-4 h-4" />
-          Export CSV
+          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {exporting ? 'Exporting…' : 'Export CSV'}
         </button>
       </div>
 

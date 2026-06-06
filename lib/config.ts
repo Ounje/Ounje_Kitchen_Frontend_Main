@@ -271,11 +271,23 @@ export const ENDPOINTS = {
     REVENUE_TOP_VENDORS: '/api/finance/revenue/top-vendors',
     REVENUE_TOP_RIDERS:  '/api/finance/revenue/top-riders',
 
+    // Wallets & Payouts
+    WALLETS_OVERVIEW: '/api/finance/wallets/overview',
+    PAYOUTS:          '/api/finance/payouts',
+    PAYOUTS_STATS:    '/api/finance/payouts/stats',
+    PAYOUT_BY_ID:     (id: string) => `/api/finance/payouts/${id}`,
+
     // Profile / Settings
     PROFILE:         '/api/finance/profile',
     PROFILE_AVATAR:  '/api/finance/profile/avatar',
     CHANGE_PASSWORD: '/api/finance/change-password',
     VERIFY_OTP:      '/api/finance/verify-otp',
     RESEND_OTP:      '/api/finance/resend-otp',
+  },
+
+  // ── Investor Portal ───────────────────────────────────────────────────────
+  INVESTOR: {
+    DASHBOARD: '/api/investor/dashboard',
+    REVENUE:   '/api/investor/revenue',
   },
 };

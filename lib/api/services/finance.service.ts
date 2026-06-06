@@ -108,6 +108,59 @@ export interface WithdrawalFilters {
   limit?: number;
 }
 
+// ── Wallets & Payouts ─────────────────────────────────────────────────────────
+
+export interface WalletBucket {
+  availableBalance: number;
+  pendingBalance:   number;
+  holdBalance:      number;
+  totalBalance:     number;
+}
+
+export interface WalletOverview {
+  vendors:  WalletBucket;
+  riders:   WalletBucket;
+  platform: { availableBalance: number; pendingBalance: number; totalBalance: number };
+  pendingPayouts: { count: number; totalNaira: number };
+}
+
+export interface PayoutItem {
+  _id:            string;
+  recipientName:  string;
+  recipientType:  'VendorProfile' | 'RiderProfile';
+  amountNaira:    number;
+  netAmountNaira: number;
+  feeNaira:       number;
+  status:         'pending' | 'processing' | 'success' | 'failed' | 'cancelled';
+  bankDetails: {
+    bankName:      string;
+    accountNumber: string;
+    accountName:   string;
+  };
+  processAt:      string;
+  processedAt?:   string;
+  failureReason?: string;
+  retryCount:     number;
+  createdAt:      string;
+}
+
+export interface PayoutStats {
+  pending:    { count: number; totalNaira: number };
+  processing: { count: number; totalNaira: number };
+  success:    { count: number; totalNaira: number };
+  failed:     { count: number; totalNaira: number };
+  cancelled:  { count: number; totalNaira: number };
+}
+
+export interface PayoutFilters {
+  status?:        string;
+  recipientType?: string;
+  startDate?:     string;
+  endDate?:       string;
+  page?:          number;
+  limit?:         number;
+}
+
 // ── Revenue ───────────────────────────────────────────────────────────────────
 export type RevenuePeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -308,6 +361,28 @@ export const financeService = {
   async resendOTP() {
     const res = await apiClient.post(ENDPOINTS.FINANCE.RESEND_OTP);
     return res;
+  },
+
+  // ==================== WALLETS & PAYOUTS ====================
+
+  async getWalletOverview(): Promise<WalletOverview> {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.WALLETS_OVERVIEW) as any;
+    return res?.data ?? res;
+  },
+
+  async getPayouts(filters: PayoutFilters = {}) {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.PAYOUTS, { params: filters }) as any;
+    return res?.data ?? res;
+  },
+
+  async getPayoutStats(): Promise<PayoutStats> {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.PAYOUTS_STATS) as any;
+    return res?.data ?? res;
+  },
+
+  async getPayoutById(id: string): Promise<PayoutItem> {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.PAYOUT_BY_ID(id)) as any;
+    return res?.data ?? res;
   },
 };
 

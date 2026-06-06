@@ -12,6 +12,7 @@ import financeService, {
   type DashboardStats,
   type DashboardWithdrawalRow,
   type WithdrawalDetail,
+  type WalletOverview,
 } from '@/lib/api/services/finance.service';
 
 export default function FinanceDashboardPage() {
@@ -35,7 +36,19 @@ export default function FinanceDashboardPage() {
     },
   });
 
-  // 2. Fetch Withdrawals
+  // 2. Wallet Overview
+  const {
+    data: wallets,
+    isLoading: loadingWallets,
+  } = useQuery<WalletOverview>({
+    queryKey: ['financeWalletOverview'],
+    queryFn: async () => {
+      try { return await financeService.getWalletOverview(); }
+      catch { return null as any; }
+    },
+  });
+
+  // 3. Fetch Withdrawals
   const { 
     data: rows = [], 
     isLoading: loadingRows, 
@@ -106,7 +119,7 @@ export default function FinanceDashboardPage() {
         <div className="flex flex-col items-center justify-center p-12 bg-surface rounded-xl shadow-sm border border-border mt-10 text-center">
            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Error Loading Dashboard</h2>
            <p className="text-muted-foreground mb-4">{errMessage}</p>
-           <button onClick={() => window.location.reload()} className="px-5 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-opacity-90 transition">
+           <button type="button" onClick={() => window.location.reload()} className="px-5 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-opacity-90 transition">
              Reload Dashboard
            </button>
         </div>
@@ -143,6 +156,39 @@ export default function FinanceDashboardPage() {
               subtitle={c.subtitle}
             />
           ))
+        ) : null}
+      </div>
+
+      {/* Wallet Overview */}
+      <div className="mb-8">
+        <h2 className="text-lg font-bold text-primary mb-3">Wallet Balances</h2>
+        {loadingWallets ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-surface-secondary animate-pulse" />)}
+          </div>
+        ) : wallets ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-xl p-4 bg-[#1a3f1c] text-white">
+              <p className="text-xs font-semibold text-white/60 mb-1">Platform Balance</p>
+              <p className="text-2xl font-black">₦{wallets.platform.availableBalance.toLocaleString()}</p>
+              <p className="text-xs text-white/50 mt-1">₦{wallets.platform.pendingBalance.toLocaleString()} pending</p>
+            </div>
+            <div className="rounded-xl p-4 bg-white border border-gray-100 shadow-sm">
+              <p className="text-xs font-semibold text-gray-500 mb-1">Vendor Wallets</p>
+              <p className="text-2xl font-black text-gray-900">₦{wallets.vendors.availableBalance.toLocaleString()}</p>
+              <p className="text-xs text-gray-400 mt-1">₦{wallets.vendors.holdBalance.toLocaleString()} on hold</p>
+            </div>
+            <div className="rounded-xl p-4 bg-white border border-gray-100 shadow-sm">
+              <p className="text-xs font-semibold text-gray-500 mb-1">Rider Wallets</p>
+              <p className="text-2xl font-black text-gray-900">₦{wallets.riders.availableBalance.toLocaleString()}</p>
+              <p className="text-xs text-gray-400 mt-1">₦{wallets.riders.holdBalance.toLocaleString()} on hold</p>
+            </div>
+            <div className="rounded-xl p-4 bg-amber-50 border border-amber-100">
+              <p className="text-xs font-semibold text-amber-700 mb-1">Pending Payouts</p>
+              <p className="text-2xl font-black text-amber-800">{wallets.pendingPayouts.count}</p>
+              <p className="text-xs text-amber-600 mt-1">₦{wallets.pendingPayouts.totalNaira.toLocaleString()} queued</p>
+            </div>
+          </div>
         ) : null}
       </div>
 

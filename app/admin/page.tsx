@@ -49,7 +49,9 @@ function DashboardSkeleton() {
 export default function AdminDashboard() {
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
 
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [dashboard,      setDashboard]      = useState<DashboardData | null>(null);
+  const [periodRevenue,  setPeriodRevenue]  = useState<number | null>(null);
+  const [periodLoading,  setPeriodLoading]  = useState(false);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState("");
 
@@ -97,7 +99,14 @@ export default function AdminDashboard() {
   const handlePeriodSelect = (period: typeof selectedPeriod) => {
     setSelectedPeriod(period);
     setShowDropdown(false);
-    // TODO: pass period.toLowerCase() to dashboardService.getRevenue(period)
+    setPeriodLoading(true);
+    dashboardService.getRevenue(period.toLowerCase() as 'daily' | 'weekly' | 'monthly' | 'yearly')
+      .then((res: any) => {
+        const gross = res?.gross ?? res?.data?.gross ?? res?.revenue?.gross ?? null;
+        if (gross !== null) setPeriodRevenue(gross);
+      })
+      .catch(() => {})
+      .finally(() => setPeriodLoading(false));
   };
 
   // ── Guards ─────────────────────────────────────────────────────────────────
@@ -109,6 +118,7 @@ export default function AdminDashboard() {
         <p className="font-semibold">Error loading dashboard</p>
         <p className="text-sm mt-1">{error}</p>
         <button
+          type="button"
           onClick={() => window.location.reload()}
           className="mt-3 text-sm underline text-red-600"
         >
@@ -138,6 +148,7 @@ export default function AdminDashboard() {
         {/* Period dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
+            type="button"
             onClick={() => setShowDropdown((p) => !p)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-surface text-foreground hover:bg-muted/30 shadow-sm text-sm font-bold transition-all"
           >
@@ -150,6 +161,7 @@ export default function AdminDashboard() {
               {(["Daily", "Weekly", "Monthly", "Yearly"] as const).map((p) => (
                 <button
                   key={p}
+                  type="button"
                   onClick={() => handlePeriodSelect(p)}
                   className={`w-full px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                     selectedPeriod === p
@@ -170,7 +182,11 @@ export default function AdminDashboard() {
         <StatsCard icon={Users}        value={(users?.total       ?? 0).toLocaleString()} label="Total Users"    />
         <StatsCard icon={ShoppingCart} value={(orders?.total      ?? 0).toLocaleString()} label="Total Orders"   />
         <StatsCard icon={Store}        value={(users?.vendors     ?? 0).toLocaleString()} label="Total Vendors"  />
-        <StatsCard icon={DollarSign}   value={`₦${(revenue?.gross ?? 0).toLocaleString()}`} label="Total Revenue" />
+        <StatsCard
+          icon={DollarSign}
+          value={periodLoading ? '…' : `₦${(periodRevenue ?? revenue?.gross ?? 0).toLocaleString()}`}
+          label={`Revenue (${selectedPeriod})`}
+        />
         <StatsCard icon={Bike}         value={(users?.riders      ?? 0).toLocaleString()} label="Total Riders"   />
         <StatsCard icon={HelpCircle}   value={(queries?.open      ?? 0).toLocaleString()} label="Total Queries"  />
         <StatsCard icon={Star}         value={(ratings?.total     ?? 0).toLocaleString()} label="Total Ratings"  />
