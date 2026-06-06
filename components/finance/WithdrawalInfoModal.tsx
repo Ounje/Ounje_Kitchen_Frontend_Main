@@ -82,7 +82,7 @@ export function WithdrawalInfoModal({ isOpen, onClose, detail, loading, onDownlo
                     <b>Withdrawal ID:</b> {detail.withdrawalId}
                   </span>
                   <span className="text-[#1A3F1C] dark:text-primary/90">
-                    <b>Amount:</b> ₦{detail.amount.toLocaleString()}
+                    <b>Amount:</b> ₦{(detail.amount ?? 0).toLocaleString()}
                   </span>
                   <span className="flex items-center gap-2 text-[#1A3F1C] dark:text-primary/90">
                     <b>Status:</b> <StatusBadge status={detail.status} />
@@ -96,7 +96,7 @@ export function WithdrawalInfoModal({ isOpen, onClose, detail, loading, onDownlo
                 <div
                   className="rounded-lg px-4 py-3 text-sm bg-[#98EF9B] dark:bg-primary/20 text-[#1A3F1C] dark:text-primary/90"
                 >
-                  {detail.note}
+                  {detail.note || '—'}
                 </div>
               </div>
             </>
@@ -106,6 +106,7 @@ export function WithdrawalInfoModal({ isOpen, onClose, detail, loading, onDownlo
 
           {/* Download Slip */}
           <button
+            type="button"
             onClick={handleDownload}
             className="w-full py-3.5 rounded-xl text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity bg-primary print:hidden"
           >

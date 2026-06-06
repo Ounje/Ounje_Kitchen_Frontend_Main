@@ -53,7 +53,7 @@ export function DashboardWithdrawalTable({ rows, onInfo, onDelete }: Props) {
                           <img src={row.userAvatar} alt={row.userName} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-500">
-                            {row.userName[0]}
+                            {(row.userName ?? 'U')[0].toUpperCase()}
                           </div>
                         )}
                       </div>
@@ -72,7 +72,7 @@ export function DashboardWithdrawalTable({ rows, onInfo, onDelete }: Props) {
                       className="inline-block px-3 py-1.5 rounded text-xs font-semibold text-center leading-tight bg-[#FFCA3A] dark:bg-yellow-500/20 text-[#1A3F1C] dark:text-yellow-400"
                     >
                       Request For Withdrawal<br />
-                      ₦{row.amount.toLocaleString()}
+                      ₦{(row.amount ?? 0).toLocaleString()}
                     </span>
                   </td>
 
@@ -85,6 +85,7 @@ export function DashboardWithdrawalTable({ rows, onInfo, onDelete }: Props) {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button
+                        type="button"
                         onClick={() => onInfo(row)}
                         className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-secondary hover:bg-surface-secondary/80 border border-border transition-colors"
                         title="View Info"
@@ -92,6 +93,7 @@ export function DashboardWithdrawalTable({ rows, onInfo, onDelete }: Props) {
                         <Info className="w-4 h-4 text-muted-foreground" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => onDelete(row.id)}
                         className="w-8 h-8 rounded flex items-center justify-center hover:opacity-80 transition-opacity bg-red-600 dark:bg-red-900/50"
                         title="Delete"
