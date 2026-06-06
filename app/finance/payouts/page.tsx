@@ -107,7 +107,12 @@ export default function PayoutsPage() {
     <div className="w-full space-y-6">
 
       {/* Header */}
-      <h1 className="text-2xl sm:text-3xl font-bold text-primary">Payouts</h1>
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-primary">Payouts</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Tracks the actual bank transfers sent to vendors and riders via Paystack. This runs automatically — no approval needed. Use this page to monitor what's pending, in progress, or failed.
+        </p>
+      </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">

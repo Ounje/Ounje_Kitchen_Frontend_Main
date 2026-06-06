@@ -110,9 +110,12 @@ export default function WithdrawalsPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-[#1a3f1c]">
-        Withdrawals
-      </h1>
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1a3f1c]">Withdrawals</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Internal withdrawal records — for reference only. Approving or rejecting here does <strong>not</strong> affect actual bank transfers, which are handled automatically by the Payouts system.
+        </p>
+      </div>
 
       <FinanceFilters onSearch={handleSearch} onExport={handleExport} />
 
