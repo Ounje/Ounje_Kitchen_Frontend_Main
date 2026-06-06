@@ -12,9 +12,47 @@ export interface PaginatedResponse<T> {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export interface DashboardStats {
-  withdrawals:  { count: number; subtitle: string };
-  transactions: { count: number; subtitle: string };
-  payroll:      { count: number; subtitle: string };
+  withdrawals:    { count: number; subtitle: string };
+  transactions:   { count: number; subtitle: string };
+  payroll:        { count: number; subtitle: string };
+  todayRevenue?:  { gross: number; net: number; subtitle: string };
+  pendingPayouts?: { count: number; total: number; subtitle: string };
+  failedPayouts?:  { count: number; subtitle: string };
+}
+
+// ── Reconciliation ─────────────────────────────────────────────────────────────
+export interface ReconciliationCheckSummary {
+  key:      string;
+  label:    string;
+  severity: 'critical' | 'warning' | 'info';
+  count:    number;
+  items:    any[];
+}
+
+export interface ReconciliationReport {
+  id:          string;
+  runAt:       string;
+  triggeredBy: string;
+  durationMs:  number;
+  summary: {
+    totalIssues:    number;
+    criticalIssues: number;
+    warningIssues:  number;
+    infoIssues:     number;
+  };
+  checks:  ReconciliationCheckSummary[];
+  errors:  { check: string; message: string }[];
+  clean:   boolean;
+}
+
+export interface ReconciliationHistoryItem {
+  id:          string;
+  runAt:       string;
+  triggeredBy: string;
+  durationMs:  number;
+  summary:     ReconciliationReport['summary'];
+  hasErrors:   boolean;
+  clean:       boolean;
 }
 
 export interface DashboardWithdrawalRow {
@@ -382,6 +420,25 @@ export const financeService = {
 
   async getPayoutById(id: string): Promise<PayoutItem> {
     const res = await apiClient.get(ENDPOINTS.FINANCE.PAYOUT_BY_ID(id)) as any;
+    return res?.data ?? res;
+  },
+
+  // ==================== RECONCILIATION ====================
+
+  async getLatestReconciliation(): Promise<ReconciliationReport | null> {
+    try {
+      const res = await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_LATEST) as any;
+      return res?.data ?? res ?? null;
+    } catch { return null; }
+  },
+
+  async getReconciliationHistory(page = 1, limit = 20) {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_HISTORY, { params: { page, limit } }) as any;
+    return res?.data ?? res;
+  },
+
+  async getReconciliationById(id: string): Promise<ReconciliationReport> {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_BY_ID(id)) as any;
     return res?.data ?? res;
   },
 };

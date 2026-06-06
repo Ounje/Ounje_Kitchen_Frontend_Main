@@ -277,6 +277,11 @@ export const ENDPOINTS = {
     PAYOUTS_STATS:    '/api/finance/payouts/stats',
     PAYOUT_BY_ID:     (id: string) => `/api/finance/payouts/${id}`,
 
+    // Reconciliation
+    RECONCILIATION_LATEST:  '/api/finance/reconciliation/latest',
+    RECONCILIATION_HISTORY: '/api/finance/reconciliation/history',
+    RECONCILIATION_BY_ID:   (id: string) => `/api/finance/reconciliation/${id}`,
+
     // Profile / Settings
     PROFILE:         '/api/finance/profile',
     PROFILE_AVATAR:  '/api/finance/profile/avatar',

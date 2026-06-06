@@ -128,9 +128,25 @@ export default function FinanceDashboardPage() {
 
   const STAT_CARDS = stats
     ? [
-        { icon: '🏧', value: stats.withdrawals?.count  ?? 0, label: 'Withdrawals',  subtitle: stats.withdrawals?.subtitle  ?? '' },
-        { icon: '🔄', value: stats.transactions?.count ?? 0, label: 'Transactions', subtitle: stats.transactions?.subtitle ?? '' },
-        { icon: '💼', value: stats.payroll?.count      ?? 0, label: 'Payroll',      subtitle: stats.payroll?.subtitle      ?? '' },
+        {
+          icon: '💰', label: "Today's Revenue",
+          value: `₦${(stats.todayRevenue?.gross ?? 0).toLocaleString()}`,
+          subtitle: stats.todayRevenue?.subtitle ?? '',
+        },
+        {
+          icon: '⏳', label: 'Pending Payouts',
+          value: stats.pendingPayouts?.count ?? 0,
+          subtitle: stats.pendingPayouts?.subtitle ?? '',
+        },
+        {
+          icon: stats.failedPayouts?.count ? '🚨' : '✅',
+          label: 'Failed Payouts',
+          value: stats.failedPayouts?.count ?? 0,
+          subtitle: stats.failedPayouts?.subtitle ?? '',
+        },
+        { icon: '🏧', value: stats.withdrawals?.count  ?? 0, label: 'Withdrawal Requests', subtitle: stats.withdrawals?.subtitle  ?? '' },
+        { icon: '🔄', value: stats.transactions?.count ?? 0, label: 'Transactions',        subtitle: stats.transactions?.subtitle ?? '' },
+        { icon: '💼', value: stats.payroll?.count      ?? 0, label: 'Payroll',             subtitle: stats.payroll?.subtitle      ?? '' },
       ]
     : [];
 
@@ -141,9 +157,9 @@ export default function FinanceDashboardPage() {
       </h1>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
         {loadingStats ? (
-          [...Array(3)].map((_, i) => (
+          [...Array(6)].map((_, i) => (
             <div key={i} className="h-28 rounded-xl bg-surface-secondary animate-pulse" />
           ))
         ) : stats ? (
