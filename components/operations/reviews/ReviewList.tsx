@@ -47,13 +47,19 @@ export default function ReviewList({ reviews, loading }: ReviewListProps) {
         <div key={review.id} className="py-4">
           <div className="flex gap-3">
             <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0 bg-gray-100">
-              <Image
-                src={review.reviewerPhoto}
-                alt={review.reviewerName}
-                fill
-                className="object-cover"
-                unoptimized
-              />
+              {review.reviewerPhoto ? (
+                <Image
+                  src={review.reviewerPhoto}
+                  alt={review.reviewerName}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-bold">
+                  {review.reviewerName?.charAt(0)?.toUpperCase() || "?"}
+                </div>
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">

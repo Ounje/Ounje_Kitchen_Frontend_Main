@@ -51,10 +51,11 @@ export default function ReviewsPage() {
   // ── Fetch Stats ──────────────────────────────────────────
   useEffect(() => {
     setStatsLoading(true);
-    operationsService.getReviewStats(type).then((s) => {
-      setStats(s);
-      setStatsLoading(false);
-    });
+    operationsService
+      .getReviewStats(type)
+      .then((s) => setStats(s))
+      .catch(() => setStats({ totalReviews: 0, goodRating: 0, averageRating: 0, badRating: 0 }))
+      .finally(() => setStatsLoading(false));
   }, [type]);
 
   // ── Fetch Table ──────────────────────────────────────────

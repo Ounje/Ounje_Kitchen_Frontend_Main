@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { X, Smile, ThumbsDown, ThumbsUp } from "lucide-react";
+import { toast } from "sonner";
 import {
   operationsService,
   ReviewType,
@@ -29,6 +30,7 @@ function StarTabs({
       {stars.map((s) => (
         <button
           key={s}
+          type="button"
           onClick={() => onChange(s)}
           className={`flex items-center gap-1 px-4 py-2 rounded-full border text-sm font-medium transition-all ${
             active === s
@@ -52,18 +54,21 @@ function ActionButtons({ onAction }: { onAction: (action: string) => void }) {
   return (
     <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-gray-200">
       <button
+        type="button"
         onClick={() => onAction("warn")}
         className="py-3 rounded-xl bg-[#D0021B] text-white font-bold text-sm hover:bg-red-700 transition-colors"
       >
         Warn Account
       </button>
       <button
+        type="button"
         onClick={() => onAction("suspend")}
         className="py-3 rounded-xl bg-[#FFCA3A] text-gray-900 font-bold text-sm hover:bg-yellow-400 transition-colors"
       >
         Suspend Account
       </button>
       <button
+        type="button"
         onClick={() => onAction("commend")}
         className="py-3 rounded-xl bg-[#1A3F1C] text-white font-bold text-sm hover:bg-[#16341a] transition-colors"
       >
@@ -88,13 +93,19 @@ function VendorInfoHeader({
     <div className="flex flex-col sm:flex-row gap-4 mb-4">
       <div className="flex gap-4 flex-1">
         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-          <Image
-            src={detail.photo}
-            alt={detail.name}
-            fill
-            className="object-cover"
-            unoptimized
-          />
+          {detail.photo ? (
+            <Image
+              src={detail.photo}
+              alt={detail.name}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl font-bold">
+              {detail.name?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+          )}
         </div>
         <div className="space-y-1">
           <p className="text-sm">
@@ -145,13 +156,19 @@ function RiderInfoHeader({
     <div className="flex flex-col sm:flex-row gap-4 mb-4">
       <div className="flex gap-4 flex-1">
         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-          <Image
-            src={detail.photo}
-            alt={detail.name}
-            fill
-            className="object-cover"
-            unoptimized
-          />
+          {detail.photo ? (
+            <Image
+              src={detail.photo}
+              alt={detail.name}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl font-bold">
+              {detail.name?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+          )}
         </div>
         <div className="space-y-1">
           <p className="text-sm">
@@ -246,12 +263,19 @@ export default function ReviewDetailsModal({
         ? operationsService.getVendorReviewDetail(id, params)
         : operationsService.getRiderReviewDetail(id, params);
 
-    request.then((d: any) => {
-      if (type === "vendor") setVendorDetail(d as VendorDetail);
-      else setRiderDetail(d as RiderDetail);
-      setReviews(d.reviews);
-      setLoading(false);
-    });
+    request
+      .then((d: any) => {
+        // Backend wraps payload in { success, message, data: {...} }
+        const detail = d?.data ?? d;
+        if (type === "vendor") setVendorDetail(detail as VendorDetail);
+        else setRiderDetail(detail as RiderDetail);
+        setReviews(detail.reviews ?? []);
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        toast.error(err?.message || "Failed to load review details");
+        setLoading(false);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, type]);
 
@@ -266,28 +290,36 @@ export default function ReviewDetailsModal({
         ? operationsService.getVendorReviewDetail(id, params)
         : operationsService.getRiderReviewDetail(id, params);
 
-    request.then((d: any) => {
-      setReviews(d.reviews);
-      setReviewsLoading(false);
-    });
+    request
+      .then((d: any) => {
+        const detail = d?.data ?? d;
+        setReviews(detail.reviews ?? []);
+        setReviewsLoading(false);
+      })
+      .catch((err: any) => {
+        toast.error(err?.message || "Failed to load reviews");
+        setReviewsLoading(false);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeStar, activeFilter]);
 
   const handleAction = async (action: string) => {
-    if (action === "warn") await operationsService.warnReviewAccount(type, id);
-    else if (action === "suspend")
-      await operationsService.suspendReviewAccount(type, id);
-    else if (action === "commend")
-      await operationsService.commendReviewAccount(type, id);
-    alert(`Action "${action}" completed.`);
+    try {
+      if (action === "warn") await operationsService.warnReviewAccount(type, id);
+      else if (action === "suspend") await operationsService.suspendReviewAccount(type, id);
+      else if (action === "commend") await operationsService.commendReviewAccount(type, id);
+      const label = action === "warn" ? "warned" : action === "suspend" ? "suspended" : "commended";
+      toast.success(`Account ${label} successfully`);
+    } catch (err: any) {
+      toast.error(err?.message || `Failed to ${action} account`);
+    }
   };
 
   const title = type === "vendor" ? "Vendor's Review" : "Rider's Review";
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -297,6 +329,8 @@ export default function ReviewDetailsModal({
         <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-200 bg-[#f0faf0]">
           <h2 className="text-lg font-bold text-gray-900">{title}</h2>
           <button
+            type="button"
+            aria-label="Close"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-400 text-gray-600 hover:bg-gray-100 transition-colors"
           >
