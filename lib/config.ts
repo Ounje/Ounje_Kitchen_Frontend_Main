@@ -200,6 +200,7 @@ export const ENDPOINTS = {
 
     // Reviews (aggregated / frontend-facing)
     REVIEWS_STATS:        '/api/operations/reviews/stats',
+    REVIEWS_ALL:          '/api/operations/reviews/all',
     REVIEWS_VENDORS:      '/api/operations/reviews/vendors',
     REVIEWS_VENDOR_BY_ID: (id: string) => `/api/operations/reviews/vendors/${id}`,
     REVIEWS_RIDERS:       '/api/operations/reviews/riders',

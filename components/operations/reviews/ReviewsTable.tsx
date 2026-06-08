@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import { Star } from "lucide-react";
-import { VendorReviewRow as VendorRow, RiderReviewRow as RiderRow, ReviewType } from "@/lib/api/services/operations.service";
+import { VendorReviewRow as VendorRow, RiderReviewRow as RiderRow, AllReviewRow, ReviewType } from "@/lib/api/services/operations.service";
 import Pagination from "@/components/Pagination";
 
 // ── Types ──────────────────────────────────────────────────
 
 interface ReviewsTableProps {
   type: ReviewType;
-  rows: (VendorRow | RiderRow)[];
+  rows: (VendorRow | RiderRow | AllReviewRow)[];
   loading?: boolean;
   pagination: {
     page: number;
@@ -19,7 +19,7 @@ interface ReviewsTableProps {
   };
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
-  onOpenDetail: (id: string, filter?: string) => void;
+  onOpenDetail: (id: string, entityType: ReviewType, filter?: string) => void;
 }
 
 // ── Skeleton ───────────────────────────────────────────────
@@ -44,17 +44,20 @@ function TableSkeleton({ cols }: { cols: number }) {
 
 function ActionButtons({
   id,
+  entityType,
   starRating,
   onOpen,
 }: {
   id: string;
+  entityType: ReviewType;
   starRating: number;
-  onOpen: (id: string, filter?: string) => void;
+  onOpen: (id: string, entityType: ReviewType, filter?: string) => void;
 }) {
   return (
     <div className="flex items-center gap-3 flex-wrap">
       <button
-        onClick={() => onOpen(id)}
+        type="button"
+        onClick={() => onOpen(id, entityType)}
         className="flex items-center gap-1 text-[#1A3F1C] text-sm font-semibold hover:underline"
       >
         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-400">
@@ -63,7 +66,8 @@ function ActionButtons({
         <span>{starRating} Star rating</span>
       </button>
       <button
-        onClick={() => onOpen(id, "mixed")}
+        type="button"
+        onClick={() => onOpen(id, entityType, "mixed")}
         className="text-[#1A3F1C] text-sm font-semibold hover:underline"
       >
         Mixed Rating
@@ -94,20 +98,21 @@ export default function ReviewsTable({
             <tr>
               <th className={thCls} style={{ width: 50 }}>S/N</th>
               <th className={thCls} style={{ width: 180 }}>Name</th>
+              {type === "all" && <th className={thCls} style={{ width: 90 }}>Type</th>}
               <th className={thCls}>
-                {type === "vendor" ? "Address" : "Zone"}
+                {type === "vendor" ? "Address" : type === "rider" ? "Zone" : "Location"}
               </th>
               <th className={thCls} style={{ width: 130 }}>Total Ratings</th>
-              <th className={thCls} style={{ width: 260 }}>Actons</th>
+              <th className={thCls} style={{ width: 260 }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <TableSkeleton cols={5} />
+              <TableSkeleton cols={type === "all" ? 6 : 5} />
             ) : rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={type === "all" ? 6 : 5}
                   className="text-center py-12 text-gray-400 text-sm"
                 >
                   No records found.
@@ -116,9 +121,17 @@ export default function ReviewsTable({
             ) : (
               rows.map((row, idx) => {
                 const sn = (pagination.page - 1) * pagination.limit + idx + 1;
-                const isVendor = type === "vendor";
                 const vendorRow = row as VendorRow;
-                const riderRow = row as RiderRow;
+                const riderRow  = row as RiderRow;
+                const allRow    = row as AllReviewRow;
+
+                const location =
+                  type === "vendor" ? vendorRow.address :
+                  type === "rider"  ? riderRow.zone :
+                  allRow.location;
+
+                const entityType: ReviewType =
+                  type === "all" ? allRow.entityType : type;
 
                 return (
                   <tr
@@ -130,7 +143,7 @@ export default function ReviewsTable({
                     {/* Name + photo */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="relative w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                        <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-gray-100">
                           {row.photo ? (
                             <Image
                               src={row.photo}
@@ -151,9 +164,22 @@ export default function ReviewsTable({
                       </div>
                     </td>
 
-                    {/* Address or Zone */}
+                    {/* Type badge — only in "all" mode */}
+                    {type === "all" && (
+                      <td className="px-4 py-3">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
+                          allRow.entityType === "vendor"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-purple-100 text-purple-700"
+                        }`}>
+                          {allRow.entityType === "vendor" ? "Vendor" : "Rider"}
+                        </span>
+                      </td>
+                    )}
+
+                    {/* Location */}
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {isVendor ? vendorRow.address : riderRow.zone}
+                      {location}
                     </td>
 
                     {/* Total Ratings */}
@@ -165,6 +191,7 @@ export default function ReviewsTable({
                     <td className="px-4 py-3">
                       <ActionButtons
                         id={row.id}
+                        entityType={entityType}
                         starRating={row.starRating}
                         onOpen={onOpenDetail}
                       />

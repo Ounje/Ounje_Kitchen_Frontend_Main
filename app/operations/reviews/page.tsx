@@ -9,6 +9,7 @@ import {
   ReviewStats,
   VendorReviewRow as VendorRow,
   RiderReviewRow as RiderRow,
+  AllReviewRow,
 } from "@/lib/api/services/operations.service";
 import StatsCards from "@/components/operations/reviews/StatsCards";
 import ReviewFilters from "@/components/operations/reviews/ReviewFilters";
@@ -33,7 +34,7 @@ export default function ReviewsPage() {
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
-  const [rows, setRows] = useState<(VendorRow | RiderRow)[]>([]);
+  const [rows, setRows] = useState<(VendorRow | RiderRow | AllReviewRow)[]>([]);
   const [tableLoading, setTableLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -46,6 +47,7 @@ export default function ReviewsPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalId, setModalId] = useState<string | null>(null);
+  const [modalType, setModalType] = useState<"vendor" | "rider">("vendor");
   const [modalFilter, setModalFilter] = useState<string | null>(null);
 
   // ── Fetch Stats ──────────────────────────────────────────
@@ -72,8 +74,10 @@ export default function ReviewsPage() {
         const res = (
           type === "vendor"
             ? await operationsService.getVendorReviews(queryParams)
-            : await operationsService.getRiderReviews(queryParams)
-        ) as ReviewsApiResponse<VendorRow | RiderRow>;
+            : type === "rider"
+            ? await operationsService.getRiderReviews(queryParams)
+            : await operationsService.getAllReviews(queryParams)
+        ) as ReviewsApiResponse<VendorRow | RiderRow | AllReviewRow>;
 
         setRows(Array.isArray(res.data) ? res.data : []);
         setPagination({
@@ -123,8 +127,9 @@ export default function ReviewsPage() {
     loadTable(1, ratingCategory, size);
   };
 
-  const handleOpenDetail = (id: string, filter?: string) => {
+  const handleOpenDetail = (id: string, entityType: ReviewType, filter?: string) => {
     setModalId(id);
+    setModalType((entityType === "all" ? "vendor" : entityType) as "vendor" | "rider");
     setModalFilter(filter ?? null);
     setModalOpen(true);
   };
@@ -143,12 +148,12 @@ export default function ReviewsPage() {
             onClick={() => setTypeDropdownOpen((v) => !v)}
             className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
           >
-            {type === "vendor" ? "Vendor" : "Rider"}
+            {type === "all" ? "All" : type === "vendor" ? "Vendor" : "Rider"}
             <ChevronDown size={14} className="text-gray-400" />
           </button>
           {typeDropdownOpen && (
             <ul className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-md z-10 overflow-hidden">
-              {(["vendor", "rider"] as ReviewType[]).map((t) => (
+              {(["all", "vendor", "rider"] as ReviewType[]).map((t) => (
                 <li key={t}>
                   <button
                     type="button"
@@ -157,7 +162,7 @@ export default function ReviewsPage() {
                       type === t ? "bg-[#e8f8e8] font-semibold text-[#1A3F1C]" : "text-gray-700"
                     }`}
                   >
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                    {t === "all" ? "All" : t.charAt(0).toUpperCase() + t.slice(1)}
                   </button>
                 </li>
               ))}
@@ -181,7 +186,7 @@ export default function ReviewsPage() {
 
       {modalOpen && modalId && (
         <ReviewDetailsModal
-          type={type}
+          type={modalType}
           id={modalId}
           initialFilter={modalFilter}
           onClose={() => {

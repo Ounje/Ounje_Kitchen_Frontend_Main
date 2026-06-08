@@ -4,7 +4,7 @@ import { notificationService } from './notification.service';
 import type { PaginationParams } from '@/types';
 
 // ── Reviews types ─────────────────────────────────────────────────────────────
-export type ReviewType   = 'vendor' | 'rider';
+export type ReviewType   = 'vendor' | 'rider' | 'all';
 export type ReviewFilter = 'mixed' | 'good' | 'bad';
 
 export interface ReviewStats {
@@ -37,6 +37,16 @@ export interface RiderReviewRow {
   name:         string;
   photo:        string;
   zone:         string;
+  totalRatings: number;
+  starRating:   number;
+}
+
+export interface AllReviewRow {
+  id:           string;
+  entityType:   'vendor' | 'rider';
+  name:         string;
+  photo:        string;
+  location:     string;
   totalRatings: number;
   starRating:   number;
 }
@@ -260,6 +270,11 @@ export const operationsService = {
 
   async getRiderReviews(params?: ReviewListParams) {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.REVIEWS_RIDERS, { params });
+    return res;
+  },
+
+  async getAllReviews(params?: ReviewListParams) {
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REVIEWS_ALL, { params });
     return res;
   },
 
