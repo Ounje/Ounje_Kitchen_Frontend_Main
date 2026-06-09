@@ -496,9 +496,7 @@ export const financeService = {
 
   async getCustomerPaymentStats(): Promise<PaidInStats> {
     const res = await apiClient.get(ENDPOINTS.FINANCE.PAID_IN_STATS) as any;
-    const data = res?.data ?? res;
-    if (data?.pending && data?.success !== undefined && data?.failed) return data;
-    throw new Error('Invalid stats shape');
+    return (res?.data ?? res) as PaidInStats;
   },
 
   async getWalletBalances(filters: WalletBalanceFilters = {}) {
@@ -519,8 +517,9 @@ export const financeService = {
   },
 
   async getCustomerPayments(filters: PaidInFilters = {}) {
+    // Return full response — page needs data[], page, total, totalPages at the root
     const res = await apiClient.get(ENDPOINTS.FINANCE.PAID_IN, { params: filters }) as any;
-    return res?.data ?? res;
+    return res;
   },
 
   // ==================== RECONCILIATION ====================
