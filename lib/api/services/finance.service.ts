@@ -226,13 +226,15 @@ export interface PayoutFilters {
 
 // ── Paid In (customer wallet top-ups) ─────────────────────────────────────────
 export interface PaidInItem {
-  _id:          string;
-  customerName: string;
-  amountNaira:  number;
-  reference:    string;
-  status:       'pending' | 'success' | 'failed';
-  paidAt:       string | null;
-  createdAt:    string;
+  _id:            string;
+  customerName:   string;
+  amountNaira:    number;
+  reference:      string;
+  status:         'pending' | 'success' | 'failed';
+  paidAt:         string | null;
+  createdAt:      string;
+  paymentChannel?: string | null;
+  paymentBank?:    string | null;
 }
 
 export interface PaidInFilters {

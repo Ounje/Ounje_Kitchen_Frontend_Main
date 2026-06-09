@@ -56,6 +56,13 @@ function StatCard({ label, count, amount, accent = false }: { label: string; cou
 
 const fmt = (n: number) => `₦${(n ?? 0).toLocaleString()}`;
 
+const formatFundingSource = (bank?: string | null, channel?: string | null) => {
+  if (bank) return bank;
+  if (!channel) return "—";
+  if (channel === "dedicated_nuban") return "DVA";
+  return channel.replace(/_/g, " ").replace(/\b\w/g, (chr) => chr.toUpperCase());
+};
+
 // ── Payouts tab ───────────────────────────────────────────────────────────────
 function PayoutsTab() {
   const [payouts,      setPayouts]      = useState<PayoutItem[]>([]);
@@ -377,6 +384,7 @@ function PaidInTab() {
                 <th>Customer</th>
                 <th>Amount</th>
                 <th>Reference</th>
+                <th>Source</th>
                 <th>Status</th>
                 <th>Paid At</th>
                 <th>Date</th>
@@ -386,14 +394,14 @@ function PaidInTab() {
               {loading ? (
                 [...Array(8)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    {[...Array(6)].map((_, j) => (
+                    {[...Array(7)].map((_, j) => (
                       <td key={j}><div className="h-4 bg-gray-100 rounded-full w-3/4" /></td>
                     ))}
                   </tr>
                 ))
               ) : records.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-16 text-center">
+                  <td colSpan={7} className="py-16 text-center">
                     <Wallet className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                     <p className="text-sm text-gray-400">No wallet top-ups found</p>
                   </td>
@@ -403,6 +411,7 @@ function PaidInTab() {
                   <td className="font-semibold text-gray-900">{r.customerName}</td>
                   <td className="font-medium tabular-nums text-[#1a3f1c]">{fmt(r.amountNaira)}</td>
                   <td className="text-gray-500 text-xs tabular-nums">{r.reference}</td>
+                  <td className="text-gray-500 text-xs">{formatFundingSource(r.paymentBank, r.paymentChannel)}</td>
                   <td><PaidInStatusBadge status={r.status} /></td>
                   <td className="text-gray-500 whitespace-nowrap text-xs">
                     {r.paidAt ? new Date(r.paidAt).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
