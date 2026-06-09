@@ -323,9 +323,9 @@ function PaidInTab() {
           [...Array(3)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />)
         ) : stats ? (
           <>
-            <StatCard label="Pending" count={stats.pending.count} amount={stats.pending.totalNaira} accent />
-            <StatCard label="Success" count={stats.success.count} amount={stats.success.totalNaira} />
-            <StatCard label="Failed"  count={stats.failed.count}  amount={stats.failed.totalNaira}  />
+            <StatCard label="Pending" count={stats?.pending?.count ?? 0} amount={stats?.pending?.totalNaira ?? 0} accent />
+            <StatCard label="Success" count={stats?.success?.count ?? 0} amount={stats?.success?.totalNaira ?? 0} />
+            <StatCard label="Failed"  count={stats?.failed?.count  ?? 0} amount={stats?.failed?.totalNaira  ?? 0} />
           </>
         ) : null}
       </div>

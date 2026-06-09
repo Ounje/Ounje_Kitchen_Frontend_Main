@@ -453,7 +453,9 @@ export const financeService = {
 
   async getCustomerPaymentStats(): Promise<PaidInStats> {
     const res = await apiClient.get(ENDPOINTS.FINANCE.PAID_IN_STATS) as any;
-    return res?.data ?? res;
+    const data = res?.data ?? res;
+    if (data?.pending && data?.success !== undefined && data?.failed) return data;
+    throw new Error('Invalid stats shape');
   },
 
   async getCustomerPayments(filters: PaidInFilters = {}) {
