@@ -275,6 +275,8 @@ export const ENDPOINTS = {
     // Wallets & Payouts
     WALLETS_OVERVIEW:  '/api/finance/wallets/overview',
     WALLET_BALANCES:   '/api/finance/wallets/balances',
+    WALLET_HISTORY:    '/api/finance/wallets/history',
+    WALLET_BANK_TOTAL: '/api/finance/wallets/bank-total',
     PAYOUTS:          '/api/finance/payouts',
     PAYOUTS_STATS:    '/api/finance/payouts/stats',
     PAYOUT_BY_ID:     (id: string) => `/api/finance/payouts/${id}`,

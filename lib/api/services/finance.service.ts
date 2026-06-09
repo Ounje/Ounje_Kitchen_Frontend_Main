@@ -156,10 +156,35 @@ export interface WalletBucket {
 }
 
 export interface WalletOverview {
-  vendors:  WalletBucket;
-  riders:   WalletBucket;
-  platform: { availableBalance: number; pendingBalance: number; totalBalance: number };
+  customers: { availableBalance: number; pendingBalance: number; totalBalance: number };
+  vendors:   WalletBucket;
+  riders:    WalletBucket;
+  platform:  { availableBalance: number; pendingBalance: number; totalBalance: number };
   pendingPayouts: { count: number; totalNaira: number };
+}
+
+export interface WalletLedgerEntry {
+  _id:          string;
+  source:       'wallet' | 'bank';
+  entryType:    'CREDIT' | 'DEBIT';
+  reason:       string;
+  amount:       number;
+  balanceAfter?: number | null;
+  orderId?:     string | null;
+  reference?:   string;
+  paidAt?:      string | null;
+  meta?:        any;
+  createdAt:    string;
+}
+
+export interface WalletHistoryResponse {
+  ledger:     WalletLedgerEntry[];
+  bank:       WalletLedgerEntry[];
+  page:       number;
+  limit:      number;
+  total:      number;
+  totalPages: number;
+  account: { availableBalance: number; pendingBalance: number; holdBalance: number };
 }
 
 export interface PayoutItem {
@@ -479,6 +504,17 @@ export const financeService = {
   async getWalletBalances(filters: WalletBalanceFilters = {}) {
     const res = await apiClient.get(ENDPOINTS.FINANCE.WALLET_BALANCES, { params: filters }) as any;
     return res?.data ?? res;
+  },
+
+  async getWalletHistory(accountId: string, type: WalletAccountType, page = 1, limit = 20): Promise<WalletHistoryResponse> {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.WALLET_HISTORY, { params: { accountId, type, page, limit } }) as any;
+    return res?.data ?? res;
+  },
+
+  async getBankPaymentsTotal(): Promise<{ totalNaira: number; count: number }> {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.WALLET_BANK_TOTAL) as any;
+    const d = res?.data ?? res;
+    return { totalNaira: d?.totalNaira ?? 0, count: d?.count ?? 0 };
   },
 
   async getCustomerPayments(filters: PaidInFilters = {}) {
