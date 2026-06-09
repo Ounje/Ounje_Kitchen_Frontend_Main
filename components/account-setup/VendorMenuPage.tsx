@@ -112,15 +112,15 @@ function FoodItemViewModal({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-lg p-0">
-        <DialogHeader className="px-6 pt-6 pb-0">
+      <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-lg p-0">
+        <DialogHeader className="px-4 sm:px-6 pt-5 pb-0">
           <DialogTitle className="text-[#1a3f1c] font-black capitalize">
             {capitalize(item.category)} — {totalDishes} dish{totalDishes !== 1 ? "es" : ""}
           </DialogTitle>
-          <p className="text-xs text-gray-400 mt-1">Click the pencil icon to edit a dish's name, price, or image.</p>
+          <p className="text-xs text-gray-400 mt-1">Click the pencil icon to edit a dish&apos;s name, price, or image.</p>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[60vh] px-6 pb-2">
+        <ScrollArea className="max-h-[65vh] px-4 sm:px-6 pb-2">
           <div className="space-y-5 pt-4">
             {subCategories.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-8">No dishes in this category.</p>
@@ -171,29 +171,33 @@ function FoodItemViewModal({
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-start gap-3">
                             {dish.img && (
-                              <img src={dish.img} alt={dish.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                              <img src={dish.img} alt={dish.name} className="w-10 h-10 rounded-lg object-cover shrink-0 mt-0.5" />
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-gray-800 truncate">{dish.name || "—"}</p>
-                              {dish.description && <p className="text-xs text-gray-400 truncate">{dish.description}</p>}
-                            </div>
-                            <div className="text-right shrink-0 mr-2">
-                              <p className="text-sm font-black text-[#1a3f1c]">
-                                {dish.price ? `₦${Number(dish.price).toLocaleString()}` : "—"}
-                              </p>
-                              <span className={`text-[9px] font-black uppercase ${dish.isAvailable !== false ? "text-green-600" : "text-gray-400"}`}>
-                                {dish.isAvailable !== false ? "available" : "hidden"}
-                              </span>
-                            </div>
-                            <div className="flex gap-1 shrink-0">
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-[#1a3f1c]" onClick={() => startEdit(si, di, dish)}>
-                                <Pencil className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-red-500" onClick={() => deleteDish(si, di)}>
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                              <div className="flex items-start justify-between gap-2">
+                                <p className="text-sm font-semibold text-gray-800 leading-tight">{dish.name || "—"}</p>
+                                <div className="flex gap-1 shrink-0">
+                                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-[#1a3f1c]" onClick={() => startEdit(si, di, dish)}>
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-red-500" onClick={() => deleteDish(si, di)}>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+                              </div>
+                              {dish.description && (
+                                <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{dish.description}</p>
+                              )}
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-sm font-black text-[#1a3f1c]">
+                                  {dish.price ? `₦${Number(dish.price).toLocaleString()}` : "—"}
+                                </span>
+                                <span className={`text-[9px] font-black uppercase ${dish.isAvailable !== false ? "text-green-600" : "text-gray-400"}`}>
+                                  {dish.isAvailable !== false ? "available" : "hidden"}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -206,7 +210,7 @@ function FoodItemViewModal({
           </div>
         </ScrollArea>
 
-        <div className="flex gap-2 px-6 pb-6 pt-3 border-t border-gray-100">
+        <div className="flex gap-2 px-4 sm:px-6 pb-5 pt-3 border-t border-gray-100">
           <Button variant="outline" className="flex-1" onClick={onClose}>Close</Button>
           {dirty && (
             <Button className="flex-1 bg-[#1a3f1c] hover:bg-[#1a3f1c]/90" onClick={handleSave} disabled={saving}>
