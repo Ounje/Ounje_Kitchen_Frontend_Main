@@ -225,6 +225,24 @@ export interface PaidInStats {
   failed:  { count: number; totalNaira: number };
 }
 
+// ── Wallet Balances ───────────────────────────────────────────────────────────
+export type WalletAccountType = 'CUSTOMER' | 'VENDOR' | 'RIDER';
+
+export interface WalletBalanceItem {
+  _id:              string;
+  name:             string;
+  availableBalance: number;
+  pendingBalance:   number;
+  holdBalance:      number;
+}
+
+export interface WalletBalanceFilters {
+  type?:   WalletAccountType;
+  search?: string;
+  page?:   number;
+  limit?:  number;
+}
+
 // ── Revenue ───────────────────────────────────────────────────────────────────
 export type RevenuePeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -456,6 +474,11 @@ export const financeService = {
     const data = res?.data ?? res;
     if (data?.pending && data?.success !== undefined && data?.failed) return data;
     throw new Error('Invalid stats shape');
+  },
+
+  async getWalletBalances(filters: WalletBalanceFilters = {}) {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.WALLET_BALANCES, { params: filters }) as any;
+    return res?.data ?? res;
   },
 
   async getCustomerPayments(filters: PaidInFilters = {}) {

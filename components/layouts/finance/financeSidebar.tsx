@@ -5,15 +5,16 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, ArrowLeftRight, TrendingUp, Settings, LogOut, X, Wallet, ShieldCheck } from "lucide-react";
+import { Home, ArrowLeftRight, TrendingUp, Settings, LogOut, X, Wallet, ShieldCheck, PiggyBank } from "lucide-react";
 
 const NAV = [
-  { href: "/finance/dashboard",       name: "Home",            icon: Home           },
-  { href: "/finance/transactions",    name: "Transactions",    icon: ArrowLeftRight },
-  { href: "/finance/payouts",         name: "Payouts & Paid In", icon: Wallet       },
-  { href: "/finance/revenue",         name: "Revenue",         icon: TrendingUp     },
-  { href: "/finance/reconciliation",  name: "Reconciliation",  icon: ShieldCheck    },
-  { href: "/finance/settings",        name: "Settings",        icon: Settings       },
+  { href: "/finance/dashboard",       name: "Home",              icon: Home           },
+  { href: "/finance/transactions",    name: "Transactions",      icon: ArrowLeftRight },
+  { href: "/finance/payouts",         name: "Payouts & Paid In", icon: Wallet         },
+  { href: "/finance/wallets",         name: "Wallet Balances",   icon: PiggyBank      },
+  { href: "/finance/revenue",         name: "Revenue",           icon: TrendingUp     },
+  { href: "/finance/reconciliation",  name: "Reconciliation",    icon: ShieldCheck    },
+  { href: "/finance/settings",        name: "Settings",          icon: Settings       },
 ];
 
 interface FinanceSidebarProps {

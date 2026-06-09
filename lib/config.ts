@@ -273,7 +273,8 @@ export const ENDPOINTS = {
     REVENUE_TOP_RIDERS:  '/api/finance/revenue/top-riders',
 
     // Wallets & Payouts
-    WALLETS_OVERVIEW: '/api/finance/wallets/overview',
+    WALLETS_OVERVIEW:  '/api/finance/wallets/overview',
+    WALLET_BALANCES:   '/api/finance/wallets/balances',
     PAYOUTS:          '/api/finance/payouts',
     PAYOUTS_STATS:    '/api/finance/payouts/stats',
     PAYOUT_BY_ID:     (id: string) => `/api/finance/payouts/${id}`,
