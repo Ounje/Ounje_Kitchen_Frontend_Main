@@ -199,6 +199,32 @@ export interface PayoutFilters {
   limit?:         number;
 }
 
+// ── Paid In (customer wallet top-ups) ─────────────────────────────────────────
+export interface PaidInItem {
+  _id:          string;
+  customerName: string;
+  amountNaira:  number;
+  reference:    string;
+  status:       'pending' | 'success' | 'failed';
+  paidAt:       string | null;
+  createdAt:    string;
+}
+
+export interface PaidInFilters {
+  customerName?: string;
+  status?:       string;
+  startDate?:    string;
+  endDate?:      string;
+  page?:         number;
+  limit?:        number;
+}
+
+export interface PaidInStats {
+  pending: { count: number; totalNaira: number };
+  success: { count: number; totalNaira: number };
+  failed:  { count: number; totalNaira: number };
+}
+
 // ── Revenue ───────────────────────────────────────────────────────────────────
 export type RevenuePeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -420,6 +446,18 @@ export const financeService = {
 
   async getPayoutById(id: string): Promise<PayoutItem> {
     const res = await apiClient.get(ENDPOINTS.FINANCE.PAYOUT_BY_ID(id)) as any;
+    return res?.data ?? res;
+  },
+
+  // ==================== PAID IN ====================
+
+  async getCustomerPaymentStats(): Promise<PaidInStats> {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.PAID_IN_STATS) as any;
+    return res?.data ?? res;
+  },
+
+  async getCustomerPayments(filters: PaidInFilters = {}) {
+    const res = await apiClient.get(ENDPOINTS.FINANCE.PAID_IN, { params: filters }) as any;
     return res?.data ?? res;
   },
 

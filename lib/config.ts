@@ -278,6 +278,10 @@ export const ENDPOINTS = {
     PAYOUTS_STATS:    '/api/finance/payouts/stats',
     PAYOUT_BY_ID:     (id: string) => `/api/finance/payouts/${id}`,
 
+    // Paid In (customer wallet top-ups)
+    PAID_IN:       '/api/finance/payments',
+    PAID_IN_STATS: '/api/finance/payments/stats',
+
     // Reconciliation
     RECONCILIATION_LATEST:  '/api/finance/reconciliation/latest',
     RECONCILIATION_HISTORY: '/api/finance/reconciliation/history',
