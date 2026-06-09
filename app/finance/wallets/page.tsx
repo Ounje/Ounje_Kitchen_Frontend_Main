@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, RefreshCw, Users, Store, Bike, Wallet, X, ArrowUpCircle, ArrowDownCircle, CreditCard } from 'lucide-react';
+import { Search, RefreshCw, Users, Store, Bike, Wallet, X, ArrowUpCircle, ArrowDownCircle, CreditCard, Eye } from 'lucide-react';
 import financeService, {
   type WalletBalanceItem,
   type WalletBalanceFilters,
@@ -251,20 +251,21 @@ function BalancesTable({ accountType }: { accountType: WalletAccountType }) {
                   <th>Pending Balance</th>
                   {showHold && <th>Hold Balance</th>}
                   <th>Total</th>
+                  <th className="text-right">Details</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   [...Array(8)].map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      {[...Array(colCount)].map((_, j) => (
+                      {[...Array(colCount + 1)].map((_, j) => (
                         <td key={j}><div className="h-4 bg-gray-100 rounded-full w-3/4" /></td>
                       ))}
                     </tr>
                   ))
                 ) : rows.length === 0 ? (
                   <tr>
-                    <td colSpan={colCount} className="py-16 text-center">
+                    <td colSpan={colCount + 1} className="py-16 text-center">
                       <Wallet className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                       <p className="text-sm text-gray-400">
                         {activeSearch ? `No results for "${activeSearch}"` : 'No wallet accounts found'}
@@ -274,13 +275,22 @@ function BalancesTable({ accountType }: { accountType: WalletAccountType }) {
                 ) : rows.map(r => {
                   const total = (r.availableBalance ?? 0) + (r.pendingBalance ?? 0) + (r.holdBalance ?? 0);
                   return (
-                    <tr key={r._id} onClick={() => setSelected(r)}
-                      className="cursor-pointer hover:bg-[#98ef9b]/10 transition-colors">
+                    <tr key={r._id} className="hover:bg-[#98ef9b]/10 transition-colors">
                       <td className="font-semibold text-gray-900">{r.name}</td>
                       <td className="tabular-nums font-medium text-[#1a3f1c]">{fmt(r.availableBalance)}</td>
                       <td className="tabular-nums text-amber-600">{fmt(r.pendingBalance)}</td>
                       {showHold && <td className="tabular-nums text-blue-600">{fmt(r.holdBalance)}</td>}
                       <td className="tabular-nums font-bold text-gray-800">{fmt(total)}</td>
+                      <td className="text-right">
+                        <button
+                          type="button"
+                          onClick={() => setSelected(r)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1a3f1c]/8 text-[#1a3f1c] hover:bg-[#1a3f1c] hover:text-white transition-colors"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          View
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
