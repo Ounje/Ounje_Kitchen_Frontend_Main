@@ -502,8 +502,9 @@ export const financeService = {
   },
 
   async getWalletBalances(filters: WalletBalanceFilters = {}) {
+    // Return full response — page needs data[], page, total, totalPages at the root
     const res = await apiClient.get(ENDPOINTS.FINANCE.WALLET_BALANCES, { params: filters }) as any;
-    return res?.data ?? res;
+    return res;
   },
 
   async getWalletHistory(accountId: string, type: WalletAccountType, page = 1, limit = 20): Promise<WalletHistoryResponse> {
