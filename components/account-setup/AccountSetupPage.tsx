@@ -41,6 +41,7 @@ export default function AccountSetupPage({ portal }: AccountSetupPageProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
+  const [detailLoading, setDetailLoading] = useState<string | null>(null);
 
   const fetchData = useCallback(async (pg = page, sz = pageSize, s = search) => {
     setLoading(true);
@@ -66,6 +67,23 @@ export default function AccountSetupPage({ portal }: AccountSetupPageProps) {
 
   const handleSearch = () => { setPage(1); fetchData(1, pageSize, search); };
   const handleCreated = () => { setShowForm(false); setEditTarget(null); fetchData(1, pageSize, search); };
+
+  const openEdit = async (item: any) => {
+    const id = item._id;
+    setDetailLoading(id);
+    try {
+      let res: any;
+      if (tab === "customers")     res = await customerSetupService.getById(id);
+      else if (tab === "vendors")  res = await vendorSetupService.getById(id);
+      else                         res = await riderSetupService.getById(id);
+      setEditTarget(res?.data ?? res);
+      setShowForm(true);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to load details");
+    } finally {
+      setDetailLoading(null);
+    }
+  };
 
   const menuPath = (id: string) => `/${portal}/account-setup/vendor/${id}/menu`;
 
@@ -203,9 +221,12 @@ export default function AccountSetupPage({ portal }: AccountSetupPageProps) {
                             size="sm"
                             variant="ghost"
                             className="h-7 w-7 p-0"
-                            onClick={() => { setEditTarget(item); setShowForm(true); }}
+                            disabled={detailLoading === item._id}
+                            onClick={() => openEdit(item)}
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            {detailLoading === item._id
+                              ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                              : <Eye className="w-3.5 h-3.5" />}
                           </Button>
                         </div>
                       </td>

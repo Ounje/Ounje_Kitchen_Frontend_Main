@@ -14,6 +14,9 @@ export const customerSetupService = {
   list(params?: { search?: string; page?: number; limit?: number }) {
     return apiClient.get(E.CUSTOMERS, { params }) as Promise<any>;
   },
+  getById(userId: string) {
+    return apiClient.get(E.CUSTOMER_BY_ID(userId)) as Promise<any>;
+  },
   create(body: {
     name: string; email: string; phone?: string; address?: string;
   }) {
