@@ -76,6 +76,7 @@ export interface TransactionItem {
   orderType: string;
   amount: number;
   paymentMethod: string;
+  createdAt?: string;
 }
 
 export interface TransactionGroup {
