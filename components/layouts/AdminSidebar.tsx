@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Users, DollarSign, ShoppingCart, Bell, Shield, Settings, LogOut, X } from "lucide-react";
+import { Home, Users, DollarSign, ShoppingCart, Bell, Shield, Settings, LogOut, X, Zap } from "lucide-react";
 
 const navigation = [
   { name: "Home",          href: "/admin",               icon: Home         },
   { name: "User & Staff",  href: "/admin/users",         icon: Users        },
   { name: "Revenue",       href: "/admin/revenue",       icon: DollarSign   },
   { name: "Orders",        href: "/admin/orders",        icon: ShoppingCart },
+  { name: "Surge Pricing", href: "/admin/surge",         icon: Zap          },
   { name: "Notifications", href: "/admin/notifications", icon: Bell         },
   { name: "Permissions",   href: "/admin/permissions",   icon: Shield       },
   { name: "Settings",      href: "/admin/settings",      icon: Settings     },
@@ -74,7 +75,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         </div>
 
         {/* Navigation */}
-        <ScrollArea className="flex-1 sidebar-scroll">
+        <ScrollArea className="flex-1 min-h-0 sidebar-scroll">
           <div className="px-3 py-3">
             <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest px-3 mb-2">Menu</p>
             <nav className="flex flex-col gap-0.5">

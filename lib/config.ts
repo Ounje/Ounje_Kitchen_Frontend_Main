@@ -80,6 +80,9 @@ export const ENDPOINTS = {
     PROMO_TOGGLE: (id: string) => `/api/superadmin/promos/${id}/toggle`,
     PROMO_DELETE: (id: string) => `/api/superadmin/promos/${id}`,
 
+    // Surge Pricing
+    SURGE: '/api/superadmin/surge',
+
     // Notifications
     NOTIFICATIONS:       '/api/superadmin/notifications',
     NOTIFICATION_DELETE: (id: string) => `/api/superadmin/notifications/${id}`,
@@ -220,6 +223,9 @@ export const ENDPOINTS = {
     PROMOS:       '/api/operations/promos',
     PROMO_TOGGLE: (id: string) => `/api/operations/promos/${id}/toggle`,
     PROMO_DELETE: (id: string) => `/api/operations/promos/${id}`,
+
+    // Surge Pricing
+    SURGE: '/api/operations/surge',
 
     // Notifications
     NOTIFICATIONS:       '/api/operations/notifications',

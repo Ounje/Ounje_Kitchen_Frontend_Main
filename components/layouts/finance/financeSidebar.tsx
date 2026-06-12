@@ -74,7 +74,7 @@ export default function FinanceSidebar({ isOpen, onClose }: FinanceSidebarProps)
         </div>
 
         {/* Navigation */}
-        <ScrollArea className="flex-1 sidebar-scroll">
+        <ScrollArea className="flex-1 min-h-0 sidebar-scroll">
           <div className="px-3 py-3">
             <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest px-3 mb-2">Menu</p>
             <nav className="flex flex-col gap-0.5">

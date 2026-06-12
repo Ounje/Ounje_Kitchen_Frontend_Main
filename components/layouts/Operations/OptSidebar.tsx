@@ -8,16 +8,17 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Home, ShoppingCart, Users,
-  Star, UserCircle, LogOut, X, Tag, Radio, CreditCard, UserPlus,
+  Star, UserCircle, LogOut, X, Tag, Radio, CreditCard, UserPlus, Zap,
 } from "lucide-react";
 
 const navigation = [
-  { name: "Home",           href: "/operations",               icon: Home        },
+  { name: "Home",           href: "/operations",               icon: Home         },
   { name: "Orders",         href: "/operations/orders",        icon: ShoppingCart },
-  { name: "Users",           href: "/operations/users",         icon: Users        },
-  { name: "Account Setup",  href: "/operations/account-setup", icon: UserPlus     },
+  { name: "Users",          href: "/operations/users",         icon: Users        },
+  { name: "Account Setup",  href: "/operations/account-setup", icon: UserPlus    },
   { name: "Review & Rating",href: "/operations/reviews",       icon: Star         },
   { name: "Promo Codes",    href: "/operations/promos",        icon: Tag          },
+  { name: "Surge Pricing",  href: "/operations/surge",         icon: Zap          },
   { name: "Transactions",   href: "/operations/transactions",  icon: CreditCard   },
   { name: "Broadcasts",     href: "/operations/notifications", icon: Radio        },
   { name: "Settings",       href: "/operations/settings",      icon: UserCircle   },
@@ -95,7 +96,7 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
         </div>
 
         {/* ── Navigation ────────────────────────────────────────────────── */}
-        <ScrollArea className="flex-1 sidebar-scroll">
+        <ScrollArea className="flex-1 min-h-0 sidebar-scroll">
           <div className="px-3 py-3">
             <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest px-3 mb-2">Menu</p>
             <nav className="flex flex-col gap-0.5">
