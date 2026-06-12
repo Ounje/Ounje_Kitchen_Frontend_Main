@@ -47,6 +47,44 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" });
 }
 
+interface SurgeSession {
+  startedAt: string;
+  endedAt: string | null;
+  multiplier: number;
+  reason: string;
+  by: string;
+}
+
+function buildSessions(logs: LogEntry[], isCurrentlyActive: boolean): SurgeSession[] {
+  const chronological = [...logs].reverse();
+  const sessions: SurgeSession[] = [];
+  let open: Partial<SurgeSession> | null = null;
+  for (const log of chronological) {
+    if (log.action === "activated") {
+      if (open) sessions.push({ ...(open as SurgeSession), endedAt: null });
+      open = { startedAt: log.at, multiplier: log.multiplier, reason: log.reason, by: log.by };
+    } else if (log.action === "updated" && open) {
+      open.multiplier = log.multiplier;
+      if (log.reason) open.reason = log.reason;
+    } else if (log.action === "deactivated" && open) {
+      sessions.push({ ...(open as SurgeSession), endedAt: log.at });
+      open = null;
+    }
+  }
+  if (open && isCurrentlyActive) sessions.push({ ...(open as SurgeSession), endedAt: null });
+  return sessions.reverse();
+}
+
+function fmtDuration(start: string, end: string | null): string {
+  const diffMs = (end ? new Date(end).getTime() : Date.now()) - new Date(start).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "< 1m";
+  if (mins < 60) return `${mins}m`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
 function MultiplierPill({ value }: { value: number }) {
   const cls =
     value >= 1.3 ? "bg-red-100 text-red-700 border-red-200"
@@ -149,6 +187,7 @@ export default function AdminSurgePricingPage() {
   }
 
   const activeScheduledSlots = schedule.filter(s => s.enabled).length;
+  const sessions = buildSessions(config?.logs ?? [], isActive);
 
   return (
     <div className="p-6 space-y-6 w-full">
@@ -399,30 +438,76 @@ export default function AdminSurgePricingPage() {
         </div>
       </div>
 
-      {/* ── Activity Log ────────────────────────────────────────────── */}
-      {config?.logs && config.logs.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <p className="font-semibold text-gray-900">Recent Activity</p>
+      {/* ── Surge Sessions ──────────────────────────────────────────── */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-gray-900">Surge Sessions</p>
+            <p className="text-xs text-gray-400 mt-0.5">Every time surge pricing was turned on and off</p>
           </div>
-          <div className="divide-y divide-gray-50">
-            {config.logs.slice(0, 15).map((log, i) => (
-              <div key={i} className="flex items-center gap-3 px-6 py-3 text-sm">
-                <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-bold
-                  ${log.action === "activated"   ? "bg-green-100 text-green-700"
-                  : log.action === "deactivated" ? "bg-gray-100 text-gray-500"
-                  : "bg-blue-100 text-blue-700"}`}>
-                  {log.action}
-                </span>
-                <MultiplierPill value={log.multiplier} />
-                {log.reason && <span className="text-gray-400 truncate">"{log.reason}"</span>}
-                <span className="text-gray-400 ml-auto shrink-0">by {log.by}</span>
-                <span className="text-gray-300 shrink-0 text-xs">{fmtDate(log.at)}</span>
-              </div>
-            ))}
-          </div>
+          {sessions.length > 0 && (
+            <span className="text-xs text-gray-400">{sessions.length} session{sessions.length !== 1 ? "s" : ""}</span>
+          )}
         </div>
-      )}
+
+        {sessions.length === 0 ? (
+          <div className="py-16 text-center">
+            <Zap className="h-8 w-8 text-gray-200 mx-auto mb-2" />
+            <p className="text-sm text-gray-400">No surge sessions recorded yet</p>
+            <p className="text-xs text-gray-300 mt-1">Sessions appear here once surge is activated for the first time</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/80">
+                  <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Status</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Multiplier</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Reason</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Activated By</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Started</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Ended</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Duration</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {sessions.map((s, i) => (
+                  <tr key={i} className={s.endedAt === null ? "bg-amber-50/60" : "hover:bg-gray-50/40 transition-colors"}>
+                    <td className="px-6 py-3.5">
+                      {s.endedAt === null ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          LIVE
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500">
+                          Ended
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5"><MultiplierPill value={s.multiplier} /></td>
+                    <td className="px-4 py-3.5 text-gray-500 max-w-48">
+                      <span className="line-clamp-1">{s.reason || <span className="text-gray-300">—</span>}</span>
+                    </td>
+                    <td className="px-4 py-3.5 font-medium text-gray-700 whitespace-nowrap">{s.by}</td>
+                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">{fmtDate(s.startedAt)}</td>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      {s.endedAt
+                        ? <span className="text-gray-400">{fmtDate(s.endedAt)}</span>
+                        : <span className="text-amber-600 font-medium">Still active</span>}
+                    </td>
+                    <td className="px-4 py-3.5 font-mono text-xs whitespace-nowrap">
+                      {s.endedAt === null
+                        ? <span className="text-amber-600 font-semibold">{fmtDuration(s.startedAt, null)}</span>
+                        : <span className="text-gray-500">{fmtDuration(s.startedAt, s.endedAt)}</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
