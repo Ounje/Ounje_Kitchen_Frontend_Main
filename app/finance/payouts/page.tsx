@@ -58,8 +58,8 @@ const fmt = (n: number) => `₦${(n ?? 0).toLocaleString()}`;
 
 const formatFundingSource = (bank?: string | null, channel?: string | null) => {
   if (bank) return bank;
-  if (!channel) return "—";
-  if (channel === "dedicated_nuban") return "DVA";
+  if (!channel) return "Card / Bank";
+  if (channel === "dedicated_nuban") return "Bank Transfer (DVA)";
   return channel.replace(/_/g, " ").replace(/\b\w/g, (chr) => chr.toUpperCase());
 };
 
@@ -414,7 +414,9 @@ function PaidInTab() {
                   <td className="text-gray-500 text-xs">{formatFundingSource(r.paymentBank, r.paymentChannel)}</td>
                   <td><PaidInStatusBadge status={r.status} /></td>
                   <td className="text-gray-500 whitespace-nowrap text-xs">
-                    {r.paidAt ? new Date(r.paidAt).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
+                    {(r.paidAt || r.createdAt)
+                      ? new Date(r.paidAt ?? r.createdAt).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+                      : '—'}
                   </td>
                   <td className="text-gray-500 whitespace-nowrap text-xs">
                     {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}

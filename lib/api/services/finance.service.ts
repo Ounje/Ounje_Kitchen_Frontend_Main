@@ -542,6 +542,16 @@ export const financeService = {
     const res = await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_BY_ID(id)) as any;
     return res?.data ?? res;
   },
+
+  async fixDuplicateEntries(): Promise<{ duplicateGroups: number; deletedEntries: number; affectedAccounts: number }> {
+    const res = await apiClient.post(ENDPOINTS.FINANCE.RECONCILIATION_FIX_DUPES) as any;
+    return res?.data ?? res;
+  },
+
+  async fixWalletBalances(): Promise<{ totalChecked: number; updatedAccounts: number }> {
+    const res = await apiClient.post(ENDPOINTS.FINANCE.RECONCILIATION_FIX_BALANCES) as any;
+    return res?.data ?? res;
+  },
 };
 
 export default financeService;

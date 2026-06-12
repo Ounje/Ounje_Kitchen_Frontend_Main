@@ -292,9 +292,11 @@ export const ENDPOINTS = {
     PAID_IN_STATS: '/api/finance/payments/stats',
 
     // Reconciliation
-    RECONCILIATION_LATEST:  '/api/finance/reconciliation/latest',
-    RECONCILIATION_HISTORY: '/api/finance/reconciliation/history',
-    RECONCILIATION_BY_ID:   (id: string) => `/api/finance/reconciliation/${id}`,
+    RECONCILIATION_LATEST:      '/api/finance/reconciliation/latest',
+    RECONCILIATION_HISTORY:     '/api/finance/reconciliation/history',
+    RECONCILIATION_BY_ID:       (id: string) => `/api/finance/reconciliation/${id}`,
+    RECONCILIATION_FIX_DUPES:   '/api/finance/reconciliation/fix-duplicates',
+    RECONCILIATION_FIX_BALANCES:'/api/finance/reconciliation/fix-balances',
 
     // Profile / Settings
     PROFILE:         '/api/finance/profile',

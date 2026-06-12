@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FinanceFilters, type FinanceFilterValues } from '@/components/finance/FinanceFilters';
 import { TransactionList } from '@/components/finance/TransactionList';
 import { TransactionInfoModal } from '@/components/finance/TransactionInfoModal';
@@ -11,10 +11,21 @@ import financeService, {
   type TransactionDetail,
 } from '@/lib/api/services/finance.service';
 
+const todayStr   = () => new Date().toISOString().split('T')[0];
+const sevenDaysAgo = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 6);
+  return d.toISOString().split('T')[0];
+};
+
 export default function TransactionsPage() {
   const [groups, setGroups]         = useState<TransactionGroup[]>([]);
   const [loading, setLoading]       = useState(false);
-  const [filters, setFilters]       = useState<TransactionFilters>({ page: 1, limit: 10 });
+  const [filters, setFilters]       = useState<TransactionFilters>({
+    page: 1, limit: 10,
+    startDate: sevenDaysAgo(),
+    endDate:   todayStr(),
+  });
   const [pageSize, setPageSize]     = useState(10);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -22,6 +33,9 @@ export default function TransactionsPage() {
   const [modalOpen, setModalOpen]       = useState(false);
   const [modalDetail, setModalDetail]   = useState<TransactionDetail | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+
+  // Load on mount with last 7 days
+  useEffect(() => { load(filters); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const load = useCallback(async (f: TransactionFilters, limit = pageSize) => {
     setLoading(true);
@@ -127,7 +141,11 @@ export default function TransactionsPage() {
         <p className="text-sm font-semibold text-muted-foreground mt-1">Review and manage financial records across portals.</p>
       </div>
 
-      <FinanceFilters onSearch={handleSearch} onExport={handleExport} />
+      <FinanceFilters
+        onSearch={handleSearch}
+        onExport={handleExport}
+        initialValues={{ startDate: sevenDaysAgo(), endDate: todayStr() }}
+      />
 
       {loading ? (
         <div className="grid grid-cols-1 gap-4">

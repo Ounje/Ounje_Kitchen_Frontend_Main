@@ -11,12 +11,16 @@ export interface FinanceFilterValues {
 }
 
 interface Props {
-  onSearch: (v: FinanceFilterValues) => void;
-  onExport: () => void;
+  onSearch:      (v: FinanceFilterValues) => void;
+  onExport:      () => void;
+  initialValues?: Partial<FinanceFilterValues>;
 }
 
-export function FinanceFilters({ onSearch, onExport }: Props) {
-  const [v, setV] = useState<FinanceFilterValues>({ name: '', role: '', startDate: '', endDate: '' });
+export function FinanceFilters({ onSearch, onExport, initialValues }: Props) {
+  const [v, setV] = useState<FinanceFilterValues>({
+    name: '', role: '', startDate: '', endDate: '',
+    ...initialValues,
+  });
   const set = (k: keyof FinanceFilterValues) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setV(prev => ({ ...prev, [k]: e.target.value }));
 
