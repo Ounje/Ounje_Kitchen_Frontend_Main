@@ -670,7 +670,18 @@ export default function ReconciliationPage() {
                     key={check.key}
                     checkKey={check.key}
                     items={check.items}
-                    onFixed={() => { setSelected(null); loadLatest(); }}
+                    onFixed={() => {
+                      // Clear this check's items immediately in local state so the count drops to 0
+                      setLatest(prev => {
+                        if (!prev) return prev;
+                        const cleared = prev.checks.map(c =>
+                          c.key === check.key ? { ...c, items: [], count: 0 } : c
+                        );
+                        const remaining = cleared.reduce((s, c) => s + (c.count ?? 0), 0);
+                        return { ...prev, checks: cleared, summary: { ...prev.summary, totalIssues: remaining }, clean: remaining === 0 };
+                      });
+                      setSelected(null);
+                    }}
                   />
                 ))}
               </div>

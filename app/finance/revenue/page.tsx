@@ -276,10 +276,10 @@ export default function RevenuePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          {trendData.length > 0 && trendData.some(t => t.gross > 0)
+          {trendData.length > 0
             ? <RevenueTrendChart data={trendData} />
             : <div className="h-72 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-sm text-gray-400">No trend data for this period</div>}
-          {distributionData.length > 0 && distributionData.some(d => d.value > 0)
+          {distributionData.length > 0
             ? <RevenueDistributionChart data={distributionData} />
             : <div className="h-72 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-sm text-gray-400">No distribution data for this period</div>}
         </div>
