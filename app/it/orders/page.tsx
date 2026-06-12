@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { itService } from "@/lib/api/services/it.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Eye, Trash2, ChevronDown, Download, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import Pagination from "@/components/Pagination";
@@ -12,14 +13,10 @@ import Pagination from "@/components/Pagination";
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Period = "Daily" | "Weekly" | "Monthly" | "Yearly" | "All";
 
-// ── Date range helpers ────────────────────────────────────────────────────────
-// Returns { dateFrom, dateTo } ISO strings for the selected period window.
-// These are passed to the backend as query params so MongoDB filters by createdAt.
 function getDateRange(period: Period): { dateFrom?: string; dateTo?: string } {
   if (period === "All") return {};
   const now = new Date();
   let from: Date, to: Date;
-
   switch (period) {
     case "Daily":
       from = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -42,11 +39,7 @@ function getDateRange(period: Period): { dateFrom?: string; dateTo?: string } {
       break;
     default: return {};
   }
-
-  return {
-    dateFrom: from?.toISOString(),
-    dateTo:   to?.toISOString(),
-  };
+  return { dateFrom: from?.toISOString(), dateTo: to?.toISOString() };
 }
 
 function periodLabel(period: Period): string {
@@ -57,7 +50,7 @@ function periodLabel(period: Period): string {
     case "Weekly": {
       const { dateFrom, dateTo } = getDateRange("Weekly");
       const f = new Date(dateFrom || "");
-      const t = new Date(dateTo || "");
+      const t = new Date(dateTo  || "");
       return `${f.toLocaleDateString("en-NG", { day: "numeric", month: "short" })} – ${t.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}`;
     }
     case "Monthly":
@@ -67,29 +60,6 @@ function periodLabel(period: Period): string {
     default:
       return "All Records";
   }
-}
-
-// ── Formatting helpers ────────────────────────────────────────────────────────
-function formatGroupDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  const days   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const nth = (n: number) => {
-    if (n > 3 && n < 21) return "th";
-    switch (n % 10) { case 1: return "st"; case 2: return "nd"; case 3: return "rd"; default: return "th"; }
-  };
-  return `${days[d.getDay()]} ${d.getDate()}${nth(d.getDate())}, ${months[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-function groupByDate(orders: any[]): Record<string, any[]> {
-  return orders.reduce((acc, order) => {
-    const raw = order.createdAt ?? order.date ?? "";
-    const key = raw ? raw.slice(0, 10) : "Unknown";
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(order);
-    return acc;
-  }, {} as Record<string, any[]>);
 }
 
 function fmt(n: number | undefined) {
@@ -105,7 +75,7 @@ function safeStr(val: any, fallback = "—"): string {
 }
 
 function resolveOrderName(order: any): string {
-  return order.customer?.user?.name ?? order.customer?.name ?? order.customerName ?? order.orderName ?? "Order";
+  return order.customer?.user?.name ?? order.customer?.name ?? order.customerName ?? order.orderName ?? "—";
 }
 function resolveVendorName(order: any): string {
   return safeStr(order.vendor?.name ?? order.vendor?.businessName ?? order.vendorName);
@@ -119,8 +89,23 @@ function resolveRiderName(order: any): string {
     order.riderName
   );
 }
-function resolveImage(order: any): string {
-  return order.image ?? order.foodImage ?? order.photo ?? "";
+
+function statusColor(status: string): string {
+  const s = (status ?? "").toLowerCase();
+  if (["delivered","successful","completed"].includes(s))
+    return "bg-green-100 text-green-700 border-green-200";
+  if (["cancelled","failed"].includes(s))
+    return "bg-red-100 text-red-700 border-red-200";
+  if (["pending"].includes(s))
+    return "bg-yellow-100 text-yellow-700 border-yellow-200";
+  return "bg-gray-100 text-gray-600 border-gray-200";
+}
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleString("en-NG", {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: true,
+  });
 }
 
 // ── Export helpers ────────────────────────────────────────────────────────────
@@ -156,8 +141,6 @@ function exportCSV(orders: any[], period: Period) {
 }
 
 function exportPDF(orders: any[], period: Period) {
-  // Build a self-contained printable HTML document and open it in a new tab.
-  // The user hits Ctrl+P / Cmd+P → Save as PDF. No third-party library needed.
   const rows = orders.map((o, i) => `
     <tr>
       <td>${i + 1}</td>
@@ -216,30 +199,19 @@ function exportPDF(orders: any[], period: Period) {
 </html>`;
 
   const win = window.open("", "_blank");
-  if (win) {
-    win.document.write(html);
-    win.document.close();
-  }
+  if (win) { win.document.write(html); win.document.close(); }
 }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
-function SkeletonCard() {
+// ── Skeleton row ──────────────────────────────────────────────────────────────
+function SkeletonRow() {
   return (
-    <div className="animate-pulse flex items-center gap-3 bg-[#98ef9b] rounded-lg p-3 mb-2">
-      <div className="w-16 h-16 bg-gray-300 rounded-lg flex-shrink-0" />
-      <div className="flex-1 space-y-2">
-        <div className="h-4 bg-gray-300 rounded w-1/3" />
-        <div className="h-3 bg-gray-300 rounded w-1/4" />
-      </div>
-      <div className="space-y-2 text-right">
-        <div className="h-3 bg-gray-300 rounded w-20" />
-        <div className="h-3 bg-gray-300 rounded w-24" />
-      </div>
-      <div className="flex gap-1 ml-2">
-        <div className="w-7 h-7 bg-gray-400 rounded-full" />
-        <div className="w-7 h-7 bg-gray-400 rounded-full" />
-      </div>
-    </div>
+    <tr className="border-b border-gray-100 animate-pulse">
+      {[1,2,3,4,5,6,7,8].map(i => (
+        <td key={i} className="px-4 py-3.5">
+          <div className="h-3.5 bg-gray-100 rounded-full w-3/4" />
+        </td>
+      ))}
+    </tr>
   );
 }
 
@@ -274,22 +246,21 @@ export default function ITOrdersPage() {
   const router = useRouter();
 
   const [orders,     setOrders]     = useState<any[]>([]);
-  const [allOrders,  setAllOrders]  = useState<any[]>([]);   // unfiltered copy for export
+  const [allOrders,  setAllOrders]  = useState<any[]>([]);
   const [loading,    setLoading]    = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, limit: 7, total: 0, pages: 1 });
+  const [pagination, setPagination] = useState({ page: 1, limit: 25, total: 0, pages: 1 });
 
-  const [filters,         setFilters]         = useState({ name: "", vendor: "", rider: "", zone: "" });
-  const [period,          setPeriod]          = useState<Period>("All");
-  const [showPeriodDrop,  setShowPeriodDrop]  = useState(false);
-  const [showExportDrop,  setShowExportDrop]  = useState(false);
+  const [filters,        setFilters]        = useState({ name: "", vendor: "", rider: "", zone: "" });
+  const [period,         setPeriod]         = useState<Period>("All");
+  const [showPeriodDrop, setShowPeriodDrop] = useState(false);
+  const [showExportDrop, setShowExportDrop] = useState(false);
 
-  const periodRef  = useRef<HTMLDivElement>(null);
-  const exportRef  = useRef<HTMLDivElement>(null);
+  const periodRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
 
-  const [deleteId,  setDeleteId]  = useState<string | null>(null);
-  const [deleting,  setDeleting]  = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (periodRef.current && !periodRef.current.contains(e.target as Node))  setShowPeriodDrop(false);
@@ -299,7 +270,6 @@ export default function ITOrdersPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ── Response shape extractors ──────────────────────────────────────────────
   const extractRows = (res: any): any[] => {
     const d = res?.data ?? res;
     if (Array.isArray(d?.orders)) return d.orders;
@@ -318,29 +288,21 @@ export default function ITOrdersPage() {
     };
   };
 
-  // ── Fetch — sends dateFrom/dateTo computed from the selected period ─────────
   const fetchOrders = useCallback(async (page = 1, currentFilters = filters) => {
     setLoading(true);
     try {
       const { dateFrom, dateTo } = getDateRange(period);
-
-      const params: any = {
-        page,
-        limit:    pagination.limit,
-        dateFrom,
-        dateTo,
-      };
+      const params: any = { page, limit: pagination.limit, dateFrom, dateTo };
       if (currentFilters.name)   params.name   = currentFilters.name;
-      if (currentFilters.vendor) params.vendor  = currentFilters.vendor;
-      if (currentFilters.rider)  params.rider   = currentFilters.rider;
-      if (currentFilters.zone)   params.zone    = currentFilters.zone;
+      if (currentFilters.vendor) params.vendor = currentFilters.vendor;
+      if (currentFilters.rider)  params.rider  = currentFilters.rider;
+      if (currentFilters.zone)   params.zone   = currentFilters.zone;
 
       const res: any = await itService.getOrders(params);
       const rows = extractRows(res);
       setOrders(rows);
       setPagination(extractPagination(res, pagination.limit));
 
-      // For export: fetch all pages if total > limit, but cap at 500 to avoid abuse
       const pag = extractPagination(res, pagination.limit);
       if (pag.total <= pagination.limit) {
         setAllOrders(rows);
@@ -348,7 +310,6 @@ export default function ITOrdersPage() {
         const allRes: any = await itService.getOrders({ ...params, page: 1, limit: pag.total });
         setAllOrders(extractRows(allRes));
       } else {
-        // Too many — export only current page
         setAllOrders(rows);
       }
     } catch (err: any) {
@@ -360,7 +321,6 @@ export default function ITOrdersPage() {
     }
   }, [period, pagination.limit, filters]);
 
-  // Re-fetch whenever period changes — date range recalculates automatically
   useEffect(() => { fetchOrders(1); }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = () => fetchOrders(1, filters);
@@ -386,17 +346,19 @@ export default function ITOrdersPage() {
     }
   };
 
-  const grouped  = groupByDate(orders);
-  const dateKeys = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
-
   return (
     <div className="space-y-6">
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{periodLabel(period)}</p>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#1a3f1c] flex items-center justify-center">
+            <ShoppingCart className="w-5 h-5 text-[#ffca3a]" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-[#1a3f1c]">Orders</h1>
+            <p className="text-xs text-gray-500">{periodLabel(period)}</p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -405,7 +367,7 @@ export default function ITOrdersPage() {
             <button
               onClick={() => setShowExportDrop(p => !p)}
               disabled={allOrders.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-40"
+              className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-40"
             >
               <Download className="h-4 w-4" />
               Export
@@ -413,16 +375,12 @@ export default function ITOrdersPage() {
             </button>
             {showExportDrop && (
               <div className="absolute right-0 mt-1 w-44 bg-white border rounded-lg shadow-lg py-1 z-20">
-                <button
-                  onClick={() => { exportCSV(allOrders, period); setShowExportDrop(false); }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                >
+                <button onClick={() => { exportCSV(allOrders, period); setShowExportDrop(false); }}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
                   📄 Download CSV
                 </button>
-                <button
-                  onClick={() => { exportPDF(allOrders, period); setShowExportDrop(false); }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                >
+                <button onClick={() => { exportPDF(allOrders, period); setShowExportDrop(false); }}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
                   🖨 Print / Save PDF
                 </button>
               </div>
@@ -433,7 +391,7 @@ export default function ITOrdersPage() {
           <div className="relative" ref={periodRef}>
             <button
               onClick={() => setShowPeriodDrop(p => !p)}
-              className="flex items-center gap-2 px-4 py-2 bg-secondary text-primary rounded-lg text-sm font-black hover:brightness-95 transition-all shadow-sm border border-primary/5 uppercase tracking-wider"
+              className="flex items-center gap-2 px-3 py-2 bg-secondary text-primary rounded-lg text-sm font-black hover:brightness-95 transition-all shadow-sm border border-primary/5 uppercase tracking-wider"
             >
               <span>{period}</span>
               <ChevronDown className={`h-4 w-4 transition-transform ${showPeriodDrop ? "rotate-180" : ""}`} />
@@ -455,13 +413,13 @@ export default function ITOrdersPage() {
       </div>
 
       {/* ── Search Filters ── */}
-      <div className="bg-surface border border-border/50 rounded-2xl p-6 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
           {[
-            { key: "name",   label: "Name",   placeholder: "Search by name"   },
-            { key: "vendor", label: "Vendor", placeholder: "Search by vendor" },
-            { key: "rider",  label: "Rider",  placeholder: "Search by rider"  },
-            { key: "zone",   label: "Zone",   placeholder: "Search by zone"   },
+            { key: "name",   label: "Customer",  placeholder: "Search by name"   },
+            { key: "vendor", label: "Vendor",    placeholder: "Search by vendor" },
+            { key: "rider",  label: "Rider",     placeholder: "Search by rider"  },
+            { key: "zone",   label: "Zone",      placeholder: "Search by zone"   },
           ].map(({ key, label, placeholder }) => (
             <div key={key}>
               <label className="text-xs font-medium text-gray-600 mb-1 block">{label}</label>
@@ -469,126 +427,122 @@ export default function ITOrdersPage() {
                 value={filters[key as keyof typeof filters]}
                 onChange={e => setFilters(f => ({ ...f, [key]: e.target.value }))}
                 placeholder={placeholder}
-                className="h-9"
+                className="h-9 rounded-xl"
                 onKeyDown={e => e.key === "Enter" && handleSearch()}
               />
             </div>
           ))}
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mt-4">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <Button 
-              onClick={handleSearch} 
-              className="bg-[#1a3f1c] text-white hover:bg-[#1a3f1c]/90 h-10 px-8 font-bold flex-1 sm:flex-initial shadow-sm transition-all"
-            >
-              Search
-            </Button>
-            <Button 
-              onClick={handleReset} 
-              variant="outline" 
-              className="h-10 px-8 border-gray-300 text-gray-600 hover:bg-gray-50 font-bold flex-1 sm:flex-initial transition-all"
-            >
-              Reset
-            </Button>
-          </div>
-          <Button
-            onClick={() => router.push("/it/orders/create")}
-            className="bg-[#4a7c4e] text-white hover:bg-[#4a7c4e]/90 h-10 px-8 font-bold shadow-md w-full sm:w-auto transition-all"
-          >
-            Create Order
+        <div className="flex gap-2">
+          <Button onClick={handleSearch} className="bg-[#1a3f1c] text-white hover:bg-[#1a3f1c]/90 h-9 px-6 font-bold text-sm">
+            Search
+          </Button>
+          <Button onClick={handleReset} variant="outline" className="h-9 px-6 font-bold text-sm">
+            Reset
           </Button>
         </div>
       </div>
 
-      {/* ── Order count badge ── */}
-      {!loading && (
-        <p className="text-sm text-gray-500 font-medium italic">
-          {pagination.total > 0
-            ? `Showing ${orders.length} of ${pagination.total} order${pagination.total !== 1 ? "s" : ""} for this ${period.toLowerCase()} period`
-            : `No orders matching filters for ${periodLabel(period)}`
-          }
-        </p>
-      )}
-
-      {/* ── Orders grouped by date ── */}
-      <div className="space-y-4">
-        {loading ? (
-          <>
-            <div className="h-4 bg-gray-200 rounded w-40 animate-pulse" />
-            {[1,2,3].map(i => <SkeletonCard key={i} />)}
-          </>
-        ) : orders.length === 0 ? (
-          <div className="text-center py-20 text-gray-400 bg-surface rounded-2xl border border-dashed border-border flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-              <ShoppingCart className="h-8 w-8 text-muted-foreground/30" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-foreground/70">No orders found</p>
-              <p className="text-sm mt-1 max-w-xs mx-auto">Try adjusting your filters or changing the time period (currently {period}).</p>
-            </div>
-            <Button onClick={handleReset} variant="outline" className="mt-2 border-primary/20 text-primary">
-              Clear all filters
+      {/* ── Table ── */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        {!loading && orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+            <ShoppingCart className="w-10 h-10 mb-3 opacity-30" />
+            <p className="text-sm font-medium">No orders found</p>
+            <p className="text-xs mt-1">Try adjusting your filters or changing the time period.</p>
+            <Button onClick={handleReset} variant="outline" size="sm" className="mt-4">
+              Clear filters
             </Button>
           </div>
         ) : (
-          dateKeys.map(dateKey => (
-            <div key={dateKey}>
-              <p className="text-sm font-bold text-gray-700 mb-2 mt-2">{formatGroupDate(dateKey)}</p>
-              {grouped[dateKey].map((order: any) => {
-                const id         = order._id ?? order.id;
-                const name       = resolveOrderName(order);
-                const vendorName = resolveVendorName(order);
-                const riderName  = resolveRiderName(order);
-                const total      = order.totalFee ?? order.total ?? order.totalPrice ?? 0;
-                const image      = resolveImage(order);
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/80">
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">#</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Order ID</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Customer</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Vendor</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Rider</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Zone</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
+                  <th className="px-4 py-3 text-right text-[10px] font-black uppercase tracking-widest text-gray-400">Total</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Date</th>
+                  <th className="px-4 py-3 text-center text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading
+                  ? Array.from({ length: 10 }).map((_, i) => <SkeletonRow key={i} />)
+                  : orders.map((order, idx) => {
+                    const id         = order._id ?? order.id;
+                    const orderNum   = order.orderNumber ?? String(id).slice(-6).toUpperCase();
+                    const customer   = resolveOrderName(order);
+                    const vendor     = resolveVendorName(order);
+                    const rider      = resolveRiderName(order);
+                    const zone       = safeStr(order.zone);
+                    const status     = order.status ?? "—";
+                    const total      = order.totalFee ?? order.total ?? order.totalPrice ?? 0;
+                    const date       = order.createdAt ? formatDate(order.createdAt) : "—";
+                    const rowNum     = (pagination.page - 1) * pagination.limit + idx + 1;
 
-                return (
-                  <div key={id}
-                    className="flex items-center gap-4 bg-secondary rounded-2xl p-4 mb-3 hover:brightness-95 transition-all shadow-sm border border-primary/5 group">
-                    {/* Food image */}
-                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                      {image
-                        ? <img src={image} alt={name} className="w-full h-full object-cover" />
-                        : <div className="w-full h-full bg-gradient-to-br from-green-300 to-green-500 flex items-center justify-center text-white text-xs font-bold">IMG</div>
-                      }
-                    </div>
-
-                    {/* Order info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[#1a3f1c] text-sm truncate">{name}</p>
-                      <p className="text-xs text-[#1a3f1c]/80 font-medium">Total Amount: {fmt(total)}</p>
-                    </div>
-
-                    {/* Vendor & Rider — hidden on mobile */}
-                    <div className="hidden sm:block text-right text-xs text-[#1a3f1c]/80 space-y-0.5 mr-2">
-                      <p><span className="font-medium">Vendor:</span> {vendorName}</p>
-                      <p><span className="font-medium">Rider:</span> {riderName}</p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-1.5 flex-shrink-0">
-                      <button
-                        onClick={() => router.push(`/it/orders/${id}`)}
-                        className="w-10 h-10 rounded-full flex items-center justify-center bg-primary hover:scale-105 transition-transform shadow-md"
-                        title="View order"
-                      >
-                        <Eye className="h-5 w-5 text-white" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(id)}
-                        className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
-                        title="Delete order"
-                      >
-                        <Trash2 className="h-4 w-4 text-white" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ))
+                    return (
+                      <tr key={id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td className="px-4 py-3 text-gray-400 text-xs">{rowNum}</td>
+                        <td className="px-4 py-3">
+                          <span className="font-mono text-xs text-gray-500">{orderNum}</span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-800 font-medium text-xs">{customer}</td>
+                        <td className="px-4 py-3 text-gray-600 text-xs">{vendor}</td>
+                        <td className="px-4 py-3 text-gray-600 text-xs">{rider}</td>
+                        <td className="px-4 py-3 text-gray-500 text-xs">{zone}</td>
+                        <td className="px-4 py-3">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] font-bold uppercase tracking-wider border ${statusColor(status)}`}
+                          >
+                            {status}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 font-semibold text-xs">
+                          {fmt(total)}
+                        </td>
+                        <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{date}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => router.push(`/it/orders/${id}`)}
+                              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#1a3f1c] hover:scale-105 transition-transform shadow-sm"
+                              title="View order"
+                            >
+                              <Eye className="h-3.5 w-3.5 text-white" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteId(id)}
+                              className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                              title="Delete order"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-white" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
+      {/* ── Record count ── */}
+      {!loading && pagination.total > 0 && (
+        <p className="text-xs text-gray-400 text-right">
+          Showing {orders.length} of {pagination.total} order{pagination.total !== 1 ? "s" : ""}
+        </p>
+      )}
 
       {/* ── Pagination ── */}
       {!loading && pagination.pages > 1 && (
