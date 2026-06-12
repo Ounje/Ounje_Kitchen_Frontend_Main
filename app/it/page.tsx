@@ -6,8 +6,8 @@ import { itService } from "@/lib/api/services/it.service";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Users, Store, Bike, UserCog, ShoppingCart,
-  AlertCircle, TrendingUp, Bell, CheckCircle,
-  XCircle, AlertTriangle, Clock, Info, ArrowUpRight,
+  AlertCircle, TrendingUp, Bell,
+  AlertTriangle, Info, ArrowUpRight, Trash2,
 } from "lucide-react";
 import { useRouteGuard } from "@/hooks/useRouteGuard";
 
@@ -37,7 +37,7 @@ function StatCard({
     <Card className="border border-border shadow-sm hover:shadow-lg transition-all duration-300 bg-surface">
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-4">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-inner"
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner"
             style={{ backgroundColor: iconBg }}>
             <Icon className="h-6 w-6 text-white" />
           </div>
@@ -101,7 +101,7 @@ function OrderSummaryCard({ orders }: { orders: DashboardData["orders"] }) {
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-primary shadow-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-14 h-14 rounded-2xl bg-primary shadow-lg flex items-center justify-center shrink-0">
                <ShoppingCart className="h-7 w-7 text-white" />
             </div>
             <div>
@@ -233,6 +233,136 @@ function Skeleton() {
   );
 }
 
+// ── Notifications Table ───────────────────────────────────────────────────────
+function NotificationsTable({
+  notifications,
+  onDismiss,
+}: {
+  notifications: any[];
+  onDismiss: (id: string) => void;
+}) {
+  const [dismissing, setDismissing] = useState<string | null>(null);
+
+  const handleDismiss = async (id: string) => {
+    setDismissing(id);
+    try {
+      await itService.deleteNotification(id);
+      onDismiss(id);
+    } catch {
+      // silent — row stays
+    } finally {
+      setDismissing(null);
+    }
+  };
+
+  const typeStyle = (type: string) => {
+    if (type === "error")   return { cls: "bg-red-100 text-red-700",    icon: <AlertCircle className="h-3.5 w-3.5" /> };
+    if (type === "warning") return { cls: "bg-yellow-100 text-yellow-700", icon: <AlertTriangle className="h-3.5 w-3.5" /> };
+    return                         { cls: "bg-blue-100 text-blue-700",   icon: <Info className="h-3.5 w-3.5" /> };
+  };
+
+  return (
+    <div className="pt-4">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-secondary rounded-lg">
+          <Bell className="h-5 w-5 text-primary" />
+        </div>
+        <h2 className="text-xl font-black text-foreground tracking-tight">System Notifications</h2>
+        {notifications.length > 0 && (
+          <span className="text-[10px] font-black uppercase tracking-widest bg-primary text-white px-2 py-1 rounded-md ml-2">
+            {notifications.length} Active
+          </span>
+        )}
+      </div>
+
+      {notifications.length === 0 ? (
+        <Card className="border border-dashed border-border bg-muted/20 shadow-none rounded-2xl">
+          <CardContent className="p-12 flex flex-col items-center gap-4 text-center">
+            <div className="w-16 h-16 rounded-full bg-surface border border-border flex items-center justify-center">
+              <Bell className="h-8 w-8 text-primary/30" />
+            </div>
+            <p className="text-base font-black text-foreground">No notifications at the moment</p>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              Critical system alerts and broadcast logs will appear here.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border border-border overflow-hidden rounded-2xl bg-surface shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="bg-muted/30 border-b border-border">
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Type</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Title</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Message</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Audience</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Channels</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sent By</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Date</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {notifications.map((n) => {
+                  const { cls, icon } = typeStyle(n.type ?? "info");
+                  const sentBy = n.createdBy
+                    ? `${n.createdBy.firstName ?? ""} ${n.createdBy.lastName ?? ""}`.trim() || n.createdBy.email
+                    : "System";
+                  const channels: string[] = Array.isArray(n.channels) ? n.channels : [];
+                  return (
+                    <tr key={n._id} className="hover:bg-muted/10 transition-colors">
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase px-2 py-1 rounded-full ${cls}`}>
+                          {icon}{n.type ?? "info"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-foreground max-w-45 truncate">{n.title}</td>
+                      <td className="px-4 py-3 text-muted-foreground max-w-65">
+                        <p className="line-clamp-2 text-xs">{n.message}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs font-medium text-foreground/80 bg-muted/40 px-2 py-0.5 rounded-md">
+                          {n.audience ?? "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {channels.map((ch) => (
+                            <span key={ch} className="text-[10px] font-bold uppercase bg-secondary text-primary px-1.5 py-0.5 rounded">
+                              {ch}
+                            </span>
+                          ))}
+                          {channels.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{sentBy}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(n.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          type="button"
+                          disabled={dismissing === n._id}
+                          onClick={() => handleDismiss(n._id)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-red-500 hover:text-red-700 disabled:opacity-40 transition-colors"
+                          title="Dismiss"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function ITDashboard() {
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
@@ -302,7 +432,7 @@ export default function ITDashboard() {
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-6">
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
           <div>
             <p className="font-bold text-red-900">Error loading dashboard</p>
             <p className="text-sm text-red-700 mt-1">{error}</p>
@@ -415,66 +545,11 @@ export default function ITDashboard() {
       {/* Recent Orders — New Section */}
       <RecentOrdersTable orders={dashboard.recentOrders || []} />
 
-      {/* Notifications — Real data from /api/it/notifications */}
-      <div className="pt-4">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-secondary rounded-lg font-bold">
-            <Bell className="h-5 w-5 text-primary" />
-          </div>
-          <h2 className="text-xl font-black text-foreground tracking-tight">System Notifications</h2>
-          {notifications.length > 0 && (
-            <span className="text-[10px] font-black uppercase tracking-widest bg-primary text-white px-2 py-1 rounded-md ml-2 border border-primary/10">
-              {notifications.length} Active
-            </span>
-          )}
-        </div>
-
-        {notifications.length === 0 ? (
-          <Card className="border border-dashed border-border bg-muted/20 shadow-none rounded-2xl">
-            <CardContent className="p-12">
-              <div className="flex flex-col items-center justify-center gap-4 text-muted-foreground/50 text-center">
-                <div className="w-20 h-20 rounded-full bg-surface shadow-md border border-border flex items-center justify-center mb-2">
-                  <Bell className="h-10 w-10 text-primary/30" />
-                </div>
-                <p className="text-lg font-black text-foreground tracking-tight">No notifications at the moment</p>
-                <p className="text-sm text-muted-foreground font-medium max-w-sm">
-                  Critical system alerts and broadcast logs will appear here when they are generated.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {notifications.slice(0, 5).map((n) => (
-              <Card key={n._id} className="border border-border bg-surface hover:shadow-md transition-all rounded-xl">
-                <CardContent className="p-4 flex items-start gap-4">
-                  <div className={`p-2 rounded-lg flex-shrink-0 ${
-                    n.type === 'error' ? 'bg-red-50 text-red-600' : 
-                    n.type === 'warning' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600'
-                  }`}>
-                    {n.type === 'error' ? <AlertCircle className="h-5 w-5" /> : 
-                     n.type === 'warning' ? <AlertTriangle className="h-5 w-5" /> : <Info className="h-5 w-5" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-bold text-foreground truncate">{n.title}</p>
-                      <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap">
-                        {new Date(n.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{n.message}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            {notifications.length > 5 && (
-              <p className="text-center text-xs text-muted-foreground font-medium mt-2">
-                Showing latest 5 of {notifications.length} notifications
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+      {/* System Notifications — tabular */}
+      <NotificationsTable
+        notifications={notifications}
+        onDismiss={(id) => setNotifications(prev => prev.filter(n => n._id !== id))}
+      />
     </div>
   );
 }
