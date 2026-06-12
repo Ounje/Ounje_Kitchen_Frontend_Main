@@ -229,7 +229,6 @@ export const ENDPOINTS = {
   // ── Account Setup (IT + Operations) ──────────────────────────────────────────
   ACCOUNTS: {
     CUSTOMERS:        '/api/accounts/customers',
-    CUSTOMER_BY_ID:   (id: string) => `/api/accounts/customers/${id}`,
     CUSTOMER_UPDATE:  (id: string) => `/api/accounts/customers/${id}`,
 
     VENDORS:          '/api/accounts/vendors',
