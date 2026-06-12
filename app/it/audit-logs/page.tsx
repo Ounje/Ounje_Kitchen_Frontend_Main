@@ -68,7 +68,8 @@ function formatDate(d: string) {
 
 function resolveName(u: any) {
   if (!u) return "—";
-  return u.user || u.email || u._id || "—";
+  if (u.firstName || u.lastName) return `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim();
+  return u.email || u._id || "—";
 }
 
 function SkeletonRow() {
