@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Users, DollarSign, ShoppingCart, Bell, Shield, Settings, LogOut, X, Zap } from "lucide-react";
+import { Home, Users, DollarSign, ShoppingCart, Bell, Shield, Settings, LogOut, X, Zap, ScrollText } from "lucide-react";
 
 const navigation = [
   { name: "Home",          href: "/admin",               icon: Home         },
@@ -15,7 +15,8 @@ const navigation = [
   { name: "Surge Pricing", href: "/admin/surge",         icon: Zap          },
   { name: "Notifications", href: "/admin/notifications", icon: Bell         },
   { name: "Permissions",   href: "/admin/permissions",   icon: Shield       },
-  { name: "Settings",      href: "/admin/settings",      icon: Settings     },
+  { name: "Audit Logs",   href: "/admin/audit-logs",    icon: ScrollText   },
+  { name: "Settings",     href: "/admin/settings",      icon: Settings     },
 ];
 
 interface AdminSidebarProps {

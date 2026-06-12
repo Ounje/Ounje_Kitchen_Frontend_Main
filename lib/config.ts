@@ -86,6 +86,9 @@ export const ENDPOINTS = {
     // Notifications
     NOTIFICATIONS:       '/api/superadmin/notifications',
     NOTIFICATION_DELETE: (id: string) => `/api/superadmin/notifications/${id}`,
+
+    // Audit Logs
+    AUDIT_LOGS: '/api/superadmin/audit-logs',
   },
 
   // ── IT Portal ─────────────────────────────────────────────────────────────
