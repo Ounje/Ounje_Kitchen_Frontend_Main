@@ -296,10 +296,11 @@ export const itService = {
     return res;
   },
 
-  async changePassword(currentPassword: string, newPassword: string) {
+  async changePassword(currentPassword: string, newPassword: string, alternativeEmail?: string) {
     const res = await apiClient.post(ENDPOINTS.IT.CHANGE_PASSWORD, {
       currentPassword,
       newPassword,
+      ...(alternativeEmail ? { alternativeEmail } : {}),
     });
     return res;
   },

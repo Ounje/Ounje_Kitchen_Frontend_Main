@@ -11,12 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X, Check } from "lucide-react";
+import { X, Check, Mail } from "lucide-react";
 
 interface ChangePasswordModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (currentPassword: string, newPassword: string) => void;
+  onSubmit: (currentPassword: string, newPassword: string, alternativeEmail: string) => void;
   isForced?: boolean;
 }
 
@@ -35,6 +35,7 @@ export default function ChangePasswordModal({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [alternativeEmail, setAlternativeEmail] = useState("");
 
   const [validation, setValidation] = useState<PasswordValidation>({
     hasUppercase: false,
@@ -50,6 +51,7 @@ export default function ChangePasswordModal({
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setAlternativeEmail("");
       setValidation({
         hasUppercase: false,
         hasNumber: false,
@@ -101,7 +103,7 @@ export default function ChangePasswordModal({
 
   const handleProceed = () => {
     if (!isValid || !currentPassword) return;
-    onSubmit(currentPassword, newPassword);
+    onSubmit(currentPassword, newPassword, alternativeEmail.trim());
   };
 
   const handleDiscard = () => {
@@ -177,6 +179,30 @@ export default function ChangePasswordModal({
             {!passwordsMatch && confirmPassword && (
               <p className="text-xs text-red-600 mt-1">Passwords do not match</p>
             )}
+          </div>
+
+          {/* Alternative Email */}
+          <div>
+            <Label
+              htmlFor="alternativeEmail"
+              className="text-sm font-medium text-gray-700 flex items-center gap-1.5"
+            >
+              <Mail className="h-4 w-4 text-blue-500" />
+              Personal Email
+              <span className="text-xs text-gray-400 font-normal">(OTP will be sent here)</span>
+            </Label>
+            <Input
+              id="alternativeEmail"
+              type="email"
+              value={alternativeEmail}
+              onChange={(e) => setAlternativeEmail(e.target.value)}
+              className="mt-1 bg-white"
+              placeholder="e.g. yourname@gmail.com"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Use a personal email (Gmail, Yahoo, etc.) if your work email isn&apos;t receiving
+              messages yet.
+            </p>
           </div>
 
           {/* Password Strength Indicator */}

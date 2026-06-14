@@ -327,8 +327,12 @@ export const operationsService = {
     return apiClient.post(ENDPOINTS.OPERATIONS.PROFILE_AVATAR, formData);
   },
 
-  async changePassword(currentPassword: string, newPassword: string) {
-    return apiClient.post(ENDPOINTS.OPERATIONS.CHANGE_PASSWORD, { currentPassword, newPassword });
+  async changePassword(currentPassword: string, newPassword: string, alternativeEmail?: string) {
+    return apiClient.post(ENDPOINTS.OPERATIONS.CHANGE_PASSWORD, {
+      currentPassword,
+      newPassword,
+      ...(alternativeEmail ? { alternativeEmail } : {}),
+    });
   },
 
   async verifyOTP(otp: string) {

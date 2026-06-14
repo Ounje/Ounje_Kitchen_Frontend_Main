@@ -268,10 +268,11 @@ export const superAdminService = {
     return res;
   },
 
-  async changePassword(currentPassword: string, newPassword: string) {
+  async changePassword(currentPassword: string, newPassword: string, alternativeEmail?: string) {
     const res = await apiClient.post(ENDPOINTS.SUPERADMIN.CHANGE_PASSWORD, {
       currentPassword,
       newPassword,
+      ...(alternativeEmail ? { alternativeEmail } : {}),
     });
     return res;
   },

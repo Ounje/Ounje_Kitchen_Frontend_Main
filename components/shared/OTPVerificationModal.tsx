@@ -18,6 +18,7 @@ interface OTPVerificationModalProps {
   onOpenChange: (open: boolean) => void;
   onVerify: (otp: string) => Promise<void>;
   onResend: () => Promise<void>;
+  sentToEmail?: string;
 }
 
 export default function OTPVerificationModal({
@@ -25,6 +26,7 @@ export default function OTPVerificationModal({
   onOpenChange,
   onVerify,
   onResend,
+  sentToEmail,
 }: OTPVerificationModalProps) {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(60);
@@ -145,7 +147,9 @@ export default function OTPVerificationModal({
             Enter Verification Code
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
-            A one time six-digit code has been sent to your email; fill in the numbers you received.
+            {sentToEmail
+              ? `A six-digit code has been sent to ${sentToEmail}. Fill in the numbers you received.`
+              : "A six-digit code has been sent to your email. Fill in the numbers you received."}
           </DialogDescription>
         </DialogHeader>
 

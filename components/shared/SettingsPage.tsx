@@ -43,7 +43,11 @@ interface SettingsPageProps {
     getProfile: () => Promise<any>;
     updateProfile: (data: any) => Promise<any>;
     uploadAvatar: (formData: FormData) => Promise<any>;
-    changePassword: (currentPassword: string, newPassword: string) => Promise<any>;
+    changePassword: (
+      currentPassword: string,
+      newPassword: string,
+      alternativeEmail?: string
+    ) => Promise<any>;
     verifyOTP: (otp: string) => Promise<any>;
     resendOTP: () => Promise<any>;
   };
@@ -125,6 +129,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
+    alternativeEmail: "",
   });
 
   // Activity log state
@@ -156,7 +161,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
 
   const handleSuccessClose = async () => {
     setSuccessModalOpen(false);
-    setPasswordData({ currentPassword: "", newPassword: "" });
+    setPasswordData({ currentPassword: "", newPassword: "", alternativeEmail: "" });
 
     await refreshUser();
     // Remove the mustChange flag from the URL now that the password is set
@@ -358,8 +363,12 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
     setPasswordModalOpen(true);
   };
 
-  const handlePasswordSubmit = (currentPassword: string, newPassword: string) => {
-    setPasswordData({ currentPassword, newPassword });
+  const handlePasswordSubmit = (
+    currentPassword: string,
+    newPassword: string,
+    alternativeEmail: string
+  ) => {
+    setPasswordData({ currentPassword, newPassword, alternativeEmail });
     setPasswordModalOpen(false);
     setConfirmPasswordModalOpen(true);
   };
@@ -369,7 +378,11 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
 
     try {
       // Call change password endpoint which sends OTP
-      await apiService.changePassword(passwordData.currentPassword, passwordData.newPassword);
+      await apiService.changePassword(
+        passwordData.currentPassword,
+        passwordData.newPassword,
+        passwordData.alternativeEmail || undefined
+      );
 
       // Open OTP modal
       setOtpModalOpen(true);
@@ -768,6 +781,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
         onOpenChange={setOtpModalOpen}
         onVerify={handleOTPVerify}
         onResend={handleResendOTP}
+        sentToEmail={passwordData.alternativeEmail || undefined}
       />
 
       <PasswordChangeSuccessModal open={successModalOpen} onClose={handleSuccessClose} />
