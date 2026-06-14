@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import { Star } from "lucide-react";
-import { VendorReviewRow as VendorRow, RiderReviewRow as RiderRow, AllReviewRow, ReviewType } from "@/lib/api/services/operations.service";
+import {
+  VendorReviewRow as VendorRow,
+  RiderReviewRow as RiderRow,
+  AllReviewRow,
+  ReviewType,
+} from "@/lib/api/services/operations.service";
 import Pagination from "@/components/Pagination";
 
 // ── Types ──────────────────────────────────────────────────
@@ -96,14 +101,26 @@ export default function ReviewsTable({
         <table className="w-full min-w-[600px]">
           <thead>
             <tr>
-              <th className={thCls} style={{ width: 50 }}>S/N</th>
-              <th className={thCls} style={{ width: 180 }}>Name</th>
-              {type === "all" && <th className={thCls} style={{ width: 90 }}>Type</th>}
+              <th className={thCls} style={{ width: 50 }}>
+                S/N
+              </th>
+              <th className={thCls} style={{ width: 180 }}>
+                Name
+              </th>
+              {type === "all" && (
+                <th className={thCls} style={{ width: 90 }}>
+                  Type
+                </th>
+              )}
               <th className={thCls}>
                 {type === "vendor" ? "Address" : type === "rider" ? "Zone" : "Location"}
               </th>
-              <th className={thCls} style={{ width: 130 }}>Total Ratings</th>
-              <th className={thCls} style={{ width: 260 }}>Actions</th>
+              <th className={thCls} style={{ width: 130 }}>
+                Total Ratings
+              </th>
+              <th className={thCls} style={{ width: 260 }}>
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -122,16 +139,17 @@ export default function ReviewsTable({
               rows.map((row, idx) => {
                 const sn = (pagination.page - 1) * pagination.limit + idx + 1;
                 const vendorRow = row as VendorRow;
-                const riderRow  = row as RiderRow;
-                const allRow    = row as AllReviewRow;
+                const riderRow = row as RiderRow;
+                const allRow = row as AllReviewRow;
 
                 const location =
-                  type === "vendor" ? vendorRow.address :
-                  type === "rider"  ? riderRow.zone :
-                  allRow.location;
+                  type === "vendor"
+                    ? vendorRow.address
+                    : type === "rider"
+                      ? riderRow.zone
+                      : allRow.location;
 
-                const entityType: ReviewType =
-                  type === "all" ? allRow.entityType : type;
+                const entityType: ReviewType = type === "all" ? allRow.entityType : type;
 
                 return (
                   <tr
@@ -158,34 +176,30 @@ export default function ReviewsTable({
                             </div>
                           )}
                         </div>
-                        <span className="text-sm font-medium text-gray-800">
-                          {row.name}
-                        </span>
+                        <span className="text-sm font-medium text-gray-800">{row.name}</span>
                       </div>
                     </td>
 
                     {/* Type badge — only in "all" mode */}
                     {type === "all" && (
                       <td className="px-4 py-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
-                          allRow.entityType === "vendor"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-purple-100 text-purple-700"
-                        }`}>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
+                            allRow.entityType === "vendor"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-purple-100 text-purple-700"
+                          }`}
+                        >
                           {allRow.entityType === "vendor" ? "Vendor" : "Rider"}
                         </span>
                       </td>
                     )}
 
                     {/* Location */}
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {location}
-                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{location}</td>
 
                     {/* Total Ratings */}
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {row.totalRatings}
-                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{row.totalRatings}</td>
 
                     {/* Actions */}
                     <td className="px-4 py-3">

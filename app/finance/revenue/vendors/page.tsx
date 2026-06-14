@@ -1,31 +1,31 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { X, User } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { X, User } from "lucide-react";
 import financeService, {
   type TopVendor,
   type RevenuePeriod,
-} from '@/lib/api/services/finance.service';
+} from "@/lib/api/services/finance.service";
 
 const PERIODS: { label: string; value: RevenuePeriod }[] = [
-  { label: 'Daily',   value: 'daily' },
-  { label: 'Weekly',  value: 'weekly' },
-  { label: 'Monthly', value: 'monthly' },
+  { label: "Daily", value: "daily" },
+  { label: "Weekly", value: "weekly" },
+  { label: "Monthly", value: "monthly" },
 ];
 
-const thCls = 'px-4 py-3 text-left text-sm font-semibold whitespace-nowrap';
+const thCls = "px-4 py-3 text-left text-sm font-semibold whitespace-nowrap";
 
 function unwrapVendors(res: any): TopVendor[] {
-  if (Array.isArray(res))              return res as TopVendor[];
-  if (Array.isArray(res?.data))        return res.data as TopVendor[];
-  if (Array.isArray(res?.vendors))     return res.vendors as TopVendor[];
+  if (Array.isArray(res)) return res as TopVendor[];
+  if (Array.isArray(res?.data)) return res.data as TopVendor[];
+  if (Array.isArray(res?.vendors)) return res.vendors as TopVendor[];
   return [];
 }
 
 export default function TopVendorsPage() {
   const router = useRouter();
-  const [period, setPeriod]   = useState<RevenuePeriod>('daily');
+  const [period, setPeriod] = useState<RevenuePeriod>("daily");
   const [vendors, setVendors] = useState<TopVendor[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +41,9 @@ export default function TopVendorsPage() {
     }
   };
 
-  useEffect(() => { load(period); }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    load(period);
+  }, [period]);  
 
   return (
     <div className="w-full">
@@ -52,15 +54,11 @@ export default function TopVendorsPage() {
         ← Revenue / Vendors details
       </p>
 
-      <div
-        className="w-full rounded-2xl overflow-hidden shadow-lg bg-gray-50"
-      >
+      <div className="w-full rounded-2xl overflow-hidden shadow-lg bg-gray-50">
         <div className="px-5 sm:px-7 pt-6 pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold mb-1 text-[#1a3f1c]">
-                Top 5 Vendors
-              </h1>
+              <h1 className="text-xl sm:text-2xl font-bold mb-1 text-[#1a3f1c]">Top 5 Vendors</h1>
               <p className="text-sm text-gray-500">
                 Vendors generating the highest orders and revenue on the platform.
               </p>
@@ -70,15 +68,19 @@ export default function TopVendorsPage() {
               <div className="relative">
                 <select
                   value={period}
-                  onChange={e => setPeriod(e.target.value as RevenuePeriod)}
+                  onChange={(e) => setPeriod(e.target.value as RevenuePeriod)}
                   className="appearance-none pl-8 pr-6 py-1.5 rounded-lg text-white text-sm font-semibold cursor-pointer bg-[#1a3f1c]"
                 >
-                  {PERIODS.map(p => (
-                    <option key={p.value} value={p.value}>{p.label}</option>
+                  {PERIODS.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
                   ))}
                 </select>
                 <User className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white pointer-events-none" />
-                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-white pointer-events-none text-xs">▾</span>
+                <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-white pointer-events-none text-xs">
+                  ▾
+                </span>
               </div>
               <button
                 onClick={() => router.back()}
@@ -94,8 +96,10 @@ export default function TopVendorsPage() {
           <table className="w-full min-w-[540px] rounded-xl overflow-hidden">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
-                {['Vendor Name', 'Orders', 'Revenue', 'Commission', 'AOV'].map(h => (
-                  <th key={h} className={`${thCls} text-[#1a3f1c]`}>{h}</th>
+                {["Vendor Name", "Orders", "Revenue", "Commission", "AOV"].map((h) => (
+                  <th key={h} className={`${thCls} text-[#1a3f1c]`}>
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -118,22 +122,33 @@ export default function TopVendorsPage() {
                 </tr>
               ) : (
                 vendors.map((v) => (
-                  <tr key={v.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={v.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-500">
-                          {v.photo
-                            ? <img src={v.photo} alt={v.name} className="w-full h-full object-cover" />
-                            : v.name?.charAt(0).toUpperCase() ?? '?'}
+                          {v.photo ? (
+                            <img
+                              src={v.photo}
+                              alt={v.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            (v.name?.charAt(0).toUpperCase() ?? "?")
+                          )}
                         </div>
-                        <span className="text-sm font-medium text-[#1a3f1c]">
-                          {v.name}
-                        </span>
+                        <span className="text-sm font-medium text-[#1a3f1c]">{v.name}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-[#1a3f1c]">{v.orders}</td>
-                    <td className="px-4 py-3 text-sm text-[#1a3f1c]">₦{v.revenue.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-sm text-[#1a3f1c]">₦{v.commission.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-sm text-[#1a3f1c]">
+                      ₦{v.revenue.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-[#1a3f1c]">
+                      ₦{v.commission.toLocaleString()}
+                    </td>
                     <td className="px-4 py-3 text-sm text-[#1a3f1c]">₦{v.aov.toLocaleString()}</td>
                   </tr>
                 ))

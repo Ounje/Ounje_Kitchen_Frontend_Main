@@ -1,5 +1,5 @@
 import { API_CONFIG } from "./config";
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 export class PasswordChangeRequiredError extends Error {
   constructor(message: string = "Password change required") {
@@ -35,17 +35,17 @@ class APIClient {
    * Build query string from params object
    */
   private buildQueryString(params?: Record<string, any>): string {
-    if (!params) return '';
-    
+    if (!params) return "";
+
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null && value !== "") {
         searchParams.append(key, String(value));
       }
     });
-    
+
     const queryString = searchParams.toString();
-    return queryString ? `?${queryString}` : '';
+    return queryString ? `?${queryString}` : "";
   }
 
   private async handleResponse<T>(response: Response, options: RequestOptions = {}): Promise<T> {
@@ -66,19 +66,19 @@ class APIClient {
       } catch {
         // not JSON – keep statusText
       }
-      
+
       // ✅ GLOBAL INTERCEPTOR: Trap exact security requirements
-      if (response.status === 403 && message.toLowerCase().includes('password') && requiresAuth) {
+      if (response.status === 403 && message.toLowerCase().includes("password") && requiresAuth) {
         if (typeof window !== "undefined") {
-            const portalRoute = window.location.pathname.split('/')[1] || '';
-            const settingsPath = portalRoute ? `/${portalRoute}/settings` : '/settings';
-            
-            toast.error(message || "Password change required. Please update your password.");
-            
-            // Allow toast to show briefly before navigating
-            setTimeout(() => {
-                window.location.href = settingsPath;
-            }, 1000);
+          const portalRoute = window.location.pathname.split("/")[1] || "";
+          const settingsPath = portalRoute ? `/${portalRoute}/settings` : "/settings";
+
+          toast.error(message || "Password change required. Please update your password.");
+
+          // Allow toast to show briefly before navigating
+          setTimeout(() => {
+            window.location.href = settingsPath;
+          }, 1000);
         }
         throw new PasswordChangeRequiredError(message);
       }
@@ -104,7 +104,7 @@ class APIClient {
     }
 
     if (requiresAuth) {
-      const svc   = await getAuthService();
+      const svc = await getAuthService();
       const token = svc.getToken();
       if (token) headers["Authorization"] = `Bearer ${token}`;
     }
@@ -113,7 +113,7 @@ class APIClient {
     const queryString = this.buildQueryString(params);
     const url = `${this.baseURL}${endpoint}${queryString}`;
 
-    console.log('[API Client] Request:', { url, method: rest.method || 'GET', params });
+    console.log("[API Client] Request:", { url, method: rest.method || "GET", params });
 
     const response = await fetch(url, {
       ...rest,
@@ -128,29 +128,29 @@ class APIClient {
   get<T>(ep: string, opts?: RequestOptions) {
     return this.request<T>(ep, { ...opts, method: "GET" });
   }
-  
+
   post<T>(ep: string, data?: unknown, opts?: RequestOptions) {
     // ✅ Check if data is FormData
     const isFormData = data instanceof FormData;
-    
+
     return this.request<T>(ep, {
       ...opts,
       method: "POST",
-      body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
+      body: isFormData ? data : data ? JSON.stringify(data) : undefined,
     });
   }
-  
+
   put<T>(ep: string, data?: unknown, opts?: RequestOptions) {
     // ✅ Check if data is FormData
     const isFormData = data instanceof FormData;
-    
+
     return this.request<T>(ep, {
       ...opts,
       method: "PUT",
-      body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
+      body: isFormData ? data : data ? JSON.stringify(data) : undefined,
     });
   }
-  
+
   delete<T>(ep: string, opts?: RequestOptions) {
     return this.request<T>(ep, { ...opts, method: "DELETE" });
   }

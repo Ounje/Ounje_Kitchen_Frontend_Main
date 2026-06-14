@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import type { WithdrawalGroup } from '@/lib/api/services/finance.service';
+import type { WithdrawalGroup } from "@/lib/api/services/finance.service";
 
 interface Props {
   groups: WithdrawalGroup[];
@@ -8,7 +8,7 @@ interface Props {
   onPrint: (withdrawalId: string) => void;
 }
 
-function StatusBadge({ status }: { status: 'PASS' | 'FAIL' }) {
+function StatusBadge({ status }: { status: "PASS" | "FAIL" }) {
   return (
     <span
       className={`inline-block px-2 py-0.5 rounded text-xs font-bold text-white whitespace-nowrap ${status === "PASS" ? "bg-[#1a3f1c]" : "bg-red-600"}`}
@@ -29,22 +29,24 @@ export function WithdrawalList({ groups, onInfo, onPrint }: Props) {
 
   return (
     <div className="space-y-4 w-full">
-      {groups.map(group => (
+      {groups.map((group) => (
         <div key={group.date}>
-          <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">
-            {group.date}
-          </p>
+          <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">{group.date}</p>
 
           <div className="rounded-xl overflow-hidden bg-gray-50 border-b border-gray-100">
             {group.withdrawals.map((wd, idx) => (
               <div
                 key={wd.id}
-                className={`flex items-center gap-3 px-4 py-3 ${idx !== 0 ? 'border-t border-[#7dd880]/40' : ''}`}
+                className={`flex items-center gap-3 px-4 py-3 ${idx !== 0 ? "border-t border-[#7dd880]/40" : ""}`}
               >
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-gray-300 flex-shrink-0 overflow-hidden border-2 border-white">
                   {wd.userAvatar ? (
-                    <img src={wd.userAvatar} alt={wd.userName} className="w-full h-full object-cover" />
+                    <img
+                      src={wd.userAvatar}
+                      alt={wd.userName}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full rounded-full bg-gray-400" />
                   )}

@@ -42,18 +42,17 @@ interface SettingsPageProps {
 
 export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPageProps) {
   const { refreshUser, user: authUser } = useAuth(); // ✅ Get refreshUser from AuthContext
-  
+
   useEffect(() => {
     if (authUser?.mustChangePassword) {
       setPasswordModalOpen(true);
     }
   }, [authUser?.mustChangePassword]);
 
-
   // Profile data
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
-    
+
   // Edit mode state
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedData, setEditedData] = useState({
@@ -62,32 +61,30 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
     phone: "",
   });
 
-
-  
   // Avatar upload
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Saving state
   const [saving, setSaving] = useState(false);
-  
+
   // Password change modals
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [confirmPasswordModalOpen, setConfirmPasswordModalOpen] = useState(false);
   const [otpModalOpen, setOtpModalOpen] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-  
+
   // Password data for passing between modals
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
   });
 
-   const handleSuccessClose = async () => {
+  const handleSuccessClose = async () => {
     setSuccessModalOpen(false);
     setPasswordData({ currentPassword: "", newPassword: "" });
-    
+
     // ✅ Refresh user to update mustChangePassword flag
     await refreshUser();
   };
@@ -147,11 +144,11 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
         lastName: editedData.lastName,
         phone: editedData.phone,
       });
-      
+
       toast.success("Profile updated successfully");
       await fetchProfile(); // Refetch to get updated data
       setIsEditMode(false);
-      
+
       // ✅ Refresh user in AuthContext to update sidebar name
       await refreshUser();
     } catch (error: any) {
@@ -170,7 +167,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
@@ -181,7 +178,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
       return;
     }
 
-     const resizedFile = await resizeImage(file, 400, 400);
+    const resizedFile = await resizeImage(file, 400, 400);
 
     // Show preview immediately
     const reader = new FileReader();
@@ -192,96 +189,96 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
 
     // Upload to backend
     setUploadingAvatar(true);
-  try {
-    const formData = new FormData();
-    formData.append('avatar', resizedFile);
-    
-    const result = await apiService.uploadAvatar(formData);
-    toast.success("Profile picture updated successfully");
-    
-    // Update profile with new avatar URL
-    if (profile) {
-      setProfile({ ...profile, avatar: result.avatarUrl });
+    try {
+      const formData = new FormData();
+      formData.append("avatar", resizedFile);
+
+      const result = await apiService.uploadAvatar(formData);
+      toast.success("Profile picture updated successfully");
+
+      // Update profile with new avatar URL
+      if (profile) {
+        setProfile({ ...profile, avatar: result.avatarUrl });
+      }
+
+      // ✅ Refresh user in AuthContext to update sidebar
+      await refreshUser();
+
+      // Callback to update sidebar avatar (if provided)
+      if (onAvatarUpdate && result.avatarUrl) {
+        onAvatarUpdate(result.avatarUrl);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to upload profile picture");
+      // Revert preview on error
+      if (profile?.avatar) {
+        setAvatarPreview(profile.avatar);
+      } else {
+        setAvatarPreview(null);
+      }
+    } finally {
+      setUploadingAvatar(false);
     }
-    
-    // ✅ Refresh user in AuthContext to update sidebar
-    await refreshUser();
-    
-    // Callback to update sidebar avatar (if provided)
-    if (onAvatarUpdate && result.avatarUrl) {
-      onAvatarUpdate(result.avatarUrl);
-    }
-  } catch (error: any) {
-    toast.error(error.message || "Failed to upload profile picture");
-    // Revert preview on error
-    if (profile?.avatar) {
-      setAvatarPreview(profile.avatar);
-    } else {
-      setAvatarPreview(null);
-    }
-  } finally {
-    setUploadingAvatar(false);
-  }
   };
-  
+
   // ✅ Helper function to resize image
   const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<File> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
 
-        // Calculate new dimensions
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error('Failed to create blob'));
-              return;
+          // Calculate new dimensions
+          if (width > height) {
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
             }
-            const resizedFile = new File([blob], file.name, {
-              type: file.type,
-              lastModified: Date.now(),
-            });
-            resolve(resizedFile);
-          },
-          file.type,
-          0.85 // 85% quality
-        );
+          } else {
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Failed to get canvas context"));
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error("Failed to create blob"));
+                return;
+              }
+              const resizedFile = new File([blob], file.name, {
+                type: file.type,
+                lastModified: Date.now(),
+              });
+              resolve(resizedFile);
+            },
+            file.type,
+            0.85 // 85% quality
+          );
+        };
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = e.target?.result as string;
       };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = e.target?.result as string;
-    };
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsDataURL(file);
-  });
-};
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handlePasswordChangeClick = () => {
     setPasswordModalOpen(true);
@@ -295,11 +292,11 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
 
   const handleConfirmPasswordChange = async () => {
     setConfirmPasswordModalOpen(false);
-    
+
     try {
       // Call change password endpoint which sends OTP
       await apiService.changePassword(passwordData.currentPassword, passwordData.newPassword);
-      
+
       // Open OTP modal
       setOtpModalOpen(true);
     } catch (error: any) {
@@ -310,7 +307,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
   const handleOTPVerify = async (otp: string) => {
     try {
       await apiService.verifyOTP(otp);
-      
+
       // Close OTP modal and show success
       setOtpModalOpen(false);
       setSuccessModalOpen(true);
@@ -327,7 +324,6 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
       toast.error(error.message || "Failed to resend OTP");
     }
   };
-
 
   if (loading) {
     return (
@@ -347,14 +343,14 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
 
   const fullName = `${profile.firstName} ${profile.lastName}`;
   const initials = `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase();
-  
+
   // Dynamic access level based on user type
   const getAccessLevel = () => {
     if (profile.isSuperAdmin) return "Super Admin";
     if (profile.isHead) return "Admin";
     return "Staff";
   };
-  
+
   // Dynamic role based on department and position
   const getRole = () => {
     if (profile.isSuperAdmin) return "Super Admin";
@@ -384,7 +380,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                 {initials}
               </AvatarFallback>
             </Avatar>
-            
+
             {uploadingAvatar && (
               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
                 <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -404,7 +400,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
               onClick={handleAvatarClick}
               disabled={uploadingAvatar}
               className="gap-2"
-              style={{ backgroundColor: '#1a3f1c' }}
+              style={{ backgroundColor: "#1a3f1c" }}
             >
               <Camera className="h-4 w-4" />
               Change Picture
@@ -413,9 +409,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
         </div>
 
         {/* Profile Form Card */}
-        <Card 
-          className="border shadow-sm bg-[#98ef9b]/50"
-        >
+        <Card className="border shadow-sm bg-[#98ef9b]/50">
           <CardContent className="p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Name */}
@@ -429,7 +423,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   onChange={(e) => setEditedData({ ...editedData, firstName: e.target.value })}
                   disabled={!isEditMode}
                   placeholder="#000000"
-                  className={`mt-1 border border-[#000000] ${!isEditMode ? 'bg-white text-[#000000]' : 'bg-white'}`}
+                  className={`mt-1 border border-[#000000] ${!isEditMode ? "bg-white text-[#000000]" : "bg-white"}`}
                 />
                 <Label htmlFor="lastName" className="text-sm font-medium text-gray-700 mt-2">
                   Last Name
@@ -439,7 +433,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   value={editedData.lastName}
                   onChange={(e) => setEditedData({ ...editedData, lastName: e.target.value })}
                   disabled={!isEditMode}
-                  className={`mt-1 border border-[#000000] ${!isEditMode ? 'bg-white' : 'bg-white'}`}
+                  className={`mt-1 border border-[#000000] ${!isEditMode ? "bg-white" : "bg-white"}`}
                 />
               </div>
 
@@ -466,7 +460,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                   value={editedData.phone}
                   onChange={(e) => setEditedData({ ...editedData, phone: e.target.value })}
                   disabled={!isEditMode}
-                  className={`mt-1 border border-[#000000] ${!isEditMode ? 'bg-white' : 'bg-white'}`}
+                  className={`mt-1 border border-[#000000] ${!isEditMode ? "bg-white" : "bg-white"}`}
                 />
               </div>
 
@@ -521,14 +515,14 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
               <Button
                 onClick={handleEditClick}
                 className="px-8 py-6 text-base"
-                style={{ backgroundColor: '#1a3f1c' }}
+                style={{ backgroundColor: "#1a3f1c" }}
               >
                 Edit Information
               </Button>
               <Button
                 onClick={handlePasswordChangeClick}
                 className="px-8 py-6 text-base"
-                style={{ backgroundColor: '#ffca3a', color: '#1a3f1c' }}
+                style={{ backgroundColor: "#ffca3a", color: "#1a3f1c" }}
               >
                 Change Password
               </Button>
@@ -546,7 +540,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                 onClick={handleSaveChanges}
                 disabled={saving}
                 className="px-8 py-6 text-base"
-                style={{ backgroundColor: '#1a3f1c' }}
+                style={{ backgroundColor: "#1a3f1c" }}
               >
                 {saving ? (
                   <>
@@ -554,7 +548,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
                     Saving...
                   </>
                 ) : (
-                  'Save Changes'
+                  "Save Changes"
                 )}
               </Button>
             </>
@@ -583,10 +577,7 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
         onResend={handleResendOTP}
       />
 
-      <PasswordChangeSuccessModal
-        open={successModalOpen}
-        onClose={handleSuccessClose}
-      />
+      <PasswordChangeSuccessModal open={successModalOpen} onClose={handleSuccessClose} />
     </div>
   );
 }

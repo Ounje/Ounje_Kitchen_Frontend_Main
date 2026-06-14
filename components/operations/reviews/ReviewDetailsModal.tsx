@@ -17,13 +17,7 @@ import ReviewList from "./ReviewList";
 
 // ── Star Tabs ──────────────────────────────────────────────
 
-function StarTabs({
-  active,
-  onChange,
-}: {
-  active: number;
-  onChange: (star: number) => void;
-}) {
+function StarTabs({ active, onChange }: { active: number; onChange: (star: number) => void }) {
   const stars = [5, 4, 3, 2, 1];
   return (
     <div className="flex gap-2 flex-wrap">
@@ -39,9 +33,7 @@ function StarTabs({
           }`}
         >
           {s} Star
-          <span className={active === s ? "text-yellow-300" : "text-yellow-500"}>
-            ★
-          </span>
+          <span className={active === s ? "text-yellow-300" : "text-yellow-500"}>★</span>
         </button>
       ))}
     </div>
@@ -94,13 +86,7 @@ function VendorInfoHeader({
       <div className="flex gap-4 flex-1">
         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
           {detail.photo ? (
-            <Image
-              src={detail.photo}
-              alt={detail.name}
-              fill
-              className="object-cover"
-              unoptimized
-            />
+            <Image src={detail.photo} alt={detail.name} fill className="object-cover" unoptimized />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl font-bold">
               {detail.name?.charAt(0)?.toUpperCase() || "?"}
@@ -157,13 +143,7 @@ function RiderInfoHeader({
       <div className="flex gap-4 flex-1">
         <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
           {detail.photo ? (
-            <Image
-              src={detail.photo}
-              alt={detail.name}
-              fill
-              className="object-cover"
-              unoptimized
-            />
+            <Image src={detail.photo} alt={detail.name} fill className="object-cover" unoptimized />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-2xl font-bold">
               {detail.name?.charAt(0)?.toUpperCase() || "?"}

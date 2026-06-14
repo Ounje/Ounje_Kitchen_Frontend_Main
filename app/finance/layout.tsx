@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/context/AuthContext';
-import { useRouteGuard } from '@/hooks/useRouteGuard';
-import FinanceSidebar from '@/components/layouts/finance/financeSidebar';
-import FinanceHeader from '@/components/layouts/finance/financeHeader';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/context/AuthContext";
+import { useRouteGuard } from "@/hooks/useRouteGuard";
+import FinanceSidebar from "@/components/layouts/finance/financeSidebar";
+import FinanceHeader from "@/components/layouts/finance/financeHeader";
 
 export default function FinanceLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, loading } = useAuth();
@@ -18,11 +18,11 @@ export default function FinanceLayout({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (loading) return;
     if (!isAuthenticated || !user) {
-      router.push('/');
+      router.push("/");
       return;
     }
-    if (user.department?.toLowerCase() !== 'finance' && !user.isSuperAdmin) {
-      router.push('/');
+    if (user.department?.toLowerCase() !== "finance" && !user.isSuperAdmin) {
+      router.push("/");
     }
   }, [loading, isAuthenticated, user, router]);
 
@@ -34,8 +34,8 @@ export default function FinanceLayout({ children }: { children: React.ReactNode 
       }
     };
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   if (loading) {
@@ -46,16 +46,13 @@ export default function FinanceLayout({ children }: { children: React.ReactNode 
     );
   }
 
-  if (!user || (user.department?.toLowerCase() !== 'finance' && !user.isSuperAdmin)) {
+  if (!user || (user.department?.toLowerCase() !== "finance" && !user.isSuperAdmin)) {
     return null;
   }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <FinanceSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+      <FinanceSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0">
         <FinanceHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />

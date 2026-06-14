@@ -12,7 +12,7 @@
 //     <div className="p-6 space-y-6">
 //       {/* Header with close button */}
 //       <div className="flex items-start justify-between gap-4">
-//         <h2 className="text-2xl font-bold text-foreground">Customer's Information</h2>
+//         <h2 className="text-2xl font-bold text-foreground">Customer&apos;s Information</h2>
 //         <button
 //           onClick={onClose}
 //           className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
@@ -121,7 +121,6 @@
 //   );
 // }
 
-
 // 'use client';
 
 // import { useState, useEffect } from 'react';
@@ -162,7 +161,7 @@
 //     <div className="p-6 space-y-6">
 //       {/* Header */}
 //       <div className="flex items-start justify-between gap-4">
-//         <h2 className="text-2xl font-bold text-foreground">Customer's Information</h2>
+//         <h2 className="text-2xl font-bold text-foreground">Customer&apos;s Information</h2>
 //         <button
 //           onClick={onClose}
 //           className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
@@ -343,13 +342,12 @@
 //   );
 // }
 
+"use client";
 
-'use client';
-
-import { useState, useEffect } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
-import { superAdminApi, type Customer } from '@/lib/api/api';
+import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { superAdminApi, type Customer } from "@/lib/api/api";
 
 interface CustomerModalContentProps {
   customer: Customer; // partial row data from the table
@@ -364,33 +362,46 @@ export function CustomerModalContent({ customer: rowData, onClose }: CustomerMod
     let cancelled = false;
     superAdminApi.customers
       .getById(rowData.id)
-      .then((res) => { if (!cancelled) setCustomer(res.data.customer); })
-      .catch(() => { if (!cancelled) toast.error('Could not load full customer details'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .then((res) => {
+        if (!cancelled) setCustomer(res.data.customer);
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Could not load full customer details");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [rowData.id]);
 
-  const phone   = customer.phoneNumber ?? customer.phone ?? '—';
-  const address = customer.address ?? '—';
-  const status  = customer.statusOfAccount ?? customer.status ?? '—';
+  const phone = customer.phoneNumber ?? customer.phone ?? "—";
+  const address = customer.address ?? "—";
+  const status = customer.statusOfAccount ?? customer.status ?? "—";
 
   // Derive total from breakdown if available, otherwise fall back to totalOrders
   const successful = customer.successfulOrders ?? 0;
-  const cancelled_ = customer.cancelledOrders  ?? 0;
-  const pending    = customer.pendingOrders     ?? 0;
-  const total      = (successful + cancelled_ + pending) || (customer.totalOrders ?? 0);
+  const cancelled_ = customer.cancelledOrders ?? 0;
+  const pending = customer.pendingOrders ?? 0;
+  const total = successful + cancelled_ + pending || (customer.totalOrders ?? 0);
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
-        <h2 className="text-2xl font-bold text-foreground">Customer's Information</h2>
+        <h2 className="text-2xl font-bold text-foreground">Customer&apos;s Information</h2>
         <button
           onClick={onClose}
           className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -422,9 +433,9 @@ export function CustomerModalContent({ customer: rowData, onClose }: CustomerMod
               <h4 className="font-bold text-foreground text-lg">Order number</h4>
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-2">
-                  <StatBadge color="bg-primary"  value={successful} label="successful orders" />
-                  <StatBadge color="bg-red-500"   value={cancelled_} label="cancelled orders"  />
-                  <StatBadge color="bg-accent"    value={pending}    label="pending orders"    />
+                  <StatBadge color="bg-primary" value={successful} label="successful orders" />
+                  <StatBadge color="bg-red-500" value={cancelled_} label="cancelled orders" />
+                  <StatBadge color="bg-accent" value={pending} label="pending orders" />
                 </div>
                 <DonutTotal total={total} />
               </div>
@@ -487,18 +498,20 @@ function ModalSkeleton() {
 function Avatar({
   name,
   src,
-  size = 'md',
-  className = '',
+  size = "md",
+  className = "",
 }: {
   name?: string;
   src?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   className?: string;
 }) {
   const dim =
-    size === 'lg' ? 'w-20 h-20 text-2xl' :
-    size === 'md' ? 'w-14 h-14 text-lg'  :
-                    'w-10 h-10 text-sm';
+    size === "lg"
+      ? "w-20 h-20 text-2xl"
+      : size === "md"
+        ? "w-14 h-14 text-lg"
+        : "w-10 h-10 text-sm";
   if (src) {
     return (
       <img
@@ -512,7 +525,7 @@ function Avatar({
     <div
       className={`${dim} rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center shrink-0 ${className}`}
     >
-      {(name ?? '?')[0]?.toUpperCase()}
+      {(name ?? "?")[0]?.toUpperCase()}
     </div>
   );
 }
@@ -520,11 +533,15 @@ function Avatar({
 function StatusBadge({ status }: { status: string }) {
   const s = status.toLowerCase();
   const cls =
-    s === 'active'      ? 'bg-green-100 text-green-700' :
-    s === 'suspended'   ? 'bg-red-100   text-red-700'   :
-    s === 'pending'     ? 'bg-yellow-100 text-yellow-700' :
-    s === 'deactivated' ? 'bg-gray-100  text-gray-600'  :
-                          'bg-primary   text-primary-foreground';
+    s === "active"
+      ? "bg-green-100 text-green-700"
+      : s === "suspended"
+        ? "bg-red-100   text-red-700"
+        : s === "pending"
+          ? "bg-yellow-100 text-yellow-700"
+          : s === "deactivated"
+            ? "bg-gray-100  text-gray-600"
+            : "bg-primary   text-primary-foreground";
   return (
     <span className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize shrink-0 ${cls}`}>
       {status}

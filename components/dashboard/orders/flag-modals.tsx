@@ -53,10 +53,9 @@
 //   );
 // }
 
+"use client";
 
-'use client';
-
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Flag Confirm Modal
@@ -92,7 +91,7 @@ export function FlagConfirmModal({ onConfirm, onCancel, loading = false }: FlagC
             disabled={loading}
             className="px-8 py-2 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 min-w-[72px] justify-center"
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : 'Yes'}
+            {loading ? <Loader2 size={16} className="animate-spin" /> : "Yes"}
           </button>
         </div>
       </div>

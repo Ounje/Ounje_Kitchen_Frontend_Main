@@ -7,21 +7,31 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Home, ShoppingCart, Users,
-  Star, UserCircle, LogOut, X, Tag, Radio, CreditCard, UserPlus, Zap,
+  Home,
+  ShoppingCart,
+  Users,
+  Star,
+  UserCircle,
+  LogOut,
+  X,
+  Tag,
+  Radio,
+  CreditCard,
+  UserPlus,
+  Zap,
 } from "lucide-react";
 
 const navigation = [
-  { name: "Home",           href: "/operations",               icon: Home         },
-  { name: "Orders",         href: "/operations/orders",        icon: ShoppingCart },
-  { name: "Users",          href: "/operations/users",         icon: Users        },
-  { name: "Account Setup",  href: "/operations/account-setup", icon: UserPlus    },
-  { name: "Review & Rating",href: "/operations/reviews",       icon: Star         },
-  { name: "Promo Codes",    href: "/operations/promos",        icon: Tag          },
-  { name: "Surge Pricing",  href: "/operations/surge",         icon: Zap          },
-  { name: "Transactions",   href: "/operations/transactions",  icon: CreditCard   },
-  { name: "Broadcasts",     href: "/operations/notifications", icon: Radio        },
-  { name: "Settings",       href: "/operations/settings",      icon: UserCircle   },
+  { name: "Home", href: "/operations", icon: Home },
+  { name: "Orders", href: "/operations/orders", icon: ShoppingCart },
+  { name: "Users", href: "/operations/users", icon: Users },
+  { name: "Account Setup", href: "/operations/account-setup", icon: UserPlus },
+  { name: "Review & Rating", href: "/operations/reviews", icon: Star },
+  { name: "Promo Codes", href: "/operations/promos", icon: Tag },
+  { name: "Surge Pricing", href: "/operations/surge", icon: Zap },
+  { name: "Transactions", href: "/operations/transactions", icon: CreditCard },
+  { name: "Broadcasts", href: "/operations/notifications", icon: Radio },
+  { name: "Settings", href: "/operations/settings", icon: UserCircle },
 ];
 
 interface OperationsSidebarProps {
@@ -33,10 +43,11 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  const initials = user?.firstName && user?.lastName
-    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-    : "OP";
-  const fullName  = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Operations";
+  const initials =
+    user?.firstName && user?.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+      : "OP";
+  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Operations";
   const avatarUrl = user?.avatar;
 
   return (
@@ -63,7 +74,11 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
         {/* ── Brand ─────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <img src="/images/mamput.png" alt="Ounje Logo" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+            <img
+              src="/images/mamput.png"
+              alt="Ounje Logo"
+              className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
+            />
             <span className="text-white font-black text-lg tracking-tight">Ounjefood</span>
           </div>
           <button
@@ -98,7 +113,9 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
         {/* ── Navigation ────────────────────────────────────────────────── */}
         <ScrollArea className="flex-1 min-h-0 sidebar-scroll">
           <div className="px-3 py-3">
-            <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest px-3 mb-2">Menu</p>
+            <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest px-3 mb-2">
+              Menu
+            </p>
             <nav className="flex flex-col gap-0.5">
               {navigation.map((item) => {
                 const Icon = item.icon;
@@ -110,20 +127,25 @@ export default function OperationsSidebar({ isOpen, onClose }: OperationsSidebar
                   <Link
                     key={item.name}
                     href={item.href}
-                    onClick={() => { if (window.innerWidth < 1024) onClose(); }}
+                    onClick={() => {
+                      if (window.innerWidth < 1024) onClose();
+                    }}
                     className={`
                       relative flex items-center gap-3 px-3 py-3 rounded-xl
                       text-sm font-semibold transition-all duration-300 group overflow-hidden
-                      ${isActive
-                        ? "bg-gradient-to-r from-[#ffca3a]/90 to-[#ffca3a] text-[#1a3f1c] shadow-[0_4px_12px_rgba(255,202,58,0.3)] hover-lift"
-                        : "text-white/60 hover:text-white hover:bg-white/10"
+                      ${
+                        isActive
+                          ? "bg-gradient-to-r from-[#ffca3a]/90 to-[#ffca3a] text-[#1a3f1c] shadow-[0_4px_12px_rgba(255,202,58,0.3)] hover-lift"
+                          : "text-white/60 hover:text-white hover:bg-white/10"
                       }
                     `}
                   >
                     {isActive && (
                       <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#1a3f1c]/30" />
                     )}
-                    <Icon className={`h-[18px] w-[18px] flex-shrink-0 transition-transform duration-300 ${isActive ? "text-[#1a3f1c] scale-110" : "text-white/50 group-hover:text-white/80 group-hover:scale-110"}`} />
+                    <Icon
+                      className={`h-[18px] w-[18px] flex-shrink-0 transition-transform duration-300 ${isActive ? "text-[#1a3f1c] scale-110" : "text-white/50 group-hover:text-white/80 group-hover:scale-110"}`}
+                    />
                     <span className="truncate tracking-wide">{item.name}</span>
                   </Link>
                 );

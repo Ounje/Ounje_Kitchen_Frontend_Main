@@ -1,19 +1,25 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRiders, useTopPerformers, useSuspendRider, useActivateRider, useDeleteRider } from '@/hooks/useRiders';
-import { TopChart, type TopChartEntry } from '@/components/operations/TopChart';
-import { FiltersBar, type FilterValues } from '@/components/operations/riders/FiltersBar';
-import { RidersTable } from '@/components/operations/riders/RidersTable';
-import { RidersTableSkeleton } from '@/components/operations/riders/SkeletonLoaders';
-import { ConfirmModal, SuccessModal } from '@/components/operations/riders/ActionModals';
-import Pagination from '@/components/Pagination';
-import type { RiderFilters } from '@/lib/api/services/rider.service';
-import { riderService } from '@/lib/api/services/rider.service';
-import { downloadCSV } from '@/lib/utils/exportCSV';
-import { Download, Loader2, Bike } from 'lucide-react';
-import { formatNigerianPhone } from '@/lib/utils/formatPhone';
-import { toast } from 'sonner';
+import { useState } from "react";
+import {
+  useRiders,
+  useTopPerformers,
+  useSuspendRider,
+  useActivateRider,
+  useDeleteRider,
+} from "@/hooks/useRiders";
+import { TopChart, type TopChartEntry } from "@/components/operations/TopChart";
+import { FiltersBar, type FilterValues } from "@/components/operations/riders/FiltersBar";
+import { RidersTable } from "@/components/operations/riders/RidersTable";
+import { RidersTableSkeleton } from "@/components/operations/riders/SkeletonLoaders";
+import { ConfirmModal, SuccessModal } from "@/components/operations/riders/ActionModals";
+import Pagination from "@/components/Pagination";
+import type { RiderFilters } from "@/lib/api/services/rider.service";
+import { riderService } from "@/lib/api/services/rider.service";
+import { downloadCSV } from "@/lib/utils/exportCSV";
+import { Download, Loader2, Bike } from "lucide-react";
+import { formatNigerianPhone } from "@/lib/utils/formatPhone";
+import { toast } from "sonner";
 
 export default function RidersPage() {
   const [filters, setFilters] = useState<RiderFilters>({ page: 1, limit: 7 });
@@ -21,10 +27,22 @@ export default function RidersPage() {
   const [exporting, setExporting] = useState(false);
 
   // Action modal state
-  const [suspendModal, setSuspendModal] = useState<{ isOpen: boolean; riderId: string | null }>({ isOpen: false, riderId: null });
-  const [activateModal, setActivateModal] = useState<{ isOpen: boolean; riderId: string | null }>({ isOpen: false, riderId: null });
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; riderId: string | null }>({ isOpen: false, riderId: null });
-  const [successModal, setSuccessModal] = useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: '' });
+  const [suspendModal, setSuspendModal] = useState<{ isOpen: boolean; riderId: string | null }>({
+    isOpen: false,
+    riderId: null,
+  });
+  const [activateModal, setActivateModal] = useState<{ isOpen: boolean; riderId: string | null }>({
+    isOpen: false,
+    riderId: null,
+  });
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; riderId: string | null }>({
+    isOpen: false,
+    riderId: null,
+  });
+  const [successModal, setSuccessModal] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  });
 
   // Data
   const { data: topPerformers, isLoading: topPerformersLoading } = useTopPerformers();
@@ -39,8 +57,8 @@ export default function RidersPage() {
   const handleSearch = (filterValues: FilterValues) => {
     setFilters({
       name: filterValues.name || undefined,
-      status: (filterValues.status || undefined) as RiderFilters['status'],
-      modeOfDelivery: (filterValues.modeOfDelivery || undefined) as RiderFilters['modeOfDelivery'],
+      status: (filterValues.status || undefined) as RiderFilters["status"],
+      modeOfDelivery: (filterValues.modeOfDelivery || undefined) as RiderFilters["modeOfDelivery"],
       page: 1,
       limit: pageSize,
     });
@@ -68,17 +86,17 @@ export default function RidersPage() {
         Name: r.name,
         Phone: formatNigerianPhone(r.phone),
         Zone: r.zone,
-        'Account Status': r.accountStatus,
-        'Rider Status': r.riderStatus,
-        'Mode of Delivery': r.modeOfDelivery,
-        'Successful Deliveries': r.successfulDeliveries,
-        'Cancelled Deliveries': r.cancelledDeliveries,
-        'Total Deliveries': r.totalDeliveries,
+        "Account Status": r.accountStatus,
+        "Rider Status": r.riderStatus,
+        "Mode of Delivery": r.modeOfDelivery,
+        "Successful Deliveries": r.successfulDeliveries,
+        "Cancelled Deliveries": r.cancelledDeliveries,
+        "Total Deliveries": r.totalDeliveries,
       }));
       downloadCSV(rows, `riders_${new Date().toISOString().slice(0, 10)}`);
-      toast.success('Riders exported successfully');
+      toast.success("Riders exported successfully");
     } catch (err: any) {
-      toast.error(err.message || 'Export failed');
+      toast.error(err.message || "Export failed");
     } finally {
       setExporting(false);
     }
@@ -96,14 +114,14 @@ export default function RidersPage() {
     if (!activateModal.riderId) return;
     await activateMutation.mutateAsync(activateModal.riderId);
     setActivateModal({ isOpen: false, riderId: null });
-    setSuccessModal({ isOpen: true, message: 'The account has been activated successfully!' });
+    setSuccessModal({ isOpen: true, message: "The account has been activated successfully!" });
   };
 
   const confirmDelete = async () => {
     if (!deleteModal.riderId) return;
     await deleteMutation.mutateAsync(deleteModal.riderId);
     setDeleteModal({ isOpen: false, riderId: null });
-    setSuccessModal({ isOpen: true, message: 'The account has been successfully deleted!' });
+    setSuccessModal({ isOpen: true, message: "The account has been successfully deleted!" });
   };
 
   const currentPage = filters.page ?? 1;
@@ -111,93 +129,111 @@ export default function RidersPage() {
 
   return (
     <div className="space-y-5">
-        {/* Page Title */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1a3f1c]/10 flex items-center justify-center shrink-0">
-              <Bike className="h-5 w-5 text-[#1a3f1c]" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-gray-900">Riders</h1>
-              {ridersData?.total != null && <p className="text-xs text-gray-400">{ridersData.total.toLocaleString()} total riders</p>}
-            </div>
+      {/* Page Title */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#1a3f1c]/10 flex items-center justify-center shrink-0">
+            <Bike className="h-5 w-5 text-[#1a3f1c]" />
           </div>
-          <button type="button" onClick={handleExportCSV} disabled={exporting}
-            className="inline-flex items-center gap-2 h-9 px-4 bg-[#1a3f1c] text-white text-sm font-semibold rounded-lg hover:bg-[#163318] active:scale-[0.98] transition-all disabled:opacity-50 shrink-0">
-            {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-            {exporting ? "Exporting…" : "Export CSV"}
-          </button>
+          <div>
+            <h1 className="text-xl font-black text-gray-900">Riders</h1>
+            {ridersData?.total != null && (
+              <p className="text-xs text-gray-400">
+                {ridersData.total.toLocaleString()} total riders
+              </p>
+            )}
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={handleExportCSV}
+          disabled={exporting}
+          className="inline-flex items-center gap-2 h-9 px-4 bg-[#1a3f1c] text-white text-sm font-semibold rounded-lg hover:bg-[#163318] active:scale-[0.98] transition-all disabled:opacity-50 shrink-0"
+        >
+          {exporting ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Download className="w-3.5 h-3.5" />
+          )}
+          {exporting ? "Exporting…" : "Export CSV"}
+        </button>
+      </div>
 
-        {/* Top Chart */}
-        <TopChart
-          title="Rider"
-          statLabel="Deliveries"
-          loading={topPerformersLoading}
-          items={(topPerformers ?? []).map((r): TopChartEntry => ({
-            id: r.id, name: r.name, avatar: r.photo, phone: r.phone,
-            location: r.location, stat: r.completedOrders, rank: r.rank,
-          }))}
-        />
-
-        {/* Filters */}
-        <FiltersBar onSearch={handleSearch} onReset={handleReset} />
-
-        {/* Table + Pagination */}
-        {ridersLoading ? (
-          <RidersTableSkeleton />
-        ) : ridersData?.riders && ridersData.riders.length > 0 ? (
-          <div className="modern-table-container">
-            <RidersTable
-              riders={ridersData.riders}
-              currentPage={currentPage}
-              pageLimit={pageSize}
-              onSuspend={(id) => setSuspendModal({ isOpen: true, riderId: id })}
-              onActivate={(id) => setActivateModal({ isOpen: true, riderId: id })}
-              onDelete={(id) => setDeleteModal({ isOpen: true, riderId: id })}
-            />
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              pageSize={pageSize}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-            />
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
-            <p className="text-gray-500">No riders found</p>
-          </div>
+      {/* Top Chart */}
+      <TopChart
+        title="Rider"
+        statLabel="Deliveries"
+        loading={topPerformersLoading}
+        items={(topPerformers ?? []).map(
+          (r): TopChartEntry => ({
+            id: r.id,
+            name: r.name,
+            avatar: r.photo,
+            phone: r.phone,
+            location: r.location,
+            stat: r.completedOrders,
+            rank: r.rank,
+          })
         )}
+      />
 
-        {/* Modals */}
-        <ConfirmModal
-          isOpen={suspendModal.isOpen}
-          onClose={() => setSuspendModal({ isOpen: false, riderId: null })}
-          onConfirm={confirmSuspend}
-          title="Are you sure, you want to suspend this rider?"
-          loading={suspendMutation.isPending}
-        />
-        <ConfirmModal
-          isOpen={activateModal.isOpen}
-          onClose={() => setActivateModal({ isOpen: false, riderId: null })}
-          onConfirm={confirmActivate}
-          title="Are you sure, you want to activate this rider?"
-          loading={activateMutation.isPending}
-        />
-        <ConfirmModal
-          isOpen={deleteModal.isOpen}
-          onClose={() => setDeleteModal({ isOpen: false, riderId: null })}
-          onConfirm={confirmDelete}
-          title="Are you sure, you want to delete this account?"
-          loading={deleteMutation.isPending}
-        />
-        <SuccessModal
-          isOpen={successModal.isOpen}
-          title={successModal.message}
-          onClose={() => setSuccessModal({ isOpen: false, message: '' })}
-        />
+      {/* Filters */}
+      <FiltersBar onSearch={handleSearch} onReset={handleReset} />
 
+      {/* Table + Pagination */}
+      {ridersLoading ? (
+        <RidersTableSkeleton />
+      ) : ridersData?.riders && ridersData.riders.length > 0 ? (
+        <div className="modern-table-container">
+          <RidersTable
+            riders={ridersData.riders}
+            currentPage={currentPage}
+            pageLimit={pageSize}
+            onSuspend={(id) => setSuspendModal({ isOpen: true, riderId: id })}
+            onActivate={(id) => setActivateModal({ isOpen: true, riderId: id })}
+            onDelete={(id) => setDeleteModal({ isOpen: true, riderId: id })}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
+          <p className="text-gray-500">No riders found</p>
+        </div>
+      )}
+
+      {/* Modals */}
+      <ConfirmModal
+        isOpen={suspendModal.isOpen}
+        onClose={() => setSuspendModal({ isOpen: false, riderId: null })}
+        onConfirm={confirmSuspend}
+        title="Are you sure, you want to suspend this rider?"
+        loading={suspendMutation.isPending}
+      />
+      <ConfirmModal
+        isOpen={activateModal.isOpen}
+        onClose={() => setActivateModal({ isOpen: false, riderId: null })}
+        onConfirm={confirmActivate}
+        title="Are you sure, you want to activate this rider?"
+        loading={activateMutation.isPending}
+      />
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, riderId: null })}
+        onConfirm={confirmDelete}
+        title="Are you sure, you want to delete this account?"
+        loading={deleteMutation.isPending}
+      />
+      <SuccessModal
+        isOpen={successModal.isOpen}
+        title={successModal.message}
+        onClose={() => setSuccessModal({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }

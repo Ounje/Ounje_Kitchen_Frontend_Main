@@ -75,8 +75,8 @@ export default function ReviewsPage() {
           type === "vendor"
             ? await operationsService.getVendorReviews(queryParams)
             : type === "rider"
-            ? await operationsService.getRiderReviews(queryParams)
-            : await operationsService.getAllReviews(queryParams)
+              ? await operationsService.getRiderReviews(queryParams)
+              : await operationsService.getAllReviews(queryParams)
         ) as ReviewsApiResponse<VendorRow | RiderRow | AllReviewRow>;
 
         setRows(Array.isArray(res.data) ? res.data : []);

@@ -67,15 +67,15 @@ export default function OTPVerificationModal({
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     // Handle backspace
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 6);
-    
+    const pastedData = e.clipboardData.getData("text").slice(0, 6);
+
     if (!/^\d+$/.test(pastedData)) {
       toast.error("Please paste numbers only");
       return;
@@ -93,8 +93,8 @@ export default function OTPVerificationModal({
   };
 
   const handleVerify = async () => {
-    const otpString = otp.join('');
-    
+    const otpString = otp.join("");
+
     if (otpString.length !== 6) {
       toast.error("Please enter all 6 digits");
       return;
@@ -124,17 +124,14 @@ export default function OTPVerificationModal({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const isComplete = otp.every(digit => digit !== '');
+  const isComplete = otp.every((digit) => digit !== "");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="sm:max-w-md"
-        style={{ backgroundColor: '#e8f7e8' }}
-      >
+      <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e8f7e8" }}>
         {/* Close button */}
         <button
           onClick={() => onOpenChange(false)}
@@ -162,7 +159,9 @@ export default function OTPVerificationModal({
               {otp.map((digit, index) => (
                 <Input
                   key={index}
-                  ref={(el) => { inputRefs.current[index] = el; }}
+                  ref={(el) => {
+                    inputRefs.current[index] = el;
+                  }}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
@@ -177,22 +176,18 @@ export default function OTPVerificationModal({
 
           {/* Timer */}
           <div className="text-center">
-            <p className="text-sm text-gray-700">
-              {formatTime(timer)} seconds
-            </p>
+            <p className="text-sm text-gray-700">{formatTime(timer)} seconds</p>
           </div>
 
           {/* Resend Link */}
           <div className="text-center">
             <p className="text-sm text-gray-700">
-              Didn't get any code?{' '}
+              {"Didn't get any code?"}{" "}
               <button
                 onClick={handleResend}
                 disabled={timer > 0}
                 className={`font-semibold ${
-                  timer > 0 
-                    ? 'text-gray-400 cursor-not-allowed' 
-                    : 'text-blue-600 hover:underline'
+                  timer > 0 ? "text-gray-400 cursor-not-allowed" : "text-blue-600 hover:underline"
                 }`}
               >
                 Click here.
@@ -206,8 +201,8 @@ export default function OTPVerificationModal({
             disabled={!isComplete || verifying}
             className="w-full py-6 text-base"
             style={{
-              backgroundColor: isComplete ? '#1a3f1c' : '#d1d5db',
-              color: isComplete ? 'white' : '#6b7280',
+              backgroundColor: isComplete ? "#1a3f1c" : "#d1d5db",
+              color: isComplete ? "white" : "#6b7280",
             }}
           >
             {verifying ? (
@@ -216,7 +211,7 @@ export default function OTPVerificationModal({
                 Verifying...
               </>
             ) : (
-              'Verify'
+              "Verify"
             )}
           </Button>
         </div>

@@ -13,8 +13,8 @@ export interface TopChartEntry {
 }
 
 interface TopChartProps {
-  title: string;       // "Customer" | "Vendor" | "Rider"
-  statLabel: string;   // "Orders" | "Completed" | "Deliveries"
+  title: string; // "Customer" | "Vendor" | "Rider"
+  statLabel: string; // "Orders" | "Completed" | "Deliveries"
   items: TopChartEntry[];
   loading?: boolean;
 }
@@ -26,7 +26,12 @@ const RANK = {
 };
 
 function initials(name: string) {
-  return (name || "?").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  return (name || "?")
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 export function TopChart({ title, statLabel, items, loading = false }: TopChartProps) {
@@ -81,9 +86,7 @@ export function TopChart({ title, statLabel, items, loading = false }: TopChartP
 
                 <div className="min-w-0">
                   <p className="font-bold text-sm text-white truncate leading-tight">{item.name}</p>
-                  {item.phone && (
-                    <p className="text-[11px] text-white/80 truncate">{item.phone}</p>
-                  )}
+                  {item.phone && <p className="text-[11px] text-white/80 truncate">{item.phone}</p>}
                   {item.location && (
                     <p className="text-[11px] text-white/70 truncate">{item.location}</p>
                   )}

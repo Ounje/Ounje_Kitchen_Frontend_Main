@@ -12,28 +12,53 @@ export function TopPerformersSkeleton() {
 }
 
 export function RidersTableSkeleton() {
-  const thCls = 'px-4 py-3 text-left font-medium text-sm whitespace-nowrap';
+  const thCls = "px-4 py-3 text-left font-medium text-sm whitespace-nowrap";
   return (
     <div className="bg-white rounded-xl overflow-hidden border border-gray-200 w-full">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px]">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
-              {['S/N', 'Name', 'Phone Number', 'Zones', 'Account Status', 'Rider Status', 'Mode of Delivery', 'Actions'].map((h) => (
-                <th key={h} className={`${thCls} text-[#1a3f1c]`}>{h}</th>
+              {[
+                "S/N",
+                "Name",
+                "Phone Number",
+                "Zones",
+                "Account Status",
+                "Rider Status",
+                "Mode of Delivery",
+                "Actions",
+              ].map((h) => (
+                <th key={h} className={`${thCls} text-[#1a3f1c]`}>
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {[...Array(8)].map((_, i) => (
               <tr key={i} className="border-b border-gray-100">
-                <td className="px-4 py-4"><div className="h-4 w-6 bg-gray-200 rounded animate-pulse" /></td>
-                <td className="px-4 py-4"><div className="h-4 w-32 bg-gray-200 rounded animate-pulse" /></td>
-                <td className="px-4 py-4"><div className="h-4 w-28 bg-gray-200 rounded animate-pulse" /></td>
-                <td className="px-4 py-4"><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></td>
-                <td className="px-4 py-4"><div className="h-6 w-16 bg-gray-200 rounded animate-pulse" /></td>
-                <td className="px-4 py-4"><div className="h-6 w-14 bg-gray-200 rounded animate-pulse" /></td>
-                <td className="px-4 py-4"><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></td>
+                <td className="px-4 py-4">
+                  <div className="h-4 w-6 bg-gray-200 rounded animate-pulse" />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-6 w-16 bg-gray-200 rounded animate-pulse" />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-6 w-14 bg-gray-200 rounded animate-pulse" />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                </td>
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-2">
                     {[1, 2, 3].map((j) => (

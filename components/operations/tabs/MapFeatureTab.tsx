@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  GoogleMap,
-  useJsApiLoader,
-  DirectionsRenderer,
-  Marker,
-} from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from "@react-google-maps/api";
 import { io, Socket } from "socket.io-client";
 
 interface MapFeatureTabProps {
@@ -82,7 +77,7 @@ export default function MapFeatureTab({ order }: MapFeatureTabProps) {
         } else {
           setRouteError("Could not load route — check coordinates.");
         }
-      },
+      }
     );
   }, [isLoaded, vendorLat, vendorLng, customerLat, customerLng]);
 
@@ -106,9 +101,10 @@ export default function MapFeatureTab({ order }: MapFeatureTabProps) {
     };
   }, [riderId]);
 
-  const defaultCenter = vendorLat && vendorLng
-    ? { lat: Number(vendorLat), lng: Number(vendorLng) }
-    : { lat: 6.5244, lng: 3.3792 }; // Lagos fallback
+  const defaultCenter =
+    vendorLat && vendorLng
+      ? { lat: Number(vendorLat), lng: Number(vendorLng) }
+      : { lat: 6.5244, lng: 3.3792 }; // Lagos fallback
 
   if (loadError) {
     return (
@@ -174,18 +170,14 @@ export default function MapFeatureTab({ order }: MapFeatureTabProps) {
             </>
           )}
 
-          {riderPos && (
-            <Marker
-              position={riderPos}
-              icon={RIDER_ICON}
-              title="Rider (live)"
-            />
-          )}
+          {riderPos && <Marker position={riderPos} icon={RIDER_ICON} title="Rider (live)" />}
         </GoogleMap>
 
         {/* Live indicator */}
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 shadow border border-white/50 z-10">
-          <span className={`w-2 h-2 rounded-full ${riderPos ? "bg-green-500 animate-pulse" : "bg-gray-400"}`} />
+          <span
+            className={`w-2 h-2 rounded-full ${riderPos ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}
+          />
           <span className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]">
             {riderPos ? "Live Tracking" : riderId ? "Waiting for rider" : "No rider assigned"}
           </span>
@@ -205,11 +197,17 @@ function AddressCards({ order }: { order: any }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="p-4 bg-muted/50 rounded-xl border border-border shadow-sm">
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1">Pickup From</h3>
-        <p className="font-bold text-[#1a3f1c] text-sm leading-snug">{order.vendor?.address || "—"}</p>
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1">
+          Pickup From
+        </h3>
+        <p className="font-bold text-[#1a3f1c] text-sm leading-snug">
+          {order.vendor?.address || "—"}
+        </p>
       </div>
       <div className="p-4 bg-secondary rounded-xl border border-primary/10 shadow-sm">
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-1">Deliver To</h3>
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-1">
+          Deliver To
+        </h3>
         <p className="font-bold text-primary text-sm leading-snug">
           {order.deliveryAddress || order.customer?.address || "—"}
         </p>

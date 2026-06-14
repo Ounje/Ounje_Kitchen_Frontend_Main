@@ -33,8 +33,7 @@ export default function ReviewTypePage() {
   const params = useParams();
   const rawType = params?.type as string;
 
-  const type: ReviewType =
-    rawType === "vendor" || rawType === "rider" ? rawType : "rider";
+  const type: ReviewType = rawType === "vendor" || rawType === "rider" ? rawType : "rider";
 
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -134,9 +133,7 @@ export default function ReviewTypePage() {
       </Link>
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {capitalised} Reviews &amp; Rating
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900">{capitalised} Reviews &amp; Rating</h1>
         <span className="px-4 py-1.5 bg-[#e8f8e8] text-[#1A3F1C] text-sm font-bold rounded-full border border-[#98EF9B]">
           {capitalised}
         </span>

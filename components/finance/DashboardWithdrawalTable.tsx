@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Info, Trash2 } from 'lucide-react';
-import type { DashboardWithdrawalRow } from '@/lib/api/services/finance.service';
+import { Info, Trash2 } from "lucide-react";
+import type { DashboardWithdrawalRow } from "@/lib/api/services/finance.service";
 
 interface Props {
   rows: DashboardWithdrawalRow[];
@@ -9,7 +9,7 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-function StatusBadge({ status }: { status: 'Successful' | 'Failed' }) {
+function StatusBadge({ status }: { status: "Successful" | "Failed" }) {
   return (
     <span
       className={`px-3 py-1 rounded text-xs font-semibold text-white whitespace-nowrap ${status === "Successful" ? "bg-[#1a3f1c]" : "bg-red-600"}`}
@@ -20,7 +20,7 @@ function StatusBadge({ status }: { status: 'Successful' | 'Failed' }) {
 }
 
 export function DashboardWithdrawalTable({ rows, onInfo, onDelete }: Props) {
-  const thCls = 'px-4 py-3 text-sm font-semibold text-left whitespace-nowrap';
+  const thCls = "px-4 py-3 text-sm font-semibold text-left whitespace-nowrap";
 
   return (
     <div className="bg-surface border border-border rounded-xl w-full">
@@ -28,11 +28,11 @@ export function DashboardWithdrawalTable({ rows, onInfo, onDelete }: Props) {
         <table className="w-full min-w-[600px]">
           <thead>
             <tr className="bg-[#98ef9b] dark:bg-[#1a3f1c]/20 border-b border-border">
-              <th className={`${thCls} text-foreground/90`} >User</th>
-              <th className={`${thCls} text-foreground/90`} >Role</th>
-              <th className={`${thCls} text-foreground/90`} >Process</th>
-              <th className={`${thCls} text-foreground/90`} >Status</th>
-              <th className={`${thCls} text-foreground/90`} >Actions</th>
+              <th className={`${thCls} text-foreground/90`}>User</th>
+              <th className={`${thCls} text-foreground/90`}>Role</th>
+              <th className={`${thCls} text-foreground/90`}>Process</th>
+              <th className={`${thCls} text-foreground/90`}>Status</th>
+              <th className={`${thCls} text-foreground/90`}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -43,17 +43,24 @@ export function DashboardWithdrawalTable({ rows, onInfo, onDelete }: Props) {
                 </td>
               </tr>
             ) : (
-              rows.map(row => (
-                <tr key={row.id} className="border-b border-border hover:bg-surface-secondary transition-colors">
+              rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b border-border hover:bg-surface-secondary transition-colors"
+                >
                   {/* User */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
                         {row.userAvatar ? (
-                          <img src={row.userAvatar} alt={row.userName} className="w-full h-full object-cover" />
+                          <img
+                            src={row.userAvatar}
+                            alt={row.userName}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-500">
-                            {(row.userName ?? 'U')[0].toUpperCase()}
+                            {(row.userName ?? "U")[0].toUpperCase()}
                           </div>
                         )}
                       </div>
@@ -68,11 +75,9 @@ export function DashboardWithdrawalTable({ rows, onInfo, onDelete }: Props) {
 
                   {/* Process */}
                   <td className="px-4 py-3">
-                    <span
-                      className="inline-block px-3 py-1.5 rounded text-xs font-semibold text-center leading-tight bg-[#FFCA3A] dark:bg-yellow-500/20 text-[#1A3F1C] dark:text-yellow-400"
-                    >
-                      Request For Withdrawal<br />
-                      ₦{(row.amount ?? 0).toLocaleString()}
+                    <span className="inline-block px-3 py-1.5 rounded text-xs font-semibold text-center leading-tight bg-[#FFCA3A] dark:bg-yellow-500/20 text-[#1A3F1C] dark:text-yellow-400">
+                      Request For Withdrawal
+                      <br />₦{(row.amount ?? 0).toLocaleString()}
                     </span>
                   </td>
 

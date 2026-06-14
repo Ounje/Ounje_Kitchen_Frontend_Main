@@ -25,7 +25,7 @@ export default function HomePage() {
       router.push("/admin");
     } else {
       const dept = user.department?.toLowerCase();
-      
+
       switch (dept) {
         case "it":
           router.push("/it");

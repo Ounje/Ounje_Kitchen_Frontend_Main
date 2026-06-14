@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { X } from 'lucide-react';
+import { X } from "lucide-react";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -10,7 +10,13 @@ interface ConfirmModalProps {
   loading?: boolean;
 }
 
-export function ConfirmModal({ isOpen, onClose, onConfirm, title, loading = false }: ConfirmModalProps) {
+export function ConfirmModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  loading = false,
+}: ConfirmModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -32,7 +38,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, title, loading = fals
             disabled={loading}
             className="flex-1 py-2.5 sm:py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 text-sm sm:text-base bg-[#98ef9b]/50 text-[#1a3f1c]"
           >
-            {loading ? 'Processing...' : 'Yes'}
+            {loading ? "Processing..." : "Yes"}
           </button>
         </div>
       </div>

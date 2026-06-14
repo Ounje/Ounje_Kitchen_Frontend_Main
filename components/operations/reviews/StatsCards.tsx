@@ -62,7 +62,9 @@ export default function StatsCards({ stats, loading }: StatsCardsProps) {
   if (loading) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+        {[...Array(4)].map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
       </div>
     );
   }
@@ -75,10 +77,7 @@ export default function StatsCards({ stats, loading }: StatsCardsProps) {
         const isLast = card.key === "badRating";
 
         return (
-          <div
-            key={card.key}
-            className="bg-[#e8f8e8] rounded-xl px-4 py-4 flex flex-col min-w-0"
-          >
+          <div key={card.key} className="bg-[#e8f8e8] rounded-xl px-4 py-4 flex flex-col min-w-0">
             <div className="flex items-start justify-between mb-1">
               <div className="flex items-center gap-2">
                 <span
@@ -88,9 +87,7 @@ export default function StatsCards({ stats, loading }: StatsCardsProps) {
                 >
                   <Icon size={14} className="text-white" />
                 </span>
-                <span className="text-xl font-bold text-gray-900">
-                  {value.toLocaleString()}
-                </span>
+                <span className="text-xl font-bold text-gray-900">{value.toLocaleString()}</span>
               </div>
               <BarChart2 size={18} className="text-gray-500 mt-1 flex-shrink-0" />
             </div>

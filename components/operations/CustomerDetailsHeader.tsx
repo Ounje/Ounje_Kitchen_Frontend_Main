@@ -18,7 +18,13 @@ export function CustomerDetailsHeader({ customer }: CustomerDetailsHeaderProps) 
         <div className="shrink-0">
           {customer.avatar ? (
             <div className="relative w-16 h-16 rounded-xl overflow-hidden ring-2 ring-gray-100">
-              <Image src={customer.avatar} alt={customer.name} fill className="object-cover" unoptimized />
+              <Image
+                src={customer.avatar}
+                alt={customer.name}
+                fill
+                className="object-cover"
+                unoptimized
+              />
             </div>
           ) : (
             <div className="w-16 h-16 rounded-xl bg-[#98ef9b]/40 flex items-center justify-center text-xl font-bold text-[#1a3f1c]">

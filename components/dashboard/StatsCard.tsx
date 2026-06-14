@@ -22,7 +22,9 @@ export default function StatsCard({ icon: Icon, value, label }: StatsCardProps) 
           </div>
         </div>
         <div>
-          <h3 className="text-3xl font-black text-foreground tracking-tight leading-none mb-1.5">{value}</h3>
+          <h3 className="text-3xl font-black text-foreground tracking-tight leading-none mb-1.5">
+            {value}
+          </h3>
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
         </div>
       </CardContent>

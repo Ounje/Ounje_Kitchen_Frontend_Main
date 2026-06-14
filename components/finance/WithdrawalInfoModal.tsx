@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { X } from 'lucide-react';
-import { ModalWatermark } from './ModalWatermark';
-import type { WithdrawalDetail } from '@/lib/api/services/finance.service';
+import { X } from "lucide-react";
+import { ModalWatermark } from "./ModalWatermark";
+import type { WithdrawalDetail } from "@/lib/api/services/finance.service";
 
 interface Props {
   isOpen: boolean;
@@ -12,12 +12,11 @@ interface Props {
   onDownload?: () => void;
 }
 
-function StatusBadge({ status }: { status: 'PASS' | 'FAIL' | 'PENDING' }) {
-  const bg = status === 'PASS' ? 'bg-[#1a3f1c]' : status === 'PENDING' ? 'bg-yellow-500' : 'bg-red-600';
+function StatusBadge({ status }: { status: "PASS" | "FAIL" | "PENDING" }) {
+  const bg =
+    status === "PASS" ? "bg-[#1a3f1c]" : status === "PENDING" ? "bg-yellow-500" : "bg-red-600";
   return (
-    <span className={`px-2.5 py-0.5 rounded text-xs font-bold text-white ${bg}`}>
-      {status}
-    </span>
+    <span className={`px-2.5 py-0.5 rounded text-xs font-bold text-white ${bg}`}>{status}</span>
   );
 }
 
@@ -25,7 +24,10 @@ export function WithdrawalInfoModal({ isOpen, onClose, detail, loading, onDownlo
   if (!isOpen) return null;
 
   const handleDownload = () => {
-    if (onDownload) { onDownload(); return; }
+    if (onDownload) {
+      onDownload();
+      return;
+    }
     window.print();
   };
 
@@ -40,7 +42,7 @@ export function WithdrawalInfoModal({ isOpen, onClose, detail, loading, onDownlo
         {/* Header */}
         <div className="relative flex items-center justify-between px-6 py-4 border-b border-[#98EF9B]/50 dark:border-border">
           <h2 className="font-bold text-base sm:text-lg text-center flex-1 pr-8 break-all text-[#1A3F1C] dark:text-primary">
-            {detail?.withdrawalId ?? '—'}
+            {detail?.withdrawalId ?? "—"}
           </h2>
           <button
             onClick={onClose}
@@ -59,25 +61,33 @@ export function WithdrawalInfoModal({ isOpen, onClose, detail, loading, onDownlo
             <>
               {/* Personal Details */}
               <div>
-                <p className="text-sm font-semibold mb-2 text-[#1A3F1C] dark:text-primary/90">Personal Details</p>
-                <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-[#98EF9B] dark:bg-primary/20"
-                >
-                  <span className="text-[#1A3F1C] dark:text-primary/90"><b>Vendor:</b> {detail.vendorName}</span>
-                  <span className="text-[#1A3F1C] dark:text-primary/90"><b>Bank:</b> {detail.bankName}</span>
-                  <span className="text-[#1A3F1C] dark:text-primary/90"><b>Account Number:</b> {detail.accountNumber}</span>
+                <p className="text-sm font-semibold mb-2 text-[#1A3F1C] dark:text-primary/90">
+                  Personal Details
+                </p>
+                <div className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-[#98EF9B] dark:bg-primary/20">
+                  <span className="text-[#1A3F1C] dark:text-primary/90">
+                    <b>Vendor:</b> {detail.vendorName}
+                  </span>
+                  <span className="text-[#1A3F1C] dark:text-primary/90">
+                    <b>Bank:</b> {detail.bankName}
+                  </span>
+                  <span className="text-[#1A3F1C] dark:text-primary/90">
+                    <b>Account Number:</b> {detail.accountNumber}
+                  </span>
                 </div>
               </div>
 
               {/* Transaction Details */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold underline text-blue-600 dark:text-blue-400 cursor-pointer">Transaction Details</p>
-                  <p className="text-sm text-[#1A3F1C] dark:text-primary/90">Payment Method: {detail.paymentMethod}</p>
+                  <p className="text-sm font-semibold underline text-blue-600 dark:text-blue-400 cursor-pointer">
+                    Transaction Details
+                  </p>
+                  <p className="text-sm text-[#1A3F1C] dark:text-primary/90">
+                    Payment Method: {detail.paymentMethod}
+                  </p>
                 </div>
-                <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-[#98EF9B] dark:bg-primary/20"
-                >
+                <div className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-[#98EF9B] dark:bg-primary/20">
                   <span className="break-all text-[#1A3F1C] dark:text-primary/90">
                     <b>Withdrawal ID:</b> {detail.withdrawalId}
                   </span>
@@ -92,11 +102,11 @@ export function WithdrawalInfoModal({ isOpen, onClose, detail, loading, onDownlo
 
               {/* Note */}
               <div>
-                <p className="text-sm font-semibold mb-2 text-[#1A3F1C] dark:text-primary/90">Note</p>
-                <div
-                  className="rounded-lg px-4 py-3 text-sm bg-[#98EF9B] dark:bg-primary/20 text-[#1A3F1C] dark:text-primary/90"
-                >
-                  {detail.note || '—'}
+                <p className="text-sm font-semibold mb-2 text-[#1A3F1C] dark:text-primary/90">
+                  Note
+                </p>
+                <div className="rounded-lg px-4 py-3 text-sm bg-[#98EF9B] dark:bg-primary/20 text-[#1A3F1C] dark:text-primary/90">
+                  {detail.note || "—"}
                 </div>
               </div>
             </>

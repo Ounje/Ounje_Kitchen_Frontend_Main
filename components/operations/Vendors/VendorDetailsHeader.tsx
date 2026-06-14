@@ -21,7 +21,9 @@ function StarRating({ rating }: { rating: number }) {
           className={`w-3.5 h-3.5 ${i <= Math.round(rating) ? "fill-[#ffca3a] text-[#ffca3a]" : "text-gray-200"}`}
         />
       ))}
-      <span className="ml-1 text-xs text-gray-500 tabular-nums">{rating > 0 ? rating.toFixed(1) : "No ratings"}</span>
+      <span className="ml-1 text-xs text-gray-500 tabular-nums">
+        {rating > 0 ? rating.toFixed(1) : "No ratings"}
+      </span>
     </div>
   );
 }
@@ -49,7 +51,11 @@ export function VendorDetailsHeader({ vendor }: VendorDetailsHeaderProps) {
         {/* Avatar */}
         <div className="shrink-0">
           {vendor.avatar ? (
-            <img src={vendor.avatar} alt={vendor.name} className="w-16 h-16 rounded-xl object-cover ring-2 ring-gray-100" />
+            <img
+              src={vendor.avatar}
+              alt={vendor.name}
+              className="w-16 h-16 rounded-xl object-cover ring-2 ring-gray-100"
+            />
           ) : (
             <div className="w-16 h-16 rounded-xl bg-[#98ef9b]/40 flex items-center justify-center text-xl font-bold text-[#1a3f1c]">
               {(vendor.name ?? "?").charAt(0).toUpperCase()}
@@ -74,7 +80,9 @@ export function VendorDetailsHeader({ vendor }: VendorDetailsHeaderProps) {
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Building2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
               <CACBadge isRegistered={!!isRegistered} />
-              {vendor.cacNumber && <span className="text-xs text-gray-400 ml-1">{vendor.cacNumber}</span>}
+              {vendor.cacNumber && (
+                <span className="text-xs text-gray-400 ml-1">{vendor.cacNumber}</span>
+              )}
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600 sm:col-span-2">
               <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />

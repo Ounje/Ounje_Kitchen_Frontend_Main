@@ -24,9 +24,9 @@ export function getPortalRoute(user: User): string {
 
   const dept = user.department?.toLowerCase();
   if (dept === "it" && user.isHead) return "/it";
-  if (dept === "operations")        return "/operations";
-  if (dept === "finance")           return "/finance";
-  if (dept === "investors")         return "/investor";
+  if (dept === "operations") return "/operations";
+  if (dept === "finance") return "/finance";
+  if (dept === "investors") return "/investor";
 
   return "/";
 }
@@ -48,9 +48,9 @@ function getProfileEndpoint(user: User | null): string {
 
 // ─── provider ─────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser]       = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router                = useRouter();
+  const router = useRouter();
 
   // Single effect: runs once on mount.
   // If a token cookie exists, fetch the user to hydrate context.
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await authService.logout(); // hits backend + clears cookie
     } catch {
-      authService.clearToken();   // even if the network call fails
+      authService.clearToken(); // even if the network call fails
     }
     setUser(null);
     router.push("/");
@@ -109,12 +109,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       return;
     }
-    
+
     try {
       const endpoint = getProfileEndpoint(user);
-      const response = await apiClient.get(endpoint) as any;
+      const response = (await apiClient.get(endpoint)) as any;
       const userData = response.user || response.data?.user || response;
-      
+
       setUser(userData);
     } catch (error) {
       console.error("Failed to refresh user:", error);

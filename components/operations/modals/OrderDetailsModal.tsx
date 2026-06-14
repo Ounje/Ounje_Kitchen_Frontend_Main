@@ -35,7 +35,7 @@
 //   return (
 //     <>
 //       <Dialog open={open} onOpenChange={onClose}>
-//         <DialogContent 
+//         <DialogContent
 //           className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto p-0"
 //           style={{ backgroundColor: "#e8f7e8" }}
 //         >
@@ -106,8 +106,8 @@
 //             <div className="min-h-[300px]">
 //               {activeTab === "content" && <OrderContentTab order={order} />}
 //               {activeTab === "party" && (
-//                 <InvolvedPartyTab 
-//                   order={order} 
+//                 <InvolvedPartyTab
+//                   order={order}
 //                   onAssignRider={() => setAssignRiderOpen(true)}
 //                 />
 //               )}

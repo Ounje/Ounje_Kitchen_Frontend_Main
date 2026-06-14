@@ -14,12 +14,12 @@ export default function LoginPage() {
   const { login, user, loading } = useAuth();
   const router = useRouter();
 
-  const [email,      setEmail]      = useState("");
-  const [password,   setPassword]   = useState("");
-  const [showPass,   setShowPass]   = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error,      setError]      = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!loading && user) router.push(getPortalRoute(user));
@@ -35,10 +35,13 @@ export default function LoginPage() {
     } catch (err: any) {
       const msg = err?.message?.toLowerCase() ?? "";
       const friendly =
-        msg.includes("invalid") || msg.includes("incorrect") ? "Invalid email or password." :
-        msg.includes("deactivated")                           ? "Account deactivated. Contact IT support." :
-        msg.includes("suspended")                             ? "Account suspended. Contact support." :
-        err?.message || "Login failed. Please try again.";
+        msg.includes("invalid") || msg.includes("incorrect")
+          ? "Invalid email or password."
+          : msg.includes("deactivated")
+            ? "Account deactivated. Contact IT support."
+            : msg.includes("suspended")
+              ? "Account suspended. Contact support."
+              : err?.message || "Login failed. Please try again.";
       setError(friendly);
       setPassword("");
     } finally {
@@ -57,11 +60,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-
       {/* ── Left panel ── */}
-      <div
-        className="login-brand-panel hidden lg:flex lg:w-[52%] flex-col items-center justify-center p-12 relative overflow-hidden"
-      >
+      <div className="login-brand-panel hidden lg:flex lg:w-[52%] flex-col items-center justify-center p-12 relative overflow-hidden">
         {/* Decorative blobs */}
         <div className="login-blob-gold absolute -top-32 -left-32 w-96 h-96 rounded-full" />
         <div className="login-blob-green absolute -bottom-20 -right-20 w-72 h-72 rounded-full" />
@@ -94,7 +94,13 @@ export default function LoginPage() {
               <div key={f} className="flex items-center gap-3 text-left">
                 <div className="login-check-circle w-6 h-6 rounded-full flex items-center justify-center shrink-0">
                   <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
-                    <path d="M1 4.5L4 7.5L10 1.5" stroke="#1a3f1c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M1 4.5L4 7.5L10 1.5"
+                      stroke="#1a3f1c"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </div>
                 <span className="text-white/80 text-sm font-medium">{f}</span>
@@ -107,7 +113,6 @@ export default function LoginPage() {
       {/* ── Right panel ── */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 bg-white">
         <div className="w-full max-w-md space-y-8">
-
           {/* Mobile logo */}
           <div className="lg:hidden flex flex-col items-center gap-3">
             <Image src="/images/mamput.png" alt="Ounje Logo" width={64} height={64} priority />
@@ -130,14 +135,18 @@ export default function LoginPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-bold text-gray-800">Email address</Label>
+              <Label htmlFor="email" className="text-sm font-bold text-gray-800">
+                Email address
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
-                onChange={e => { setEmail(e.target.value); if (error) setError(""); }}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError("");
+                }}
                 disabled={submitting}
                 required
                 placeholder="you@ounjefood.com"
@@ -146,13 +155,18 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-bold text-gray-800">Password</Label>
+              <Label htmlFor="password" className="text-sm font-bold text-gray-800">
+                Password
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPass ? "text" : "password"}
                   value={password}
-                  onChange={e => { setPassword(e.target.value); if (error) setError(""); }}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError("");
+                  }}
                   disabled={submitting}
                   required
                   placeholder="••••••••"
@@ -160,7 +174,7 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPass(v => !v)}
+                  onClick={() => setShowPass((v) => !v)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
                   tabIndex={-1}
                 >
@@ -173,10 +187,13 @@ export default function LoginPage() {
               <Checkbox
                 id="remember"
                 checked={rememberMe}
-                onCheckedChange={v => setRememberMe(v === true)}
+                onCheckedChange={(v) => setRememberMe(v === true)}
                 disabled={submitting}
               />
-              <Label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer font-normal select-none">
+              <Label
+                htmlFor="remember"
+                className="text-sm text-gray-600 cursor-pointer font-normal select-none"
+              >
                 Keep me signed in for 30 days
               </Label>
             </div>
@@ -186,16 +203,18 @@ export default function LoginPage() {
               disabled={submitting}
               className="login-submit-btn w-full h-12 rounded-xl text-white font-bold text-base transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {submitting
-                ? <><Loader2 className="h-5 w-5 animate-spin" /> Signing in…</>
-                : "Sign In"
-              }
+              {submitting ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" /> Signing in…
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-400">
-            Having trouble?{" "}
-            <span className="font-semibold text-[#1a3f1c]">Contact IT support</span>
+            Having trouble? <span className="font-semibold text-[#1a3f1c]">Contact IT support</span>
           </p>
         </div>
       </div>

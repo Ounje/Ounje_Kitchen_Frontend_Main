@@ -12,7 +12,7 @@
 //     <div className="p-6 space-y-6">
 //       {/* Header */}
 //       <div className="flex items-start justify-between gap-4">
-//         <h2 className="text-2xl font-bold text-foreground">Rider's Information</h2>
+//         <h2 className="text-2xl font-bold text-foreground">Rider&apos;s Information</h2>
 //         <button
 //           onClick={onClose}
 //           className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
@@ -98,9 +98,6 @@
 //   );
 // }
 
-
-
-
 // 'use client';
 
 // import { useState, useEffect } from 'react';
@@ -135,7 +132,7 @@
 //     <div className="p-6 space-y-6">
 //       {/* Header */}
 //       <div className="flex items-start justify-between gap-4">
-//         <h2 className="text-2xl font-bold text-foreground">Rider's Information</h2>
+//         <h2 className="text-2xl font-bold text-foreground">Rider&apos;s Information</h2>
 //         <button
 //           onClick={onClose}
 //           className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
@@ -273,13 +270,12 @@
 //   );
 // }
 
+"use client";
 
-'use client';
-
-import { useState, useEffect } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
-import { superAdminApi, type Rider } from '@/lib/api/api';
+import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { superAdminApi, type Rider } from "@/lib/api/api";
 
 interface RiderModalContentProps {
   rider: Rider;
@@ -294,27 +290,40 @@ export function RiderModalContent({ rider: rowData, onClose }: RiderModalContent
     let cancelled = false;
     superAdminApi.riders
       .getById(rowData.id)
-      .then((res) => { if (!cancelled) setRider(res.data.rider); })
-      .catch(() => { if (!cancelled) toast.error('Could not load full rider details'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .then((res) => {
+        if (!cancelled) setRider(res.data.rider);
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Could not load full rider details");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [rowData.id]);
 
-  const phone  = rider.phoneNumber ?? rider.phone ?? '—';
-  const status = rider.statusOfAccount ?? rider.status ?? '—';
-  const total  = rider.totalDeliveries ?? rider.totalOrders ?? 0;
+  const phone = rider.phoneNumber ?? rider.phone ?? "—";
+  const status = rider.statusOfAccount ?? rider.status ?? "—";
+  const total = rider.totalDeliveries ?? rider.totalOrders ?? 0;
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
-        <h2 className="text-2xl font-bold text-foreground">Rider's Information</h2>
+        <h2 className="text-2xl font-bold text-foreground">Rider&apos;s Information</h2>
         <button
           onClick={onClose}
           className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -336,11 +345,11 @@ export function RiderModalContent({ rider: rowData, onClose }: RiderModalContent
                   {rider.rating != null && (
                     <InfoLine
                       icon="★"
-                      value={`${rider.rating}${rider.reviewCount != null ? ` (${rider.reviewCount} reviews)` : ''}`}
+                      value={`${rider.rating}${rider.reviewCount != null ? ` (${rider.reviewCount} reviews)` : ""}`}
                     />
                   )}
                   <InfoLine icon="📱" value={phone} />
-                  <InfoLine icon="📍" value={rider.address ?? '—'} />
+                  <InfoLine icon="📍" value={rider.address ?? "—"} />
                 </div>
               </div>
             </div>
@@ -350,21 +359,19 @@ export function RiderModalContent({ rider: rowData, onClose }: RiderModalContent
           <div className="grid grid-cols-2 gap-4">
             {/* Delivery breakdown */}
             <div className="bg-secondary rounded-xl p-5 space-y-4">
-              <h4 className="font-bold text-foreground text-lg">
-                Total Orders: {total}
-              </h4>
+              <h4 className="font-bold text-foreground text-lg">Total Orders: {total}</h4>
               <div className="space-y-2">
                 <div className="bg-primary rounded-lg px-4 py-3 text-white text-center font-semibold">
-                  <div className="text-2xl">{rider.deliveredOrders ?? '—'}</div>
+                  <div className="text-2xl">{rider.deliveredOrders ?? "—"}</div>
                   <div className="text-xs opacity-90">Delivered orders</div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="bg-accent rounded-lg px-3 py-2 text-accent-foreground text-center font-semibold text-sm">
-                    <div>{rider.outgoingOrders ?? '—'}</div>
+                    <div>{rider.outgoingOrders ?? "—"}</div>
                     <div className="text-xs">Outgoing orders</div>
                   </div>
                   <div className="bg-red-500 rounded-lg px-3 py-2 text-white text-center font-semibold text-sm">
-                    <div>{rider.rejectedOrders ?? '—'}</div>
+                    <div>{rider.rejectedOrders ?? "—"}</div>
                     <div className="text-xs">Rejected orders</div>
                   </div>
                 </div>
@@ -385,9 +392,7 @@ export function RiderModalContent({ rider: rowData, onClose }: RiderModalContent
                   📍 {rider.mostFrequentZone}
                 </p>
               ) : rider.address ? (
-                <p className="text-sm text-primary-foreground font-semibold">
-                  📍 {rider.address}
-                </p>
+                <p className="text-sm text-primary-foreground font-semibold">📍 {rider.address}</p>
               ) : null}
             </div>
           </div>
@@ -412,17 +417,36 @@ function ModalSkeleton() {
 }
 
 function Avatar({
-  name, src, size = 'md', className = '',
+  name,
+  src,
+  size = "md",
+  className = "",
 }: {
-  name?: string; src?: string; size?: 'sm' | 'md' | 'lg'; className?: string;
+  name?: string;
+  src?: string;
+  size?: "sm" | "md" | "lg";
+  className?: string;
 }) {
-  const dim = size === 'lg' ? 'w-20 h-20 text-2xl' : size === 'md' ? 'w-14 h-14 text-lg' : 'w-10 h-10 text-sm';
+  const dim =
+    size === "lg"
+      ? "w-20 h-20 text-2xl"
+      : size === "md"
+        ? "w-14 h-14 text-lg"
+        : "w-10 h-10 text-sm";
   if (src) {
-    return <img src={src} alt={name} className={`${dim} rounded-full object-cover shrink-0 border-2 border-secondary-foreground/20 ${className}`} />;
+    return (
+      <img
+        src={src}
+        alt={name}
+        className={`${dim} rounded-full object-cover shrink-0 border-2 border-secondary-foreground/20 ${className}`}
+      />
+    );
   }
   return (
-    <div className={`${dim} rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center shrink-0 ${className}`}>
-      {(name ?? '?')[0]?.toUpperCase()}
+    <div
+      className={`${dim} rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center shrink-0 ${className}`}
+    >
+      {(name ?? "?")[0]?.toUpperCase()}
     </div>
   );
 }
@@ -430,18 +454,27 @@ function Avatar({
 function StatusBadge({ status }: { status: string }) {
   const s = status.toLowerCase();
   const cls =
-    s === 'active'      ? 'bg-green-100 text-green-700'   :
-    s === 'suspended'   ? 'bg-red-100   text-red-700'     :
-    s === 'pending'     ? 'bg-yellow-100 text-yellow-700' :
-    s === 'deactivated' ? 'bg-gray-100  text-gray-600'    :
-                          'bg-primary   text-primary-foreground';
-  return <span className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize shrink-0 ${cls}`}>{status}</span>;
+    s === "active"
+      ? "bg-green-100 text-green-700"
+      : s === "suspended"
+        ? "bg-red-100   text-red-700"
+        : s === "pending"
+          ? "bg-yellow-100 text-yellow-700"
+          : s === "deactivated"
+            ? "bg-gray-100  text-gray-600"
+            : "bg-primary   text-primary-foreground";
+  return (
+    <span className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize shrink-0 ${cls}`}>
+      {status}
+    </span>
+  );
 }
 
 function InfoLine({ icon, value }: { icon: string; value: string }) {
   return (
     <div className="flex items-center gap-2 text-sm text-foreground/80">
-      <span>{icon}</span><span>{value}</span>
+      <span>{icon}</span>
+      <span>{value}</span>
     </div>
   );
 }

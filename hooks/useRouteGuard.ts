@@ -21,21 +21,19 @@ interface RouteGuardReturn {
 
 /**
  * Unified route guard for password change enforcement and page rendering control
- * 
+ *
  * Usage in Layouts:
  * ```tsx
  * useRouteGuard(); // Just redirects, no render control needed
  * ```
- * 
+ *
  * Usage in Dashboard Pages:
  * ```tsx
  * const { shouldRender, loading } = useRouteGuard({ returnRenderFlag: true });
  * if (loading || !shouldRender) return <LoadingSpinner />;
  * ```
  */
-export function useRouteGuard(
-  options: RouteGuardOptions = {}
-): RouteGuardReturn {
+export function useRouteGuard(options: RouteGuardOptions = {}): RouteGuardReturn {
   const { returnRenderFlag = false } = options;
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -58,7 +56,7 @@ export function useRouteGuard(
 
   // ✅ Determine if page should render
   const shouldRender = returnRenderFlag
-    ? !loading && (!user?.mustChangePassword || pathname.includes('/settings'))
+    ? !loading && (!user?.mustChangePassword || pathname.includes("/settings"))
     : true;
 
   return {

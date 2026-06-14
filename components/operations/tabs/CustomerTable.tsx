@@ -1,10 +1,10 @@
 // app/operations/customers/components/CustomerTable.tsx
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Eye, Lock, Trash2, PauseCircle, PlayCircle } from 'lucide-react';
-import { StatusBadge } from '@/components/operations/StatusBadge';
-import { Customer } from '@/lib/api/services/customer.service';
+import Link from "next/link";
+import { Eye, Lock, Trash2, PauseCircle, PlayCircle } from "lucide-react";
+import { StatusBadge } from "@/components/operations/StatusBadge";
+import { Customer } from "@/lib/api/services/customer.service";
 
 interface CustomerTableProps {
   customers: Customer[];
@@ -32,7 +32,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                 key={customer.id}
                 className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                 style={{
-                  backgroundColor: index % 2 === 0 ? '#D4FFDE' : 'white'
+                  backgroundColor: index % 2 === 0 ? "#D4FFDE" : "white",
                 }}
               >
                 {/* Serial Number */}
@@ -48,16 +48,12 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                       alt={customer.name}
                       className="w-10 h-10 rounded-full object-cover"
                     />
-                    <span className="text-sm font-medium text-[#1a3f1c]">
-                      {customer.name}
-                    </span>
+                    <span className="text-sm font-medium text-[#1a3f1c]">{customer.name}</span>
                   </div>
                 </td>
 
                 {/* Email */}
-                <td className="px-4 py-4 text-sm text-[#1a3f1c]">
-                  {customer.email}
-                </td>
+                <td className="px-4 py-4 text-sm text-[#1a3f1c]">{customer.email}</td>
 
                 {/* Account Status */}
                 <td className="px-4 py-4">
@@ -82,7 +78,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                     </Link>
 
                     {/* Suspend/Activate Button - Yellow Circle */}
-                    {customer.accountStatus === 'active' ? (
+                    {customer.accountStatus === "active" ? (
                       <Link
                         href={`/operations/customers/${customer.id}/actions/suspend`}
                         className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity bg-amber-400"
@@ -90,7 +86,7 @@ export function CustomerTable({ customers, currentPage }: CustomerTableProps) {
                       >
                         <PauseCircle className="w-4 h-4 text-white" />
                       </Link>
-                    ) : customer.accountStatus === 'suspended' ? (
+                    ) : customer.accountStatus === "suspended" ? (
                       <Link
                         href={`/operations/customers/${customer.id}/actions/activate`}
                         className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 transition-opacity bg-amber-400"

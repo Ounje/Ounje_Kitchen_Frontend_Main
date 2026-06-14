@@ -19,7 +19,14 @@ export default function OrderContentTab({ order }: OrderContentTabProps) {
             {order.items.map((item: any, index: number) => (
               <tr key={index} className="border-b border-gray-200">
                 <td className="py-2">{item.name}</td>
-                <td className="py-2">₦{item.price}/{item.name.includes('wrap') ? 'wrap' : item.name.includes('plate') ? 'plate' : 'piece'}</td>
+                <td className="py-2">
+                  ₦{item.price}/
+                  {item.name.includes("wrap")
+                    ? "wrap"
+                    : item.name.includes("plate")
+                      ? "plate"
+                      : "piece"}
+                </td>
                 <td className="text-right py-2">₦{item.total.toLocaleString()}</td>
               </tr>
             ))}

@@ -178,12 +178,10 @@
 //   );
 // }
 
+"use client";
 
-
-'use client';
-
-import { useRef } from 'react';
-import { type Order } from '@/lib/api/api';
+import { useRef } from "react";
+import { type Order } from "@/lib/api/api";
 
 interface OrderInfoModalProps {
   order: Order;
@@ -196,31 +194,25 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
 
   // Derive display values using the backend's flattened fields.
   // Fallback chain mirrors the controller's populate + mapping.
-  const orderId    = order.orderNumber ?? order._id ?? order.id;
-  const amountPaid = order.amountPaid  ?? order.totalAmount ?? 0;
+  const orderId = order.orderNumber ?? order._id ?? order.id;
+  const amountPaid = order.amountPaid ?? order.totalAmount ?? 0;
 
   // customerName: controller populates customer.user.name but doesn't flatten it in the list
   // endpoint yet — use the nested object as a fallback until the backend adds the flat field.
-  const customerName =
-    order.customerName ??
-    order.customer?.user?.name ??
-    '—';
+  const customerName = order.customerName ?? order.customer?.user?.name ?? "—";
 
   const vendorName =
-    order.vendorName ??          // flattened by controller ✓
-    order.storeName  ??
+    order.vendorName ?? // flattened by controller ✓
+    order.storeName ??
     order.vendor?.owner?.name ??
-    '—';
+    "—";
 
-  const riderName =
-    order.riderName ??
-    order.rider?.user?.name ??
-    '—';
+  const riderName = order.riderName ?? order.rider?.user?.name ?? "—";
 
   const handlePrint = () => {
     if (!printRef.current) return;
     const content = printRef.current.innerHTML;
-    const win = window.open('', '_blank', 'width=800,height=600');
+    const win = window.open("", "_blank", "width=800,height=600");
     if (!win) return;
     win.document.write(`
       <html>
@@ -249,7 +241,6 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-background rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-
         {/* Header */}
         <div className="sticky top-0 bg-background px-6 py-4 border-b border-border flex items-center justify-between rounded-t-xl z-10">
           <h2 className="text-xl font-bold text-foreground">Order Information</h2>
@@ -258,16 +249,20 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
             className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         {/* Scrollable content — also the print target */}
         <div ref={printRef} className="flex-1 overflow-y-auto p-6 space-y-5">
-
           {/* Food image */}
-          {(order.foodImage || order.items?.[0]?.image) ? (
+          {order.foodImage || order.items?.[0]?.image ? (
             <img
               src={order.foodImage ?? order.items![0].image}
               alt="Order"
@@ -275,16 +270,24 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
             />
           ) : (
             <div className="w-full h-48 rounded-xl bg-primary/10 flex items-center justify-center text-6xl">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="20" fill="#FFCA3A"/>
-          <path d="M29 24C29 19.375 25.493 15.559 21 15.059V13H19V15.059C14.507 15.559 11 19.375 11 24V26H29V24ZM10 27H30V29H10V27Z" fill="#1A3F1C"/>
-          </svg>
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 40 40"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle cx="20" cy="20" r="20" fill="#FFCA3A" />
+                <path
+                  d="M29 24C29 19.375 25.493 15.559 21 15.059V13H19V15.059C14.507 15.559 11 19.375 11 24V26H29V24ZM10 27H30V29H10V27Z"
+                  fill="#1A3F1C"
+                />
+              </svg>
             </div>
           )}
 
           {/* Details grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
             {/* Customer */}
             <InfoCard title="Customer Details">
               <DetailRow icon="👤" value={customerName} bold />
@@ -300,7 +303,11 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
               {order.vendorAddress ? (
                 <DetailRow icon="📍" value={order.vendorAddress} iconColor="text-red-500" />
               ) : order.vendor?.storeDetails?.address ? (
-                <DetailRow icon="📍" value={order.vendor.storeDetails.address} iconColor="text-red-500" />
+                <DetailRow
+                  icon="📍"
+                  value={order.vendor.storeDetails.address}
+                  iconColor="text-red-500"
+                />
               ) : null}
             </InfoCard>
 
@@ -310,9 +317,7 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
               {order.riderZone && (
                 <DetailRow icon="📍" value={order.riderZone} iconColor="text-green-600" />
               )}
-              {order.riderPhone && (
-                <DetailRow icon="📱" value={order.riderPhone} />
-              )}
+              {order.riderPhone && <DetailRow icon="📱" value={order.riderPhone} />}
               {/* Fallback: rider phone from nested populate */}
               {!order.riderPhone && order.rider?.phone && (
                 <DetailRow icon="📱" value={order.rider.phone} />
@@ -326,8 +331,7 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
                 <span className="font-mono text-sm break-all">{orderId}</span>
               </p>
               <p className="text-base text-black">
-                <span className="font-medium">Amount Paid: </span>
-                ₦{amountPaid.toLocaleString()}
+                <span className="font-medium">Amount Paid: </span>₦{amountPaid.toLocaleString()}
               </p>
               {order.paymentStatus && (
                 <p className="text-base text-black capitalize">
@@ -360,9 +364,9 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
           {/* Status */}
           <div className="text-center py-4 border-y border-border">
             <p className="text-lg font-semibold text-foreground">
-              Status:{' '}
+              Status:{" "}
               <span className="text-primary capitalize">
-                {order.status?.replace(/_/g, ' ') ?? '—'}
+                {order.status?.replace(/_/g, " ") ?? "—"}
               </span>
               {order.isReported && (
                 <span className="ml-2 text-sm text-orange-600 font-medium">(Reported)</span>
@@ -388,11 +392,10 @@ export function OrderInfoModal({ order, onClose, onFlagClick }: OrderInfoModalPr
               disabled={order.isReported}
               className="px-6 py-3 bg-accent text-accent-foreground rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {order.isReported ? 'Already Flagged' : 'Flag Order'}
+              {order.isReported ? "Already Flagged" : "Flag Order"}
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );
@@ -413,7 +416,7 @@ function DetailRow({
   icon,
   value,
   bold = false,
-  iconColor = 'text-foreground',
+  iconColor = "text-foreground",
 }: {
   icon: string;
   value: string;
@@ -423,7 +426,7 @@ function DetailRow({
   return (
     <div className="flex items-start gap-2">
       <span className={`text-lg shrink-0 ${iconColor}`}>{icon}</span>
-      <span className={`text-foreground text-sm ${bold ? 'font-semibold' : ''}`}>{value}</span>
+      <span className={`text-foreground text-sm ${bold ? "font-semibold" : ""}`}>{value}</span>
     </div>
   );
 }

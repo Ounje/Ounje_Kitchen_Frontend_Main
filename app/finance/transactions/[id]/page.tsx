@@ -1,23 +1,24 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { X } from 'lucide-react';
-import { ModalWatermark } from '@/components/finance/ModalWatermark';
-import financeService, { type TransactionDetail } from '@/lib/api/services/finance.service';
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { X } from "lucide-react";
+import { ModalWatermark } from "@/components/finance/ModalWatermark";
+import financeService, { type TransactionDetail } from "@/lib/api/services/finance.service";
 
 export default function TransactionDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const router  = useRouter();
+  const router = useRouter();
 
-  const [detail, setDetail]   = useState<TransactionDetail | null>(null);
+  const [detail, setDetail] = useState<TransactionDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     setError(false);
-    financeService.getTransactionDetail(id)
+    financeService
+      .getTransactionDetail(id)
       .then((res) => setDetail(res as TransactionDetail))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
@@ -27,16 +28,14 @@ export default function TransactionDetailPage() {
 
   const costRows = detail
     ? [
-        { label: 'Order Cost',   value: detail.orderCost },
-        { label: 'Service Cost', value: detail.serviceCost },
-        { label: 'Delivery Fee', value: detail.deliveryFee },
+        { label: "Order Cost", value: detail.orderCost },
+        { label: "Service Cost", value: detail.serviceCost },
+        { label: "Delivery Fee", value: detail.deliveryFee },
       ]
     : [];
 
   return (
-    <div
-      className="min-h-screen w-full flex items-start justify-center py-6 px-4 print:p-0 bg-gray-50"
-    >
+    <div className="min-h-screen w-full flex items-start justify-center py-6 px-4 print:p-0 bg-gray-50">
       <div
         className="relative w-full max-w-2xl rounded-2xl overflow-hidden shadow-xl print:shadow-none print:rounded-none print:max-w-full bg-gray-50"
         id="transaction-slip"
@@ -45,10 +44,8 @@ export default function TransactionDetailPage() {
 
         {/* Header */}
         <div className="relative flex items-center justify-center px-12 py-5 border-b border-[#98EF9B]/50">
-          <h1
-            className="font-bold text-sm sm:text-base text-center break-all text-[#1a3f1c]"
-          >
-            {loading ? '—' : detail?.orderId ?? '—'}
+          <h1 className="font-bold text-sm sm:text-base text-center break-all text-[#1a3f1c]">
+            {loading ? "—" : (detail?.orderId ?? "—")}
           </h1>
           <button
             onClick={() => router.back()}
@@ -68,7 +65,7 @@ export default function TransactionDetailPage() {
           ) : error || !detail ? (
             <div className="text-center py-12">
               <p className="text-gray-500 mb-4">
-                {error ? 'Failed to load transaction.' : 'Transaction not found.'}
+                {error ? "Failed to load transaction." : "Transaction not found."}
               </p>
               <button
                 onClick={() => router.back()}
@@ -81,12 +78,8 @@ export default function TransactionDetailPage() {
             <>
               {/* Personal Details */}
               <section>
-                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">
-                  Personal Details
-                </p>
-                <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-gray-50 border-b border-gray-100"
-                >
+                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Personal Details</p>
+                <div className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-gray-50 border-b border-gray-100">
                   <span className="text-[#1a3f1c]">
                     <b>Customer:</b> {detail.customerName}
                   </span>
@@ -101,12 +94,8 @@ export default function TransactionDetailPage() {
 
               {/* Transaction Details */}
               <section>
-                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">
-                  Transaction Details
-                </p>
-                <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm bg-gray-50 border-b border-gray-100"
-                >
+                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Transaction Details</p>
+                <div className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm bg-gray-50 border-b border-gray-100">
                   <span className="text-[#1a3f1c]">
                     <b>Order ID:</b> {detail.orderId}
                   </span>
@@ -124,12 +113,8 @@ export default function TransactionDetailPage() {
 
               {/* Order Details */}
               <section>
-                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">
-                  Order Details
-                </p>
-                <div
-                  className="rounded-lg px-4 py-4 space-y-2 text-sm bg-[#98ef9b]/40 text-[#1a3f1c]"
-                >
+                <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Order Details</p>
+                <div className="rounded-lg px-4 py-4 space-y-2 text-sm bg-[#98ef9b]/40 text-[#1a3f1c]">
                   {costRows.map(({ label, value }) => (
                     <div key={label} className="flex items-center gap-2">
                       <span className="w-28 flex-shrink-0">{label}</span>

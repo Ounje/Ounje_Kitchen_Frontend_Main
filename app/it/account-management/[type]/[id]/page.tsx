@@ -14,8 +14,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  ArrowLeft, Mail, Phone, MapPin, Calendar, User,
-  AlertCircle, CheckCircle2, Trash2, AlertTriangle,
+  ArrowLeft,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  User,
+  AlertCircle,
+  CheckCircle2,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,9 +33,9 @@ function unwrap(res: any, entityType: string): any {
   if (!res) return null;
   const d = res?.data ?? res;
   if (entityType === "customer" && d?.customer) return d.customer;
-  if (entityType === "vendor"   && d?.vendor)   return d.vendor;
-  if (entityType === "rider"    && d?.rider)    return d.rider;
-  if (entityType === "staff"    && (d?.staff || d?.admin)) return d.staff ?? d.admin;
+  if (entityType === "vendor" && d?.vendor) return d.vendor;
+  if (entityType === "rider" && d?.rider) return d.rider;
+  if (entityType === "staff" && (d?.staff || d?.admin)) return d.staff ?? d.admin;
   // fallback — if d is a plain object it's the entity itself
   if (d && typeof d === "object" && !Array.isArray(d)) return d;
   return res;
@@ -35,16 +43,16 @@ function unwrap(res: any, entityType: string): any {
 
 // ── Field resolvers ───────────────────────────────────────────────────────────
 function resolveName(account: any, entityType: string): string {
-  if (entityType === "customer") return account.user?.name  || account.name || "N/A";
-  if (entityType === "vendor")   return account.name        || "N/A";
+  if (entityType === "customer") return account.user?.name || account.name || "N/A";
+  if (entityType === "vendor") return account.name || "N/A";
   if (entityType === "rider")
     return `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || "N/A";
   return `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || account.name || "N/A";
 }
 
 function resolveEmail(account: any, entityType: string): string {
-  if (entityType === "customer") return account.user?.email  || account.email || "N/A";
-  if (entityType === "vendor")   return account.owner?.email || account.email || "N/A";
+  if (entityType === "customer") return account.user?.email || account.email || "N/A";
+  if (entityType === "vendor") return account.owner?.email || account.email || "N/A";
   return account.email || "N/A";
 }
 
@@ -62,9 +70,10 @@ function resolvePhone(account: any, entityType: string): string {
 }
 
 function resolveAddress(account: any, entityType: string): string {
-  const addr = entityType === "vendor"
-    ? account.location?.address || account.address
-    : account.address?.street   || account.address;
+  const addr =
+    entityType === "vendor"
+      ? account.location?.address || account.address
+      : account.address?.street || account.address;
   if (!addr) return "";
   return typeof addr === "string" ? addr : "";
 }
@@ -85,33 +94,44 @@ export default function AccountDetailPage({
   params: Promise<{ type: string; id: string }>;
 }) {
   const { type, id } = use(params);
-  const router       = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const entityType   = searchParams.get("entityType") as "customer" | "vendor" | "rider" | "staff";
-  const status       = searchParams.get("status")     as "suspended" | "deleted";
+  const entityType = searchParams.get("entityType") as "customer" | "vendor" | "rider" | "staff";
+  const status = searchParams.get("status") as "suspended" | "deleted";
 
-  const [account, setAccount]   = useState<any>(null);
-  const [loading, setLoading]   = useState(true);
+  const [account, setAccount] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const [processing, setProcessing]             = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleting, setDeleting]               = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => { fetchAccountDetails(); }, [id, entityType]);
+  useEffect(() => {
+    fetchAccountDetails();
+  }, [id, entityType]);
 
   const fetchAccountDetails = async () => {
     setLoading(true);
     try {
       let raw: any;
       switch (entityType) {
-        case "customer": raw = await itService.getCustomer(id);    break;
-        case "vendor":   raw = await itService.getVendor(id);      break;
-        case "rider":    raw = await itService.getRider(id);       break;
-        case "staff":    raw = await itService.getStaffMember(id); break;
-        default: throw new Error("Unknown entity type");
+        case "customer":
+          raw = await itService.getCustomer(id);
+          break;
+        case "vendor":
+          raw = await itService.getVendor(id);
+          break;
+        case "rider":
+          raw = await itService.getRider(id);
+          break;
+        case "staff":
+          raw = await itService.getStaffMember(id);
+          break;
+        default:
+          throw new Error("Unknown entity type");
       }
       setAccount(unwrap(raw, entityType));
     } catch (err: any) {
@@ -144,7 +164,9 @@ export default function AccountDetailPage({
       setConfirmModalOpen(false);
       setSuccessModalOpen(true);
     } catch (err: any) {
-      toast.error(err.message || `Failed to ${status === "suspended" ? "activate" : "restore"} account`);
+      toast.error(
+        err.message || `Failed to ${status === "suspended" ? "activate" : "restore"} account`
+      );
     } finally {
       setProcessing(false);
     }
@@ -153,10 +175,10 @@ export default function AccountDetailPage({
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      if (entityType === "customer")     await itService.deleteCustomer(id);
-      else if (entityType === "vendor")  await itService.deleteVendor(id);
-      else if (entityType === "rider")   await itService.deleteRider(id);
-      else                               await itService.deleteStaff(id);
+      if (entityType === "customer") await itService.deleteCustomer(id);
+      else if (entityType === "vendor") await itService.deleteVendor(id);
+      else if (entityType === "rider") await itService.deleteRider(id);
+      else await itService.deleteStaff(id);
       toast.success("Account deleted successfully");
       setDeleteModalOpen(false);
       router.push("/it/account-management");
@@ -189,25 +211,31 @@ export default function AccountDetailPage({
   }
 
   // ── Resolved values ───────────────────────────────────────────────────────
-  const name    = resolveName(account, entityType);
-  const email   = resolveEmail(account, entityType);
-  const phone   = resolvePhone(account, entityType);
+  const name = resolveName(account, entityType);
+  const email = resolveEmail(account, entityType);
+  const phone = resolvePhone(account, entityType);
   const address = resolveAddress(account, entityType);
-  const role    = resolveRole(account, entityType);
-  const initials = name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase() || "??";
+  const role = resolveRole(account, entityType);
+  const initials =
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase() || "??";
 
   const statusColor = status === "suspended" ? "bg-yellow-500" : "bg-red-500";
-  const actionText  = status === "suspended" ? "Activate Account" : "Restore Account";
+  const actionText = status === "suspended" ? "Activate Account" : "Restore Account";
 
-  const reason    = account.suspensionReason || account.deletionReason || account.reason;
-  const eventDate = status === "suspended"
-    ? account.suspendedAt  || account.suspensionDate || account.updatedAt
-    : account.deletedAt;
+  const reason = account.suspensionReason || account.deletionReason || account.reason;
+  const eventDate =
+    status === "suspended"
+      ? account.suspendedAt || account.suspensionDate || account.updatedAt
+      : account.deletedAt;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
-
         {/* Back */}
         <Button variant="ghost" onClick={() => router.back()} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> Back
@@ -292,8 +320,11 @@ export default function AccountDetailPage({
                   <p className="font-semibold text-gray-900">
                     {eventDate
                       ? new Date(eventDate).toLocaleString("en-US", {
-                          year: "numeric", month: "long", day: "numeric",
-                          hour: "2-digit", minute: "2-digit",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })
                       : "N/A"}
                   </p>
@@ -310,7 +341,7 @@ export default function AccountDetailPage({
             className="w-full px-8 py-6 text-lg"
             style={{
               backgroundColor: status === "suspended" ? "#98ef9b" : "#1a3f1c",
-              color:           status === "suspended" ? "#1a3f1c" : "#fff",
+              color: status === "suspended" ? "#1a3f1c" : "#fff",
             }}
           >
             {actionText}
@@ -333,8 +364,8 @@ export default function AccountDetailPage({
               Confirm {status === "suspended" ? "Activation" : "Restoration"}
             </DialogTitle>
             <DialogDescription className="text-base pt-4">
-              Are you sure you want to{" "}
-              {status === "suspended" ? "activate" : "restore"} this account?
+              Are you sure you want to {status === "suspended" ? "activate" : "restore"} this
+              account?
               <br />
               <span className="font-semibold text-gray-900 mt-2 block">{name}</span>
             </DialogDescription>
@@ -357,7 +388,9 @@ export default function AccountDetailPage({
             >
               {processing ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : "Yes"}
+              ) : (
+                "Yes"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -399,7 +432,9 @@ export default function AccountDetailPage({
             >
               {deleting ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : "Yes, Delete"}
+              ) : (
+                "Yes, Delete"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -414,12 +449,14 @@ export default function AccountDetailPage({
             </div>
             <DialogHeader>
               <DialogTitle className="text-2xl">
-                The account has been{" "}
-                {status === "suspended" ? "activated" : "restored"}!!!
+                The account has been {status === "suspended" ? "activated" : "restored"}!!!
               </DialogTitle>
             </DialogHeader>
             <Button
-              onClick={() => { setSuccessModalOpen(false); router.push("/it/account-management"); }}
+              onClick={() => {
+                setSuccessModalOpen(false);
+                router.push("/it/account-management");
+              }}
               className="w-full mt-4"
               style={{ backgroundColor: "#1a3f1c" }}
             >

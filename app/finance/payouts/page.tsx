@@ -1,33 +1,82 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Search, RefreshCw, CheckCircle, Clock, XCircle, Loader, Ban, ArrowDownToLine, Wallet } from 'lucide-react';
+import { useState, useEffect, useCallback } from "react";
+import {
+  Search,
+  RefreshCw,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Loader,
+  Ban,
+  ArrowDownToLine,
+  Wallet,
+} from "lucide-react";
 import financeService, {
-  type PayoutItem, type PayoutStats, type PayoutFilters,
-  type PaidInItem, type PaidInFilters, type PaidInStats,
-} from '@/lib/api/services/finance.service';
-import Pagination from '@/components/Pagination';
+  type PayoutItem,
+  type PayoutStats,
+  type PayoutFilters,
+  type PaidInItem,
+  type PaidInFilters,
+  type PaidInStats,
+} from "@/lib/api/services/finance.service";
+import Pagination from "@/components/Pagination";
 
 // ── Shared status badge ───────────────────────────────────────────────────────
-const PAYOUT_STATUS: Record<string, { label: string; icon: any; bg: string; text: string; border: string }> = {
-  pending:    { label: 'Pending',    icon: Clock,       bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200'  },
-  processing: { label: 'Processing', icon: Loader,      bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200'   },
-  success:    { label: 'Success',    icon: CheckCircle, bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200'  },
-  failed:     { label: 'Failed',     icon: XCircle,     bg: 'bg-red-50',    text: 'text-red-700',    border: 'border-red-200'    },
-  cancelled:  { label: 'Cancelled',  icon: Ban,         bg: 'bg-gray-50',   text: 'text-gray-500',   border: 'border-gray-200'   },
+const PAYOUT_STATUS: Record<
+  string,
+  { label: string; icon: any; bg: string; text: string; border: string }
+> = {
+  pending: {
+    label: "Pending",
+    icon: Clock,
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+  },
+  processing: {
+    label: "Processing",
+    icon: Loader,
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    border: "border-blue-200",
+  },
+  success: {
+    label: "Success",
+    icon: CheckCircle,
+    bg: "bg-green-50",
+    text: "text-green-700",
+    border: "border-green-200",
+  },
+  failed: {
+    label: "Failed",
+    icon: XCircle,
+    bg: "bg-red-50",
+    text: "text-red-700",
+    border: "border-red-200",
+  },
+  cancelled: {
+    label: "Cancelled",
+    icon: Ban,
+    bg: "bg-gray-50",
+    text: "text-gray-500",
+    border: "border-gray-200",
+  },
 };
 
 const PAIDIN_STATUS: Record<string, { label: string; bg: string; text: string }> = {
-  pending: { label: 'Pending', bg: 'bg-amber-50',  text: 'text-amber-700'  },
-  success: { label: 'Success', bg: 'bg-green-50',  text: 'text-green-700'  },
-  failed:  { label: 'Failed',  bg: 'bg-red-50',    text: 'text-red-700'    },
+  pending: { label: "Pending", bg: "bg-amber-50", text: "text-amber-700" },
+  success: { label: "Success", bg: "bg-green-50", text: "text-green-700" },
+  failed: { label: "Failed", bg: "bg-red-50", text: "text-red-700" },
 };
 
 function PayoutStatusBadge({ status }: { status: string }) {
   const cfg = PAYOUT_STATUS[status] ?? PAYOUT_STATUS.pending;
   const Icon = cfg.icon;
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${cfg.bg} ${cfg.text} ${cfg.border}`}
+    >
       <Icon className="w-3 h-3" />
       {cfg.label}
     </span>
@@ -37,19 +86,39 @@ function PayoutStatusBadge({ status }: { status: string }) {
 function PaidInStatusBadge({ status }: { status: string }) {
   const cfg = PAIDIN_STATUS[status] ?? PAIDIN_STATUS.pending;
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${cfg.bg} ${cfg.text}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${cfg.bg} ${cfg.text}`}
+    >
       {cfg.label}
     </span>
   );
 }
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
-function StatCard({ label, count, amount, accent = false }: { label: string; count: number; amount: number; accent?: boolean }) {
+function StatCard({
+  label,
+  count,
+  amount,
+  accent = false,
+}: {
+  label: string;
+  count: number;
+  amount: number;
+  accent?: boolean;
+}) {
   return (
-    <div className={`rounded-xl p-4 border ${accent ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100 shadow-sm'}`}>
-      <p className={`text-xs font-semibold mb-1 ${accent ? 'text-amber-700' : 'text-gray-500'}`}>{label}</p>
-      <p className={`text-2xl font-black ${accent ? 'text-amber-800' : 'text-gray-900'}`}>{count.toLocaleString()}</p>
-      <p className={`text-xs mt-1 ${accent ? 'text-amber-600' : 'text-gray-400'}`}>₦{amount.toLocaleString()}</p>
+    <div
+      className={`rounded-xl p-4 border ${accent ? "bg-amber-50 border-amber-200" : "bg-white border-gray-100 shadow-sm"}`}
+    >
+      <p className={`text-xs font-semibold mb-1 ${accent ? "text-amber-700" : "text-gray-500"}`}>
+        {label}
+      </p>
+      <p className={`text-2xl font-black ${accent ? "text-amber-800" : "text-gray-900"}`}>
+        {count.toLocaleString()}
+      </p>
+      <p className={`text-xs mt-1 ${accent ? "text-amber-600" : "text-gray-400"}`}>
+        ₦{amount.toLocaleString()}
+      </p>
     </div>
   );
 }
@@ -65,41 +134,52 @@ const formatFundingSource = (bank?: string | null, channel?: string | null) => {
 
 // ── Payouts tab ───────────────────────────────────────────────────────────────
 function PayoutsTab() {
-  const [payouts,      setPayouts]      = useState<PayoutItem[]>([]);
-  const [stats,        setStats]        = useState<PayoutStats | null>(null);
-  const [loading,      setLoading]      = useState(true);
+  const [payouts, setPayouts] = useState<PayoutItem[]>([]);
+  const [stats, setStats] = useState<PayoutStats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [pageSize,     setPageSize]     = useState(20);
-  const [pagination,   setPagination]   = useState({ page: 1, totalPages: 1, total: 0 });
-  const [recipientTab, setRecipientTab] = useState<'all' | 'VendorProfile' | 'RiderProfile'>('all');
-  const [filters,      setFilters]      = useState<PayoutFilters>({ status: '', startDate: '', endDate: '' });
+  const [pageSize, setPageSize] = useState(20);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [recipientTab, setRecipientTab] = useState<"all" | "VendorProfile" | "RiderProfile">("all");
+  const [filters, setFilters] = useState<PayoutFilters>({ status: "", startDate: "", endDate: "" });
   const [activeFilters, setActiveFilters] = useState<PayoutFilters>({});
 
-  const loadPayouts = useCallback(async (page: number, f: PayoutFilters, rType: typeof recipientTab, limit = pageSize) => {
-    setLoading(true);
-    try {
-      const params: PayoutFilters = { page, limit };
-      if (f.status)    params.status        = f.status;
-      if (f.startDate) params.startDate     = f.startDate;
-      if (f.endDate)   params.endDate       = f.endDate;
-      if (rType !== 'all') params.recipientType = rType;
+  const loadPayouts = useCallback(
+    async (page: number, f: PayoutFilters, rType: typeof recipientTab, limit = pageSize) => {
+      setLoading(true);
+      try {
+        const params: PayoutFilters = { page, limit };
+        if (f.status) params.status = f.status;
+        if (f.startDate) params.startDate = f.startDate;
+        if (f.endDate) params.endDate = f.endDate;
+        if (rType !== "all") params.recipientType = rType;
 
-      const res: any = await financeService.getPayouts(params);
-      const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-      setPayouts(data);
-      setPagination({ page: res?.page ?? page, totalPages: res?.totalPages ?? 1, total: res?.total ?? data.length });
-    } catch {
-      setPayouts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [pageSize]);
+        const res: any = await financeService.getPayouts(params);
+        const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+        setPayouts(data);
+        setPagination({
+          page: res?.page ?? page,
+          totalPages: res?.totalPages ?? 1,
+          total: res?.total ?? data.length,
+        });
+      } catch {
+        setPayouts([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pageSize]
+  );
 
   const loadStats = useCallback(async () => {
     setStatsLoading(true);
-    try { setStats(await financeService.getPayoutStats()); }
-    catch { setStats(null); }
-    finally { setStatsLoading(false); }
+    try {
+      setStats(await financeService.getPayoutStats());
+    } catch {
+      setStats(null);
+    } finally {
+      setStatsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -118,45 +198,67 @@ function PayoutsTab() {
   };
 
   const handleReset = () => {
-    const empty: PayoutFilters = { status: '', startDate: '', endDate: '' };
+    const empty: PayoutFilters = { status: "", startDate: "", endDate: "" };
     setFilters(empty);
     setActiveFilters({});
     loadPayouts(1, {}, recipientTab);
   };
 
   const subTabs: { key: typeof recipientTab; label: string }[] = [
-    { key: 'all',           label: 'All'     },
-    { key: 'VendorProfile', label: 'Vendors' },
-    { key: 'RiderProfile',  label: 'Riders'  },
+    { key: "all", label: "All" },
+    { key: "VendorProfile", label: "Vendors" },
+    { key: "RiderProfile", label: "Riders" },
   ];
 
   return (
     <div className="space-y-5">
-
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {statsLoading ? (
-          [...Array(5)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />)
+          [...Array(5)].map((_, i) => (
+            <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />
+          ))
         ) : stats ? (
           <>
-            <StatCard label="Pending"    count={stats.pending.count}    amount={stats.pending.totalNaira}    accent />
-            <StatCard label="Processing" count={stats.processing.count} amount={stats.processing.totalNaira} />
-            <StatCard label="Success"    count={stats.success.count}    amount={stats.success.totalNaira}    />
-            <StatCard label="Failed"     count={stats.failed.count}     amount={stats.failed.totalNaira}     />
-            <StatCard label="Cancelled"  count={stats.cancelled.count}  amount={stats.cancelled.totalNaira}  />
+            <StatCard
+              label="Pending"
+              count={stats.pending.count}
+              amount={stats.pending.totalNaira}
+              accent
+            />
+            <StatCard
+              label="Processing"
+              count={stats.processing.count}
+              amount={stats.processing.totalNaira}
+            />
+            <StatCard
+              label="Success"
+              count={stats.success.count}
+              amount={stats.success.totalNaira}
+            />
+            <StatCard label="Failed" count={stats.failed.count} amount={stats.failed.totalNaira} />
+            <StatCard
+              label="Cancelled"
+              count={stats.cancelled.count}
+              amount={stats.cancelled.totalNaira}
+            />
           </>
         ) : null}
       </div>
 
       {/* Vendor / Rider sub-tabs */}
       <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
-        {subTabs.map(t => (
-          <button key={t.key} type="button" onClick={() => handleRecipientTab(t.key)}
+        {subTabs.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => handleRecipientTab(t.key)}
             className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${
               recipientTab === t.key
-                ? 'bg-white text-[#1a3f1c] shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}>
+                ? "bg-white text-[#1a3f1c] shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
             {t.label}
           </button>
         ))}
@@ -166,8 +268,11 @@ function PayoutsTab() {
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-wrap gap-3 items-end">
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Status</label>
-          <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]">
+          <select
+            value={filters.status}
+            onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
+            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
+          >
             <option value="">All</option>
             <option value="pending">Pending</option>
             <option value="processing">Processing</option>
@@ -178,20 +283,34 @@ function PayoutsTab() {
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
-          <input type="date" value={filters.startDate} onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]" />
+          <input
+            type="date"
+            value={filters.startDate}
+            onChange={(e) => setFilters((f) => ({ ...f, startDate: e.target.value }))}
+            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
+          />
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
-          <input type="date" value={filters.endDate} onChange={e => setFilters(f => ({ ...f, endDate: e.target.value }))}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]" />
+          <input
+            type="date"
+            value={filters.endDate}
+            onChange={(e) => setFilters((f) => ({ ...f, endDate: e.target.value }))}
+            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
+          />
         </div>
-        <button type="button" onClick={handleSearch}
-          className="h-9 px-4 rounded-lg bg-[#1a3f1c] text-white text-sm font-semibold flex items-center gap-2 hover:opacity-90">
+        <button
+          type="button"
+          onClick={handleSearch}
+          className="h-9 px-4 rounded-lg bg-[#1a3f1c] text-white text-sm font-semibold flex items-center gap-2 hover:opacity-90"
+        >
           <Search className="w-3.5 h-3.5" /> Search
         </button>
-        <button type="button" onClick={handleReset}
-          className="h-9 px-4 rounded-lg border border-gray-200 text-gray-600 text-sm font-semibold flex items-center gap-2 hover:bg-gray-50">
+        <button
+          type="button"
+          onClick={handleReset}
+          className="h-9 px-4 rounded-lg border border-gray-200 text-gray-600 text-sm font-semibold flex items-center gap-2 hover:bg-gray-50"
+        >
           <RefreshCw className="w-3.5 h-3.5" /> Reset
         </button>
       </div>
@@ -218,7 +337,9 @@ function PayoutsTab() {
                 [...Array(8)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
                     {[...Array(9)].map((_, j) => (
-                      <td key={j}><div className="h-4 bg-gray-100 rounded-full w-3/4" /></td>
+                      <td key={j}>
+                        <div className="h-4 bg-gray-100 rounded-full w-3/4" />
+                      </td>
                     ))}
                   </tr>
                 ))
@@ -229,31 +350,54 @@ function PayoutsTab() {
                     <p className="text-sm text-gray-400">No payouts found</p>
                   </td>
                 </tr>
-              ) : payouts.map(p => (
-                <tr key={p._id}>
-                  <td className="font-semibold text-gray-900">{p.recipientName}</td>
-                  <td>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                      p.recipientType === 'VendorProfile'
-                        ? 'bg-[#98ef9b]/30 text-[#1a3f1c]'
-                        : 'bg-blue-50 text-blue-700'
-                    }`}>
-                      {p.recipientType === 'VendorProfile' ? 'Vendor' : 'Rider'}
-                    </span>
-                  </td>
-                  <td className="font-medium tabular-nums">{fmt(p.amountNaira)}</td>
-                  <td className="text-gray-700 tabular-nums">{fmt(p.netAmountNaira)}</td>
-                  <td className="text-gray-500 max-w-32 truncate">{p.bankDetails?.bankName || '—'}</td>
-                  <td className="text-gray-500 tabular-nums">{p.bankDetails?.accountNumber || '—'}</td>
-                  <td><PayoutStatusBadge status={p.status} /></td>
-                  <td className="text-gray-500 whitespace-nowrap text-xs">
-                    {p.processAt ? new Date(p.processAt).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
-                  </td>
-                  <td className="text-gray-500 whitespace-nowrap text-xs">
-                    {p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
-                  </td>
-                </tr>
-              ))}
+              ) : (
+                payouts.map((p) => (
+                  <tr key={p._id}>
+                    <td className="font-semibold text-gray-900">{p.recipientName}</td>
+                    <td>
+                      <span
+                        className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                          p.recipientType === "VendorProfile"
+                            ? "bg-[#98ef9b]/30 text-[#1a3f1c]"
+                            : "bg-blue-50 text-blue-700"
+                        }`}
+                      >
+                        {p.recipientType === "VendorProfile" ? "Vendor" : "Rider"}
+                      </span>
+                    </td>
+                    <td className="font-medium tabular-nums">{fmt(p.amountNaira)}</td>
+                    <td className="text-gray-700 tabular-nums">{fmt(p.netAmountNaira)}</td>
+                    <td className="text-gray-500 max-w-32 truncate">
+                      {p.bankDetails?.bankName || "—"}
+                    </td>
+                    <td className="text-gray-500 tabular-nums">
+                      {p.bankDetails?.accountNumber || "—"}
+                    </td>
+                    <td>
+                      <PayoutStatusBadge status={p.status} />
+                    </td>
+                    <td className="text-gray-500 whitespace-nowrap text-xs">
+                      {p.processAt
+                        ? new Date(p.processAt).toLocaleString("en-NG", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "—"}
+                    </td>
+                    <td className="text-gray-500 whitespace-nowrap text-xs">
+                      {p.createdAt
+                        ? new Date(p.createdAt).toLocaleDateString("en-NG", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "—"}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -261,8 +405,11 @@ function PayoutsTab() {
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pageSize}
-          onPageChange={p => loadPayouts(p, activeFilters, recipientTab)}
-          onPageSizeChange={s => { setPageSize(s); loadPayouts(1, activeFilters, recipientTab, s); }}
+          onPageChange={(p) => loadPayouts(p, activeFilters, recipientTab)}
+          onPageSizeChange={(s) => {
+            setPageSize(s);
+            loadPayouts(1, activeFilters, recipientTab, s);
+          }}
         />
       </div>
     </div>
@@ -271,43 +418,62 @@ function PayoutsTab() {
 
 // ── Paid In tab ───────────────────────────────────────────────────────────────
 function PaidInTab() {
-  const [records,      setRecords]      = useState<PaidInItem[]>([]);
-  const [stats,        setStats]        = useState<PaidInStats | null>(null);
+  const [records, setRecords] = useState<PaidInItem[]>([]);
+  const [stats, setStats] = useState<PaidInStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [loading,      setLoading]      = useState(true);
-  const [pageSize,     setPageSize]     = useState(20);
-  const [pagination,   setPagination]   = useState({ page: 1, totalPages: 1, total: 0 });
-  const [filters,      setFilters]      = useState<PaidInFilters>({ customerName: '', status: '', startDate: '', endDate: '' });
+  const [loading, setLoading] = useState(true);
+  const [pageSize, setPageSize] = useState(20);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [filters, setFilters] = useState<PaidInFilters>({
+    customerName: "",
+    status: "",
+    startDate: "",
+    endDate: "",
+  });
   const [activeFilters, setActiveFilters] = useState<PaidInFilters>({});
 
   const loadStats = useCallback(async () => {
     setStatsLoading(true);
-    try { setStats(await financeService.getCustomerPaymentStats()); }
-    catch { setStats(null); }
-    finally { setStatsLoading(false); }
+    try {
+      setStats(await financeService.getCustomerPaymentStats());
+    } catch {
+      setStats(null);
+    } finally {
+      setStatsLoading(false);
+    }
   }, []);
 
-  const load = useCallback(async (page: number, f: PaidInFilters, limit = pageSize) => {
-    setLoading(true);
-    try {
-      const params: PaidInFilters = { page, limit };
-      if (f.customerName) params.customerName = f.customerName;
-      if (f.status)       params.status       = f.status;
-      if (f.startDate)    params.startDate    = f.startDate;
-      if (f.endDate)      params.endDate      = f.endDate;
+  const load = useCallback(
+    async (page: number, f: PaidInFilters, limit = pageSize) => {
+      setLoading(true);
+      try {
+        const params: PaidInFilters = { page, limit };
+        if (f.customerName) params.customerName = f.customerName;
+        if (f.status) params.status = f.status;
+        if (f.startDate) params.startDate = f.startDate;
+        if (f.endDate) params.endDate = f.endDate;
 
-      const res: any = await financeService.getCustomerPayments(params);
-      const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-      setRecords(data);
-      setPagination({ page: res?.page ?? page, totalPages: res?.totalPages ?? 1, total: res?.total ?? data.length });
-    } catch {
-      setRecords([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [pageSize]);
+        const res: any = await financeService.getCustomerPayments(params);
+        const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+        setRecords(data);
+        setPagination({
+          page: res?.page ?? page,
+          totalPages: res?.totalPages ?? 1,
+          total: res?.total ?? data.length,
+        });
+      } catch {
+        setRecords([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pageSize]
+  );
 
-  useEffect(() => { load(1, {}); loadStats(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    load(1, {});
+    loadStats();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = () => {
     setActiveFilters(filters);
@@ -315,7 +481,7 @@ function PaidInTab() {
   };
 
   const handleReset = () => {
-    const empty: PaidInFilters = { customerName: '', status: '', startDate: '', endDate: '' };
+    const empty: PaidInFilters = { customerName: "", status: "", startDate: "", endDate: "" };
     setFilters(empty);
     setActiveFilters({});
     load(1, {});
@@ -323,16 +489,30 @@ function PaidInTab() {
 
   return (
     <div className="space-y-5">
-
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {statsLoading ? (
-          [...Array(3)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />)
+          [...Array(3)].map((_, i) => (
+            <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />
+          ))
         ) : stats ? (
           <>
-            <StatCard label="Pending" count={stats?.pending?.count ?? 0} amount={stats?.pending?.totalNaira ?? 0} accent />
-            <StatCard label="Success" count={stats?.success?.count ?? 0} amount={stats?.success?.totalNaira ?? 0} />
-            <StatCard label="Failed"  count={stats?.failed?.count  ?? 0} amount={stats?.failed?.totalNaira  ?? 0} />
+            <StatCard
+              label="Pending"
+              count={stats?.pending?.count ?? 0}
+              amount={stats?.pending?.totalNaira ?? 0}
+              accent
+            />
+            <StatCard
+              label="Success"
+              count={stats?.success?.count ?? 0}
+              amount={stats?.success?.totalNaira ?? 0}
+            />
+            <StatCard
+              label="Failed"
+              count={stats?.failed?.count ?? 0}
+              amount={stats?.failed?.totalNaira ?? 0}
+            />
           </>
         ) : null}
       </div>
@@ -341,14 +521,21 @@ function PaidInTab() {
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-wrap gap-3 items-end">
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Customer Name</label>
-          <input type="text" placeholder="Search customer..." value={filters.customerName}
-            onChange={e => setFilters(f => ({ ...f, customerName: e.target.value }))}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449] w-48" />
+          <input
+            type="text"
+            placeholder="Search customer..."
+            value={filters.customerName}
+            onChange={(e) => setFilters((f) => ({ ...f, customerName: e.target.value }))}
+            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449] w-48"
+          />
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Status</label>
-          <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]">
+          <select
+            value={filters.status}
+            onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
+            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
+          >
             <option value="">All</option>
             <option value="pending">Pending</option>
             <option value="success">Success</option>
@@ -357,20 +544,34 @@ function PaidInTab() {
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
-          <input type="date" value={filters.startDate} onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]" />
+          <input
+            type="date"
+            value={filters.startDate}
+            onChange={(e) => setFilters((f) => ({ ...f, startDate: e.target.value }))}
+            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
+          />
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
-          <input type="date" value={filters.endDate} onChange={e => setFilters(f => ({ ...f, endDate: e.target.value }))}
-            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]" />
+          <input
+            type="date"
+            value={filters.endDate}
+            onChange={(e) => setFilters((f) => ({ ...f, endDate: e.target.value }))}
+            className="h-9 px-3 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
+          />
         </div>
-        <button type="button" onClick={handleSearch}
-          className="h-9 px-4 rounded-lg bg-[#1a3f1c] text-white text-sm font-semibold flex items-center gap-2 hover:opacity-90">
+        <button
+          type="button"
+          onClick={handleSearch}
+          className="h-9 px-4 rounded-lg bg-[#1a3f1c] text-white text-sm font-semibold flex items-center gap-2 hover:opacity-90"
+        >
           <Search className="w-3.5 h-3.5" /> Search
         </button>
-        <button type="button" onClick={handleReset}
-          className="h-9 px-4 rounded-lg border border-gray-200 text-gray-600 text-sm font-semibold flex items-center gap-2 hover:bg-gray-50">
+        <button
+          type="button"
+          onClick={handleReset}
+          className="h-9 px-4 rounded-lg border border-gray-200 text-gray-600 text-sm font-semibold flex items-center gap-2 hover:bg-gray-50"
+        >
           <RefreshCw className="w-3.5 h-3.5" /> Reset
         </button>
       </div>
@@ -395,7 +596,9 @@ function PaidInTab() {
                 [...Array(8)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
                     {[...Array(7)].map((_, j) => (
-                      <td key={j}><div className="h-4 bg-gray-100 rounded-full w-3/4" /></td>
+                      <td key={j}>
+                        <div className="h-4 bg-gray-100 rounded-full w-3/4" />
+                      </td>
                     ))}
                   </tr>
                 ))
@@ -406,23 +609,42 @@ function PaidInTab() {
                     <p className="text-sm text-gray-400">No wallet top-ups found</p>
                   </td>
                 </tr>
-              ) : records.map(r => (
-                <tr key={r._id}>
-                  <td className="font-semibold text-gray-900">{r.customerName}</td>
-                  <td className="font-medium tabular-nums text-[#1a3f1c]">{fmt(r.amountNaira)}</td>
-                  <td className="text-gray-500 text-xs tabular-nums">{r.reference}</td>
-                  <td className="text-gray-500 text-xs">{formatFundingSource(r.paymentBank, r.paymentChannel)}</td>
-                  <td><PaidInStatusBadge status={r.status} /></td>
-                  <td className="text-gray-500 whitespace-nowrap text-xs">
-                    {(r.paidAt || r.createdAt)
-                      ? new Date(r.paidAt ?? r.createdAt).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-                      : '—'}
-                  </td>
-                  <td className="text-gray-500 whitespace-nowrap text-xs">
-                    {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
-                  </td>
-                </tr>
-              ))}
+              ) : (
+                records.map((r) => (
+                  <tr key={r._id}>
+                    <td className="font-semibold text-gray-900">{r.customerName}</td>
+                    <td className="font-medium tabular-nums text-[#1a3f1c]">
+                      {fmt(r.amountNaira)}
+                    </td>
+                    <td className="text-gray-500 text-xs tabular-nums">{r.reference}</td>
+                    <td className="text-gray-500 text-xs">
+                      {formatFundingSource(r.paymentBank, r.paymentChannel)}
+                    </td>
+                    <td>
+                      <PaidInStatusBadge status={r.status} />
+                    </td>
+                    <td className="text-gray-500 whitespace-nowrap text-xs">
+                      {r.paidAt || r.createdAt
+                        ? new Date(r.paidAt ?? r.createdAt).toLocaleString("en-NG", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "—"}
+                    </td>
+                    <td className="text-gray-500 whitespace-nowrap text-xs">
+                      {r.createdAt
+                        ? new Date(r.createdAt).toLocaleDateString("en-NG", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "—"}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -430,8 +652,11 @@ function PaidInTab() {
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           pageSize={pageSize}
-          onPageChange={p => load(p, activeFilters)}
-          onPageSizeChange={s => { setPageSize(s); load(1, activeFilters, s); }}
+          onPageChange={(p) => load(p, activeFilters)}
+          onPageSizeChange={(s) => {
+            setPageSize(s);
+            load(1, activeFilters, s);
+          }}
         />
       </div>
     </div>
@@ -440,35 +665,44 @@ function PaidInTab() {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function PayoutsAndPaidInPage() {
-  const [mainTab, setMainTab] = useState<'payouts' | 'paidin'>('payouts');
+  const [mainTab, setMainTab] = useState<"payouts" | "paidin">("payouts");
 
   const mainTabs = [
-    { key: 'payouts' as const, label: 'Payouts',  icon: ArrowDownToLine, desc: 'Bank transfers sent to vendors & riders' },
-    { key: 'paidin' as const,  label: 'Paid In',  icon: Wallet,          desc: 'Customer wallet top-ups'                 },
+    {
+      key: "payouts" as const,
+      label: "Payouts",
+      icon: ArrowDownToLine,
+      desc: "Bank transfers sent to vendors & riders",
+    },
+    { key: "paidin" as const, label: "Paid In", icon: Wallet, desc: "Customer wallet top-ups" },
   ];
 
   return (
     <div className="w-full space-y-6">
-
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-primary">Payouts & Paid In</h1>
         <p className="text-sm text-gray-400 mt-1">
-          Track outgoing bank transfers to vendors and riders, and incoming wallet top-ups from customers.
+          Track outgoing bank transfers to vendors and riders, and incoming wallet top-ups from
+          customers.
         </p>
       </div>
 
       {/* Main tabs */}
       <div className="flex gap-2 border-b border-gray-200">
-        {mainTabs.map(t => {
+        {mainTabs.map((t) => {
           const Icon = t.icon;
           return (
-            <button key={t.key} type="button" onClick={() => setMainTab(t.key)}
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setMainTab(t.key)}
               className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all -mb-px ${
                 mainTab === t.key
-                  ? 'border-[#1a3f1c] text-[#1a3f1c]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}>
+                  ? "border-[#1a3f1c] text-[#1a3f1c]"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
               <Icon className="w-4 h-4" />
               {t.label}
             </button>
@@ -477,7 +711,7 @@ export default function PayoutsAndPaidInPage() {
       </div>
 
       {/* Tab content */}
-      {mainTab === 'payouts' ? <PayoutsTab /> : <PaidInTab />}
+      {mainTab === "payouts" ? <PayoutsTab /> : <PaidInTab />}
     </div>
   );
 }

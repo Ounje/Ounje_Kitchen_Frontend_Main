@@ -7,8 +7,14 @@ import StatsCard from "@/components/dashboard/StatsCard";
 import NotificationsList from "@/components/dashboard/NotificationsList";
 import { useRouteGuard } from "@/hooks/useRouteGuard";
 import {
-  Users, ShoppingCart, Store, DollarSign,
-  Bike, HelpCircle, Star, ChevronDown,
+  Users,
+  ShoppingCart,
+  Store,
+  DollarSign,
+  Bike,
+  HelpCircle,
+  Star,
+  ChevronDown,
 } from "lucide-react";
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -18,13 +24,16 @@ function DashboardSkeleton() {
       {/* Header */}
       <div className="mt-10 flex items-center justify-between flex-wrap gap-4">
         <div className="h-8 w-40 rounded-md bg-gray-200" />
-        <div className="h-10 w-32 rounded-md bg-gray-200" /> 
+        <div className="h-10 w-32 rounded-md bg-gray-200" />
       </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="p-6 bg-surface rounded-xl shadow-sm border border-border space-y-4">
+          <div
+            key={i}
+            className="p-6 bg-surface rounded-xl shadow-sm border border-border space-y-4"
+          >
             <div className="h-6 w-6 rounded-full bg-gray-200" />
             <div className="h-6 w-24 rounded-md bg-gray-200" />
             <div className="h-4 w-32 rounded-md bg-gray-200" />
@@ -49,17 +58,17 @@ function DashboardSkeleton() {
 export default function AdminDashboard() {
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
 
-  const [dashboard,      setDashboard]      = useState<DashboardData | null>(null);
-  const [periodRevenue,  setPeriodRevenue]  = useState<number | null>(null);
-  const [periodLoading,  setPeriodLoading]  = useState(false);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState("");
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [periodRevenue, setPeriodRevenue] = useState<number | null>(null);
+  const [periodLoading, setPeriodLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const [showDropdown, setShowDropdown]     = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<
-    "Daily" | "Weekly" | "Monthly" | "Yearly"
-  >("Weekly");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<"Daily" | "Weekly" | "Monthly" | "Yearly">(
+    "Weekly"
+  );
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -73,7 +82,7 @@ export default function AdminDashboard() {
         // Backend wraps in { success, data: { users, orders, ... } }
         // apiClient unwraps one level, so res may be the DashboardData directly
         // or still have a nested .data — handle both shapes safely
-        const data: DashboardData = res?.users ? res : res?.data ?? res;
+        const data: DashboardData = res?.users ? res : (res?.data ?? res);
         setDashboard(data);
       } catch (err: any) {
         setError(err?.message || "Failed to load dashboard");
@@ -100,7 +109,8 @@ export default function AdminDashboard() {
     setSelectedPeriod(period);
     setShowDropdown(false);
     setPeriodLoading(true);
-    dashboardService.getRevenue(period.toLowerCase() as 'daily' | 'weekly' | 'monthly' | 'yearly')
+    dashboardService
+      .getRevenue(period.toLowerCase() as "daily" | "weekly" | "monthly" | "yearly")
       .then((res: any) => {
         const gross = res?.gross ?? res?.data?.gross ?? res?.revenue?.gross ?? null;
         if (gross !== null) setPeriodRevenue(gross);
@@ -137,12 +147,13 @@ export default function AdminDashboard() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-10 pb-10 px-4 md:px-6 lg:px-10 animate-fadeIn">
-
       {/* Header */}
       <div className="mt-8 mb-6 flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-black text-foreground tracking-tight">Dashboard Overview</h1>
-          <p className="text-sm font-semibold text-muted-foreground mt-1">Monitor the live performance of Ounje Kitchen.</p>
+          <p className="text-sm font-semibold text-muted-foreground mt-1">
+            Monitor the live performance of Ounje Kitchen.
+          </p>
         </div>
 
         {/* Period dropdown */}
@@ -153,7 +164,9 @@ export default function AdminDashboard() {
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-surface text-foreground hover:bg-muted/30 shadow-sm text-sm font-bold transition-all"
           >
             <span>{selectedPeriod}</span>
-            <ChevronDown className={`w-4 h-4 text-primary transition-transform duration-300 ${showDropdown ? "rotate-180" : ""}`} />
+            <ChevronDown
+              className={`w-4 h-4 text-primary transition-transform duration-300 ${showDropdown ? "rotate-180" : ""}`}
+            />
           </button>
 
           {showDropdown && (
@@ -179,17 +192,35 @@ export default function AdminDashboard() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard icon={Users}        value={(users?.total       ?? 0).toLocaleString()} label="Total Users"    />
-        <StatsCard icon={ShoppingCart} value={(orders?.total      ?? 0).toLocaleString()} label="Total Orders"   />
-        <StatsCard icon={Store}        value={(users?.vendors     ?? 0).toLocaleString()} label="Total Vendors"  />
+        <StatsCard icon={Users} value={(users?.total ?? 0).toLocaleString()} label="Total Users" />
+        <StatsCard
+          icon={ShoppingCart}
+          value={(orders?.total ?? 0).toLocaleString()}
+          label="Total Orders"
+        />
+        <StatsCard
+          icon={Store}
+          value={(users?.vendors ?? 0).toLocaleString()}
+          label="Total Vendors"
+        />
         <StatsCard
           icon={DollarSign}
-          value={periodLoading ? '…' : `₦${(periodRevenue ?? revenue?.gross ?? 0).toLocaleString()}`}
+          value={
+            periodLoading ? "…" : `₦${(periodRevenue ?? revenue?.gross ?? 0).toLocaleString()}`
+          }
           label={`Revenue (${selectedPeriod})`}
         />
-        <StatsCard icon={Bike}         value={(users?.riders      ?? 0).toLocaleString()} label="Total Riders"   />
-        <StatsCard icon={HelpCircle}   value={(queries?.open      ?? 0).toLocaleString()} label="Total Queries"  />
-        <StatsCard icon={Star}         value={(ratings?.total     ?? 0).toLocaleString()} label="Total Ratings"  />
+        <StatsCard icon={Bike} value={(users?.riders ?? 0).toLocaleString()} label="Total Riders" />
+        <StatsCard
+          icon={HelpCircle}
+          value={(queries?.open ?? 0).toLocaleString()}
+          label="Total Queries"
+        />
+        <StatsCard
+          icon={Star}
+          value={(ratings?.total ?? 0).toLocaleString()}
+          label="Total Ratings"
+        />
       </div>
 
       {/* Notifications */}

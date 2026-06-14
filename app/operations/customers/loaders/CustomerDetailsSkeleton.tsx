@@ -1,7 +1,6 @@
 export function CustomerDetailsSkeleton() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-14 py-6">
-
       {/* Title row */}
       <div className="flex items-center justify-between mb-6">
         <div className="h-8 w-48 bg-gray-300 rounded animate-pulse" />

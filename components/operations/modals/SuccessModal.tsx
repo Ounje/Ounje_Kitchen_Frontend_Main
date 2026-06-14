@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
 interface SuccessModalProps {
-  isOpen:    boolean;
-  title?:    string;
-  onGoHome:  () => void;
+  isOpen: boolean;
+  title?: string;
+  onGoHome: () => void;
 }
 
 export function SuccessModal({
   isOpen,
-  title = 'Action completed successfully!',
+  title = "Action completed successfully!",
   onGoHome,
 }: SuccessModalProps) {
   if (!isOpen) return null;
@@ -16,11 +16,9 @@ export function SuccessModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+      style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
     >
-      <div
-        className="w-full max-w-sm rounded-2xl p-8 shadow-2xl space-y-6 text-center bg-[#1a3f1c]"
-      >
+      <div className="w-full max-w-sm rounded-2xl p-8 shadow-2xl space-y-6 text-center bg-[#1a3f1c]">
         {/* Check icon */}
         <div className="flex justify-center">
           <div className="w-20 h-20 rounded-full bg-[#98ef9b] flex items-center justify-center">
@@ -41,9 +39,7 @@ export function SuccessModal({
         </div>
 
         {/* Title */}
-        <p className="text-white text-base sm:text-lg font-semibold leading-snug">
-          {title}
-        </p>
+        <p className="text-white text-base sm:text-lg font-semibold leading-snug">{title}</p>
 
         {/* Go Home */}
         <button

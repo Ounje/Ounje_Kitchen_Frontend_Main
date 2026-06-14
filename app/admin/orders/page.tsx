@@ -288,8 +288,6 @@
 //   );
 // }
 
-
-
 // 'use client';
 
 // import { useState, useEffect, useCallback } from 'react';
@@ -844,41 +842,39 @@
 //   );
 // }
 
-
 //new
 
+"use client";
 
-'use client';
-
-import { useState, useEffect, useCallback } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { ChevronLeft, ChevronRight, Flag, Eye } from 'lucide-react';
-import { OrderInfoModal } from '@/components/dashboard/orders/order-info-modal';
-import { FlagConfirmModal, FlagSuccessModal } from '@/components/dashboard/orders/flag-modals';
-import { superAdminApi, type Order } from '@/lib/api/api';
+import { useState, useEffect, useCallback } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { ChevronLeft, ChevronRight, Flag, Eye } from "lucide-react";
+import { OrderInfoModal } from "@/components/dashboard/orders/order-info-modal";
+import { FlagConfirmModal, FlagSuccessModal } from "@/components/dashboard/orders/flag-modals";
+import { superAdminApi, type Order } from "@/lib/api/api";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-type OrderPeriod = 'daily' | 'monthly' | 'yearly';
-type OrderTab    = 'active' | 'delivered' | 'rejected';
+type OrderPeriod = "daily" | "monthly" | "yearly";
+type OrderTab = "active" | "delivered" | "rejected";
 
 const ITEMS_PER_PAGE = 7;
 
 // How many orders to fetch per request. Yearly needs a large window.
 const FETCH_LIMITS: Record<OrderPeriod, number> = {
-  daily:   50,
+  daily: 50,
   monthly: 300,
-  yearly:  1000,
+  yearly: 1000,
 };
 
 const TAB_CONFIG: { id: OrderTab; label: string }[] = [
-  { id: 'active',    label: 'Active Orders'            },
-  { id: 'delivered', label: 'Delivered Orders'         },
-  { id: 'rejected',  label: 'Rejected/Reported Orders' },
+  { id: "active", label: "Active Orders" },
+  { id: "delivered", label: "Delivered Orders" },
+  { id: "rejected", label: "Rejected/Reported Orders" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -888,12 +884,12 @@ const TAB_CONFIG: { id: OrderTab; label: string }[] = [
 /** Returns the start of the chosen period (midnight for daily, 1st for monthly, etc.) */
 function getPeriodStart(period: OrderPeriod): Date {
   const now = new Date();
-  if (period === 'daily') {
+  if (period === "daily") {
     const d = new Date(now);
     d.setHours(0, 0, 0, 0);
     return d;
   }
-  if (period === 'monthly') return new Date(now.getFullYear(), now.getMonth(), 1);
+  if (period === "monthly") return new Date(now.getFullYear(), now.getMonth(), 1);
   return new Date(now.getFullYear(), 0, 1); // yearly
 }
 
@@ -909,17 +905,17 @@ function filterByPeriod(orders: Order[], period: OrderPeriod): Order[] {
  *   yearly  → one group per month e.g. "January 2025"
  */
 function groupByPeriod(orders: Order[], period: OrderPeriod): [string, Order[]][] {
-  if (period === 'daily') {
-    return orders.length ? [['Today', orders]] : [];
+  if (period === "daily") {
+    return orders.length ? [["Today", orders]] : [];
   }
 
   const map = new Map<string, Order[]>();
   for (const order of orders) {
     const d = new Date(order.createdAt);
     const key =
-      period === 'monthly'
-        ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-        : d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      period === "monthly"
+        ? d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+        : d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(order);
   }
@@ -930,15 +926,15 @@ function groupByPeriod(orders: Order[], period: OrderPeriod): [string, Order[]][
 /** Derive a display-friendly order name from real backend data. */
 function getOrderName(order: Order): string {
   if (order.items?.[0]?.name) return order.items[0].name;
-  if (order.storeName)        return order.storeName;
-  if (order.vendorName)       return order.vendorName;
+  if (order.storeName) return order.storeName;
+  if (order.vendorName) return order.vendorName;
   return `Order ${order.orderNumber ?? order._id ?? order.id}`;
 }
 
 /** Derive a display image. */
 function getOrderImage(order: Order): string | null {
-  if (order.foodImage)          return order.foodImage;
-  if (order.items?.[0]?.image)  return order.items[0].image;
+  if (order.foodImage) return order.foodImage;
+  if (order.items?.[0]?.image) return order.items[0].image;
   return null;
 }
 
@@ -970,49 +966,77 @@ function OrderCardSkeleton() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Pagination({
-  page, totalPages, total, showing, onChange,
+  page,
+  totalPages,
+  total,
+  showing,
+  onChange,
 }: {
-  page: number; totalPages: number; total: number; showing: number; onChange: (p: number) => void;
+  page: number;
+  totalPages: number;
+  total: number;
+  showing: number;
+  onChange: (p: number) => void;
 }) {
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
     .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
-    .reduce<(number | '…')[]>((acc, p, i, arr) => {
-      if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push('…');
+    .reduce<(number | "…")[]>((acc, p, i, arr) => {
+      if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("…");
       acc.push(p);
       return acc;
     }, []);
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
-      <span>Displaying {showing} of {total}</span>
+      <span>
+        Displaying {showing} of {total}
+      </span>
       <div className="flex items-center gap-1 flex-wrap justify-center">
-        <PageBtn label="First"                              onClick={() => onChange(1)}            disabled={page <= 1} />
-        <PageBtn label={<ChevronLeft size={16} />}         onClick={() => onChange(page - 1)}     disabled={page <= 1} />
+        <PageBtn label="First" onClick={() => onChange(1)} disabled={page <= 1} />
+        <PageBtn
+          label={<ChevronLeft size={16} />}
+          onClick={() => onChange(page - 1)}
+          disabled={page <= 1}
+        />
         {pages.map((p, i) =>
-          p === '…' ? (
-            <span key={`e-${i}`} className="px-2">…</span>
+          p === "…" ? (
+            <span key={`e-${i}`} className="px-2">
+              …
+            </span>
           ) : (
             <button
               key={p}
               onClick={() => onChange(p as number)}
               className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                 p === page
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-secondary text-foreground border border-border'
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-secondary text-foreground border border-border"
               }`}
             >
               {p}
             </button>
           )
         )}
-        <PageBtn label={<ChevronRight size={16} />}        onClick={() => onChange(page + 1)}     disabled={page >= totalPages} />
-        <PageBtn label="Last"                              onClick={() => onChange(totalPages)}    disabled={page >= totalPages} />
+        <PageBtn
+          label={<ChevronRight size={16} />}
+          onClick={() => onChange(page + 1)}
+          disabled={page >= totalPages}
+        />
+        <PageBtn label="Last" onClick={() => onChange(totalPages)} disabled={page >= totalPages} />
       </div>
     </div>
   );
 }
 
-function PageBtn({ label, onClick, disabled }: { label: React.ReactNode; onClick: () => void; disabled: boolean }) {
+function PageBtn({
+  label,
+  onClick,
+  disabled,
+}: {
+  label: React.ReactNode;
+  onClick: () => void;
+  disabled: boolean;
+}) {
   return (
     <button
       onClick={onClick}
@@ -1029,13 +1053,17 @@ function PageBtn({ label, onClick, disabled }: { label: React.ReactNode; onClick
 // ─────────────────────────────────────────────────────────────────────────────
 
 function OrderCard({
-  order, onView, onFlag,
+  order,
+  onView,
+  onFlag,
 }: {
-  order: Order; onView: () => void; onFlag: () => void;
+  order: Order;
+  onView: () => void;
+  onFlag: () => void;
 }) {
-  const image     = getOrderImage(order);
+  const image = getOrderImage(order);
   const orderName = getOrderName(order);
-  const orderId   = order.orderNumber ?? order._id ?? order.id;
+  const orderId = order.orderNumber ?? order._id ?? order.id;
 
   return (
     <div
@@ -1058,8 +1086,8 @@ function OrderCard({
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-xl text-black truncate">{orderName}</h3>
             <p className="text-base text-black">
-              <span className="font-semibold">Total Amount:</span>{' '}
-              ₦{(order.totalAmount ?? 0).toLocaleString()}
+              <span className="font-semibold">Total Amount:</span> ₦
+              {(order.totalAmount ?? 0).toLocaleString()}
             </p>
             {order.isReported && (
               <span className="inline-block mt-1 text-xs font-semibold bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
@@ -1071,11 +1099,11 @@ function OrderCard({
           {/* Vendor + order ID (hidden on small screens) */}
           <div className="flex-1 min-w-0 hidden md:block">
             <p className="text-base text-black">
-              <span className="font-semibold">Vendor:</span>{' '}
-              {order.vendorName ?? order.storeName ?? '—'}
+              <span className="font-semibold">Vendor:</span>{" "}
+              {order.vendorName ?? order.storeName ?? "—"}
             </p>
             <p className="text-base text-black">
-              <span className="font-semibold">Order ID:</span>{' '}
+              <span className="font-semibold">Order ID:</span>{" "}
               <span className="font-mono text-sm">{orderId}</span>
             </p>
           </div>
@@ -1083,17 +1111,23 @@ function OrderCard({
           {/* Action buttons */}
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={(e) => { e.stopPropagation(); onView(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onView();
+              }}
               className="p-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity"
               title="View order details"
             >
               <Eye size={18} />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); onFlag(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFlag();
+              }}
               disabled={order.isReported}
               className="p-2 bg-accent text-accent-foreground rounded-full hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-              title={order.isReported ? 'Already flagged' : 'Flag order'}
+              title={order.isReported ? "Already flagged" : "Flag order"}
             >
               <Flag size={18} />
             </button>
@@ -1109,21 +1143,21 @@ function OrderCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function OrdersPage() {
-  const [period,    setPeriod]    = useState<OrderPeriod>('daily');
-  const [activeTab, setActiveTab] = useState<OrderTab>('active');
-  const [page,      setPage]      = useState(1);
+  const [period, setPeriod] = useState<OrderPeriod>("daily");
+  const [activeTab, setActiveTab] = useState<OrderTab>("active");
+  const [page, setPage] = useState(1);
 
   // Raw orders from the API — keyed by tab so switching tabs is instant
   const [cache, setCache] = useState<Partial<Record<OrderTab, Order[]>>>({});
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Modal state
-  const [selectedOrder,    setSelectedOrder]    = useState<Order | null>(null);
-  const [showOrderModal,   setShowOrderModal]   = useState(false);
-  const [showFlagConfirm,  setShowFlagConfirm]  = useState(false);
-  const [showFlagSuccess,  setShowFlagSuccess]  = useState(false);
-  const [flagging,         setFlagging]         = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [showFlagConfirm, setShowFlagConfirm] = useState(false);
+  const [showFlagSuccess, setShowFlagSuccess] = useState(false);
+  const [flagging, setFlagging] = useState(false);
 
   // ── Fetch ────────────────────────────────────────────────────────────────
   //
@@ -1145,12 +1179,12 @@ export default function OrdersPage() {
     try {
       const res = await superAdminApi.orders.getAll({
         status: tab,
-        page:   1,
-        limit:  FETCH_LIMITS[currentPeriod],
+        page: 1,
+        limit: FETCH_LIMITS[currentPeriod],
       });
       setCache((prev) => ({ ...prev, [tab]: res.data ?? [] }));
     } catch (err: any) {
-      const msg = err?.message || 'Failed to load orders';
+      const msg = err?.message || "Failed to load orders";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -1165,12 +1199,12 @@ export default function OrdersPage() {
 
   // ── Derived data ─────────────────────────────────────────────────────────
 
-  const allOrders      = cache[activeTab] ?? [];
+  const allOrders = cache[activeTab] ?? [];
   const periodFiltered = filterByPeriod(allOrders, period);
-  const grouped        = groupByPeriod(periodFiltered, period); // [string, Order[]][]
-  const flatOrders     = grouped.flatMap(([, orders]) => orders);
-  const totalPages     = Math.max(1, Math.ceil(flatOrders.length / ITEMS_PER_PAGE));
-  const startIndex     = (page - 1) * ITEMS_PER_PAGE;
+  const grouped = groupByPeriod(periodFiltered, period); // [string, Order[]][]
+  const flatOrders = grouped.flatMap(([, orders]) => orders);
+  const totalPages = Math.max(1, Math.ceil(flatOrders.length / ITEMS_PER_PAGE));
+  const startIndex = (page - 1) * ITEMS_PER_PAGE;
 
   // Build a paginated subset of the grouped structure (groups stay intact across page boundary)
   const pagedGrouped = (() => {
@@ -1227,10 +1261,9 @@ export default function OrdersPage() {
     if (!selectedOrder) return;
     setFlagging(true);
     try {
-      await superAdminApi.orders.flag(
-        selectedOrder._id ?? selectedOrder.id,
-        { reason: 'Flagged for review by Super Admin' }
-      );
+      await superAdminApi.orders.flag(selectedOrder._id ?? selectedOrder.id, {
+        reason: "Flagged for review by Super Admin",
+      });
 
       // Optimistically update cache so card shows "Reported" badge immediately
       setCache((prev) => {
@@ -1247,9 +1280,9 @@ export default function OrdersPage() {
 
       setShowFlagConfirm(false);
       setShowFlagSuccess(true);
-      toast.success('Order flagged for review');
+      toast.success("Order flagged for review");
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to flag order');
+      toast.error(err?.message || "Failed to flag order");
       setShowFlagConfirm(false);
     } finally {
       setFlagging(false);
@@ -1268,7 +1301,6 @@ export default function OrdersPage() {
   return (
     <>
       <div className="space-y-6">
-
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">Orders</h1>
@@ -1291,8 +1323,8 @@ export default function OrdersPage() {
               onClick={() => handleTabChange(tab.id)}
               className={`px-6 py-3 rounded-lg font-semibold transition-colors cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-[#98EF9B] text-secondary-foreground hover:opacity-90'
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-[#98EF9B] text-secondary-foreground hover:opacity-90"
               }`}
             >
               {tab.label}
@@ -1319,16 +1351,18 @@ export default function OrdersPage() {
         <div className="space-y-6">
           {loading ? (
             <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => <OrderCardSkeleton key={i} />)}
+              {Array.from({ length: 5 }).map((_, i) => (
+                <OrderCardSkeleton key={i} />
+              ))}
             </div>
           ) : flatOrders.length === 0 ? (
             <div className="text-center py-16 bg-secondary/40 rounded-xl border border-border">
               <p className="text-muted-foreground text-lg">
-                No {activeTab} orders found{period !== 'yearly' ? ' for this period' : ''}.
+                No {activeTab} orders found{period !== "yearly" ? " for this period" : ""}.
               </p>
-              {period !== 'yearly' && (
+              {period !== "yearly" && (
                 <button
-                  onClick={() => handlePeriodChange('yearly')}
+                  onClick={() => handlePeriodChange("yearly")}
                   className="mt-3 text-sm text-primary underline underline-offset-2"
                 >
                   Try viewing all time
@@ -1363,7 +1397,10 @@ export default function OrdersPage() {
               totalPages={totalPages}
               total={flatOrders.length}
               showing={showingCount}
-              onChange={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              onChange={(p) => {
+                setPage(p);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
             />
           </div>
         )}
@@ -1386,9 +1423,7 @@ export default function OrdersPage() {
         />
       )}
 
-      {showFlagSuccess && (
-        <FlagSuccessModal onClose={handleSuccessClose} />
-      )}
+      {showFlagSuccess && <FlagSuccessModal onClose={handleSuccessClose} />}
     </>
   );
 }

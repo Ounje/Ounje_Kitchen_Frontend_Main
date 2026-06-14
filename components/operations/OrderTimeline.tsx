@@ -2,18 +2,18 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { 
-  CheckCircle2, 
-  Circle, 
-  Clock, 
-  Package, 
-  CreditCard, 
-  Store, 
-  ChefHat, 
-  Bike, 
-  MapPin, 
-  ShieldCheck, 
-  Flag 
+import {
+  CheckCircle2,
+  Circle,
+  Clock,
+  Package,
+  CreditCard,
+  Store,
+  ChefHat,
+  Bike,
+  MapPin,
+  ShieldCheck,
+  Flag,
 } from "lucide-react";
 
 interface TimelineStepProps {
@@ -25,56 +25,87 @@ interface TimelineStepProps {
   isLast?: boolean;
 }
 
-const TimelineStep = ({ title, description, status, timestamp, icon, isLast }: TimelineStepProps) => {
+const TimelineStep = ({
+  title,
+  description,
+  status,
+  timestamp,
+  icon,
+  isLast,
+}: TimelineStepProps) => {
   const isDone = status === "done";
   const isCurrent = status === "current";
 
   return (
     <div className="flex gap-4 min-h-[80px]">
       <div className="flex flex-col items-center">
-        <div 
+        <div
           className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm",
-            isDone && title.includes("Cancelled") ? "bg-red-600 border-red-600 dark:border-red-500 text-white" :
-            isDone && title.includes("Declined") ? "bg-red-600 border-red-600 dark:border-red-500 text-white" :
-            isDone ? "bg-[#1a3f1c] dark:bg-[#98ef9b] border-[#1a3f1c] dark:border-[#98ef9b] text-white dark:text-[#1a3f1c]" : 
-            isCurrent ? "bg-[#98ef9b] dark:bg-[#1a3f1c] border-[#1a3f1c] dark:border-[#98ef9b] text-[#1a3f1c] dark:text-[#98ef9b] animate-pulse" : 
-            "bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-400 dark:text-slate-500"
+            isDone && title.includes("Cancelled")
+              ? "bg-red-600 border-red-600 dark:border-red-500 text-white"
+              : isDone && title.includes("Declined")
+                ? "bg-red-600 border-red-600 dark:border-red-500 text-white"
+                : isDone
+                  ? "bg-[#1a3f1c] dark:bg-[#98ef9b] border-[#1a3f1c] dark:border-[#98ef9b] text-white dark:text-[#1a3f1c]"
+                  : isCurrent
+                    ? "bg-[#98ef9b] dark:bg-[#1a3f1c] border-[#1a3f1c] dark:border-[#98ef9b] text-[#1a3f1c] dark:text-[#98ef9b] animate-pulse"
+                    : "bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-400 dark:text-slate-500"
           )}
         >
           {icon}
         </div>
         {!isLast && (
-          <div 
+          <div
             className={cn(
               "w-0.5 flex-1 my-1 transition-all duration-500",
-              isDone && (title.includes("Cancelled") || title.includes("Declined")) ? "bg-red-600 dark:bg-red-500" :
-              isDone ? "bg-[#1a3f1c] dark:bg-[#98ef9b]" : "bg-gray-200 dark:bg-slate-700"
+              isDone && (title.includes("Cancelled") || title.includes("Declined"))
+                ? "bg-red-600 dark:bg-red-500"
+                : isDone
+                  ? "bg-[#1a3f1c] dark:bg-[#98ef9b]"
+                  : "bg-gray-200 dark:bg-slate-700"
             )}
           />
         )}
       </div>
       <div className="flex-1 pb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
-          <h3 className={cn(
-            "font-bold text-sm sm:text-base tracking-tight",
-            isDone && (title.includes("Cancelled") || title.includes("Declined")) ? "text-red-700 dark:text-red-500" :
-            isDone ? "text-[#1a3f1c] dark:text-[#98ef9b]" : isCurrent ? "text-[#1a3f1c] dark:text-[#98ef9b]" : "text-gray-400 dark:text-slate-500"
-          )}>
+          <h3
+            className={cn(
+              "font-bold text-sm sm:text-base tracking-tight",
+              isDone && (title.includes("Cancelled") || title.includes("Declined"))
+                ? "text-red-700 dark:text-red-500"
+                : isDone
+                  ? "text-[#1a3f1c] dark:text-[#98ef9b]"
+                  : isCurrent
+                    ? "text-[#1a3f1c] dark:text-[#98ef9b]"
+                    : "text-gray-400 dark:text-slate-500"
+            )}
+          >
             {title}
           </h3>
           {timestamp && (
             <span className="text-[10px] sm:text-xs text-gray-400 dark:text-slate-400 font-medium whitespace-nowrap">
               {new Date(timestamp).toLocaleString("en-NG", {
-                day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: true
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
               })}
             </span>
           )}
         </div>
-        <p className={cn(
-          "text-xs sm:text-sm mt-0.5",
-          isDone ? "text-gray-600 dark:text-slate-300" : isCurrent ? "text-[#1a3f1c] dark:text-[#98ef9b] font-medium" : "text-gray-400 dark:text-slate-500"
-        )}>
+        <p
+          className={cn(
+            "text-xs sm:text-sm mt-0.5",
+            isDone
+              ? "text-gray-600 dark:text-slate-300"
+              : isCurrent
+                ? "text-[#1a3f1c] dark:text-[#98ef9b] font-medium"
+                : "text-gray-400 dark:text-slate-500"
+          )}
+        >
           {description}
         </p>
       </div>
@@ -89,10 +120,14 @@ export function OrderTimeline({ order }: { order: any }) {
   const paymentStatus = (order.paymentStatus || "").toLowerCase();
 
   // Helper to determine step status
-  const getStepStatus = (stepIndex: number, condition: boolean, currentCondition: boolean): "done" | "current" | "pending" => {
+  const getStepStatus = (
+    stepIndex: number,
+    condition: boolean,
+    currentCondition: boolean
+  ): "done" | "current" | "pending" => {
     if (status === "cancelled" || status === "declined") {
-        if (condition) return "done";
-        return "pending"; // never current if cancelled
+      if (condition) return "done";
+      return "pending"; // never current if cancelled
     }
     if (condition) return "done";
     if (currentCondition) return "current";
@@ -109,7 +144,10 @@ export function OrderTimeline({ order }: { order: any }) {
     },
     {
       title: "Payment Pending",
-      description: paymentStatus === "paid" ? "Payment has been confirmed." : "Waiting for payment confirmation.",
+      description:
+        paymentStatus === "paid"
+          ? "Payment has been confirmed."
+          : "Waiting for payment confirmation.",
       icon: <Clock className="w-5 h-5" />,
       status: getStepStatus(1, paymentStatus === "paid", paymentStatus !== "paid"),
       timestamp: order.createdAt, // Close enough to creation
@@ -125,49 +163,78 @@ export function OrderTimeline({ order }: { order: any }) {
       title: "Vendor Accepted",
       description: "Vendor has acknowledged the order.",
       icon: <Store className="w-5 h-5" />,
-      status: getStepStatus(3, !!order.acceptedAt || ["preparing", "ready", "picked_up", "riding", "delivered"].includes(status), status === "pending" && paymentStatus === "paid"),
+      status: getStepStatus(
+        3,
+        !!order.acceptedAt ||
+          ["preparing", "ready", "picked_up", "riding", "delivered"].includes(status),
+        status === "pending" && paymentStatus === "paid"
+      ),
       timestamp: order.acceptedAt,
     },
     {
       title: "Vendor Preparing",
       description: "Kitchen is preparing your meal.",
       icon: <ChefHat className="w-5 h-5" />,
-      status: getStepStatus(4, !!order.preparingAt || ["ready", "picked_up", "riding", "delivered"].includes(status), status === "preparing"),
+      status: getStepStatus(
+        4,
+        !!order.preparingAt || ["ready", "picked_up", "riding", "delivered"].includes(status),
+        status === "preparing"
+      ),
       timestamp: order.preparingAt,
     },
     {
       title: "Order Ready",
       description: "Meal is ready for pickup.",
       icon: <CheckCircle2 className="w-5 h-5" />,
-      status: getStepStatus(5, !!order.readyAt || ["picked_up", "riding", "delivered"].includes(status), status === "ready"),
+      status: getStepStatus(
+        5,
+        !!order.readyAt || ["picked_up", "riding", "delivered"].includes(status),
+        status === "ready"
+      ),
       timestamp: order.readyAt,
     },
     {
       title: "Rider Assigned",
       description: order.rider ? `Rider has been assigned.` : "Waiting for rider assignment.",
       icon: <Bike className="w-5 h-5" />,
-      status: getStepStatus(6, !!order.riderAssignedAt || !!order.rider, status === "ready" && !order.rider),
+      status: getStepStatus(
+        6,
+        !!order.riderAssignedAt || !!order.rider,
+        status === "ready" && !order.rider
+      ),
       timestamp: order.riderAssignedAt,
     },
     {
       title: "Order Picked Up",
       description: "Rider has collected the order from vendor.",
       icon: <Package className="w-5 h-5" />,
-      status: getStepStatus(7, !!order.pickedUpAt || ["riding", "delivered"].includes(status), status === "picked_up"),
+      status: getStepStatus(
+        7,
+        !!order.pickedUpAt || ["riding", "delivered"].includes(status),
+        status === "picked_up"
+      ),
       timestamp: order.pickedUpAt,
     },
     {
       title: "On The Way",
       description: "Rider is en route to customer location.",
       icon: <MapPin className="w-5 h-5" />,
-      status: getStepStatus(8, !!order.inTransitAt || status === "riding" || status === "delivered", status === "riding"),
+      status: getStepStatus(
+        8,
+        !!order.inTransitAt || status === "riding" || status === "delivered",
+        status === "riding"
+      ),
       timestamp: order.inTransitAt,
     },
     {
       title: "Delivery Code Sent",
       description: "Verification code sent to customer.",
       icon: <ShieldCheck className="w-5 h-5" />,
-      status: getStepStatus(9, !!order.codeSentAt || status === "delivered", status === "riding" && !!order.deliveryOtpSentAt),
+      status: getStepStatus(
+        9,
+        !!order.codeSentAt || status === "delivered",
+        status === "riding" && !!order.deliveryOtpSentAt
+      ),
       timestamp: order.codeSentAt || order.deliveryOtpSentAt,
     },
     {
@@ -190,7 +257,8 @@ export function OrderTimeline({ order }: { order: any }) {
   if (status === "cancelled" || status === "declined") {
     steps.push({
       title: `Order ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-      description: order.cancellationReason || order.declineReason || "The order journey was stopped.",
+      description:
+        order.cancellationReason || order.declineReason || "The order journey was stopped.",
       icon: <Circle className="w-5 h-5" />,
       status: "done" as const,
       timestamp: order.cancelledAt || order.declinedAt,
@@ -201,8 +269,12 @@ export function OrderTimeline({ order }: { order: any }) {
   return (
     <div className="py-2 px-1 max-w-2xl mx-auto">
       <div className="mb-8">
-        <h2 className="text-xl font-black text-[#1a3f1c] dark:text-gray-50 mb-1 tracking-tight">Order Journey</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 italic">Track the real-time progress of this order from start to finish.</p>
+        <h2 className="text-xl font-black text-[#1a3f1c] dark:text-gray-50 mb-1 tracking-tight">
+          Order Journey
+        </h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 italic">
+          Track the real-time progress of this order from start to finish.
+        </p>
       </div>
       <div className="space-y-0 text-left">
         {steps.map((step, index) => (

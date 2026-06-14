@@ -29,28 +29,28 @@ import { useRouter } from "next/navigation";
 
 // ── Types matching dashboardController response exactly ───────────────────────
 interface DashboardOverview {
-  customers:       number;
-  vendors:         number;
-  riders:          number;
-  orders:          number;
-  activeOrders:    number;
+  customers: number;
+  vendors: number;
+  riders: number;
+  orders: number;
+  activeOrders: number;
   deliveredOrders: number;
-  ratings:         number;
-  queries:         number;
+  ratings: number;
+  queries: number;
 }
 
 interface DashboardAlerts {
   suspendedCustomers: number;
-  suspendedVendors:   number;
-  suspendedRiders:    number;
-  openQueries:        number;
+  suspendedVendors: number;
+  suspendedRiders: number;
+  openQueries: number;
 }
 
 interface DashboardData {
-  overview:       DashboardOverview;
-  recentActivity: any[];   // populated Order documents
-  alerts:         DashboardAlerts;
-  orderTrends:    any[];   // { date, successful, cancelled }
+  overview: DashboardOverview;
+  recentActivity: any[]; // populated Order documents
+  alerts: DashboardAlerts;
+  orderTrends: any[]; // { date, successful, cancelled }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -71,12 +71,10 @@ function resolveVendorName(order: any): string {
 
 function statusBadge(status: string) {
   const s = (status ?? "").toLowerCase();
-  if (["delivered", "completed"].includes(s))
-    return "bg-green-100 text-green-800";
+  if (["delivered", "completed"].includes(s)) return "bg-green-100 text-green-800";
   if (["pending", "preparing", "in_transit", "assigned"].includes(s))
     return "bg-yellow-100 text-yellow-800";
-  if (["cancelled", "declined"].includes(s))
-    return "bg-red-100 text-red-800";
+  if (["cancelled", "declined"].includes(s)) return "bg-red-100 text-red-800";
   return "bg-blue-100 text-blue-800";
 }
 
@@ -84,7 +82,7 @@ function timeAgo(dateStr: string): string {
   if (!dateStr) return "";
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1)  return "just now";
+  if (m < 1) return "just now";
   if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
@@ -93,9 +91,17 @@ function timeAgo(dateStr: string): string {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 function StatCard({
-  title, value, sub, icon: Icon, bg,
+  title,
+  value,
+  sub,
+  icon: Icon,
+  bg,
 }: {
-  title: string; value: number | string; sub: string; icon: any; bg: string;
+  title: string;
+  value: number | string;
+  sub: string;
+  icon: any;
+  bg: string;
 }) {
   return (
     <Card className="border border-border rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 bg-surface relative overflow-hidden group">
@@ -136,7 +142,10 @@ function ActivityTable({ orders, onView }: { orders: any[]; onView: (id: string)
         <thead>
           <tr className="border-b border-gray-100 bg-gray-50/80">
             {["Order", "Customer", "Vendor", "Status", "Time", ""].map((h, i) => (
-              <th key={i} className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+              <th
+                key={i}
+                className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400"
+              >
                 {h}
               </th>
             ))}
@@ -144,7 +153,10 @@ function ActivityTable({ orders, onView }: { orders: any[]; onView: (id: string)
         </thead>
         <tbody>
           {orders.map((order: any, i: number) => (
-            <tr key={order._id ?? i} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
+            <tr
+              key={order._id ?? i}
+              className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors"
+            >
               <td className="px-4 py-3.5">
                 <span className="font-mono text-[11px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
                   #{order.orderNumber ?? order._id?.slice(-6)?.toUpperCase() ?? "—"}
@@ -157,7 +169,9 @@ function ActivityTable({ orders, onView }: { orders: any[]; onView: (id: string)
                 {resolveVendorName(order)}
               </td>
               <td className="px-4 py-3.5">
-                <span className={`text-[10px] uppercase px-2 py-0.5 rounded-full font-black tracking-wider ${statusBadge(order.status)}`}>
+                <span
+                  className={`text-[10px] uppercase px-2 py-0.5 rounded-full font-black tracking-wider ${statusBadge(order.status)}`}
+                >
                   {order.status ?? "pending"}
                 </span>
               </td>
@@ -204,9 +218,9 @@ export default function OperationsDashboardPage() {
   const router = useRouter();
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
 
-  const [data,    setData]    = useState<DashboardData | null>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!shouldRender) return;
@@ -223,10 +237,10 @@ export default function OperationsDashboardPage() {
       const res: any = await operationsService.getDashboard();
       const d = res?.data ?? res;
       setData({
-        overview:       d?.overview       ?? {},
+        overview: d?.overview ?? {},
         recentActivity: d?.recentActivity ?? [],
-        alerts:         d?.alerts         ?? {},
-        orderTrends:    d?.orderTrends    ?? [],
+        alerts: d?.alerts ?? {},
+        orderTrends: d?.orderTrends ?? [],
       });
     } catch (err: any) {
       setError(err?.message || "Failed to load dashboard");
@@ -253,8 +267,11 @@ export default function OperationsDashboardPage() {
           <div>
             <p className="font-bold text-red-900">Error loading dashboard</p>
             <p className="text-sm text-red-700 mt-1">{error}</p>
-            <button type="button" onClick={fetchDashboard}
-              className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-900">
+            <button
+              type="button"
+              onClick={fetchDashboard}
+              className="mt-3 text-sm font-medium text-red-700 underline hover:text-red-900"
+            >
               Try again
             </button>
           </div>
@@ -269,31 +286,31 @@ export default function OperationsDashboardPage() {
   const stats = [
     {
       title: "Today's Orders",
-      value: overview.orders        ?? 0,
-      sub:   `${overview.activeOrders ?? 0} active · ${overview.deliveredOrders ?? 0} delivered`,
-      icon:  ShoppingCart,
-      bg:    "#98ef9b",
+      value: overview.orders ?? 0,
+      sub: `${overview.activeOrders ?? 0} active · ${overview.deliveredOrders ?? 0} delivered`,
+      icon: ShoppingCart,
+      bg: "#98ef9b",
     },
     {
       title: "Total Vendors",
-      value: overview.vendors       ?? 0,
-      sub:   `${alerts.suspendedVendors ?? 0} suspended`,
-      icon:  Store,
-      bg:    "#98ef9b",
+      value: overview.vendors ?? 0,
+      sub: `${alerts.suspendedVendors ?? 0} suspended`,
+      icon: Store,
+      bg: "#98ef9b",
     },
     {
       title: "Total Riders",
-      value: overview.riders        ?? 0,
-      sub:   `${alerts.suspendedRiders ?? 0} suspended`,
-      icon:  Bike,
-      bg:    "#98ef9b",
+      value: overview.riders ?? 0,
+      sub: `${alerts.suspendedRiders ?? 0} suspended`,
+      icon: Bike,
+      bg: "#98ef9b",
     },
     {
       title: "Total Customers",
-      value: overview.customers     ?? 0,
-      sub:   `${alerts.suspendedCustomers ?? 0} suspended`,
-      icon:  Users,
-      bg:    "#98ef9b",
+      value: overview.customers ?? 0,
+      sub: `${alerts.suspendedCustomers ?? 0} suspended`,
+      icon: Users,
+      bg: "#98ef9b",
     },
   ];
 
@@ -302,7 +319,9 @@ export default function OperationsDashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-8 mb-4">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Dashboard Overview</h1>
+          <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+            Dashboard Overview
+          </h1>
           <p className="text-sm font-medium text-muted-foreground mt-1">
             {overview.activeOrders ?? 0} active orders right now. Monitor operations live.
           </p>
@@ -311,7 +330,9 @@ export default function OperationsDashboardPage() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((s, i) => <StatCard key={i} {...s} />)}
+        {stats.map((s, i) => (
+          <StatCard key={i} {...s} />
+        ))}
       </div>
 
       {/* Orders Trend Chart */}
@@ -323,7 +344,9 @@ export default function OperationsDashboardPage() {
                 <LineChartIcon className="w-5 h-5 text-[#1a3f1c]" />
                 Order Trends
               </h2>
-              <p className="text-xs text-muted-foreground">Successful vs Cancelled orders (last 7 days)</p>
+              <p className="text-xs text-muted-foreground">
+                Successful vs Cancelled orders (last 7 days)
+              </p>
             </div>
             <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest">
               <div className="flex items-center gap-1.5">
@@ -344,50 +367,60 @@ export default function OperationsDashboardPage() {
                 <p className="text-sm font-medium">No order data for the last 7 days</p>
               </div>
             ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={orderTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorSuc" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1a3f1c" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#1a3f1c" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorCan" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f87171" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                <XAxis
-                  dataKey="date"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: 600 }}
-                  dy={10}
-                  tickFormatter={(val) => new Date(val).toLocaleDateString("en-US", { weekday: "short" })}
-                />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600 }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}
-                  labelStyle={{ fontWeight: "bold", fontSize: "12px", marginBottom: "4px" }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="successful"
-                  stroke="#1a3f1c"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorSuc)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="cancelled"
-                  stroke="#f87171"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorCan)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={orderTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorSuc" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#1a3f1c" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#1a3f1c" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorCan" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f87171" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                  <XAxis
+                    dataKey="date"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 600 }}
+                    dy={10}
+                    tickFormatter={(val) =>
+                      new Date(val).toLocaleDateString("en-US", { weekday: "short" })
+                    }
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 600 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "none",
+                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                    }}
+                    labelStyle={{ fontWeight: "bold", fontSize: "12px", marginBottom: "4px" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="successful"
+                    stroke="#1a3f1c"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorSuc)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="cancelled"
+                    stroke="#f87171"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorCan)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             )}
           </div>
         </CardContent>
@@ -395,7 +428,6 @@ export default function OperationsDashboardPage() {
 
       {/* Activity + Alerts grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
         {/* Recent Activity — table, takes 2 columns */}
         <Card className="lg:col-span-2 border border-border rounded-2xl shadow-sm bg-surface overflow-hidden">
           <CardContent className="p-0">
@@ -435,16 +467,40 @@ export default function OperationsDashboardPage() {
                   <h2 className="text-sm font-bold text-amber-800">Alerts & Warnings</h2>
                 </div>
                 <span className="text-xs font-black text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">
-                  {(alerts.suspendedCustomers ?? 0) + (alerts.suspendedVendors ?? 0) + (alerts.suspendedRiders ?? 0) + (alerts.openQueries ?? 0)} total
+                  {(alerts.suspendedCustomers ?? 0) +
+                    (alerts.suspendedVendors ?? 0) +
+                    (alerts.suspendedRiders ?? 0) +
+                    (alerts.openQueries ?? 0)}{" "}
+                  total
                 </span>
               </div>
 
               {/* Alert rows */}
               {[
-                { label: "Suspended Customers", count: alerts.suspendedCustomers ?? 0, bar: "bg-red-500",    path: "/operations/customers" },
-                { label: "Suspended Vendors",   count: alerts.suspendedVendors   ?? 0, bar: "bg-orange-500", path: "/operations/vendors"   },
-                { label: "Suspended Riders",    count: alerts.suspendedRiders    ?? 0, bar: "bg-yellow-500", path: "/operations/riders"    },
-                { label: "Open Queries",         count: alerts.openQueries        ?? 0, bar: "bg-blue-500",   path: "/operations/orders"    },
+                {
+                  label: "Suspended Customers",
+                  count: alerts.suspendedCustomers ?? 0,
+                  bar: "bg-red-500",
+                  path: "/operations/customers",
+                },
+                {
+                  label: "Suspended Vendors",
+                  count: alerts.suspendedVendors ?? 0,
+                  bar: "bg-orange-500",
+                  path: "/operations/vendors",
+                },
+                {
+                  label: "Suspended Riders",
+                  count: alerts.suspendedRiders ?? 0,
+                  bar: "bg-yellow-500",
+                  path: "/operations/riders",
+                },
+                {
+                  label: "Open Queries",
+                  count: alerts.openQueries ?? 0,
+                  bar: "bg-blue-500",
+                  path: "/operations/orders",
+                },
               ].map((item, i) => (
                 <button
                   key={i}
@@ -454,9 +510,13 @@ export default function OperationsDashboardPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-1 h-7 rounded-full ${item.bar}`} />
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{item.label}</span>
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                      {item.label}
+                    </span>
                   </div>
-                  <span className={`text-xs font-black px-2.5 py-1 rounded-full text-white ${item.count > 0 ? item.bar : "bg-gray-300"}`}>
+                  <span
+                    className={`text-xs font-black px-2.5 py-1 rounded-full text-white ${item.count > 0 ? item.bar : "bg-gray-300"}`}
+                  >
                     {item.count}
                   </span>
                 </button>
@@ -467,7 +527,9 @@ export default function OperationsDashboardPage() {
           {/* Platform Ratings */}
           <Card className="border border-border rounded-2xl shadow-sm overflow-hidden bg-[#1a3f1c]">
             <CardContent className="p-5">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-2">Platform Ratings</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-2">
+                Platform Ratings
+              </p>
               <p className="text-4xl font-black text-white tracking-tight">
                 {(overview.ratings ?? 0).toLocaleString()}
               </p>

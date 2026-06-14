@@ -11,9 +11,9 @@ export function ModalWatermark() {
           key={row}
           className="absolute flex gap-10 whitespace-nowrap"
           style={{
-            transform: 'rotate(-30deg)',
+            transform: "rotate(-30deg)",
             top: `${row * 80 - 40}px`,
-            left: '-60px',
+            left: "-60px",
           }}
         >
           {[...Array(6)].map((_, col) => (

@@ -20,24 +20,29 @@ function getDateRange(period: Period): { dateFrom?: string; dateTo?: string } {
   switch (period) {
     case "Daily":
       from = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      to   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      to = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       break;
     case "Weekly": {
       const day = now.getDay();
       const diff = day === 0 ? -6 : 1 - day;
-      from = new Date(now); from.setDate(now.getDate() + diff); from.setHours(0,0,0,0);
-      to   = new Date(from); to.setDate(from.getDate() + 6);    to.setHours(23,59,59,999);
+      from = new Date(now);
+      from.setDate(now.getDate() + diff);
+      from.setHours(0, 0, 0, 0);
+      to = new Date(from);
+      to.setDate(from.getDate() + 6);
+      to.setHours(23, 59, 59, 999);
       break;
     }
     case "Monthly":
       from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-      to   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
       break;
     case "Yearly":
       from = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
-      to   = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      to = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
       break;
-    default: return {};
+    default:
+      return {};
   }
   return { dateFrom: from?.toISOString(), dateTo: to?.toISOString() };
 }
@@ -46,11 +51,16 @@ function periodLabel(period: Period): string {
   const now = new Date();
   switch (period) {
     case "Daily":
-      return now.toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+      return now.toLocaleDateString("en-NG", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
     case "Weekly": {
       const { dateFrom, dateTo } = getDateRange("Weekly");
       const f = new Date(dateFrom || "");
-      const t = new Date(dateTo  || "");
+      const t = new Date(dateTo || "");
       return `${f.toLocaleDateString("en-NG", { day: "numeric", month: "short" })} – ${t.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}`;
     }
     case "Monthly":
@@ -75,7 +85,13 @@ function safeStr(val: any, fallback = "—"): string {
 }
 
 function resolveOrderName(order: any): string {
-  return order.customer?.user?.name ?? order.customer?.name ?? order.customerName ?? order.orderName ?? "—";
+  return (
+    order.customer?.user?.name ??
+    order.customer?.name ??
+    order.customerName ??
+    order.orderName ??
+    "—"
+  );
 }
 function resolveVendorName(order: any): string {
   return safeStr(order.vendor?.name ?? order.vendor?.businessName ?? order.vendorName);
@@ -85,40 +101,51 @@ function resolveRiderName(order: any): string {
   const r = order.rider;
   return safeStr(
     r.user?.name ??
-    (`${r.firstName ?? ""} ${r.lastName ?? ""}`.trim() || undefined) ??
-    order.riderName
+      (`${r.firstName ?? ""} ${r.lastName ?? ""}`.trim() || undefined) ??
+      order.riderName
   );
 }
 
 function statusColor(status: string): string {
   const s = (status ?? "").toLowerCase();
-  if (["delivered","successful","completed"].includes(s))
+  if (["delivered", "successful", "completed"].includes(s))
     return "bg-green-100 text-green-700 border-green-200";
-  if (["cancelled","failed"].includes(s))
-    return "bg-red-100 text-red-700 border-red-200";
-  if (["pending"].includes(s))
-    return "bg-yellow-100 text-yellow-700 border-yellow-200";
+  if (["cancelled", "failed"].includes(s)) return "bg-red-100 text-red-700 border-red-200";
+  if (["pending"].includes(s)) return "bg-yellow-100 text-yellow-700 border-yellow-200";
   return "bg-gray-100 text-gray-600 border-gray-200";
 }
 
 function formatDate(d: string) {
   return new Date(d).toLocaleString("en-NG", {
-    day: "numeric", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit", hour12: true,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
   });
 }
 
 // ── Export helpers ────────────────────────────────────────────────────────────
 function exportCSV(orders: any[], period: Period) {
-  const headers = ["Order ID","Customer","Vendor","Rider","Zone","Status","Total (NGN)","Date"];
-  const rows = orders.map(o => [
+  const headers = [
+    "Order ID",
+    "Customer",
+    "Vendor",
+    "Rider",
+    "Zone",
+    "Status",
+    "Total (NGN)",
+    "Date",
+  ];
+  const rows = orders.map((o) => [
     o.orderNumber ?? o._id ?? "",
     resolveOrderName(o),
     resolveVendorName(o),
     resolveRiderName(o),
     safeStr(o.zone),
     o.status ?? "",
-    (o.totalFee ?? o.total ?? o.totalPrice ?? 0),
+    o.totalFee ?? o.total ?? o.totalPrice ?? 0,
     o.createdAt ? new Date(o.createdAt).toLocaleString("en-NG") : "",
   ]);
 
@@ -128,20 +155,22 @@ function exportCSV(orders: any[], period: Period) {
     headers,
     ...rows,
   ]
-    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
     .join("\n");
 
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href     = url;
-  a.download = `orders_${period.toLowerCase()}_${new Date().toISOString().slice(0,10)}.csv`;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `orders_${period.toLowerCase()}_${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
 function exportPDF(orders: any[], period: Period) {
-  const rows = orders.map((o, i) => `
+  const rows = orders
+    .map(
+      (o, i) => `
     <tr>
       <td>${i + 1}</td>
       <td>${o.orderNumber ?? o._id ?? "—"}</td>
@@ -151,17 +180,19 @@ function exportPDF(orders: any[], period: Period) {
       <td>${safeStr(o.zone)}</td>
       <td style="text-align:center">
         <span style="padding:2px 8px;border-radius:4px;font-size:11px;background:${
-          ["delivered","successful","completed"].includes((o.status ?? "").toLowerCase())
+          ["delivered", "successful", "completed"].includes((o.status ?? "").toLowerCase())
             ? "#d1fae5;color:#065f46"
-            : ["cancelled","failed"].includes((o.status ?? "").toLowerCase())
-            ? "#fee2e2;color:#991b1b"
-            : "#fef9c3;color:#713f12"
+            : ["cancelled", "failed"].includes((o.status ?? "").toLowerCase())
+              ? "#fee2e2;color:#991b1b"
+              : "#fef9c3;color:#713f12"
         }">${o.status ?? "—"}</span>
       </td>
       <td style="text-align:right">${fmt(o.totalFee ?? o.total ?? o.totalPrice)}</td>
       <td>${o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-NG") : "—"}</td>
     </tr>
-  `).join("");
+  `
+    )
+    .join("");
 
   const html = `<!DOCTYPE html>
 <html>
@@ -199,14 +230,17 @@ function exportPDF(orders: any[], period: Period) {
 </html>`;
 
   const win = window.open("", "_blank");
-  if (win) { win.document.write(html); win.document.close(); }
+  if (win) {
+    win.document.write(html);
+    win.document.close();
+  }
 }
 
 // ── Skeleton row ──────────────────────────────────────────────────────────────
 function SkeletonRow() {
   return (
     <tr className="border-b border-gray-100 animate-pulse">
-      {[1,2,3,4,5,6,7,8].map(i => (
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
         <td key={i} className="px-4 py-3.5">
           <div className="h-3.5 bg-gray-100 rounded-full w-3/4" />
         </td>
@@ -216,24 +250,41 @@ function SkeletonRow() {
 }
 
 // ── Delete Modal ──────────────────────────────────────────────────────────────
-function DeleteModal({ onConfirm, onCancel, deleting }: {
-  onConfirm: () => void; onCancel: () => void; deleting: boolean;
+function DeleteModal({
+  onConfirm,
+  onCancel,
+  deleting,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+  deleting: boolean;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-[#4B8A4E] text-white rounded-2xl w-full max-w-sm p-8 shadow-2xl">
         <h2 className="text-xl font-bold mb-2">Delete Order</h2>
-        <p className="text-base mb-6">Are you sure you want to delete this order? This action cannot be undone.</p>
+        <p className="text-base mb-6">
+          Are you sure you want to delete this order? This action cannot be undone.
+        </p>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={onCancel} disabled={deleting}
-            className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            disabled={deleting}
+            className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20"
+          >
             Cancel
           </Button>
-          <Button onClick={onConfirm} disabled={deleting}
-            className="flex-1 bg-red-500 hover:bg-red-600 text-white">
-            {deleting
-              ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : "Yes, Delete"}
+          <Button
+            onClick={onConfirm}
+            disabled={deleting}
+            className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+          >
+            {deleting ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              "Yes, Delete"
+            )}
           </Button>
         </div>
       </div>
@@ -245,13 +296,13 @@ function DeleteModal({ onConfirm, onCancel, deleting }: {
 export default function ITOrdersPage() {
   const router = useRouter();
 
-  const [orders,     setOrders]     = useState<any[]>([]);
-  const [allOrders,  setAllOrders]  = useState<any[]>([]);
-  const [loading,    setLoading]    = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [allOrders, setAllOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 25, total: 0, pages: 1 });
 
-  const [filters,        setFilters]        = useState({ name: "", vendor: "", rider: "", zone: "" });
-  const [period,         setPeriod]         = useState<Period>("All");
+  const [filters, setFilters] = useState({ name: "", vendor: "", rider: "", zone: "" });
+  const [period, setPeriod] = useState<Period>("All");
   const [showPeriodDrop, setShowPeriodDrop] = useState(false);
   const [showExportDrop, setShowExportDrop] = useState(false);
 
@@ -263,8 +314,10 @@ export default function ITOrdersPage() {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (periodRef.current && !periodRef.current.contains(e.target as Node))  setShowPeriodDrop(false);
-      if (exportRef.current && !exportRef.current.contains(e.target as Node))  setShowExportDrop(false);
+      if (periodRef.current && !periodRef.current.contains(e.target as Node))
+        setShowPeriodDrop(false);
+      if (exportRef.current && !exportRef.current.contains(e.target as Node))
+        setShowExportDrop(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -273,58 +326,63 @@ export default function ITOrdersPage() {
   const extractRows = (res: any): any[] => {
     const d = res?.data ?? res;
     if (Array.isArray(d?.orders)) return d.orders;
-    if (Array.isArray(d?.data))   return d.data;
-    if (Array.isArray(d))         return d;
+    if (Array.isArray(d?.data)) return d.data;
+    if (Array.isArray(d)) return d;
     return [];
   };
 
   const extractPagination = (res: any, currentLimit: number) => {
     const d = res?.data ?? res;
     return {
-      page:  d?.page  ?? d?.pagination?.page  ?? 1,
+      page: d?.page ?? d?.pagination?.page ?? 1,
       pages: d?.pages ?? d?.pagination?.pages ?? 1,
       total: d?.total ?? d?.pagination?.total ?? 0,
       limit: currentLimit,
     };
   };
 
-  const fetchOrders = useCallback(async (page = 1, currentFilters = filters) => {
-    setLoading(true);
-    try {
-      const { dateFrom, dateTo } = getDateRange(period);
-      const params: any = { page, limit: pagination.limit, dateFrom, dateTo };
-      if (currentFilters.name)   params.name   = currentFilters.name;
-      if (currentFilters.vendor) params.vendor = currentFilters.vendor;
-      if (currentFilters.rider)  params.rider  = currentFilters.rider;
-      if (currentFilters.zone)   params.zone   = currentFilters.zone;
+  const fetchOrders = useCallback(
+    async (page = 1, currentFilters = filters) => {
+      setLoading(true);
+      try {
+        const { dateFrom, dateTo } = getDateRange(period);
+        const params: any = { page, limit: pagination.limit, dateFrom, dateTo };
+        if (currentFilters.name) params.name = currentFilters.name;
+        if (currentFilters.vendor) params.vendor = currentFilters.vendor;
+        if (currentFilters.rider) params.rider = currentFilters.rider;
+        if (currentFilters.zone) params.zone = currentFilters.zone;
 
-      const res: any = await itService.getOrders(params);
-      const rows = extractRows(res);
-      setOrders(rows);
-      setPagination(extractPagination(res, pagination.limit));
+        const res: any = await itService.getOrders(params);
+        const rows = extractRows(res);
+        setOrders(rows);
+        setPagination(extractPagination(res, pagination.limit));
 
-      const pag = extractPagination(res, pagination.limit);
-      if (pag.total <= pagination.limit) {
-        setAllOrders(rows);
-      } else if (pag.total <= 500) {
-        const allRes: any = await itService.getOrders({ ...params, page: 1, limit: pag.total });
-        setAllOrders(extractRows(allRes));
-      } else {
-        setAllOrders(rows);
+        const pag = extractPagination(res, pagination.limit);
+        if (pag.total <= pagination.limit) {
+          setAllOrders(rows);
+        } else if (pag.total <= 500) {
+          const allRes: any = await itService.getOrders({ ...params, page: 1, limit: pag.total });
+          setAllOrders(extractRows(allRes));
+        } else {
+          setAllOrders(rows);
+        }
+      } catch (err: any) {
+        toast.error(err.message || "Failed to fetch orders");
+        setOrders([]);
+        setAllOrders([]);
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to fetch orders");
-      setOrders([]);
-      setAllOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [period, pagination.limit, filters]);
+    },
+    [period, pagination.limit, filters]
+  );
 
-  useEffect(() => { fetchOrders(1); }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchOrders(1);
+  }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = () => fetchOrders(1, filters);
-  const handleReset  = () => {
+  const handleReset = () => {
     const cleared = { name: "", vendor: "", rider: "", zone: "" };
     setFilters(cleared);
     fetchOrders(1, cleared);
@@ -336,8 +394,8 @@ export default function ITOrdersPage() {
     try {
       await itService.deleteOrder(deleteId);
       toast.success("Order deleted");
-      setOrders(prev => prev.filter(o => (o._id ?? o.id) !== deleteId));
-      setAllOrders(prev => prev.filter(o => (o._id ?? o.id) !== deleteId));
+      setOrders((prev) => prev.filter((o) => (o._id ?? o.id) !== deleteId));
+      setAllOrders((prev) => prev.filter((o) => (o._id ?? o.id) !== deleteId));
       setDeleteId(null);
     } catch (err: any) {
       toast.error(err.message || "Failed to delete order");
@@ -348,7 +406,6 @@ export default function ITOrdersPage() {
 
   return (
     <div className="space-y-6">
-
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
@@ -365,22 +422,34 @@ export default function ITOrdersPage() {
           {/* Export dropdown */}
           <div className="relative" ref={exportRef}>
             <button
-              onClick={() => setShowExportDrop(p => !p)}
+              onClick={() => setShowExportDrop((p) => !p)}
               disabled={allOrders.length === 0}
               className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-40"
             >
               <Download className="h-4 w-4" />
               Export
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showExportDrop ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${showExportDrop ? "rotate-180" : ""}`}
+              />
             </button>
             {showExportDrop && (
               <div className="absolute right-0 mt-1 w-44 bg-white border rounded-lg shadow-lg py-1 z-20">
-                <button onClick={() => { exportCSV(allOrders, period); setShowExportDrop(false); }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
+                <button
+                  onClick={() => {
+                    exportCSV(allOrders, period);
+                    setShowExportDrop(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                >
                   📄 Download CSV
                 </button>
-                <button onClick={() => { exportPDF(allOrders, period); setShowExportDrop(false); }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
+                <button
+                  onClick={() => {
+                    exportPDF(allOrders, period);
+                    setShowExportDrop(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                >
                   🖨 Print / Save PDF
                 </button>
               </div>
@@ -390,17 +459,23 @@ export default function ITOrdersPage() {
           {/* Period dropdown */}
           <div className="relative" ref={periodRef}>
             <button
-              onClick={() => setShowPeriodDrop(p => !p)}
+              onClick={() => setShowPeriodDrop((p) => !p)}
               className="flex items-center gap-2 px-3 py-2 bg-secondary text-primary rounded-lg text-sm font-black hover:brightness-95 transition-all shadow-sm border border-primary/5 uppercase tracking-wider"
             >
               <span>{period}</span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${showPeriodDrop ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${showPeriodDrop ? "rotate-180" : ""}`}
+              />
             </button>
             {showPeriodDrop && (
               <div className="absolute right-0 mt-1 w-36 bg-white border rounded-lg shadow-lg py-1 z-10">
-                {(["Daily","Weekly","Monthly","Yearly","All"] as Period[]).map(p => (
-                  <button key={p}
-                    onClick={() => { setPeriod(p); setShowPeriodDrop(false); }}
+                {(["Daily", "Weekly", "Monthly", "Yearly", "All"] as Period[]).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => {
+                      setPeriod(p);
+                      setShowPeriodDrop(false);
+                    }}
                     className={`w-full px-4 py-2 text-left text-sm ${period === p ? "bg-[#98ef9b] text-[#1a3f1c] font-semibold" : "text-gray-700 hover:bg-gray-50"}`}
                   >
                     {p}
@@ -416,25 +491,28 @@ export default function ITOrdersPage() {
       <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
           {[
-            { key: "name",   label: "Customer",  placeholder: "Search by name"   },
-            { key: "vendor", label: "Vendor",    placeholder: "Search by vendor" },
-            { key: "rider",  label: "Rider",     placeholder: "Search by rider"  },
-            { key: "zone",   label: "Zone",      placeholder: "Search by zone"   },
+            { key: "name", label: "Customer", placeholder: "Search by name" },
+            { key: "vendor", label: "Vendor", placeholder: "Search by vendor" },
+            { key: "rider", label: "Rider", placeholder: "Search by rider" },
+            { key: "zone", label: "Zone", placeholder: "Search by zone" },
           ].map(({ key, label, placeholder }) => (
             <div key={key}>
               <label className="text-xs font-medium text-gray-600 mb-1 block">{label}</label>
               <Input
                 value={filters[key as keyof typeof filters]}
-                onChange={e => setFilters(f => ({ ...f, [key]: e.target.value }))}
+                onChange={(e) => setFilters((f) => ({ ...f, [key]: e.target.value }))}
                 placeholder={placeholder}
                 className="h-9 rounded-xl"
-                onKeyDown={e => e.key === "Enter" && handleSearch()}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
           ))}
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleSearch} className="bg-[#1a3f1c] text-white hover:bg-[#1a3f1c]/90 h-9 px-6 font-bold text-sm">
+          <Button
+            onClick={handleSearch}
+            className="bg-[#1a3f1c] text-white hover:bg-[#1a3f1c]/90 h-9 px-6 font-bold text-sm"
+          >
             Search
           </Button>
           <Button onClick={handleReset} variant="outline" className="h-9 px-6 font-bold text-sm">
@@ -459,78 +537,105 @@ export default function ITOrdersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/80">
-                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">#</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Order ID</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Customer</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Vendor</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Rider</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Zone</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                  <th className="px-4 py-3 text-right text-[10px] font-black uppercase tracking-widest text-gray-400">Total</th>
-                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">Date</th>
-                  <th className="px-4 py-3 text-center text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    #
+                  </th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Order ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Customer
+                  </th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Vendor
+                  </th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Rider
+                  </th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Zone
+                  </th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-right text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Total
+                  </th>
+                  <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-center text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {loading
                   ? Array.from({ length: 10 }).map((_, i) => <SkeletonRow key={i} />)
                   : orders.map((order, idx) => {
-                    const id         = order._id ?? order.id;
-                    const orderNum   = order.orderNumber ?? String(id).slice(-6).toUpperCase();
-                    const customer   = resolveOrderName(order);
-                    const vendor     = resolveVendorName(order);
-                    const rider      = resolveRiderName(order);
-                    const zone       = safeStr(order.zone);
-                    const status     = order.status ?? "—";
-                    const total      = order.totalFee ?? order.total ?? order.totalPrice ?? 0;
-                    const date       = order.createdAt ? formatDate(order.createdAt) : "—";
-                    const rowNum     = (pagination.page - 1) * pagination.limit + idx + 1;
+                      const id = order._id ?? order.id;
+                      const orderNum = order.orderNumber ?? String(id).slice(-6).toUpperCase();
+                      const customer = resolveOrderName(order);
+                      const vendor = resolveVendorName(order);
+                      const rider = resolveRiderName(order);
+                      const zone = safeStr(order.zone);
+                      const status = order.status ?? "—";
+                      const total = order.totalFee ?? order.total ?? order.totalPrice ?? 0;
+                      const date = order.createdAt ? formatDate(order.createdAt) : "—";
+                      const rowNum = (pagination.page - 1) * pagination.limit + idx + 1;
 
-                    return (
-                      <tr key={id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                        <td className="px-4 py-3 text-gray-400 text-xs">{rowNum}</td>
-                        <td className="px-4 py-3">
-                          <span className="font-mono text-xs text-gray-500">{orderNum}</span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-800 font-medium text-xs">{customer}</td>
-                        <td className="px-4 py-3 text-gray-600 text-xs">{vendor}</td>
-                        <td className="px-4 py-3 text-gray-600 text-xs">{rider}</td>
-                        <td className="px-4 py-3 text-gray-500 text-xs">{zone}</td>
-                        <td className="px-4 py-3">
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] font-bold uppercase tracking-wider border ${statusColor(status)}`}
-                          >
-                            {status}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3 text-right text-gray-800 font-semibold text-xs">
-                          {fmt(total)}
-                        </td>
-                        <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{date}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => router.push(`/it/orders/${id}`)}
-                              className="w-7 h-7 rounded-full flex items-center justify-center bg-[#1a3f1c] hover:scale-105 transition-transform shadow-sm"
-                              title="View order"
+                      return (
+                        <tr
+                          key={id}
+                          className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                        >
+                          <td className="px-4 py-3 text-gray-400 text-xs">{rowNum}</td>
+                          <td className="px-4 py-3">
+                            <span className="font-mono text-xs text-gray-500">{orderNum}</span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-800 font-medium text-xs">
+                            {customer}
+                          </td>
+                          <td className="px-4 py-3 text-gray-600 text-xs">{vendor}</td>
+                          <td className="px-4 py-3 text-gray-600 text-xs">{rider}</td>
+                          <td className="px-4 py-3 text-gray-500 text-xs">{zone}</td>
+                          <td className="px-4 py-3">
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] font-bold uppercase tracking-wider border ${statusColor(status)}`}
                             >
-                              <Eye className="h-3.5 w-3.5 text-white" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setDeleteId(id)}
-                              className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                              title="Delete order"
-                            >
-                              <Trash2 className="h-3.5 w-3.5 text-white" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                              {status}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right text-gray-800 font-semibold text-xs">
+                            {fmt(total)}
+                          </td>
+                          <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
+                            {date}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/it/orders/${id}`)}
+                                className="w-7 h-7 rounded-full flex items-center justify-center bg-[#1a3f1c] hover:scale-105 transition-transform shadow-sm"
+                                title="View order"
+                              >
+                                <Eye className="h-3.5 w-3.5 text-white" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteId(id)}
+                                className="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                                title="Delete order"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 text-white" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
               </tbody>
             </table>
           </div>
@@ -551,8 +656,8 @@ export default function ITOrdersPage() {
           totalPages={pagination.pages}
           pageSize={pagination.limit}
           onPageChange={(p) => fetchOrders(p)}
-          onPageSizeChange={size => {
-            setPagination(prev => ({ ...prev, limit: size, page: 1 }));
+          onPageSizeChange={(size) => {
+            setPagination((prev) => ({ ...prev, limit: size, page: 1 }));
             fetchOrders(1);
           }}
         />

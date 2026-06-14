@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { StatsCard } from '@/components/finance/StatsCard';
-import { DashboardWithdrawalTable } from '@/components/finance/DashboardWithdrawalTable';
-import { WithdrawalInfoModal } from '@/components/finance/WithdrawalInfoModal';
-import { toast } from 'sonner';
-import { PasswordChangeRequiredError } from '@/lib/client';
+import { useState } from "react";
+import Link from "next/link";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { StatsCard } from "@/components/finance/StatsCard";
+import { DashboardWithdrawalTable } from "@/components/finance/DashboardWithdrawalTable";
+import { WithdrawalInfoModal } from "@/components/finance/WithdrawalInfoModal";
+import { toast } from "sonner";
+import { PasswordChangeRequiredError } from "@/lib/client";
 import financeService, {
   type DashboardStats,
   type DashboardWithdrawalRow,
   type WithdrawalDetail,
   type WalletOverview,
-} from '@/lib/api/services/finance.service';
+} from "@/lib/api/services/finance.service";
 
 export default function FinanceDashboardPage() {
   const queryClient = useQueryClient();
 
   // Modal State
-  const [modalOpen, setModalOpen]       = useState(false);
-  const [modalDetail, setModalDetail]   = useState<WithdrawalDetail | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalDetail, setModalDetail] = useState<WithdrawalDetail | null>(null);
   // Modal Loading is internal to handleInfo now, but we'll use a local state or useMutation
 
   // 1. Fetch Stats
-  const { 
-    data: stats, 
-    isLoading: loadingStats, 
-    error: statsError 
+  const {
+    data: stats,
+    isLoading: loadingStats,
+    error: statsError,
   } = useQuery<DashboardStats>({
-    queryKey: ['financeDashboardStats'],
+    queryKey: ["financeDashboardStats"],
     queryFn: async () => {
       const res: any = await financeService.getDashboardStats();
       return (res?.data ?? res) as DashboardStats;
@@ -37,31 +37,34 @@ export default function FinanceDashboardPage() {
   });
 
   // 2. Wallet Overview
-  const {
-    data: wallets,
-    isLoading: loadingWallets,
-  } = useQuery<WalletOverview>({
-    queryKey: ['financeWalletOverview'],
+  const { data: wallets, isLoading: loadingWallets } = useQuery<WalletOverview>({
+    queryKey: ["financeWalletOverview"],
     queryFn: async () => {
-      try { return await financeService.getWalletOverview(); }
-      catch { return null as any; }
+      try {
+        return await financeService.getWalletOverview();
+      } catch {
+        return null as any;
+      }
     },
   });
 
   // 3. Fetch Withdrawals
-  const { 
-    data: rows = [], 
-    isLoading: loadingRows, 
-    error: rowsError 
+  const {
+    data: rows = [],
+    isLoading: loadingRows,
+    error: rowsError,
   } = useQuery<DashboardWithdrawalRow[]>({
-    queryKey: ['financeDashboardWithdrawals'],
+    queryKey: ["financeDashboardWithdrawals"],
     queryFn: async () => {
       const res: any = await financeService.getDashboardWithdrawals();
       return (
-          Array.isArray(res)           ? res        :
-          Array.isArray(res?.data)     ? res.data   :
-          Array.isArray(res?.withdrawals) ? res.withdrawals :
-          []
+        Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.withdrawals)
+              ? res.withdrawals
+              : []
       ) as DashboardWithdrawalRow[];
     },
   });
@@ -70,14 +73,15 @@ export default function FinanceDashboardPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => financeService.deleteDashboardWithdrawal(id),
     onSuccess: (_, id) => {
-      queryClient.setQueryData(['financeDashboardWithdrawals'], (old: DashboardWithdrawalRow[] | undefined) => 
-        old ? old.filter(r => r.id !== id) : []
+      queryClient.setQueryData(
+        ["financeDashboardWithdrawals"],
+        (old: DashboardWithdrawalRow[] | undefined) => (old ? old.filter((r) => r.id !== id) : [])
       );
-      toast.success('Withdrawal record deleted');
+      toast.success("Withdrawal record deleted");
     },
     onError: (err: any) => {
-      toast.error(err.message || 'Failed to delete withdrawal');
-    }
+      toast.error(err.message || "Failed to delete withdrawal");
+    },
   });
 
   // 4. Modal Detail Mutation / Fetch
@@ -90,89 +94,118 @@ export default function FinanceDashboardPage() {
       const res = await financeService.getWithdrawalDetail(row.id);
       const detail = (res as any)?.data ?? res;
       setModalDetail(detail as WithdrawalDetail);
-    } catch(err: any) {
-      toast.error(err.message || 'Failed to fetch details');
+    } catch (err: any) {
+      toast.error(err.message || "Failed to fetch details");
     } finally {
       setModalLoading(false);
     }
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm('Delete this withdrawal record?')) return;
+    if (!confirm("Delete this withdrawal record?")) return;
     deleteMutation.mutate(id);
   };
 
   // ✅ Graceful error views
-  if (statsError instanceof PasswordChangeRequiredError || rowsError instanceof PasswordChangeRequiredError) {
+  if (
+    statsError instanceof PasswordChangeRequiredError ||
+    rowsError instanceof PasswordChangeRequiredError
+  ) {
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/20 mt-10 text-center">
-         <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Security Action Required</h2>
-         <p className="text-foreground/80">You must change your password before accessing the finance portal.</p>
-         <p className="text-sm text-muted-foreground mt-2">Redirecting to account settings...</p>
+        <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">
+          Security Action Required
+        </h2>
+        <p className="text-foreground/80">
+          You must change your password before accessing the finance portal.
+        </p>
+        <p className="text-sm text-muted-foreground mt-2">Redirecting to account settings...</p>
       </div>
     );
   }
 
   if (statsError || rowsError) {
-      const errMessage = (statsError as Error)?.message || (rowsError as Error)?.message || 'Something went wrong.';
-      return (
-        <div className="flex flex-col items-center justify-center p-12 bg-surface rounded-xl shadow-sm border border-border mt-10 text-center">
-           <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Error Loading Dashboard</h2>
-           <p className="text-muted-foreground mb-4">{errMessage}</p>
-           <button type="button" onClick={() => window.location.reload()} className="px-5 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-opacity-90 transition">
-             Reload Dashboard
-           </button>
-        </div>
-      );
+    const errMessage =
+      (statsError as Error)?.message || (rowsError as Error)?.message || "Something went wrong.";
+    return (
+      <div className="flex flex-col items-center justify-center p-12 bg-surface rounded-xl shadow-sm border border-border mt-10 text-center">
+        <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">
+          Error Loading Dashboard
+        </h2>
+        <p className="text-muted-foreground mb-4">{errMessage}</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="px-5 py-2.5 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-opacity-90 transition"
+        >
+          Reload Dashboard
+        </button>
+      </div>
+    );
   }
 
   const STAT_CARDS = stats
     ? [
         {
-          icon: '💰', label: "Today's Revenue",
+          icon: "💰",
+          label: "Today's Revenue",
           value: `₦${(stats.todayRevenue?.gross ?? 0).toLocaleString()}`,
-          subtitle: stats.todayRevenue?.subtitle ?? '',
+          subtitle: stats.todayRevenue?.subtitle ?? "",
         },
         {
-          icon: '⏳', label: 'Pending Payouts',
+          icon: "⏳",
+          label: "Pending Payouts",
           value: stats.pendingPayouts?.count ?? 0,
-          subtitle: stats.pendingPayouts?.subtitle ?? '',
+          subtitle: stats.pendingPayouts?.subtitle ?? "",
         },
         {
-          icon: stats.failedPayouts?.count ? '🚨' : '✅',
-          label: 'Failed Payouts',
+          icon: stats.failedPayouts?.count ? "🚨" : "✅",
+          label: "Failed Payouts",
           value: stats.failedPayouts?.count ?? 0,
-          subtitle: stats.failedPayouts?.subtitle ?? '',
+          subtitle: stats.failedPayouts?.subtitle ?? "",
         },
-        { icon: '🏧', value: stats.withdrawals?.count  ?? 0, label: 'Withdrawal Requests', subtitle: stats.withdrawals?.subtitle  ?? '' },
-        { icon: '🔄', value: stats.transactions?.count ?? 0, label: 'Transactions',        subtitle: stats.transactions?.subtitle ?? '' },
-        { icon: '💼', value: stats.payroll?.count      ?? 0, label: 'Payroll',             subtitle: stats.payroll?.subtitle      ?? '' },
+        {
+          icon: "🏧",
+          value: stats.withdrawals?.count ?? 0,
+          label: "Withdrawal Requests",
+          subtitle: stats.withdrawals?.subtitle ?? "",
+        },
+        {
+          icon: "🔄",
+          value: stats.transactions?.count ?? 0,
+          label: "Transactions",
+          subtitle: stats.transactions?.subtitle ?? "",
+        },
+        {
+          icon: "💼",
+          value: stats.payroll?.count ?? 0,
+          label: "Payroll",
+          subtitle: stats.payroll?.subtitle ?? "",
+        },
       ]
     : [];
 
   return (
     <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-primary">
-        Dashboard
-      </h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-primary">Dashboard</h1>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-        {loadingStats ? (
-          [...Array(6)].map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-surface-secondary animate-pulse" />
-          ))
-        ) : stats ? (
-          STAT_CARDS.map((c) => (
-            <StatsCard
-              key={c.label}
-              icon={c.icon}
-              value={c.value}
-              label={c.label}
-              subtitle={c.subtitle}
-            />
-          ))
-        ) : null}
+        {loadingStats
+          ? [...Array(6)].map((_, i) => (
+              <div key={i} className="h-28 rounded-xl bg-surface-secondary animate-pulse" />
+            ))
+          : stats
+            ? STAT_CARDS.map((c) => (
+                <StatsCard
+                  key={c.label}
+                  icon={c.icon}
+                  value={c.value}
+                  label={c.label}
+                  subtitle={c.subtitle}
+                />
+              ))
+            : null}
       </div>
 
       {/* Wallet Overview */}
@@ -180,29 +213,45 @@ export default function FinanceDashboardPage() {
         <h2 className="text-lg font-bold text-primary mb-3">Wallet Balances</h2>
         {loadingWallets ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-surface-secondary animate-pulse" />)}
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 rounded-xl bg-surface-secondary animate-pulse" />
+            ))}
           </div>
         ) : wallets ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="rounded-xl p-4 bg-[#1a3f1c] text-white">
               <p className="text-xs font-semibold text-white/60 mb-1">Platform Balance</p>
-              <p className="text-2xl font-black">₦{wallets.platform.availableBalance.toLocaleString()}</p>
-              <p className="text-xs text-white/50 mt-1">₦{wallets.platform.pendingBalance.toLocaleString()} pending</p>
+              <p className="text-2xl font-black">
+                ₦{wallets.platform.availableBalance.toLocaleString()}
+              </p>
+              <p className="text-xs text-white/50 mt-1">
+                ₦{wallets.platform.pendingBalance.toLocaleString()} pending
+              </p>
             </div>
             <div className="rounded-xl p-4 bg-white border border-gray-100 shadow-sm">
               <p className="text-xs font-semibold text-gray-500 mb-1">Vendor Wallets</p>
-              <p className="text-2xl font-black text-gray-900">₦{wallets.vendors.availableBalance.toLocaleString()}</p>
-              <p className="text-xs text-gray-400 mt-1">₦{wallets.vendors.holdBalance.toLocaleString()} on hold</p>
+              <p className="text-2xl font-black text-gray-900">
+                ₦{wallets.vendors.availableBalance.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                ₦{wallets.vendors.holdBalance.toLocaleString()} on hold
+              </p>
             </div>
             <div className="rounded-xl p-4 bg-white border border-gray-100 shadow-sm">
               <p className="text-xs font-semibold text-gray-500 mb-1">Rider Wallets</p>
-              <p className="text-2xl font-black text-gray-900">₦{wallets.riders.availableBalance.toLocaleString()}</p>
-              <p className="text-xs text-gray-400 mt-1">₦{wallets.riders.holdBalance.toLocaleString()} on hold</p>
+              <p className="text-2xl font-black text-gray-900">
+                ₦{wallets.riders.availableBalance.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                ₦{wallets.riders.holdBalance.toLocaleString()} on hold
+              </p>
             </div>
             <div className="rounded-xl p-4 bg-amber-50 border border-amber-100">
               <p className="text-xs font-semibold text-amber-700 mb-1">Pending Payouts</p>
               <p className="text-2xl font-black text-amber-800">{wallets.pendingPayouts.count}</p>
-              <p className="text-xs text-amber-600 mt-1">₦{wallets.pendingPayouts.totalNaira.toLocaleString()} queued</p>
+              <p className="text-xs text-amber-600 mt-1">
+                ₦{wallets.pendingPayouts.totalNaira.toLocaleString()} queued
+              </p>
             </div>
           </div>
         ) : null}
@@ -227,11 +276,7 @@ export default function FinanceDashboardPage() {
             ))}
           </div>
         ) : (
-          <DashboardWithdrawalTable
-            rows={rows}
-            onInfo={handleInfo}
-            onDelete={handleDelete}
-          />
+          <DashboardWithdrawalTable rows={rows} onInfo={handleInfo} onDelete={handleDelete} />
         )}
       </div>
 

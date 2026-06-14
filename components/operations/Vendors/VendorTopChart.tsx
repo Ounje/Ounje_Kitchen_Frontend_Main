@@ -1,5 +1,5 @@
-import { Medal, MapPin, CheckCircle } from 'lucide-react';
-import { TopVendor } from '@/lib/api/services/vendor.service';
+import { Medal, MapPin, CheckCircle } from "lucide-react";
+import { TopVendor } from "@/lib/api/services/vendor.service";
 
 interface VendorTopChartProps {
   topVendors: TopVendor[];
@@ -20,11 +20,12 @@ export function VendorTopChart({ topVendors, loading = false }: VendorTopChartPr
     );
   }
 
-  const getRankConfig = (rank: 1 | 2 | 3) => ({
-    1: { gradient: 'linear-gradient(135deg,#D97523 0%,#F4A460 100%)', label: '1st' },
-    2: { gradient: 'linear-gradient(135deg,#8B8B8B 0%,#C0C0C0 100%)', label: '2nd' },
-    3: { gradient: 'linear-gradient(135deg,#8B4513 0%,#CD7F32 100%)', label: '3rd' },
-  }[rank]);
+  const getRankConfig = (rank: 1 | 2 | 3) =>
+    ({
+      1: { gradient: "linear-gradient(135deg,#D97523 0%,#F4A460 100%)", label: "1st" },
+      2: { gradient: "linear-gradient(135deg,#8B8B8B 0%,#C0C0C0 100%)", label: "2nd" },
+      3: { gradient: "linear-gradient(135deg,#8B4513 0%,#CD7F32 100%)", label: "3rd" },
+    })[rank];
 
   return (
     <div className="mb-6 w-full">
@@ -59,7 +60,7 @@ export function VendorTopChart({ topVendors, loading = false }: VendorTopChartPr
                   />
                 ) : (
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white flex-shrink-0 bg-white/30 flex items-center justify-center text-white text-xl font-bold">
-                    {vendor.name?.charAt(0).toUpperCase() ?? '?'}
+                    {vendor.name?.charAt(0).toUpperCase() ?? "?"}
                   </div>
                 )}
 

@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { customerService, type Customer, type Vendor } from '@/lib/api/services/customer.service';
-import { CustomerDetailsHeader } from '@/components/operations/CustomerDetailsHeader';
-import { CustomerStats } from '@/components/operations/CustomerStats';
-import { CustomerVendorCard } from '@/components/operations/CustomerVendorCard';
-import { ActionButtons } from '@/components/operations/ActionButtons';
-import { CustomerDetailsSkeleton } from '@/app/operations/customers/loaders/CustomerDetailsSkeleton';
-import { X } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { customerService, type Customer, type Vendor } from "@/lib/api/services/customer.service";
+import { CustomerDetailsHeader } from "@/components/operations/CustomerDetailsHeader";
+import { CustomerStats } from "@/components/operations/CustomerStats";
+import { CustomerVendorCard } from "@/components/operations/CustomerVendorCard";
+import { ActionButtons } from "@/components/operations/ActionButtons";
+import { CustomerDetailsSkeleton } from "@/app/operations/customers/loaders/CustomerDetailsSkeleton";
+import { X } from "lucide-react";
+import { toast } from "sonner";
 
 export default function CustomerDetailsPage() {
   const params = useParams();
@@ -28,7 +28,7 @@ export default function CustomerDetailsPage() {
         const data = await customerService.getCustomerById(customerId);
         setCustomer(data);
       } catch (error: any) {
-        toast.error(error.message || 'Failed to load customer details');
+        toast.error(error.message || "Failed to load customer details");
       } finally {
         setLoading(false);
       }
@@ -40,7 +40,7 @@ export default function CustomerDetailsPage() {
         const data = await customerService.getMostUsedVendor(customerId);
         setVendor(data);
       } catch (error: any) {
-        console.error('Failed to load vendor:', error);
+        console.error("Failed to load vendor:", error);
       } finally {
         setVendorLoading(false);
       }

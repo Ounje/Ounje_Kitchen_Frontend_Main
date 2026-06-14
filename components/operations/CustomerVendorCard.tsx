@@ -1,5 +1,5 @@
-import { Star, MapPin } from 'lucide-react';
-import { Vendor } from '@/lib/api/services/customer.service';
+import { Star, MapPin } from "lucide-react";
+import { Vendor } from "@/lib/api/services/customer.service";
 
 interface CustomerVendorCardProps {
   vendor: Vendor | null;
@@ -46,7 +46,9 @@ export function CustomerVendorCard({ vendor, loading = false }: CustomerVendorCa
 
       {/* Vendor Details */}
       <div className="flex-1 min-w-0 z-10">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Most Used Vendor</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">
+          Most Used Vendor
+        </p>
         <h3 className="text-xl sm:text-2xl font-black text-white mb-2">{vendor.name}</h3>
         <div className="flex items-center gap-2 mb-1.5">
           <Star className="w-4 h-4 text-[#FFCA3A] fill-[#FFCA3A] flex-shrink-0" />
@@ -62,10 +64,10 @@ export function CustomerVendorCard({ vendor, loading = false }: CustomerVendorCa
 
       {/* Orders Count Badge */}
       <div className="bg-white/95 backdrop-blur-sm rounded-xl px-5 sm:px-8 py-4 sm:py-5 text-center flex-shrink-0 self-start sm:self-center shadow-lg border border-white/20 group-hover:scale-105 transition-transform duration-500 z-10">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#1a3f1c]/70 mb-1">Orders Here</p>
-        <p className="text-4xl sm:text-5xl font-black text-[#1a3f1c]">
-          {vendor.ordersCount}
+        <p className="text-xs font-bold uppercase tracking-widest text-[#1a3f1c]/70 mb-1">
+          Orders Here
         </p>
+        <p className="text-4xl sm:text-5xl font-black text-[#1a3f1c]">{vendor.ordersCount}</p>
       </div>
     </div>
   );

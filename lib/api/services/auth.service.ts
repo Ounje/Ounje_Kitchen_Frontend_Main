@@ -10,14 +10,10 @@ import type { LoginCredentials, LoginResponse, User, ChangePasswordData } from "
 // read from cookies.
 
 const COOKIE_NAME = "ounje_token";
-const THIRTY_DAYS  = 60 * 60 * 24 * 30; // seconds
+const THIRTY_DAYS = 60 * 60 * 24 * 30; // seconds
 
 function setCookie(token: string, rememberMe = false) {
-  const parts = [
-    `${COOKIE_NAME}=${encodeURIComponent(token)}`,
-    "Path=/",
-    "SameSite=Lax",
-  ];
+  const parts = [`${COOKIE_NAME}=${encodeURIComponent(token)}`, "Path=/", "SameSite=Lax"];
   if (rememberMe) parts.push(`Max-Age=${THIRTY_DAYS}`);
   // Secure flag only in production (localhost doesn't use HTTPS)
   if (typeof window !== "undefined" && window.location.protocol === "https:") {
@@ -28,9 +24,7 @@ function setCookie(token: string, rememberMe = false) {
 
 function getCookie(): string | null {
   if (typeof document === "undefined") return null;
-  const match = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${COOKIE_NAME}=`));
+  const match = document.cookie.split("; ").find((row) => row.startsWith(`${COOKIE_NAME}=`));
   return match ? decodeURIComponent(match.split("=")[1]) : null;
 }
 
@@ -42,10 +36,18 @@ function removeCookie() {
 // ─── service ──────────────────────────────────────────────────────────────────
 class AuthService {
   // ── token accessors (used by client.ts and AuthContext) ─────────────────────
-  getToken(): string | null  { return getCookie(); }
-  hasToken(): boolean        { return !!getCookie(); }
-  saveToken(token: string, rememberMe = false) { setCookie(token, rememberMe); }
-  clearToken()               { removeCookie(); }
+  getToken(): string | null {
+    return getCookie();
+  }
+  hasToken(): boolean {
+    return !!getCookie();
+  }
+  saveToken(token: string, rememberMe = false) {
+    setCookie(token, rememberMe);
+  }
+  clearToken() {
+    removeCookie();
+  }
 
   // ── API calls ───────────────────────────────────────────────────────────────
 
@@ -67,9 +69,7 @@ class AuthService {
    * We unwrap .data here so callers just get the User object.
    */
   async getMe(): Promise<User> {
-    const res = await apiClient.get<{ success: boolean; data: User }>(
-      ENDPOINTS.AUTH.ME
-    );
+    const res = await apiClient.get<{ success: boolean; data: User }>(ENDPOINTS.AUTH.ME);
     return res.data;
   }
 

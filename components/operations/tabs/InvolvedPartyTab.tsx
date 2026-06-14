@@ -20,7 +20,10 @@ export default function InvolvedPartyTab({ order, onAssignRider }: InvolvedParty
             <Avatar className="h-12 w-12 sm:h-14 sm:w-14">
               <AvatarImage src={customer.avatar} alt={customer.name} />
               <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold">
-                {customer.name.split(' ').map((n: string) => n[0]).join('')}
+                {customer.name
+                  .split(" ")
+                  .map((n: string) => n[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -49,7 +52,10 @@ export default function InvolvedPartyTab({ order, onAssignRider }: InvolvedParty
             <Avatar className="h-12 w-12 sm:h-14 sm:w-14">
               <AvatarImage src={vendor.avatar} alt={vendor.name} />
               <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold">
-                {vendor.name.split(' ').map((n: string) => n[0]).join('')}
+                {vendor.name
+                  .split(" ")
+                  .map((n: string) => n[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -82,7 +88,10 @@ export default function InvolvedPartyTab({ order, onAssignRider }: InvolvedParty
             <Avatar className="h-12 w-12 sm:h-14 sm:w-14">
               <AvatarImage src={rider.avatar} alt={rider.name} />
               <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold">
-                {rider.name.split(' ').map((n: string) => n[0]).join('')}
+                {rider.name
+                  .split(" ")
+                  .map((n: string) => n[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">

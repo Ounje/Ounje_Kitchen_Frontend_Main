@@ -1,5 +1,5 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
 
 export const notificationService = {
   async getAllNotifications(params?: { targetPortal?: string; page?: number; limit?: number }) {
@@ -33,7 +33,7 @@ export const notificationService = {
   },
 
   async searchRecipients(q: string, type?: string) {
-    return await apiClient.get(ENDPOINTS.SHARED.NOTIFICATIONS + '/search-recipients', {
+    return await apiClient.get(ENDPOINTS.SHARED.NOTIFICATIONS + "/search-recipients", {
       params: { q, ...(type ? { type } : {}) },
     });
   },
@@ -43,7 +43,7 @@ export const notificationService = {
   },
 
   async deleteAll() {
-    return await apiClient.delete(ENDPOINTS.SHARED.NOTIFICATIONS + '/delete-all');
+    return await apiClient.delete(ENDPOINTS.SHARED.NOTIFICATIONS + "/delete-all");
   },
 };
 

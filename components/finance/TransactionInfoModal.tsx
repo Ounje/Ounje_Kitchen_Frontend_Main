@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { X } from 'lucide-react';
-import { ModalWatermark } from './ModalWatermark';
-import type { TransactionDetail } from '@/lib/api/services/finance.service';
+import { X } from "lucide-react";
+import { ModalWatermark } from "./ModalWatermark";
+import type { TransactionDetail } from "@/lib/api/services/finance.service";
 
 interface Props {
   isOpen: boolean;
@@ -16,31 +16,32 @@ export function TransactionInfoModal({ isOpen, onClose, detail, loading, onDownl
   if (!isOpen) return null;
 
   const handleDownload = () => {
-    if (onDownload) { onDownload(); return; }
+    if (onDownload) {
+      onDownload();
+      return;
+    }
     window.print();
   };
 
   const rows = detail
     ? [
-        { label: 'Order Cost',    value: detail.orderCost },
-        { label: 'Service Cost',  value: detail.serviceCost },
-        { label: 'Platform Markup', value: detail.platformMarkup },
-        { label: 'Combo Markup',    value: detail.comboMarkup },
-        { label: 'Delivery Fee',  value: detail.deliveryFee },
+        { label: "Order Cost", value: detail.orderCost },
+        { label: "Service Cost", value: detail.serviceCost },
+        { label: "Platform Markup", value: detail.platformMarkup },
+        { label: "Combo Markup", value: detail.comboMarkup },
+        { label: "Delivery Fee", value: detail.deliveryFee },
       ]
     : [];
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div
-        className="relative w-full max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-2xl bg-gray-50"
-      >
+      <div className="relative w-full max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-2xl bg-gray-50">
         <ModalWatermark />
 
         {/* Header */}
         <div className="relative flex items-center justify-between px-6 py-4 border-b border-[#98EF9B]/50">
           <h2 className="font-bold text-base sm:text-lg text-center flex-1 pr-8 text-[#1a3f1c]">
-            {detail?.orderId ?? '—'}
+            {detail?.orderId ?? "—"}
           </h2>
           <button
             onClick={onClose}
@@ -60,36 +61,42 @@ export function TransactionInfoModal({ isOpen, onClose, detail, loading, onDownl
               {/* Personal Details */}
               <div>
                 <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Personal Details</p>
-                <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-gray-50 border-b border-gray-100"
-                >
-                  <span className="text-[#1a3f1c]"><b>Customer:</b> {detail.customerName}</span>
-                  <span className="text-[#1a3f1c]"><b>Vendor:</b> {detail.vendorName}</span>
-                  <span className="text-[#1a3f1c]"><b>Order Type:</b> {detail.orderType}</span>
+                <div className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm bg-gray-50 border-b border-gray-100">
+                  <span className="text-[#1a3f1c]">
+                    <b>Customer:</b> {detail.customerName}
+                  </span>
+                  <span className="text-[#1a3f1c]">
+                    <b>Vendor:</b> {detail.vendorName}
+                  </span>
+                  <span className="text-[#1a3f1c]">
+                    <b>Order Type:</b> {detail.orderType}
+                  </span>
                 </div>
               </div>
 
               {/* Transaction Details */}
               <div>
                 <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Transaction Details</p>
-                <div
-                  className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm bg-gray-50 border-b border-gray-100"
-                >
-                  <span className="text-[#1a3f1c]"><b>Order ID:</b> {detail.orderId}</span>
-                  <span className="text-[#1a3f1c]"><b>Payment Method:</b> {detail.paymentMethod}</span>
+                <div className="rounded-lg px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm bg-gray-50 border-b border-gray-100">
+                  <span className="text-[#1a3f1c]">
+                    <b>Order ID:</b> {detail.orderId}
+                  </span>
+                  <span className="text-[#1a3f1c]">
+                    <b>Payment Method:</b> {detail.paymentMethod}
+                  </span>
                   <span className="break-all text-[#1a3f1c]">
                     <b>Transaction ID:</b> {detail.transactionId}
                   </span>
-                  <span className="text-[#1a3f1c]"><b>Amount:</b> ₦{detail.amount.toLocaleString()}</span>
+                  <span className="text-[#1a3f1c]">
+                    <b>Amount:</b> ₦{detail.amount.toLocaleString()}
+                  </span>
                 </div>
               </div>
 
               {/* Order Details */}
               <div>
                 <p className="text-sm font-semibold mb-2 text-[#1a3f1c]">Order Details</p>
-                <div
-                  className="rounded-lg px-4 py-3 text-sm space-y-2 bg-[#98ef9b]/40 text-[#1a3f1c]"
-                >
+                <div className="rounded-lg px-4 py-3 text-sm space-y-2 bg-[#98ef9b]/40 text-[#1a3f1c]">
                   {rows.map(({ label, value }) => (
                     <div key={label} className="flex items-center justify-between">
                       <span>{label}</span>

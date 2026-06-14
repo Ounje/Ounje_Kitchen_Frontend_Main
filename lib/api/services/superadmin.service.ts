@@ -1,7 +1,7 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
-import { PaginationParams } from '@/types';
-import { notificationService } from './notification.service';
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
+import { PaginationParams } from "@/types";
+import { notificationService } from "./notification.service";
 
 // ── Shared Types ──────────────────────────────────────────────────────────────
 export interface PaginationMeta {
@@ -62,7 +62,6 @@ export interface RiderRow {
 
 // ── Service ───────────────────────────────────────────────────────────────────
 export const superAdminService = {
-
   // ==================== DASHBOARD ====================
 
   async getDashboard() {
@@ -70,7 +69,7 @@ export const superAdminService = {
     return res;
   },
 
-  async getRevenue(period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly') {
+  async getRevenue(period: "daily" | "weekly" | "monthly" | "yearly" = "weekly") {
     const res = await apiClient.get(ENDPOINTS.SUPERADMIN.REVENUE, { params: { period } });
     return res;
   },
@@ -93,12 +92,14 @@ export const superAdminService = {
   // ==================== CUSTOMERS ====================
   // Returns full profile: name, email, phone, address, status fields
 
-  async getCustomers(params?: PaginationParams & {
-    name?: string;
-    email?: string;
-    isActive?: boolean;
-    isSuspended?: boolean;
-  }) {
+  async getCustomers(
+    params?: PaginationParams & {
+      name?: string;
+      email?: string;
+      isActive?: boolean;
+      isSuspended?: boolean;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.SUPERADMIN.CUSTOMERS, { params });
     return res;
   },
@@ -121,13 +122,15 @@ export const superAdminService = {
   // ==================== VENDORS ====================
   // Returns full profile: businessName, ownerName, email, phone, address, ratings, status
 
-  async getVendors(params?: PaginationParams & {
-    name?: string;
-    email?: string;
-    isActive?: boolean;
-    isSuspended?: boolean;
-    isVerified?: boolean;
-  }) {
+  async getVendors(
+    params?: PaginationParams & {
+      name?: string;
+      email?: string;
+      isActive?: boolean;
+      isSuspended?: boolean;
+      isVerified?: boolean;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.SUPERADMIN.VENDORS, { params });
     return res;
   },
@@ -155,12 +158,14 @@ export const superAdminService = {
   // ==================== RIDERS ====================
   // Returns full profile: firstName, lastName, email, phone, zone, vehicle, ratings, status
 
-  async getRiders(params?: PaginationParams & {
-    name?: string;
-    zone?: string;
-    isActive?: boolean;
-    isSuspended?: boolean;
-  }) {
+  async getRiders(
+    params?: PaginationParams & {
+      name?: string;
+      zone?: string;
+      isActive?: boolean;
+      isSuspended?: boolean;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.SUPERADMIN.RIDERS, { params });
     return res;
   },
@@ -194,13 +199,15 @@ export const superAdminService = {
 
   // ==================== ORDERS ====================
 
-  async getOrders(params?: PaginationParams & {
-    status?: string;
-    vendor?: string;
-    customer?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }) {
+  async getOrders(
+    params?: PaginationParams & {
+      status?: string;
+      vendor?: string;
+      customer?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.SUPERADMIN.ORDERS, { params });
     return res;
   },
@@ -217,7 +224,7 @@ export const superAdminService = {
 
   // ==================== RATINGS ====================
 
-  async getRatings(params?: PaginationParams & { targetType?: 'Vendor' | 'Rider' }) {
+  async getRatings(params?: PaginationParams & { targetType?: "Vendor" | "Rider" }) {
     const res = await apiClient.get(ENDPOINTS.SUPERADMIN.RATINGS, { params });
     return res;
   },

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -52,8 +52,8 @@ export function PaginationControls({
             onClick={() => onPageChange(page)}
             className={`px-2 py-1 rounded text-sm transition-colors ${
               currentPage === page
-                ? 'bg-primary text-primary-foreground'
-                : 'border border-border text-foreground hover:bg-secondary'
+                ? "bg-primary text-primary-foreground"
+                : "border border-border text-foreground hover:bg-secondary"
             }`}
           >
             {page}

@@ -398,8 +398,6 @@
 //   },
 // };
 
-
-
 // second new endpoints
 
 // import { apiClient } from "../client";
@@ -926,9 +924,7 @@
 //   },
 // };
 
-
 // THIRD NEW ENDPOINT
-
 
 // import { apiClient } from "../client";
 // import { ENDPOINTS } from "../config";
@@ -1634,7 +1630,6 @@
 //   },
 // };
 
-
 //Fourth endpoint
 
 import { apiClient } from "../client";
@@ -1650,10 +1645,10 @@ import { ENDPOINTS } from "../config";
  */
 export interface PaginatedResponse<T> {
   data: T[];
-  count: number;   // items on current page
-  total: number;   // total items across all pages
+  count: number; // items on current page
+  total: number; // total items across all pages
   page: number;
-  pages: number;   // total page count
+  pages: number; // total page count
 }
 
 export interface PaginationParams {
@@ -2107,12 +2102,12 @@ export interface Rating {
   _id?: string;
   customerId?: string;
   customerName?: string;
-  customerImage?: string;    // controller returns customerImage, not customerAvatar
+  customerImage?: string; // controller returns customerImage, not customerAvatar
   targetId?: string;
   targetName?: string;
-  targetType?: string;       // full model name e.g. "VendorProfile", "RiderProfile"
-  orderType?: string;        // human-readable e.g. "Tray Builder", "Vendor Review"
-  rating: number;            // the field is `rating`, not `score`
+  targetType?: string; // full model name e.g. "VendorProfile", "RiderProfile"
+  orderType?: string; // human-readable e.g. "Tray Builder", "Vendor Review"
+  rating: number; // the field is `rating`, not `score`
   comment?: string;
   review?: string;
   createdAt: string;
@@ -2120,12 +2115,12 @@ export interface Rating {
 }
 
 export interface RatingDistributionPoint {
-  _id: number;   // star value 1–5
+  _id: number; // star value 1–5
   count: number;
 }
 
 export interface RatingByTypePoint {
-  _id: string;   // targetType string
+  _id: string; // targetType string
   count: number;
   avgRating: number;
 }
@@ -2215,29 +2210,25 @@ export interface ResendOtpPayload {
 // ─────────────────────────────────────────────
 
 export const superAdminApi = {
-
   // ── Authentication ──────────────────────────────────────────────────────
 
   auth: {
     login: (payload: LoginPayload) =>
       apiClient.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, payload, { requiresAuth: false }),
 
-    me: () =>
-      apiClient.get<AuthUser>(ENDPOINTS.AUTH.ME),
+    me: () => apiClient.get<AuthUser>(ENDPOINTS.AUTH.ME),
 
     changePassword: (payload: ChangePasswordPayload) =>
       apiClient.post<ApiMessage>(ENDPOINTS.AUTH.CHANGE_PASSWORD, payload),
 
-    logout: () =>
-      apiClient.post<ApiMessage>(ENDPOINTS.AUTH.LOGOUT),
+    logout: () => apiClient.post<ApiMessage>(ENDPOINTS.AUTH.LOGOUT),
   },
 
   // ── Dashboard ───────────────────────────────────────────────────────────
 
   dashboard: {
     // Response is nested: { data: { users, orders, ratings, queries, revenue } }
-    getStats: () =>
-      apiClient.get<{ data: DashboardStats }>(ENDPOINTS.SUPERADMIN.DASHBOARD),
+    getStats: () => apiClient.get<{ data: DashboardStats }>(ENDPOINTS.SUPERADMIN.DASHBOARD),
 
     // period: "today" | "week" | "month" | "year" | "all"
     getRevenue: (params?: { period?: string; startDate?: string; endDate?: string }) =>
@@ -2267,11 +2258,9 @@ export const superAdminApi = {
       apiClient.get<CustomerDetailResponse>(ENDPOINTS.SUPERADMIN.CUSTOMER_BY_ID(id)),
 
     // Router uses PUT
-    suspend: (id: string) =>
-      apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.CUSTOMER_SUSPEND(id)),
+    suspend: (id: string) => apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.CUSTOMER_SUSPEND(id)),
 
-    activate: (id: string) =>
-      apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.CUSTOMER_ACTIVATE(id)),
+    activate: (id: string) => apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.CUSTOMER_ACTIVATE(id)),
   },
 
   // ── Vendors ─────────────────────────────────────────────────────────────
@@ -2286,14 +2275,11 @@ export const superAdminApi = {
       apiClient.get<VendorDetailResponse>(ENDPOINTS.SUPERADMIN.VENDOR_BY_ID(id)),
 
     // Router uses PUT
-    suspend: (id: string) =>
-      apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.VENDOR_SUSPEND(id)),
+    suspend: (id: string) => apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.VENDOR_SUSPEND(id)),
 
-    activate: (id: string) =>
-      apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.VENDOR_ACTIVATE(id)),
+    activate: (id: string) => apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.VENDOR_ACTIVATE(id)),
 
-    verify: (id: string) =>
-      apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.VENDOR_VERIFY(id)),
+    verify: (id: string) => apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.VENDOR_VERIFY(id)),
   },
 
   // ── Riders ──────────────────────────────────────────────────────────────
@@ -2308,14 +2294,11 @@ export const superAdminApi = {
       apiClient.get<RiderDetailResponse>(ENDPOINTS.SUPERADMIN.RIDER_BY_ID(id)),
 
     // Router uses PUT
-    suspend: (id: string) =>
-      apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.RIDER_SUSPEND(id)),
+    suspend: (id: string) => apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.RIDER_SUSPEND(id)),
 
-    activate: (id: string) =>
-      apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.RIDER_ACTIVATE(id)),
+    activate: (id: string) => apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.RIDER_ACTIVATE(id)),
 
-    verify: (id: string) =>
-      apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.RIDER_VERIFY(id)),
+    verify: (id: string) => apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.RIDER_VERIFY(id)),
   },
 
   // ── Staff ────────────────────────────────────────────────────────────────
@@ -2326,8 +2309,7 @@ export const superAdminApi = {
       apiClient.get<PaginatedResponse<Staff>>(ENDPOINTS.SUPERADMIN.STAFF, { params }),
 
     // Response: { data: Staff }  — flat, no nesting
-    getById: (id: string) =>
-      apiClient.get<{ data: Staff }>(ENDPOINTS.SUPERADMIN.STAFF_BY_ID(id)),
+    getById: (id: string) => apiClient.get<{ data: Staff }>(ENDPOINTS.SUPERADMIN.STAFF_BY_ID(id)),
   },
 
   // ── Orders ───────────────────────────────────────────────────────────────
@@ -2337,8 +2319,7 @@ export const superAdminApi = {
     getAll: (params?: PaginationParams) =>
       apiClient.get<OrdersResponse>(ENDPOINTS.SUPERADMIN.ORDERS, { params }),
 
-    getById: (id: string) =>
-      apiClient.get<{ data: Order }>(ENDPOINTS.SUPERADMIN.ORDER_BY_ID(id)),
+    getById: (id: string) => apiClient.get<{ data: Order }>(ENDPOINTS.SUPERADMIN.ORDER_BY_ID(id)),
 
     // PUT — confirmed from router
     override: (id: string, payload: OrderOverridePayload) =>
@@ -2356,8 +2337,7 @@ export const superAdminApi = {
     getAll: (params?: PaginationParams) =>
       apiClient.get<RatingsResponse>(ENDPOINTS.SUPERADMIN.RATINGS, { params }),
 
-    getStats: () =>
-      apiClient.get<RatingStatsResponse>(`/api/superadmin/ratings/stats`),
+    getStats: () => apiClient.get<RatingStatsResponse>(`/api/superadmin/ratings/stats`),
   },
 
   // ── Queries / Complaints ─────────────────────────────────────────────────
@@ -2366,8 +2346,7 @@ export const superAdminApi = {
     getAll: (params?: PaginationParams) =>
       apiClient.get<PaginatedResponse<Query>>(ENDPOINTS.SUPERADMIN.QUERIES, { params }),
 
-    getById: (id: string) =>
-      apiClient.get<Query>(ENDPOINTS.SUPERADMIN.QUERY_BY_ID(id)),
+    getById: (id: string) => apiClient.get<Query>(ENDPOINTS.SUPERADMIN.QUERY_BY_ID(id)),
 
     assign: (id: string, payload: QueryAssignPayload) =>
       apiClient.put<ApiMessage>(ENDPOINTS.SUPERADMIN.QUERY_ASSIGN(id), payload),
@@ -2379,8 +2358,7 @@ export const superAdminApi = {
   // ── Profile / Settings ───────────────────────────────────────────────────
 
   profile: {
-    get: () =>
-      apiClient.get<Profile>(ENDPOINTS.SUPERADMIN.PROFILE),
+    get: () => apiClient.get<Profile>(ENDPOINTS.SUPERADMIN.PROFILE),
 
     update: (payload: UpdateProfilePayload) =>
       apiClient.put<Profile>(ENDPOINTS.SUPERADMIN.PROFILE, payload),

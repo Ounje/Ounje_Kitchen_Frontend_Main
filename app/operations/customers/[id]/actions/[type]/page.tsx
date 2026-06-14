@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { customerService } from '@/lib/api/services/customer.service';
-import { ConfirmActionModal } from '@/components/operations/modals/ConfirmActionModal';
-import { SuccessModal } from '@/components/operations/modals/SuccessModal';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { customerService } from "@/lib/api/services/customer.service";
+import { ConfirmActionModal } from "@/components/operations/modals/ConfirmActionModal";
+import { SuccessModal } from "@/components/operations/modals/SuccessModal";
+import { toast } from "sonner";
 
-type ActionType = 'suspend' | 'activate' | 'delete';
+type ActionType = "suspend" | "activate" | "delete";
 
 const actionConfig = {
   suspend: {
-    confirmTitle: 'Are you sure you want to suspend this user?',
+    confirmTitle: "Are you sure you want to suspend this user?",
     successTitle: "You've successfully suspended a user!",
   },
   activate: {
-    confirmTitle: 'Are you sure, you want to activate this user?',
-    successTitle: 'The account has been activated successfully!',
+    confirmTitle: "Are you sure, you want to activate this user?",
+    successTitle: "The account has been activated successfully!",
   },
   delete: {
-    confirmTitle: 'Are you sure, you want to delete this account?',
-    successTitle: 'The account has been successfully deleted!',
+    confirmTitle: "Are you sure, you want to delete this account?",
+    successTitle: "The account has been successfully deleted!",
   },
 };
 
@@ -35,9 +35,9 @@ export default function CustomerActionPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!['suspend', 'activate', 'delete'].includes(actionType)) {
-      toast.error('Invalid action type');
-      router.push('/operations/customers');
+    if (!["suspend", "activate", "delete"].includes(actionType)) {
+      toast.error("Invalid action type");
+      router.push("/operations/customers");
     }
   }, [actionType, router]);
 
@@ -45,13 +45,13 @@ export default function CustomerActionPage() {
     try {
       setLoading(true);
       switch (actionType) {
-        case 'suspend':
+        case "suspend":
           await customerService.suspendCustomer(customerId);
           break;
-        case 'activate':
+        case "activate":
           await customerService.activateCustomer(customerId);
           break;
-        case 'delete':
+        case "delete":
           await customerService.deleteCustomer(customerId);
           break;
       }
@@ -69,7 +69,7 @@ export default function CustomerActionPage() {
   };
 
   const handleGoHome = () => {
-    router.push('/operations/customers');
+    router.push("/operations/customers");
   };
 
   const config = actionConfig[actionType];
@@ -83,11 +83,7 @@ export default function CustomerActionPage() {
         title={config?.confirmTitle}
         loading={loading}
       />
-      <SuccessModal
-        isOpen={showSuccess}
-        title={config?.successTitle}
-        onGoHome={handleGoHome}
-      />
+      <SuccessModal isOpen={showSuccess} title={config?.successTitle} onGoHome={handleGoHome} />
     </div>
   );
 }

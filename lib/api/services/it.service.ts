@@ -1,17 +1,17 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
-import { PaginationParams } from '@/types';
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
+import { PaginationParams } from "@/types";
 
 export interface PaginationMeta {
   total: number;
-  page:  number;
+  page: number;
   pages: number;
   limit: number;
 }
 
 export interface PaginationMeta {
   total: number;
-  page:  number;
+  page: number;
   pages: number;
   limit: number;
 }
@@ -19,22 +19,21 @@ export interface PaginationMeta {
 // ── Staff / Dashboard types ───────────────────────────────────────────────────
 export interface ITDashboardData {
   customers: { total: number; active: number };
-  vendors:   { total: number; active: number };
-  riders:    { total: number; active: number };
-  staff:     { total: number; active: number };
-  orders:    { total: number; pending: number };
+  vendors: { total: number; active: number };
+  riders: { total: number; active: number };
+  staff: { total: number; active: number };
+  orders: { total: number; pending: number };
 }
 
 // ── Service ───────────────────────────────────────────────────────────────────
 export const itService = {
-
   // ==================== DASHBOARD ====================
 
   async getDashboard() {
     const res = await apiClient.get(ENDPOINTS.IT.DASHBOARD);
     // apiClient unwraps { success, data } → res is the data object directly
     // Handle both shapes: res = { customers, vendors, ... } OR res = { data: { customers, ... } }
-    const d = ((res as any)?.customers !== undefined) ? res : ((res as any)?.data ?? res);
+    const d = (res as any)?.customers !== undefined ? res : ((res as any)?.data ?? res);
     return d;
   },
 
@@ -42,12 +41,14 @@ export const itService = {
   // Controllers check: search, name, email, phoneNumber, isActive, isSuspended
   // Frontend sends:    name, email, phoneNumber, accountStatus as individual filters
 
-  async getCustomers(params?: PaginationParams & {
-    name?:          string;
-    email?:         string;
-    phoneNumber?:   string;
-    accountStatus?: string;
-  }) {
+  async getCustomers(
+    params?: PaginationParams & {
+      name?: string;
+      email?: string;
+      phoneNumber?: string;
+      accountStatus?: string;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.IT.CUSTOMERS, { params: params ?? {} });
     return res;
   },
@@ -81,12 +82,14 @@ export const itService = {
   // Controllers check: search, name, email, phoneNumber, isActive, isSuspended, isVerified
   // No server-side active/suspended defaults — frontend filters client-side
 
-  async getVendors(params?: PaginationParams & {
-    name?:        string;
-    email?:       string;
-    phoneNumber?: string;
-    isVerified?:  string;
-  }) {
+  async getVendors(
+    params?: PaginationParams & {
+      name?: string;
+      email?: string;
+      phoneNumber?: string;
+      isVerified?: string;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.IT.VENDORS, { params: params ?? {} });
     return res;
   },
@@ -125,12 +128,14 @@ export const itService = {
   // Controllers check: search, name, phoneNumber, isActive, isSuspended, vehicleType
   // No server-side active/suspended defaults — frontend filters client-side
 
-  async getRiders(params?: PaginationParams & {
-    name?:        string;
-    phoneNumber?: string;
-    vehicleType?: string;
-    zone?:        string;
-  }) {
+  async getRiders(
+    params?: PaginationParams & {
+      name?: string;
+      phoneNumber?: string;
+      vehicleType?: string;
+      zone?: string;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.IT.RIDERS, { params: params ?? {} });
     return res;
   },
@@ -164,14 +169,14 @@ export const itService = {
 
   async getStaff(params?: PaginationParams & { name?: string; department?: string }) {
     const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, {
-      params: { isHead: 'false', ...params },
+      params: { isHead: "false", ...params },
     });
     return res;
   },
 
   async getAdmins(params?: PaginationParams & { department?: string }) {
     const res = await apiClient.get(ENDPOINTS.STAFF.ALL_STAFF, {
-      params: { isHead: 'true', ...params },
+      params: { isHead: "true", ...params },
     });
     return res;
   },
@@ -190,9 +195,9 @@ export const itService = {
   },
 
   async createAdmin(data: {
-    firstName:  string;
-    lastName:   string;
-    email:      string;
+    firstName: string;
+    lastName: string;
+    email: string;
     department: string;
   }) {
     const res = await apiClient.post(ENDPOINTS.STAFF.DEPARTMENT_HEADS, data);
@@ -200,12 +205,12 @@ export const itService = {
   },
 
   async createStaff(data: {
-    firstName:   string;
-    lastName:    string;
-    email:       string;
-    department:  string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    department: string;
     lineManager: string;
-    phone?:      string;
+    phone?: string;
   }) {
     const res = await apiClient.post(ENDPOINTS.STAFF.ALL_STAFF, data);
     return res;
@@ -238,14 +243,16 @@ export const itService = {
 
   // ==================== ORDERS ====================
 
-  async getOrders(params?: PaginationParams & {
-    name?:   string;
-    vendor?: string;
-    rider?:  string;
-    zone?:   string;
-    period?: string;
-    status?: string;
-  }) {
+  async getOrders(
+    params?: PaginationParams & {
+      name?: string;
+      vendor?: string;
+      rider?: string;
+      zone?: string;
+      period?: string;
+      status?: string;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.IT.ORDERS, { params });
     return res;
   },

@@ -1,65 +1,69 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import { FinanceFilters, type FinanceFilterValues } from '@/components/finance/FinanceFilters';
-import { TransactionList } from '@/components/finance/TransactionList';
-import { TransactionInfoModal } from '@/components/finance/TransactionInfoModal';
-import Pagination from '@/components/Pagination';
+import { useState, useCallback, useEffect } from "react";
+import { FinanceFilters, type FinanceFilterValues } from "@/components/finance/FinanceFilters";
+import { TransactionList } from "@/components/finance/TransactionList";
+import { TransactionInfoModal } from "@/components/finance/TransactionInfoModal";
+import Pagination from "@/components/Pagination";
 import financeService, {
   type TransactionFilters,
   type TransactionGroup,
   type TransactionDetail,
-} from '@/lib/api/services/finance.service';
+} from "@/lib/api/services/finance.service";
 
 export default function TransactionsPage() {
-  const [groups, setGroups]         = useState<TransactionGroup[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [total, setTotal]           = useState(0);
-  const [filters, setFilters]       = useState<TransactionFilters>({ page: 1, limit: 20 });
-  const [pageSize, setPageSize]     = useState(20);
+  const [groups, setGroups] = useState<TransactionGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [filters, setFilters] = useState<TransactionFilters>({ page: 1, limit: 20 });
+  const [pageSize, setPageSize] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
 
   // Modal
-  const [modalOpen, setModalOpen]       = useState(false);
-  const [modalDetail, setModalDetail]   = useState<TransactionDetail | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalDetail, setModalDetail] = useState<TransactionDetail | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
 
-  const load = useCallback(async (f: TransactionFilters, limit = pageSize) => {
-    setLoading(true);
-    try {
-      const res: any = await financeService.getTransactions({ ...f, limit });
+  const load = useCallback(
+    async (f: TransactionFilters, limit = pageSize) => {
+      setLoading(true);
+      try {
+        const res: any = await financeService.getTransactions({ ...f, limit });
 
-      const list: TransactionGroup[] =
-        Array.isArray(res)               ? res              :
-        Array.isArray(res?.data)         ? res.data         :
-        Array.isArray(res?.transactions) ? res.transactions :
-        [];
+        const list: TransactionGroup[] = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.transactions)
+              ? res.transactions
+              : [];
 
-      setGroups(list);
-      setTotal(res?.total ?? list.flatMap((g: TransactionGroup) => g.transactions).length);
+        setGroups(list);
+        setTotal(res?.total ?? list.flatMap((g: TransactionGroup) => g.transactions).length);
 
-      const pages: number =
-        res?.totalPages             ??
-        res?.pagination?.pages      ??
-        res?.pagination?.totalPages ??
-        1;
-      setTotalPages(pages);
-    } catch {
-      setGroups([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [pageSize]);
+        const pages: number =
+          res?.totalPages ?? res?.pagination?.pages ?? res?.pagination?.totalPages ?? 1;
+        setTotalPages(pages);
+      } catch {
+        setGroups([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pageSize]
+  );
 
   // Load all transactions on mount (no date filter)
-  useEffect(() => { load(filters); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    load(filters);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = (v: FinanceFilterValues) => {
     const f: TransactionFilters = {
-      name:      v.name      || undefined,
-      role:      (v.role     || undefined) as TransactionFilters['role'],
+      name: v.name || undefined,
+      role: (v.role || undefined) as TransactionFilters["role"],
       startDate: v.startDate || undefined,
-      endDate:   v.endDate   || undefined,
+      endDate: v.endDate || undefined,
       page: 1,
       limit: pageSize,
     };
@@ -70,24 +74,28 @@ export default function TransactionsPage() {
   const handleExport = async () => {
     try {
       const res = await financeService.exportTransactionsCSV({
-        name:      filters.name,
-        role:      filters.role,
+        name: filters.name,
+        role: filters.role,
         startDate: filters.startDate,
-        endDate:   filters.endDate,
+        endDate: filters.endDate,
       });
 
       const blob: Blob =
-        res instanceof Blob              ? res              :
-        (res as any)?.data instanceof Blob ? (res as any).data :
-        new Blob([JSON.stringify(res)], { type: 'text/csv' });
+        res instanceof Blob
+          ? res
+          : (res as any)?.data instanceof Blob
+            ? (res as any).data
+            : new Blob([JSON.stringify(res)], { type: "text/csv" });
 
       const url = URL.createObjectURL(blob);
-      const a   = document.createElement('a');
-      a.href     = url;
-      a.download = 'transactions.csv';
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "transactions.csv";
       a.click();
       URL.revokeObjectURL(url);
-    } catch { /* silent */ }
+    } catch {
+      /* silent */
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -119,7 +127,11 @@ export default function TransactionsPage() {
   };
 
   const handlePrint = async (id: string) => {
-    try { await openInfo(id); } catch { /* silent */ }
+    try {
+      await openInfo(id);
+    } catch {
+      /* silent */
+    }
   };
 
   return (
@@ -137,7 +149,10 @@ export default function TransactionsPage() {
       {loading ? (
         <div className="space-y-2">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-14 rounded-xl bg-muted/50 animate-pulse border border-border" />
+            <div
+              key={i}
+              className="h-14 rounded-xl bg-muted/50 animate-pulse border border-border"
+            />
           ))}
         </div>
       ) : (

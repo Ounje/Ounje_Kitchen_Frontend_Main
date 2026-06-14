@@ -1,0 +1,15 @@
+echo "--- post-merge: syncing environment ---"
+
+echo "[1/4] Installing dependencies (teammates may have added packages)..."
+npm install
+
+echo "[2/4] Prettier format check..."
+npm run format:check || echo "WARNING: Unformatted files found in merged code. Run 'npm run format'."
+
+echo "[3/4] ESLint..."
+npm run lint || echo "WARNING: ESLint found errors in the merged code."
+
+echo "[4/4] TypeScript type check..."
+npm run typecheck || echo "WARNING: TypeScript errors found in the merged code."
+
+echo "--- post-merge complete. ---"

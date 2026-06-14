@@ -24,13 +24,7 @@ import ReviewList from "@/components/operations/reviews/ReviewList";
 
 // ── Star Tabs ──────────────────────────────────────────────
 
-function StarTabs({
-  active,
-  onChange,
-}: {
-  active: number;
-  onChange: (s: number) => void;
-}) {
+function StarTabs({ active, onChange }: { active: number; onChange: (s: number) => void }) {
   return (
     <div className="flex gap-2 flex-wrap">
       {[5, 4, 3, 2, 1].map((s) => (
@@ -121,8 +115,7 @@ export default function ReviewDetailPage() {
   const id = params?.id as string;
   const initialFilter = searchParams?.get("filter") ?? "";
 
-  const type: ReviewType =
-    rawType === "vendor" || rawType === "rider" ? rawType : "rider";
+  const type: ReviewType = rawType === "vendor" || rawType === "rider" ? rawType : "rider";
 
   const [loading, setLoading] = useState(true);
   const [vendorDetail, setVendorDetail] = useState<VendorDetail | null>(null);
@@ -184,10 +177,8 @@ export default function ReviewDetailPage() {
 
   const handleAction = async (action: string) => {
     if (action === "warn") await operationsService.warnReviewAccount(type, id);
-    else if (action === "suspend")
-      await operationsService.suspendReviewAccount(type, id);
-    else if (action === "commend")
-      await operationsService.commendReviewAccount(type, id);
+    else if (action === "suspend") await operationsService.suspendReviewAccount(type, id);
+    else if (action === "commend") await operationsService.commendReviewAccount(type, id);
     alert(`Action "${action}" completed.`);
   };
 
@@ -209,9 +200,7 @@ export default function ReviewDetailPage() {
       <div className="bg-[#f0faf0] rounded-2xl shadow p-6 max-w-3xl mx-auto">
         {/* Title */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-bold text-gray-900">
-            {capitalised}&apos;s Review
-          </h1>
+          <h1 className="text-lg font-bold text-gray-900">{capitalised}&apos;s Review</h1>
           <button
             onClick={() => router.back()}
             className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-400 text-gray-600 hover:bg-gray-100"
@@ -251,16 +240,11 @@ export default function ReviewDetailPage() {
                     <span className="font-semibold">Name:</span> {detail.name}
                   </p>
                   <p>
-                    <span className="font-semibold">Phone number:</span>{" "}
-                    {detail.phoneNumber}
+                    <span className="font-semibold">Phone number:</span> {detail.phoneNumber}
                   </p>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold">Rating:</span>
-                    <StarRating
-                      rating={detail.rating}
-                      count={detail.ratingCount}
-                      size={14}
-                    />
+                    <StarRating rating={detail.rating} count={detail.ratingCount} size={14} />
                   </div>
                   <p>
                     <span className="font-semibold">Zone:</span>{" "}
@@ -275,9 +259,7 @@ export default function ReviewDetailPage() {
               <div className="flex sm:flex-col gap-2 flex-wrap sm:items-end">
                 {/* Mixed — shown for both vendor and rider */}
                 <button
-                  onClick={() =>
-                    setActiveFilter(activeFilter === "mixed" ? "" : "mixed")
-                  }
+                  onClick={() => setActiveFilter(activeFilter === "mixed" ? "" : "mixed")}
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
                     activeFilter === "mixed"
                       ? "bg-yellow-400 border-yellow-400 text-gray-900"
@@ -291,9 +273,7 @@ export default function ReviewDetailPage() {
                 {type === "rider" && (
                   <>
                     <button
-                      onClick={() =>
-                        setActiveFilter(activeFilter === "bad" ? "" : "bad")
-                      }
+                      onClick={() => setActiveFilter(activeFilter === "bad" ? "" : "bad")}
                       className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
                         activeFilter === "bad"
                           ? "bg-[#D0021B] border-[#D0021B] text-white"
@@ -303,9 +283,7 @@ export default function ReviewDetailPage() {
                       Bad Review <ThumbsDown size={14} />
                     </button>
                     <button
-                      onClick={() =>
-                        setActiveFilter(activeFilter === "good" ? "" : "good")
-                      }
+                      onClick={() => setActiveFilter(activeFilter === "good" ? "" : "good")}
                       className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
                         activeFilter === "good"
                           ? "bg-[#1A3F1C] border-[#1A3F1C] text-white"

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   ResponsiveContainer,
@@ -9,18 +9,18 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-} from 'recharts';
-import type { RevenueTrendPoint } from '@/lib/api/services/finance.service';
+} from "recharts";
+import type { RevenueTrendPoint } from "@/lib/api/services/finance.service";
 
 interface Props {
   data: RevenueTrendPoint[];
 }
 
 const LINES = [
-  { key: 'gross',  color: '#1A3F1C', label: 'Gross' },
-  { key: 'vendor', color: '#FFCA3A', label: 'Vendor' },
-  { key: 'rider',  color: '#D00000', label: 'Rider' },
-  { key: 'net',    color: '#37A449', label: 'Net' },
+  { key: "gross", color: "#1A3F1C", label: "Gross" },
+  { key: "vendor", color: "#FFCA3A", label: "Vendor" },
+  { key: "rider", color: "#D00000", label: "Rider" },
+  { key: "net", color: "#37A449", label: "Net" },
 ] as const;
 
 function formatY(v: number) {
@@ -37,13 +37,13 @@ export function RevenueTrendChart({ data }: Props) {
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: '#6b7280' }}
+            tick={{ fontSize: 11, fill: "#6b7280" }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={formatY}
-            tick={{ fontSize: 11, fill: '#6b7280' }}
+            tick={{ fontSize: 11, fill: "#6b7280" }}
             axisLine={false}
             tickLine={false}
           />
@@ -53,10 +53,10 @@ export function RevenueTrendChart({ data }: Props) {
               name.charAt(0).toUpperCase() + name.slice(1),
             ]}
             contentStyle={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              fontSize: '12px',
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              border: "1px solid #e5e7eb",
+              fontSize: "12px",
             }}
           />
           <Legend

@@ -5,19 +5,28 @@ import { useRouter } from "next/navigation";
 import { itService } from "@/lib/api/services/it.service";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Users, Store, Bike, UserCog, ShoppingCart,
-  AlertCircle, TrendingUp, Bell,
-  AlertTriangle, Info, ArrowUpRight, Trash2,
+  Users,
+  Store,
+  Bike,
+  UserCog,
+  ShoppingCart,
+  AlertCircle,
+  TrendingUp,
+  Bell,
+  AlertTriangle,
+  Info,
+  ArrowUpRight,
+  Trash2,
 } from "lucide-react";
 import { useRouteGuard } from "@/hooks/useRouteGuard";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface DashboardData {
   customers: { total: number; active: number };
-  vendors:   { total: number; active: number };
-  riders:    { total: number; active: number };
-  staff:     { total: number; active: number };
-  orders:    { total: number; pending: number };
+  vendors: { total: number; active: number };
+  riders: { total: number; active: number };
+  staff: { total: number; active: number };
+  orders: { total: number; pending: number };
   recentOrders: any[]; // New field
 }
 
@@ -28,17 +37,26 @@ function suspended(total: number, active: number) {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 function StatCard({
-  title, value, sub, icon: Icon, iconBg,
+  title,
+  value,
+  sub,
+  icon: Icon,
+  iconBg,
 }: {
-  title: string; value: number; sub: string;
-  icon: any; iconBg: string;
+  title: string;
+  value: number;
+  sub: string;
+  icon: any;
+  iconBg: string;
 }) {
   return (
     <Card className="border border-border shadow-sm hover:shadow-lg transition-all duration-300 bg-surface">
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-4">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner"
-            style={{ backgroundColor: iconBg }}>
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner"
+            style={{ backgroundColor: iconBg }}
+          >
             <Icon className="h-6 w-6 text-white" />
           </div>
         </div>
@@ -51,9 +69,15 @@ function StatCard({
 }
 
 function StatusCard({
-  title, active, suspendedCount, total,
+  title,
+  active,
+  suspendedCount,
+  total,
 }: {
-  title: string; active: number; suspendedCount: number; total: number;
+  title: string;
+  active: number;
+  suspendedCount: number;
+  total: number;
 }) {
   const pct = total > 0 ? Math.round((active / total) * 100) : 0;
   return (
@@ -78,8 +102,10 @@ function StatusCard({
           {/* Progress bar */}
           <div className="pt-2">
             <div className="w-full h-2 bg-surface-secondary rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all duration-500"
-                style={{ width: `${pct}%` }} />
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${pct}%` }}
+              />
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 font-medium">{pct}% active</p>
           </div>
@@ -102,26 +128,36 @@ function OrderSummaryCard({ orders }: { orders: DashboardData["orders"] }) {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-primary shadow-lg flex items-center justify-center shrink-0">
-               <ShoppingCart className="h-7 w-7 text-white" />
+              <ShoppingCart className="h-7 w-7 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-black text-foreground tracking-tight">Order Summary</h3>
-              <p className="text-sm font-semibold text-muted-foreground mt-0.5">{completedPct}% completion rate</p>
+              <p className="text-sm font-semibold text-muted-foreground mt-0.5">
+                {completedPct}% completion rate
+              </p>
             </div>
           </div>
 
           <div className="flex gap-8 w-full md:w-auto mt-4 md:mt-0 bg-surface p-4 rounded-xl border border-border shadow-sm">
             <div className="text-center">
               <p className="text-3xl font-black text-primary">{orders.total.toLocaleString()}</p>
-              <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">Total</p>
+              <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">
+                Total
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-black text-yellow-500">{orders.pending.toLocaleString()}</p>
-              <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">Pending</p>
+              <p className="text-3xl font-black text-yellow-500">
+                {orders.pending.toLocaleString()}
+              </p>
+              <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">
+                Pending
+              </p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-black text-green-600">{completed.toLocaleString()}</p>
-              <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">Completed</p>
+              <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">
+                Completed
+              </p>
             </div>
           </div>
         </div>
@@ -132,13 +168,15 @@ function OrderSummaryCard({ orders }: { orders: DashboardData["orders"] }) {
 
 function RecentOrdersTable({ orders }: { orders: any[] }) {
   const router = useRouter();
-  
+
   if (!orders || orders.length === 0) return null;
 
   const getStatusColor = (status: string) => {
     const s = status.toLowerCase();
-    if (s === "delivered" || s === "completed") return "bg-green-100 text-green-700 border-green-200";
-    if (s === "pending" || s === "confirming") return "bg-yellow-100 text-yellow-700 border-yellow-200";
+    if (s === "delivered" || s === "completed")
+      return "bg-green-100 text-green-700 border-green-200";
+    if (s === "pending" || s === "confirming")
+      return "bg-yellow-100 text-yellow-700 border-yellow-200";
     if (s === "cancelled" || s === "declined") return "bg-red-100 text-red-700 border-red-200";
     return "bg-blue-100 text-blue-700 border-blue-200";
   };
@@ -152,7 +190,7 @@ function RecentOrdersTable({ orders }: { orders: any[] }) {
           </div>
           <h2 className="text-xl font-black text-foreground tracking-tight">Recent Orders</h2>
         </div>
-        <button 
+        <button
           onClick={() => router.push("/it/orders")}
           className="text-sm font-bold text-primary flex items-center gap-1 hover:underline"
         >
@@ -165,12 +203,24 @@ function RecentOrdersTable({ orders }: { orders: any[] }) {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-muted/30 border-b border-border">
-                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground">Order ID</th>
-                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground">Customer</th>
-                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground">Vendor</th>
-                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground">Amount</th>
-                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground text-center">Status</th>
-                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground text-right">Date</th>
+                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Order ID
+                </th>
+                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Customer
+                </th>
+                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Vendor
+                </th>
+                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Amount
+                </th>
+                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground text-center">
+                  Status
+                </th>
+                <th className="p-4 text-xs font-black uppercase tracking-widest text-muted-foreground text-right">
+                  Date
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -179,8 +229,8 @@ function RecentOrdersTable({ orders }: { orders: any[] }) {
                 const customer = order.customer?.user?.name ?? "Guest";
                 const vendor = order.vendor?.name ?? "Unknown";
                 return (
-                  <tr 
-                    key={id} 
+                  <tr
+                    key={id}
                     className="hover:bg-muted/10 cursor-pointer transition-colors"
                     onClick={() => router.push(`/it/orders/${id}`)}
                   >
@@ -193,12 +243,17 @@ function RecentOrdersTable({ orders }: { orders: any[] }) {
                       ₦{(order.totalPrice || 0).toLocaleString()}
                     </td>
                     <td className="p-4 text-center">
-                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusColor(order.status)}`}>
+                      <span
+                        className={`text-[10px] font-black px-2.5 py-1 rounded-full border uppercase tracking-wider ${getStatusColor(order.status)}`}
+                      >
                         {order.status}
                       </span>
                     </td>
                     <td className="p-4 text-sm text-right text-muted-foreground font-medium">
-                      {new Date(order.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
+                      {new Date(order.createdAt).toLocaleDateString("en-NG", {
+                        day: "numeric",
+                        month: "short",
+                      })}
                     </td>
                   </tr>
                 );
@@ -212,9 +267,7 @@ function RecentOrdersTable({ orders }: { orders: any[] }) {
 }
 
 function SkeletonCard() {
-  return (
-    <div className="h-32 rounded-lg bg-muted/50 animate-pulse" />
-  );
+  return <div className="h-32 rounded-lg bg-muted/50 animate-pulse" />;
 }
 
 function Skeleton() {
@@ -222,10 +275,14 @@ function Skeleton() {
     <div className="space-y-8 animate-pulse">
       <div className="h-8 bg-muted rounded w-48" />
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+        {[...Array(6)].map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-52 rounded-xl bg-muted/50" />)}
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-52 rounded-xl bg-muted/50" />
+        ))}
       </div>
       <div className="h-28 rounded-xl bg-muted/50" />
       <div className="h-80 rounded-xl bg-muted/50" />
@@ -256,9 +313,14 @@ function NotificationsTable({
   };
 
   const typeStyle = (type: string) => {
-    if (type === "error")   return { cls: "bg-red-100 text-red-700",    icon: <AlertCircle className="h-3.5 w-3.5" /> };
-    if (type === "warning") return { cls: "bg-yellow-100 text-yellow-700", icon: <AlertTriangle className="h-3.5 w-3.5" /> };
-    return                         { cls: "bg-blue-100 text-blue-700",   icon: <Info className="h-3.5 w-3.5" /> };
+    if (type === "error")
+      return { cls: "bg-red-100 text-red-700", icon: <AlertCircle className="h-3.5 w-3.5" /> };
+    if (type === "warning")
+      return {
+        cls: "bg-yellow-100 text-yellow-700",
+        icon: <AlertTriangle className="h-3.5 w-3.5" />,
+      };
+    return { cls: "bg-blue-100 text-blue-700", icon: <Info className="h-3.5 w-3.5" /> };
   };
 
   return (
@@ -293,31 +355,53 @@ function NotificationsTable({
             <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-muted/30 border-b border-border">
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Type</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Title</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Message</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Audience</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Channels</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sent By</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Date</th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Action</th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Type
+                  </th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Title
+                  </th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Message
+                  </th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Audience
+                  </th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Channels
+                  </th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Sent By
+                  </th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {notifications.map((n) => {
                   const { cls, icon } = typeStyle(n.type ?? "info");
                   const sentBy = n.createdBy
-                    ? `${n.createdBy.firstName ?? ""} ${n.createdBy.lastName ?? ""}`.trim() || n.createdBy.email
+                    ? `${n.createdBy.firstName ?? ""} ${n.createdBy.lastName ?? ""}`.trim() ||
+                      n.createdBy.email
                     : "System";
                   const channels: string[] = Array.isArray(n.channels) ? n.channels : [];
                   return (
                     <tr key={n._id} className="hover:bg-muted/10 transition-colors">
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase px-2 py-1 rounded-full ${cls}`}>
-                          {icon}{n.type ?? "info"}
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase px-2 py-1 rounded-full ${cls}`}
+                        >
+                          {icon}
+                          {n.type ?? "info"}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-semibold text-foreground max-w-45 truncate">{n.title}</td>
+                      <td className="px-4 py-3 font-semibold text-foreground max-w-45 truncate">
+                        {n.title}
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground max-w-65">
                         <p className="line-clamp-2 text-xs">{n.message}</p>
                       </td>
@@ -329,16 +413,27 @@ function NotificationsTable({
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
                           {channels.map((ch) => (
-                            <span key={ch} className="text-[10px] font-bold uppercase bg-secondary text-primary px-1.5 py-0.5 rounded">
+                            <span
+                              key={ch}
+                              className="text-[10px] font-bold uppercase bg-secondary text-primary px-1.5 py-0.5 rounded"
+                            >
                               {ch}
                             </span>
                           ))}
-                          {channels.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+                          {channels.length === 0 && (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{sentBy}</td>
                       <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(n.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+                        {sentBy}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(n.createdAt).toLocaleDateString("en-NG", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <button
@@ -366,11 +461,11 @@ function NotificationsTable({
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function ITDashboard() {
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
-  const [dashboard, setDashboard]   = useState<DashboardData | null>(null);
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [adminsTotal, setAdminsTotal] = useState(0);
   const [adminsActive, setAdminsActive] = useState(0);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
@@ -386,10 +481,12 @@ export default function ITDashboard() {
         ]);
 
         setDashboard(dashRes as DashboardData);
-        
+
         const adminsResult: any = adminsRes;
-        const adminsArr: any[] = adminsResult?.data ?? adminsResult?.admins ?? adminsResult?.staff ?? [];
-        const totalAdmins = adminsResult?.total ?? adminsResult?.pagination?.total ?? adminsArr.length;
+        const adminsArr: any[] =
+          adminsResult?.data ?? adminsResult?.admins ?? adminsResult?.staff ?? [];
+        const totalAdmins =
+          adminsResult?.total ?? adminsResult?.pagination?.total ?? adminsArr.length;
         const activeAdmins = adminsArr.filter(
           (a: any) => a.isActive !== false && a.isSuspended !== true
         ).length;
@@ -400,15 +497,16 @@ export default function ITDashboard() {
         // Fetch notifications separately to avoid blocking the whole dashboard
         try {
           const notifRes = await itService.getNotifications();
-          const notifData = Array.isArray((notifRes as any)?.notifications) 
-            ? (notifRes as any).notifications 
-            : (Array.isArray(notifRes) ? notifRes : []);
+          const notifData = Array.isArray((notifRes as any)?.notifications)
+            ? (notifRes as any).notifications
+            : Array.isArray(notifRes)
+              ? notifRes
+              : [];
           setNotifications(notifData);
         } catch (nErr) {
           console.warn("Notifications endpoint not reachable:", nErr);
           setNotifications([]); // Fallback to empty
         }
-
       } catch (err: any) {
         setError(err?.message || "Failed to load dashboard");
       } finally {
@@ -449,43 +547,43 @@ export default function ITDashboard() {
     {
       title: "Total Admins",
       value: adminsTotal,
-      sub:   `${adminsActive} active dept heads`,
-      icon:  UserCog,
+      sub: `${adminsActive} active dept heads`,
+      icon: UserCog,
       iconBg: "#1a3f1c",
     },
     {
       title: "Total Staff",
       value: dashboard.staff?.total ?? 0,
-      sub:   `${dashboard.staff?.active ?? 0} active`,
-      icon:  Users,
+      sub: `${dashboard.staff?.active ?? 0} active`,
+      icon: Users,
       iconBg: "#98ef9b",
     },
     {
       title: "Total Customers",
       value: dashboard.customers?.total ?? 0,
-      sub:   `${dashboard.customers?.active ?? 0} active`,
-      icon:  Users,
+      sub: `${dashboard.customers?.active ?? 0} active`,
+      icon: Users,
       iconBg: "#FFCA3A",
     },
     {
       title: "Total Vendors",
       value: dashboard.vendors?.total ?? 0,
-      sub:   `${dashboard.vendors?.active ?? 0} active`,
-      icon:  Store,
+      sub: `${dashboard.vendors?.active ?? 0} active`,
+      icon: Store,
       iconBg: "#1a3f1c",
     },
     {
       title: "Total Riders",
       value: dashboard.riders?.total ?? 0,
-      sub:   `${dashboard.riders?.active ?? 0} active`,
-      icon:  Bike,
+      sub: `${dashboard.riders?.active ?? 0} active`,
+      icon: Bike,
       iconBg: "#98ef9b",
     },
     {
       title: "Total Orders",
       value: dashboard.orders?.total ?? 0,
-      sub:   `${dashboard.orders?.pending ?? 0} pending`,
-      icon:  ShoppingCart,
+      sub: `${dashboard.orders?.pending ?? 0} pending`,
+      icon: ShoppingCart,
       iconBg: "#FFCA3A",
     },
   ];
@@ -494,13 +592,19 @@ export default function ITDashboard() {
     <div className="space-y-8 animate-fadeIn pb-10">
       {/* Header */}
       <div className="mt-8 mb-6">
-        <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">IT Dashboard</h1>
-        <p className="text-sm font-medium text-muted-foreground mt-1">Platform overview &amp; overall account management</p>
+        <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+          IT Dashboard
+        </h1>
+        <p className="text-sm font-medium text-muted-foreground mt-1">
+          Platform overview &amp; overall account management
+        </p>
       </div>
 
       {/* 6 stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
-        {stats.map((s, i) => <StatCard key={i} {...s} />)}
+        {stats.map((s, i) => (
+          <StatCard key={i} {...s} />
+        ))}
       </div>
 
       {/* Account status summary */}
@@ -509,19 +613,27 @@ export default function ITDashboard() {
           <div className="p-2 bg-surface-secondary rounded-lg">
             <TrendingUp className="h-5 w-5 text-primary" />
           </div>
-          <h2 className="text-xl font-bold text-foreground tracking-tight">Account Status Summary</h2>
+          <h2 className="text-xl font-bold text-foreground tracking-tight">
+            Account Status Summary
+          </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatusCard
             title="Customers"
             active={dashboard.customers?.active ?? 0}
-            suspendedCount={suspended(dashboard.customers?.total ?? 0, dashboard.customers?.active ?? 0)}
+            suspendedCount={suspended(
+              dashboard.customers?.total ?? 0,
+              dashboard.customers?.active ?? 0
+            )}
             total={dashboard.customers?.total ?? 0}
           />
           <StatusCard
             title="Vendors"
             active={dashboard.vendors?.active ?? 0}
-            suspendedCount={suspended(dashboard.vendors?.total ?? 0, dashboard.vendors?.active ?? 0)}
+            suspendedCount={suspended(
+              dashboard.vendors?.total ?? 0,
+              dashboard.vendors?.active ?? 0
+            )}
             total={dashboard.vendors?.total ?? 0}
           />
           <StatusCard
@@ -548,7 +660,7 @@ export default function ITDashboard() {
       {/* System Notifications — tabular */}
       <NotificationsTable
         notifications={notifications}
-        onDismiss={(id) => setNotifications(prev => prev.filter(n => n._id !== id))}
+        onDismiss={(id) => setNotifications((prev) => prev.filter((n) => n._id !== id))}
       />
     </div>
   );

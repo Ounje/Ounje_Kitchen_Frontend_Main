@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { vendorService, type Vendor, type Buyer } from '@/lib/api/services/vendor.service';
-import { VendorDetailsHeader } from '@/components/operations/Vendors/VendorDetailsHeader';
-import { VendorMetrics } from '@/components/operations/Vendors/VendorMetrics';
-import { VendorBuyerCard } from '@/components/operations/Vendors/VendorBuyerCard';
-import { ActionButtons } from '@/components/operations/Vendors/ActionButtons';
-import { VendorDetailsSkeleton } from '../loaders/VendorDetailsSkeleton';
-import { X } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { vendorService, type Vendor, type Buyer } from "@/lib/api/services/vendor.service";
+import { VendorDetailsHeader } from "@/components/operations/Vendors/VendorDetailsHeader";
+import { VendorMetrics } from "@/components/operations/Vendors/VendorMetrics";
+import { VendorBuyerCard } from "@/components/operations/Vendors/VendorBuyerCard";
+import { ActionButtons } from "@/components/operations/Vendors/ActionButtons";
+import { VendorDetailsSkeleton } from "../loaders/VendorDetailsSkeleton";
+import { X } from "lucide-react";
+import { toast } from "sonner";
 
 export default function VendorDetailsPage() {
   const params = useParams();
@@ -28,7 +28,7 @@ export default function VendorDetailsPage() {
         const data = await vendorService.getVendorById(vendorId);
         setVendor(data);
       } catch (error: any) {
-        toast.error(error.message || 'Failed to load vendor details');
+        toast.error(error.message || "Failed to load vendor details");
       } finally {
         setLoading(false);
       }
@@ -40,7 +40,7 @@ export default function VendorDetailsPage() {
         const data = await vendorService.getMostFrequentBuyer(vendorId);
         setBuyer(data);
       } catch (error: any) {
-        console.error('Failed to load buyer:', error);
+        console.error("Failed to load buyer:", error);
       } finally {
         setBuyerLoading(false);
       }

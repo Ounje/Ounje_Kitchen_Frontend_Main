@@ -1,5 +1,5 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
 
 const E = ENDPOINTS.ACCOUNTS;
 
@@ -14,12 +14,13 @@ export const customerSetupService = {
   list(params?: { search?: string; page?: number; limit?: number }) {
     return apiClient.get(E.CUSTOMERS, { params }) as Promise<any>;
   },
-  create(body: {
-    name: string; email: string; phone?: string; address?: string;
-  }) {
+  create(body: { name: string; email: string; phone?: string; address?: string }) {
     return apiClient.post(E.CUSTOMERS, body) as Promise<any>;
   },
-  update(userId: string, body: Partial<{ name: string; phone: string; address: string; img: string }>) {
+  update(
+    userId: string,
+    body: Partial<{ name: string; phone: string; address: string; img: string }>
+  ) {
     return apiClient.put(E.CUSTOMER_UPDATE(userId), body) as Promise<any>;
   },
 };

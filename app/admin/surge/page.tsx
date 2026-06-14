@@ -3,7 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { apiClient } from "@/lib/client";
 import { ENDPOINTS } from "@/lib/config";
-import { Zap, Clock, Plus, Trash2, Save, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  Zap,
+  Clock,
+  Plus,
+  Trash2,
+  Save,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MULTIPLIERS = [1.0, 1.2, 1.3] as const;
@@ -87,30 +96,36 @@ function fmtDuration(start: string, end: string | null): string {
 
 function MultiplierPill({ value }: { value: number }) {
   const cls =
-    value >= 1.3 ? "bg-red-100 text-red-700 border-red-200"
-    : value >= 1.2 ? "bg-orange-100 text-orange-700 border-orange-200"
-    : "bg-green-100 text-green-700 border-green-200";
-  return <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold border ${cls}`}>{value.toFixed(1)}×</span>;
+    value >= 1.3
+      ? "bg-red-100 text-red-700 border-red-200"
+      : value >= 1.2
+        ? "bg-orange-100 text-orange-700 border-orange-200"
+        : "bg-green-100 text-green-700 border-green-200";
+  return (
+    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold border ${cls}`}>
+      {value.toFixed(1)}×
+    </span>
+  );
 }
 
 export default function AdminSurgePricingPage() {
-  const [config, setConfig]         = useState<SurgeConfig | null>(null);
-  const [loading, setLoading]       = useState(true);
-  const [saving, setSaving]         = useState(false);
-  const [error, setError]           = useState<string | null>(null);
-  const [saved, setSaved]           = useState(false);
+  const [config, setConfig] = useState<SurgeConfig | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
-  const [isActive, setIsActive]     = useState(false);
+  const [isActive, setIsActive] = useState(false);
   const [multiplier, setMultiplier] = useState<number>(1.0);
-  const [reason, setReason]         = useState("");
-  const [schedule, setSchedule]     = useState<ScheduleSlot[]>([]);
-  const [dirty, setDirty]           = useState(false);
+  const [reason, setReason] = useState("");
+  const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
+  const [dirty, setDirty] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiClient.get(ENDPOINTS.SUPERADMIN.SURGE) as any;
+      const res = (await apiClient.get(ENDPOINTS.SUPERADMIN.SURGE)) as any;
       const data: SurgeConfig = res?.data ?? res;
       setConfig(data);
       setIsActive(data.isActive);
@@ -125,20 +140,29 @@ export default function AdminSurgePricingPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const save = async (overrides?: Partial<{ isActive: boolean; multiplier: number; reason: string; schedule: ScheduleSlot[] }>) => {
+  const save = async (
+    overrides?: Partial<{
+      isActive: boolean;
+      multiplier: number;
+      reason: string;
+      schedule: ScheduleSlot[];
+    }>
+  ) => {
     setSaving(true);
     setError(null);
     setSaved(false);
     try {
       const body = {
-        isActive:   overrides?.isActive   ?? isActive,
+        isActive: overrides?.isActive ?? isActive,
         multiplier: overrides?.multiplier ?? multiplier,
-        reason:     overrides?.reason     ?? reason,
-        schedule:   overrides?.schedule   ?? schedule,
+        reason: overrides?.reason ?? reason,
+        schedule: overrides?.schedule ?? schedule,
       };
-      const res = await apiClient.put(ENDPOINTS.SUPERADMIN.SURGE, body) as any;
+      const res = (await apiClient.put(ENDPOINTS.SUPERADMIN.SURGE, body)) as any;
       const data: SurgeConfig = res?.data ?? res;
       setConfig(data);
       setIsActive(data.isActive);
@@ -158,23 +182,38 @@ export default function AdminSurgePricingPage() {
   const toggle = () => save({ isActive: !isActive });
 
   const addSlot = () => {
-    setSchedule(prev => [...prev, { label: "", days: [1,2,3,4,5], startHour: 12, endHour: 14, multiplier: 1.2, enabled: true }]);
+    setSchedule((prev) => [
+      ...prev,
+      {
+        label: "",
+        days: [1, 2, 3, 4, 5],
+        startHour: 12,
+        endHour: 14,
+        multiplier: 1.2,
+        enabled: true,
+      },
+    ]);
     setDirty(true);
   };
 
-  const removeSlot = (i: number) => { setSchedule(prev => prev.filter((_, idx) => idx !== i)); setDirty(true); };
+  const removeSlot = (i: number) => {
+    setSchedule((prev) => prev.filter((_, idx) => idx !== i));
+    setDirty(true);
+  };
 
   const updateSlot = (i: number, patch: Partial<ScheduleSlot>) => {
-    setSchedule(prev => prev.map((s, idx) => idx === i ? { ...s, ...patch } : s));
+    setSchedule((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
     setDirty(true);
   };
 
   const toggleSlotDay = (slotIdx: number, day: number) => {
-    setSchedule(prev => prev.map((s, i) => {
-      if (i !== slotIdx) return s;
-      const days = s.days.includes(day) ? s.days.filter(d => d !== day) : [...s.days, day];
-      return { ...s, days };
-    }));
+    setSchedule((prev) =>
+      prev.map((s, i) => {
+        if (i !== slotIdx) return s;
+        const days = s.days.includes(day) ? s.days.filter((d) => d !== day) : [...s.days, day];
+        return { ...s, days };
+      })
+    );
     setDirty(true);
   };
 
@@ -186,12 +225,11 @@ export default function AdminSurgePricingPage() {
     );
   }
 
-  const activeScheduledSlots = schedule.filter(s => s.enabled).length;
+  const activeScheduledSlots = schedule.filter((s) => s.enabled).length;
   const sessions = buildSessions(config?.logs ?? [], isActive);
 
   return (
     <div className="p-6 space-y-6 w-full">
-
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
@@ -199,10 +237,16 @@ export default function AdminSurgePricingPage() {
             <Zap className="h-6 w-6 text-[#1a3f1c]" />
             Surge Pricing
           </h1>
-          <p className="text-gray-500 text-sm mt-0.5">Control delivery fee multipliers in real-time</p>
+          <p className="text-gray-500 text-sm mt-0.5">
+            Control delivery fee multipliers in real-time
+          </p>
         </div>
-        <button type="button" onClick={load} title="Refresh"
-          className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+        <button
+          type="button"
+          onClick={load}
+          title="Refresh"
+          className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+        >
           <RefreshCw className="h-4 w-4" />
         </button>
       </div>
@@ -220,21 +264,31 @@ export default function AdminSurgePricingPage() {
 
       {/* ── Live Control Card ───────────────────────────────────────── */}
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className={`px-6 py-4 flex items-center justify-between ${isActive ? "bg-amber-50 border-b border-amber-100" : "bg-gray-50 border-b border-gray-100"}`}>
+        <div
+          className={`px-6 py-4 flex items-center justify-between ${isActive ? "bg-amber-50 border-b border-amber-100" : "bg-gray-50 border-b border-gray-100"}`}
+        >
           <div className="flex items-center gap-3">
-            <div className={`w-2.5 h-2.5 rounded-full ${isActive ? "bg-amber-400 animate-pulse" : "bg-gray-300"}`} />
-            <span className={`font-bold text-base ${isActive ? "text-amber-700" : "text-gray-500"}`}>
+            <div
+              className={`w-2.5 h-2.5 rounded-full ${isActive ? "bg-amber-400 animate-pulse" : "bg-gray-300"}`}
+            />
+            <span
+              className={`font-bold text-base ${isActive ? "text-amber-700" : "text-gray-500"}`}
+            >
               {isActive ? "Surge is ACTIVE" : "Surge is Inactive"}
             </span>
             {isActive && <MultiplierPill value={multiplier} />}
           </div>
           {isActive && config?.activatedBy && (
             <span className="text-xs text-gray-400">
-              by {config.activatedBy}{config.activatedAt ? ` · ${fmtDate(config.activatedAt)}` : ""}
+              by {config.activatedBy}
+              {config.activatedAt ? ` · ${fmtDate(config.activatedAt)}` : ""}
             </span>
           )}
           {!isActive && activeScheduledSlots > 0 && (
-            <span className="text-xs text-gray-400">{activeScheduledSlots} schedule slot{activeScheduledSlots !== 1 ? "s" : ""} will auto-activate</span>
+            <span className="text-xs text-gray-400">
+              {activeScheduledSlots} schedule slot{activeScheduledSlots !== 1 ? "s" : ""} will
+              auto-activate
+            </span>
           )}
         </div>
 
@@ -249,8 +303,10 @@ export default function AdminSurgePricingPage() {
                 className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-60
                   ${isActive ? "bg-[#1a3f1c]" : "bg-gray-200"}`}
               >
-                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200
-                  ${isActive ? "translate-x-6" : "translate-x-1"}`} />
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200
+                  ${isActive ? "translate-x-6" : "translate-x-1"}`}
+                />
               </button>
               <span className="text-sm font-medium text-gray-700">
                 {saving ? "Saving…" : isActive ? "Turn Off" : "Turn On"}
@@ -260,17 +316,23 @@ export default function AdminSurgePricingPage() {
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500">Multiplier:</span>
               <div className="flex gap-1.5">
-                {MULTIPLIERS.map(m => (
+                {MULTIPLIERS.map((m) => (
                   <button
                     type="button"
                     key={m}
-                    onClick={() => { setMultiplier(m); setDirty(true); }}
+                    onClick={() => {
+                      setMultiplier(m);
+                      setDirty(true);
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition-all
-                      ${multiplier === m
-                        ? m >= 1.3 ? "bg-red-500 text-white border-red-500 shadow-sm"
-                          : m >= 1.2 ? "bg-orange-500 text-white border-orange-500 shadow-sm"
-                          : "bg-[#1a3f1c] text-white border-[#1a3f1c] shadow-sm"
-                        : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+                      ${
+                        multiplier === m
+                          ? m >= 1.3
+                            ? "bg-red-500 text-white border-red-500 shadow-sm"
+                            : m >= 1.2
+                              ? "bg-orange-500 text-white border-orange-500 shadow-sm"
+                              : "bg-[#1a3f1c] text-white border-[#1a3f1c] shadow-sm"
+                          : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
                       }`}
                   >
                     {m.toFixed(1)}×
@@ -290,7 +352,10 @@ export default function AdminSurgePricingPage() {
                 maxLength={200}
                 placeholder="e.g. Heavy rain, Friday evening rush…"
                 value={reason}
-                onChange={e => { setReason(e.target.value); setDirty(true); }}
+                onChange={(e) => {
+                  setReason(e.target.value);
+                  setDirty(true);
+                }}
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1a3f1c]/20 focus:border-[#1a3f1c]"
               />
             </div>
@@ -316,7 +381,9 @@ export default function AdminSurgePricingPage() {
             <Clock className="h-5 w-5 text-[#1a3f1c]" />
             <div>
               <p className="font-semibold text-gray-900">Peak Hours Schedule</p>
-              <p className="text-xs text-gray-400">Auto-activates surge during set times when manual toggle is off</p>
+              <p className="text-xs text-gray-400">
+                Auto-activates surge during set times when manual toggle is off
+              </p>
             </div>
           </div>
           <button
@@ -336,7 +403,10 @@ export default function AdminSurgePricingPage() {
           ) : (
             <div className="space-y-4">
               {schedule.map((slot, i) => (
-                <div key={i} className={`border rounded-xl p-4 transition-all ${slot.enabled ? "border-gray-200 bg-white" : "border-gray-100 bg-gray-50 opacity-60"}`}>
+                <div
+                  key={i}
+                  className={`border rounded-xl p-4 transition-all ${slot.enabled ? "border-gray-200 bg-white" : "border-gray-100 bg-gray-50 opacity-60"}`}
+                >
                   <div className="flex items-start gap-3 flex-wrap">
                     <button
                       type="button"
@@ -345,30 +415,35 @@ export default function AdminSurgePricingPage() {
                       className={`mt-1 relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors
                         ${slot.enabled ? "bg-[#1a3f1c]" : "bg-gray-200"}`}
                     >
-                      <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform
-                        ${slot.enabled ? "translate-x-4" : "translate-x-0.5"}`} />
+                      <span
+                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform
+                        ${slot.enabled ? "translate-x-4" : "translate-x-0.5"}`}
+                      />
                     </button>
 
                     <input
                       type="text"
                       placeholder="Label (e.g. Lunch Rush)"
                       value={slot.label}
-                      onChange={e => updateSlot(i, { label: e.target.value })}
+                      onChange={(e) => updateSlot(i, { label: e.target.value })}
                       className="flex-1 min-w-40 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1a3f1c]/20 focus:border-[#1a3f1c]"
                     />
 
                     <div className="flex gap-1">
-                      {MULTIPLIERS.map(m => (
+                      {MULTIPLIERS.map((m) => (
                         <button
                           type="button"
                           key={m}
                           onClick={() => updateSlot(i, { multiplier: m })}
                           className={`px-2.5 py-1 rounded-md text-xs font-bold border transition-all
-                            ${slot.multiplier === m
-                              ? m >= 1.3 ? "bg-red-500 text-white border-red-500"
-                                : m >= 1.2 ? "bg-orange-500 text-white border-orange-500"
-                                : "bg-[#1a3f1c] text-white border-[#1a3f1c]"
-                              : "bg-white text-gray-400 border-gray-200"
+                            ${
+                              slot.multiplier === m
+                                ? m >= 1.3
+                                  ? "bg-red-500 text-white border-red-500"
+                                  : m >= 1.2
+                                    ? "bg-orange-500 text-white border-orange-500"
+                                    : "bg-[#1a3f1c] text-white border-[#1a3f1c]"
+                                : "bg-white text-gray-400 border-gray-200"
                             }`}
                         >
                           {m.toFixed(1)}×
@@ -376,7 +451,12 @@ export default function AdminSurgePricingPage() {
                       ))}
                     </div>
 
-                    <button type="button" onClick={() => removeSlot(i)} aria-label="Remove slot" className="text-gray-300 hover:text-red-500 transition-colors ml-auto">
+                    <button
+                      type="button"
+                      onClick={() => removeSlot(i)}
+                      aria-label="Remove slot"
+                      className="text-gray-300 hover:text-red-500 transition-colors ml-auto"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -390,9 +470,10 @@ export default function AdminSurgePricingPage() {
                           aria-label={d}
                           onClick={() => toggleSlotDay(i, idx)}
                           className={`w-8 h-8 rounded-lg text-xs font-bold transition-all border
-                            ${slot.days.includes(idx)
-                              ? "bg-[#1a3f1c] text-white border-[#1a3f1c]"
-                              : "bg-white text-gray-400 border-gray-200 hover:border-gray-300"
+                            ${
+                              slot.days.includes(idx)
+                                ? "bg-[#1a3f1c] text-white border-[#1a3f1c]"
+                                : "bg-white text-gray-400 border-gray-200 hover:border-gray-300"
                             }`}
                         >
                           {d}
@@ -403,19 +484,27 @@ export default function AdminSurgePricingPage() {
                       <select
                         title="Start hour"
                         value={slot.startHour}
-                        onChange={e => updateSlot(i, { startHour: Number(e.target.value) })}
+                        onChange={(e) => updateSlot(i, { startHour: Number(e.target.value) })}
                         className="border border-gray-200 rounded-lg px-2 py-1 text-sm text-gray-700 focus:outline-none"
                       >
-                        {Array.from({ length: 24 }, (_, h) => <option key={h} value={h}>{fmt24(h)}</option>)}
+                        {Array.from({ length: 24 }, (_, h) => (
+                          <option key={h} value={h}>
+                            {fmt24(h)}
+                          </option>
+                        ))}
                       </select>
                       <span>to</span>
                       <select
                         title="End hour"
                         value={slot.endHour}
-                        onChange={e => updateSlot(i, { endHour: Number(e.target.value) })}
+                        onChange={(e) => updateSlot(i, { endHour: Number(e.target.value) })}
                         className="border border-gray-200 rounded-lg px-2 py-1 text-sm text-gray-700 focus:outline-none"
                       >
-                        {Array.from({ length: 24 }, (_, h) => <option key={h} value={h}>{fmt24(h)}</option>)}
+                        {Array.from({ length: 24 }, (_, h) => (
+                          <option key={h} value={h}>
+                            {fmt24(h)}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -443,10 +532,14 @@ export default function AdminSurgePricingPage() {
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <div>
             <p className="font-semibold text-gray-900">Surge Sessions</p>
-            <p className="text-xs text-gray-400 mt-0.5">Every time surge pricing was turned on and off</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Every time surge pricing was turned on and off
+            </p>
           </div>
           {sessions.length > 0 && (
-            <span className="text-xs text-gray-400">{sessions.length} session{sessions.length !== 1 ? "s" : ""}</span>
+            <span className="text-xs text-gray-400">
+              {sessions.length} session{sessions.length !== 1 ? "s" : ""}
+            </span>
           )}
         </div>
 
@@ -454,25 +547,48 @@ export default function AdminSurgePricingPage() {
           <div className="py-16 text-center">
             <Zap className="h-8 w-8 text-gray-200 mx-auto mb-2" />
             <p className="text-sm text-gray-400">No surge sessions recorded yet</p>
-            <p className="text-xs text-gray-300 mt-1">Sessions appear here once surge is activated for the first time</p>
+            <p className="text-xs text-gray-300 mt-1">
+              Sessions appear here once surge is activated for the first time
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/80">
-                  <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Status</th>
-                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Multiplier</th>
-                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Reason</th>
-                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Activated By</th>
-                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Started</th>
-                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Ended</th>
-                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">Duration</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    Multiplier
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    Reason
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    Activated By
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    Started
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    Ended
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                    Duration
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {sessions.map((s, i) => (
-                  <tr key={i} className={s.endedAt === null ? "bg-amber-50/60" : "hover:bg-gray-50/40 transition-colors"}>
+                  <tr
+                    key={i}
+                    className={
+                      s.endedAt === null
+                        ? "bg-amber-50/60"
+                        : "hover:bg-gray-50/40 transition-colors"
+                    }
+                  >
                     <td className="px-6 py-3.5">
                       {s.endedAt === null ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
@@ -485,21 +601,35 @@ export default function AdminSurgePricingPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3.5"><MultiplierPill value={s.multiplier} /></td>
-                    <td className="px-4 py-3.5 text-gray-500 max-w-48">
-                      <span className="line-clamp-1">{s.reason || <span className="text-gray-300">—</span>}</span>
+                    <td className="px-4 py-3.5">
+                      <MultiplierPill value={s.multiplier} />
                     </td>
-                    <td className="px-4 py-3.5 font-medium text-gray-700 whitespace-nowrap">{s.by}</td>
-                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">{fmtDate(s.startedAt)}</td>
+                    <td className="px-4 py-3.5 text-gray-500 max-w-48">
+                      <span className="line-clamp-1">
+                        {s.reason || <span className="text-gray-300">—</span>}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 font-medium text-gray-700 whitespace-nowrap">
+                      {s.by}
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
+                      {fmtDate(s.startedAt)}
+                    </td>
                     <td className="px-4 py-3.5 whitespace-nowrap">
-                      {s.endedAt
-                        ? <span className="text-gray-400">{fmtDate(s.endedAt)}</span>
-                        : <span className="text-amber-600 font-medium">Still active</span>}
+                      {s.endedAt ? (
+                        <span className="text-gray-400">{fmtDate(s.endedAt)}</span>
+                      ) : (
+                        <span className="text-amber-600 font-medium">Still active</span>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 font-mono text-xs whitespace-nowrap">
-                      {s.endedAt === null
-                        ? <span className="text-amber-600 font-semibold">{fmtDuration(s.startedAt, null)}</span>
-                        : <span className="text-gray-500">{fmtDuration(s.startedAt, s.endedAt)}</span>}
+                      {s.endedAt === null ? (
+                        <span className="text-amber-600 font-semibold">
+                          {fmtDuration(s.startedAt, null)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-500">{fmtDuration(s.startedAt, s.endedAt)}</span>
+                      )}
                     </td>
                   </tr>
                 ))}

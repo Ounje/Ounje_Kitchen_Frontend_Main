@@ -28,13 +28,13 @@ import { toast } from "sonner";
 import Pagination from "@/components/Pagination";
 
 type AccountType = "suspended" | "deleted";
-type EntityRole  = "all" | "customer" | "vendor" | "rider" | "staff";
+type EntityRole = "all" | "customer" | "vendor" | "rider" | "staff";
 
 interface AccountsData {
   customers: any[];
-  vendors:   any[];
-  riders:    any[];
-  staff:     any[];
+  vendors: any[];
+  riders: any[];
+  staff: any[];
 }
 
 // ── Unwrap helpers ────────────────────────────────────────────────────────────
@@ -44,15 +44,14 @@ function unwrapAccounts(res: any, accountType: AccountType): AccountsData {
   if (!res) return empty;
 
   const d = res?.data ?? res;
-  const block = accountType === "suspended"
-    ? (d?.suspendedAccounts ?? d)
-    : (d?.deletedAccounts   ?? d);
+  const block =
+    accountType === "suspended" ? (d?.suspendedAccounts ?? d) : (d?.deletedAccounts ?? d);
 
   return {
     customers: Array.isArray(block?.customers) ? block.customers : [],
-    vendors:   Array.isArray(block?.vendors)   ? block.vendors   : [],
-    riders:    Array.isArray(block?.riders)    ? block.riders    : [],
-    staff:     Array.isArray(block?.staff)     ? block.staff     : [],
+    vendors: Array.isArray(block?.vendors) ? block.vendors : [],
+    riders: Array.isArray(block?.riders) ? block.riders : [],
+    staff: Array.isArray(block?.staff) ? block.staff : [],
   };
 }
 
@@ -60,7 +59,7 @@ function unwrapPagination(res: any, currentLimit: number) {
   const d = res?.data ?? res;
   const p = d?.pagination ?? d;
   return {
-    page:  p?.page  ?? 1,
+    page: p?.page ?? 1,
     pages: p?.pages ?? 1,
     total: p?.total ?? 0,
     limit: currentLimit,
@@ -69,16 +68,22 @@ function unwrapPagination(res: any, currentLimit: number) {
 
 // ── Per-entity field resolvers ────────────────────────────────────────────────
 function resolveName(account: any, entityType: string): string {
-  if (entityType === "customer") return account.user?.name  || account.name || "N/A";
-  if (entityType === "vendor")   return account.name        || "N/A";
-  if (entityType === "rider")    return account.user?.name || account.name || `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || "N/A";
+  if (entityType === "customer") return account.user?.name || account.name || "N/A";
+  if (entityType === "vendor") return account.name || "N/A";
+  if (entityType === "rider")
+    return (
+      account.user?.name ||
+      account.name ||
+      `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() ||
+      "N/A"
+    );
   // staff / admin
   return `${account.firstName ?? ""} ${account.lastName ?? ""}`.trim() || account.name || "N/A";
 }
 
 function resolveEmail(account: any, entityType: string): string {
-  if (entityType === "customer") return account.user?.email  || account.email || "N/A";
-  if (entityType === "vendor")   return account.owner?.email || account.email || "N/A";
+  if (entityType === "customer") return account.user?.email || account.email || "N/A";
+  if (entityType === "vendor") return account.owner?.email || account.email || "N/A";
   return account.email || "N/A";
 }
 
@@ -109,43 +114,52 @@ function SkeletonRow() {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function AccountsListPage({
-  params,
-}: {
-  params: Promise<{ type: string }>;
-}) {
+export default function AccountsListPage({ params }: { params: Promise<{ type: string }> }) {
   const { type } = use(params);
-  const router      = useRouter();
+  const router = useRouter();
   const accountType = type as AccountType;
 
   const [accounts, setAccounts] = useState<AccountsData>({
-    customers: [], vendors: [], riders: [], staff: [],
+    customers: [],
+    vendors: [],
+    riders: [],
+    staff: [],
   });
-  const [loading, setLoading]         = useState(true);
+  const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState<EntityRole>("all");
   const [searchFilters, setSearchFilters] = useState({
-    name: "", email: "", phoneNumber: "",
+    name: "",
+    email: "",
+    phoneNumber: "",
   });
   const [pagination, setPagination] = useState({
-    page: 1, limit: 7, total: 0, pages: 1,
+    page: 1,
+    limit: 7,
+    total: 0,
+    pages: 1,
   });
 
   // Restore modal
   const [restoreModalOpen, setRestoreModalOpen] = useState(false);
   const [restoreTarget, setRestoreTarget] = useState<{
-    id: string; name: string; entityType: string;
+    id: string;
+    name: string;
+    entityType: string;
   } | null>(null);
   const [restoring, setRestoring] = useState(false);
 
-  useEffect(() => { fetchAccounts(1); }, [accountType]);
+  useEffect(() => {
+    fetchAccounts(1);
+  }, [accountType]);
 
   const fetchAccounts = async (page = 1) => {
     setLoading(true);
     try {
       const p = { page, limit: pagination.limit, ...searchFilters };
-      const raw = accountType === "suspended"
-        ? await itService.getSuspendedAccounts(p)
-        : await itService.getDeletedAccounts(p);
+      const raw =
+        accountType === "suspended"
+          ? await itService.getSuspendedAccounts(p)
+          : await itService.getDeletedAccounts(p);
 
       setAccounts(unwrapAccounts(raw, accountType));
       setPagination(unwrapPagination(raw, pagination.limit));
@@ -178,7 +192,9 @@ export default function AccountsListPage({
           ? await itService.activateStaff(id)
           : await itService.restoreStaff(id);
       }
-      toast.success(`Account ${accountType === "suspended" ? "activated" : "restored"} successfully`);
+      toast.success(
+        `Account ${accountType === "suspended" ? "activated" : "restored"} successfully`
+      );
       setRestoreModalOpen(false);
       setRestoreTarget(null);
       fetchAccounts(pagination.page);
@@ -195,13 +211,13 @@ export default function AccountsListPage({
     if (selectedRole === "all") return accounts;
     return {
       customers: selectedRole === "customer" ? accounts.customers : [],
-      vendors:   selectedRole === "vendor"   ? accounts.vendors   : [],
-      riders:    selectedRole === "rider"    ? accounts.riders    : [],
-      staff:     selectedRole === "staff"    ? accounts.staff     : [],
+      vendors: selectedRole === "vendor" ? accounts.vendors : [],
+      riders: selectedRole === "rider" ? accounts.riders : [],
+      staff: selectedRole === "staff" ? accounts.staff : [],
     };
   };
 
-  const filtered     = getFiltered();
+  const filtered = getFiltered();
   const totalAccounts = Object.values(filtered).reduce((s, a) => s + a.length, 0);
 
   const renderAccountTable = (accountList: any[], entityType: string) => {
@@ -209,9 +225,7 @@ export default function AccountsListPage({
     return (
       <div className="mb-8" key={entityType}>
         <div className="px-4 md:px-6 py-4 bg-[#98ef9b] border-b flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-[#1a3f1c] capitalize">
-            {entityType}s
-          </h3>
+          <h3 className="text-lg font-semibold text-[#1a3f1c] capitalize">{entityType}s</h3>
           <span className="text-sm text-[#1a3f1c]/70">({accountList.length})</span>
         </div>
 
@@ -228,12 +242,13 @@ export default function AccountsListPage({
             </thead>
             <tbody className="bg-white">
               {accountList.map((account, index) => {
-                const name  = resolveName(account, entityType);
+                const name = resolveName(account, entityType);
                 const email = resolveEmail(account, entityType);
                 const phone = resolvePhone(account, entityType);
-                const date  = accountType === "deleted"
-                  ? account.deletedAt
-                  : account.suspendedAt || account.suspensionDate || account.updatedAt;
+                const date =
+                  accountType === "deleted"
+                    ? account.deletedAt
+                    : account.suspendedAt || account.suspensionDate || account.updatedAt;
 
                 return (
                   <tr
@@ -254,7 +269,9 @@ export default function AccountsListPage({
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {date
                         ? new Date(date).toLocaleDateString("en-US", {
-                            year: "numeric", month: "short", day: "numeric",
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
                           })
                         : "N/A"}
                     </td>
@@ -268,7 +285,9 @@ export default function AccountsListPage({
                           }}
                           className="p-2 rounded-full transition-colors hover:opacity-80"
                           style={{ backgroundColor: "#98ef9b" }}
-                          title={accountType === "suspended" ? "Activate Account" : "Restore Account"}
+                          title={
+                            accountType === "suspended" ? "Activate Account" : "Restore Account"
+                          }
                         >
                           <RotateCcw className="h-4 w-4 text-[#1a3f1c]" />
                         </button>
@@ -354,17 +373,18 @@ export default function AccountsListPage({
               <Label>Phone Number</Label>
               <Input
                 value={searchFilters.phoneNumber}
-                onChange={(e) => setSearchFilters({ ...searchFilters, phoneNumber: e.target.value })}
+                onChange={(e) =>
+                  setSearchFilters({ ...searchFilters, phoneNumber: e.target.value })
+                }
                 placeholder="Search by phone"
               />
             </div>
             <div>
               <Label>Account Role</Label>
-              <Select
-                value={selectedRole}
-                onValueChange={(v) => setSelectedRole(v as EntityRole)}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as EntityRole)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="customer">Customer</SelectItem>
@@ -418,16 +438,14 @@ export default function AccountsListPage({
             </div>
           ) : totalAccounts === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">
-                No {accountType} accounts found
-              </p>
+              <p className="text-gray-500 text-lg">No {accountType} accounts found</p>
             </div>
           ) : (
             <>
               {renderAccountTable(filtered.customers, "customer")}
-              {renderAccountTable(filtered.vendors,   "vendor")}
-              {renderAccountTable(filtered.riders,    "rider")}
-              {renderAccountTable(filtered.staff,     "staff")}
+              {renderAccountTable(filtered.vendors, "vendor")}
+              {renderAccountTable(filtered.riders, "rider")}
+              {renderAccountTable(filtered.staff, "staff")}
 
               <div className="px-4 py-2">
                 <Pagination
@@ -454,12 +472,10 @@ export default function AccountsListPage({
               {accountType === "suspended" ? "Activate Account" : "Restore Account"}
             </DialogTitle>
             <DialogDescription className="text-base pt-4">
-              Are you sure you want to{" "}
-              {accountType === "suspended" ? "activate" : "restore"} this account?
+              Are you sure you want to {accountType === "suspended" ? "activate" : "restore"} this
+              account?
               <br />
-              <span className="font-semibold text-gray-900 mt-2 block">
-                {restoreTarget?.name}
-              </span>
+              <span className="font-semibold text-gray-900 mt-2 block">{restoreTarget?.name}</span>
               {accountType === "deleted" && (
                 <span className="text-green-600 text-sm mt-2 block">
                   This will restore the account and make it active again.
@@ -470,7 +486,10 @@ export default function AccountsListPage({
           <DialogFooter className="flex-row gap-3">
             <Button
               variant="outline"
-              onClick={() => { setRestoreModalOpen(false); setRestoreTarget(null); }}
+              onClick={() => {
+                setRestoreModalOpen(false);
+                setRestoreTarget(null);
+              }}
               disabled={restoring}
               className="flex-1"
             >

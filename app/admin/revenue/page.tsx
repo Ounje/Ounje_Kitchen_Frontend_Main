@@ -1,51 +1,51 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { useState, useEffect, useCallback } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   superAdminApi,
   type RevenueAnalyticsData,
   type RevenueTrendPoint,
   type TopPerformer,
-} from '@/lib/api/api';
+} from "@/lib/api/api";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-type Period    = 'daily' | 'weekly' | 'monthly' | 'yearly';
-type RevenueTab = 'gross' | 'expenses' | 'net';
+type Period = "daily" | "weekly" | "monthly" | "yearly";
+type RevenueTab = "gross" | "expenses" | "net";
 
 // Map UI period labels → controller's `period` param value
 const PERIOD_MAP: Record<Period, string> = {
-  daily:   'today',
-  weekly:  'week',
-  monthly: 'month',
-  yearly:  'year',
+  daily: "today",
+  weekly: "week",
+  monthly: "month",
+  yearly: "year",
 };
 
 // Map UI period → trends `groupBy` param
 const GROUPBY_MAP: Record<Period, string> = {
-  daily:   'hour',
-  weekly:  'day',
-  monthly: 'day',
-  yearly:  'month',
+  daily: "hour",
+  weekly: "day",
+  monthly: "day",
+  yearly: "month",
 };
 
 // How many trend data points to request per period
 const TREND_LIMIT: Record<Period, number> = {
-  daily:   24,   // 24 hours
-  weekly:  7,    // 7 days
-  monthly: 30,   // ~30 days
-  yearly:  12,   // 12 months
+  daily: 24, // 24 hours
+  weekly: 7, // 7 days
+  monthly: 30, // ~30 days
+  yearly: 12, // 12 months
 };
 
 const TAB_CONFIG: { id: RevenueTab; label: string }[] = [
-  { id: 'gross',    label: 'Gross Revenue'  },
-  { id: 'expenses', label: 'Total Expenses' },
-  { id: 'net',      label: 'Net Revenue'    },
+  { id: "gross", label: "Gross Revenue" },
+  { id: "expenses", label: "Total Expenses" },
+  { id: "net", label: "Net Revenue" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -53,42 +53,49 @@ const TAB_CONFIG: { id: RevenueTab; label: string }[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 function fmtCurrency(n?: number): string {
-  if (n == null) return '₦0';
-  return `₦${Number(n).toLocaleString('en-NG')}`;
+  if (n == null) return "₦0";
+  return `₦${Number(n).toLocaleString("en-NG")}`;
 }
 
 function getTabValue(data: RevenueAnalyticsData, tab: RevenueTab): number {
   switch (tab) {
-    case 'gross':    return data.totalGrossRevenue;
-    case 'expenses': return data.totalExpenses;
-    case 'net':      return data.totalNetRevenue;
+    case "gross":
+      return data.totalGrossRevenue;
+    case "expenses":
+      return data.totalExpenses;
+    case "net":
+      return data.totalNetRevenue;
   }
 }
 
 function getTrendValue(point: RevenueTrendPoint, tab: RevenueTab): number {
   switch (tab) {
-    case 'gross':    return point.grossRevenue;
-    case 'expenses': return point.expenses;      // controller field is `expenses`
-    case 'net':      return point.netRevenue;
+    case "gross":
+      return point.grossRevenue;
+    case "expenses":
+      return point.expenses; // controller field is `expenses`
+    case "net":
+      return point.netRevenue;
   }
 }
 
 /** Format the trend point's `_id` date label for display */
 function formatTrendLabel(id: string, groupBy: string): string {
   try {
-    if (groupBy === 'month') {
+    if (groupBy === "month") {
       // _id = "2025-01"
-      const [y, m] = id.split('-');
-      return new Date(Number(y), Number(m) - 1).toLocaleDateString('en-GB', {
-        month: 'short', year: 'numeric',
+      const [y, m] = id.split("-");
+      return new Date(Number(y), Number(m) - 1).toLocaleDateString("en-GB", {
+        month: "short",
+        year: "numeric",
       });
     }
-    if (groupBy === 'hour') {
+    if (groupBy === "hour") {
       // _id = "2025-01-15 14:00"
       return id.slice(11, 16); // "14:00"
     }
     // day: "2025-01-15"
-    return new Date(id).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return new Date(id).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   } catch {
     return id;
   }
@@ -97,14 +104,17 @@ function formatTrendLabel(id: string, groupBy: string): string {
 function periodDurationLabel(period: Period): string {
   const now = new Date();
   switch (period) {
-    case 'daily':   return now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    case 'weekly':  {
+    case "daily":
+      return now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    case "weekly": {
       const start = new Date(now);
       start.setDate(now.getDate() - 6);
-      return `${start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+      return `${start.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} – ${now.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
     }
-    case 'monthly': return now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-    case 'yearly':  return String(now.getFullYear());
+    case "monthly":
+      return now.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    case "yearly":
+      return String(now.getFullYear());
   }
 }
 
@@ -133,17 +143,15 @@ function InfoCardSkeleton() {
   );
 }
 
+const SKELETON_BAR_HEIGHTS = [55, 72, 41, 88, 63, 77, 35, 91, 48, 66];
+
 function TrendBarSkeleton() {
   return (
     <div className="bg-secondary rounded-xl p-6 border border-border space-y-4">
       <Skeleton className="h-5 w-32" />
       <div className="flex items-end gap-2 h-32">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <Skeleton
-            key={i}
-            className="flex-1 rounded-t"
-            style={{ height: `${30 + Math.random() * 70}%` }}
-          />
+        {SKELETON_BAR_HEIGHTS.map((h, i) => (
+          <Skeleton key={i} className="flex-1 rounded-t" style={{ height: `${h}%` }} />
         ))}
       </div>
     </div>
@@ -182,12 +190,13 @@ function TrendChart({
   if (points.length === 0) return null;
 
   const values = points.map((p) => getTrendValue(p, tab));
-  const max    = Math.max(...values, 1);
+  const max = Math.max(...values, 1);
 
   return (
     <div className="bg-secondary rounded-xl p-6 border border-border space-y-3">
       <h3 className="text-sm font-semibold text-foreground">
-        {tab === 'gross' ? 'Gross Revenue' : tab === 'expenses' ? 'Total Expenses' : 'Net Revenue'} Trend
+        {tab === "gross" ? "Gross Revenue" : tab === "expenses" ? "Total Expenses" : "Net Revenue"}{" "}
+        Trend
       </h3>
       <div className="flex items-end gap-1 h-28">
         {points.map((p, i) => {
@@ -243,7 +252,7 @@ function PerformerCard({
           />
         ) : (
           <div className="w-16 h-16 rounded-full bg-primary/20 text-primary font-bold text-2xl flex items-center justify-center shrink-0">
-            {performer.name?.[0]?.toUpperCase() ?? '?'}
+            {performer.name?.[0]?.toUpperCase() ?? "?"}
           </div>
         )}
         <div className="flex-1 min-w-0">
@@ -271,25 +280,25 @@ function PerformerCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function RevenuePage() {
-  const [period,    setPeriod]    = useState<Period>('monthly');
-  const [activeTab, setActiveTab] = useState<RevenueTab>('gross');
+  const [period, setPeriod] = useState<Period>("monthly");
+  const [activeTab, setActiveTab] = useState<RevenueTab>("gross");
 
   // Analytics state
-  const [analytics,       setAnalytics]       = useState<RevenueAnalyticsData | null>(null);
+  const [analytics, setAnalytics] = useState<RevenueAnalyticsData | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
-  const [analyticsError,   setAnalyticsError]   = useState<string | null>(null);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
 
   // Trend state
-  const [trends,        setTrends]        = useState<RevenueTrendPoint[]>([]);
-  const [groupBy,       setGroupBy]       = useState<string>('day');
+  const [trends, setTrends] = useState<RevenueTrendPoint[]>([]);
+  const [groupBy, setGroupBy] = useState<string>("day");
   const [trendsLoading, setTrendsLoading] = useState(true);
-  const [trendsError,   setTrendsError]   = useState<string | null>(null);
+  const [trendsError, setTrendsError] = useState<string | null>(null);
 
   // Top performers state (only loaded for monthly/yearly)
-  const [topVendors,        setTopVendors]        = useState<TopPerformer[]>([]);
-  const [topRiders,         setTopRiders]         = useState<TopPerformer[]>([]);
+  const [topVendors, setTopVendors] = useState<TopPerformer[]>([]);
+  const [topRiders, setTopRiders] = useState<TopPerformer[]>([]);
   const [performersLoading, setPerformersLoading] = useState(false);
-  const [performersError,   setPerformersError]   = useState<string | null>(null);
+  const [performersError, setPerformersError] = useState<string | null>(null);
 
   // ── Fetch analytics ──────────────────────────────────────────────────────
 
@@ -300,7 +309,7 @@ export default function RevenuePage() {
       const res = await superAdminApi.dashboard.getRevenue({ period: PERIOD_MAP[p] });
       setAnalytics(res.data);
     } catch (err: any) {
-      const msg = err?.message || 'Failed to load revenue data';
+      const msg = err?.message || "Failed to load revenue data";
       setAnalyticsError(msg);
       toast.error(msg);
     } finally {
@@ -318,11 +327,11 @@ export default function RevenuePage() {
     try {
       const res = await superAdminApi.dashboard.getRevenueTrends({
         groupBy: gb,
-        limit:   TREND_LIMIT[p],
+        limit: TREND_LIMIT[p],
       });
       setTrends(res.data ?? []);
     } catch (err: any) {
-      const msg = err?.message || 'Failed to load trend data';
+      const msg = err?.message || "Failed to load trend data";
       setTrendsError(msg);
       // Non-critical — don't toast, just show inline error
     } finally {
@@ -341,10 +350,10 @@ export default function RevenuePage() {
         superAdminApi.dashboard.getTopRiders({ period: PERIOD_MAP[p] }),
       ]);
       setTopVendors(vendorsRes.data?.slice(0, 1) ?? []);
-      setTopRiders(ridersRes.data?.slice(0, 1)  ?? []);
+      setTopRiders(ridersRes.data?.slice(0, 1) ?? []);
     } catch {
       // Top performers are supplementary — fail silently, show note in UI
-      setPerformersError('Top performer data unavailable');
+      setPerformersError("Top performer data unavailable");
       setTopVendors([]);
       setTopRiders([]);
     } finally {
@@ -357,7 +366,7 @@ export default function RevenuePage() {
   useEffect(() => {
     fetchAnalytics(period);
     fetchTrends(period);
-    if (period === 'monthly' || period === 'yearly') {
+    if (period === "monthly" || period === "yearly") {
       fetchTopPerformers(period);
     } else {
       setTopVendors([]);
@@ -367,15 +376,14 @@ export default function RevenuePage() {
 
   // ── Derived values ───────────────────────────────────────────────────────
 
-  const tabValue   = analytics ? getTabValue(analytics, activeTab) : null;
-  const duration   = periodDurationLabel(period);
-  const showTopPerformers = period === 'monthly' || period === 'yearly';
+  const tabValue = analytics ? getTabValue(analytics, activeTab) : null;
+  const duration = periodDurationLabel(period);
+  const showTopPerformers = period === "monthly" || period === "yearly";
 
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-6">
-
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-3xl md:text-4xl font-bold text-foreground">Finance</h1>
@@ -399,8 +407,8 @@ export default function RevenuePage() {
             onClick={() => setActiveTab(tab.id)}
             className={`px-6 py-3 rounded-lg font-semibold transition-colors cursor-pointer ${
               activeTab === tab.id
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:opacity-90'
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground hover:opacity-90"
             }`}
           >
             {tab.label}
@@ -430,7 +438,11 @@ export default function RevenuePage() {
         <div className="bg-card rounded-xl p-8 border border-border">
           <div className="text-center space-y-4">
             <p className="text-muted-foreground text-lg">
-              {activeTab === 'gross' ? 'Gross Revenue' : activeTab === 'expenses' ? 'Total Expenses' : 'Net Revenue'}
+              {activeTab === "gross"
+                ? "Gross Revenue"
+                : activeTab === "expenses"
+                  ? "Total Expenses"
+                  : "Net Revenue"}
             </p>
             <p className="text-5xl md:text-6xl font-bold text-primary">
               {fmtCurrency(tabValue ?? 0)}
@@ -446,7 +458,7 @@ export default function RevenuePage() {
         <div className="bg-secondary rounded-xl p-6 border border-border space-y-3">
           <p className="text-foreground font-medium">Duration: {duration}</p>
 
-          {activeTab === 'gross' && (
+          {activeTab === "gross" && (
             <>
               <p className="text-foreground font-medium">
                 Revenue Generated: {fmtCurrency(analytics.totalGrossRevenue)}
@@ -459,26 +471,27 @@ export default function RevenuePage() {
             </>
           )}
 
-          {activeTab === 'expenses' && (
+          {activeTab === "expenses" && (
             <>
               <p className="text-foreground font-medium">
                 Expenses Paid: {fmtCurrency(analytics.totalExpenses)}
               </p>
               <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                <ExpenseBreakdown label="Vendor Payouts"   value={analytics.totalVendorPayouts} />
-                <ExpenseBreakdown label="Rider Payouts"    value={analytics.totalRiderPayouts}  />
-                <ExpenseBreakdown label="Platform Fees"    value={analytics.totalPlatformFees}  />
+                <ExpenseBreakdown label="Vendor Payouts" value={analytics.totalVendorPayouts} />
+                <ExpenseBreakdown label="Rider Payouts" value={analytics.totalRiderPayouts} />
+                <ExpenseBreakdown label="Platform Fees" value={analytics.totalPlatformFees} />
               </div>
             </>
           )}
 
-          {activeTab === 'net' && (
+          {activeTab === "net" && (
             <>
               <p className="text-foreground font-medium">
                 Net Revenue: {fmtCurrency(analytics.totalNetRevenue)}
               </p>
               <p className="text-sm text-muted-foreground">
-                Gross {fmtCurrency(analytics.totalGrossRevenue)} − Expenses {fmtCurrency(analytics.totalExpenses)}
+                Gross {fmtCurrency(analytics.totalGrossRevenue)} − Expenses{" "}
+                {fmtCurrency(analytics.totalExpenses)}
               </p>
             </>
           )}
@@ -520,12 +533,8 @@ export default function RevenuePage() {
             </div>
           ) : (
             <>
-              {topVendors[0] && (
-                <PerformerCard title="Top Vendor" performer={topVendors[0]} />
-              )}
-              {topRiders[0] && (
-                <PerformerCard title="Top Rider" performer={topRiders[0]} />
-              )}
+              {topVendors[0] && <PerformerCard title="Top Vendor" performer={topVendors[0]} />}
+              {topRiders[0] && <PerformerCard title="Top Rider" performer={topRiders[0]} />}
             </>
           )}
         </div>

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export interface FilterValues {
   name: string;
@@ -15,9 +15,9 @@ interface FiltersBarProps {
 
 export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
   const [filters, setFilters] = useState<FilterValues>({
-    name: '',
-    status: '',
-    modeOfDelivery: '',
+    name: "",
+    status: "",
+    modeOfDelivery: "",
   });
 
   const handleInputChange = (field: keyof FilterValues, value: string) => {
@@ -27,27 +27,26 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
   const handleSearch = () => onSearch(filters);
 
   const handleReset = () => {
-    setFilters({ name: '', status: '', modeOfDelivery: '' });
+    setFilters({ name: "", status: "", modeOfDelivery: "" });
     onReset();
   };
 
   const inputCls =
-    'w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]';
-  const labelCls = 'block text-sm font-medium mb-1.5';
+    "w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]";
+  const labelCls = "block text-sm font-medium mb-1.5";
 
   return (
     <div className="glass-card p-4 sm:p-6 mb-6 w-full">
       {/* 1 col → 2 col → 5 col (name spans 2) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-
         {/* Name — wider on large screens */}
         <div className="lg:col-span-2">
           <label className={"labelCls text-[#1a3f1c]"}>Name</label>
           <input
             type="text"
             value={filters.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onChange={(e) => handleInputChange("name", e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className={inputCls}
             placeholder="Enter name"
           />
@@ -58,7 +57,7 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
           <label className={"labelCls text-[#1a3f1c]"}>Rider Status</label>
           <select
             value={filters.status}
-            onChange={(e) => handleInputChange('status', e.target.value)}
+            onChange={(e) => handleInputChange("status", e.target.value)}
             className={inputCls}
           >
             <option value="">All Status</option>
@@ -72,7 +71,7 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
           <label className={"labelCls text-[#1a3f1c]"}>Mode of Delivery</label>
           <select
             value={filters.modeOfDelivery}
-            onChange={(e) => handleInputChange('modeOfDelivery', e.target.value)}
+            onChange={(e) => handleInputChange("modeOfDelivery", e.target.value)}
             className={inputCls}
           >
             <option value="">All Modes</option>
@@ -97,7 +96,6 @@ export function FiltersBar({ onSearch, onReset }: FiltersBarProps) {
             Reset
           </button>
         </div>
-
       </div>
     </div>
   );

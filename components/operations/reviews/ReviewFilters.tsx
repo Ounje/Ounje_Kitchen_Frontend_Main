@@ -21,8 +21,7 @@ export default function ReviewFilters({ onSearch, onReset }: ReviewFiltersProps)
   const [ratingCategory, setRatingCategory] = useState("");
   const [open, setOpen] = useState(false);
 
-  const selectedLabel =
-    ratingOptions.find((o) => o.value === ratingCategory)?.label ?? "";
+  const selectedLabel = ratingOptions.find((o) => o.value === ratingCategory)?.label ?? "";
 
   const handleSearch = () => {
     onSearch(ratingCategory);

@@ -1,9 +1,8 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
-import type { DashboardData, RevenueData, OrderStats } from '@/types';
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
+import type { DashboardData, RevenueData, OrderStats } from "@/types";
 
 export const dashboardService = {
-
   /**
    * GET /api/superadmin/dashboard
    * Returns users, orders, ratings, queries, revenue stats
@@ -17,11 +16,11 @@ export const dashboardService = {
    * GET /api/superadmin/revenue?period=...
    */
   async getRevenue(
-    period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly'
+    period: "daily" | "weekly" | "monthly" | "yearly" = "weekly"
   ): Promise<RevenueData> {
-    const res = await apiClient.get<RevenueData>(
-      ENDPOINTS.SUPERADMIN.REVENUE, { params: { period } }
-    );
+    const res = await apiClient.get<RevenueData>(ENDPOINTS.SUPERADMIN.REVENUE, {
+      params: { period },
+    });
     return res;
   },
 

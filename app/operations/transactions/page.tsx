@@ -8,13 +8,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
-  CalendarIcon, Download, Loader2, RefreshCw,
-  CheckCircle2, XCircle, Clock, TrendingUp,
+  CalendarIcon,
+  Download,
+  Loader2,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  TrendingUp,
 } from "lucide-react";
 import { format } from "date-fns";
 import Pagination from "@/components/Pagination";
@@ -32,27 +42,40 @@ function formatTime(dateStr: string): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "—";
   return d.toLocaleString("en-NG", {
-    day: "numeric", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit", hour12: true,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
   });
 }
 
 function StatusBadge({ status }: { status: string }) {
   const s = (status ?? "").toLowerCase();
   const cfg =
-    s === "success"  ? { cls: "bg-green-100 text-green-700 border-green-300",  label: "Successful" } :
-    s === "failed"   ? { cls: "bg-red-100 text-red-600 border-red-300",         label: "Failed"     } :
-    s === "pending"  ? { cls: "bg-yellow-100 text-yellow-700 border-yellow-300",label: "Pending"    } :
-                       { cls: "bg-gray-100 text-gray-600 border-gray-300",       label: status       };
+    s === "success"
+      ? { cls: "bg-green-100 text-green-700 border-green-300", label: "Successful" }
+      : s === "failed"
+        ? { cls: "bg-red-100 text-red-600 border-red-300", label: "Failed" }
+        : s === "pending"
+          ? { cls: "bg-yellow-100 text-yellow-700 border-yellow-300", label: "Pending" }
+          : { cls: "bg-gray-100 text-gray-600 border-gray-300", label: status };
   return (
-    <span className={`inline-block text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border ${cfg.cls}`}>
+    <span
+      className={`inline-block text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border ${cfg.cls}`}
+    >
       {cfg.label}
     </span>
   );
 }
 
 function StatCard({
-  icon, label, value, sub, color,
+  icon,
+  label,
+  value,
+  sub,
+  color,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -63,12 +86,16 @@ function StatCard({
   return (
     <Card className="glass-card hover-lift border border-border/50 shadow-sm rounded-2xl">
       <CardContent className="p-5 flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
+        <div
+          className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}
+        >
           {icon}
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
-          <p className="text-lg sm:text-2xl font-extrabold text-gray-900 leading-tight break-all">{value}</p>
+          <p className="text-lg sm:text-2xl font-extrabold text-gray-900 leading-tight break-all">
+            {value}
+          </p>
           {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
         </div>
       </CardContent>
@@ -79,7 +106,7 @@ function StatCard({
 function SkeletonRow() {
   return (
     <tr className="animate-pulse border-b border-border/30">
-      {[1,2,3,4,5,6,7].map(i => (
+      {[1, 2, 3, 4, 5, 6, 7].map((i) => (
         <td key={i} className="px-4 py-3">
           <div className="h-3 bg-muted/50 rounded w-3/4" />
         </td>
@@ -89,10 +116,10 @@ function SkeletonRow() {
 }
 
 const STATUS_TABS = [
-  { label: "All",         value: "all"     },
-  { label: "Successful",  value: "success" },
-  { label: "Pending",     value: "pending" },
-  { label: "Failed",      value: "failed"  },
+  { label: "All", value: "all" },
+  { label: "Successful", value: "success" },
+  { label: "Pending", value: "pending" },
+  { label: "Failed", value: "failed" },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -101,88 +128,94 @@ export default function OperationsTransactionsPage() {
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
 
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [stats,        setStats]        = useState<any>(null);
-  const [loading,      setLoading]      = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [error,        setError]        = useState<string | null>(null);
-  const [exporting,    setExporting]    = useState(false);
-  const [activeTab,    setActiveTab]    = useState("all");
-  const [pagination,   setPagination]   = useState({ page: 1, total: 0, pages: 1, limit: 15 });
+  const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 1, limit: 15 });
 
   const [filters, setFilters] = useState({
-    search:   "",
+    search: "",
     dateFrom: undefined as Date | undefined,
-    dateTo:   undefined as Date | undefined,
+    dateTo: undefined as Date | undefined,
   });
 
-  const fetchStats = useCallback(async (f = filters) => {
-    setStatsLoading(true);
-    try {
-      const params: any = {};
-      if (f.dateFrom) params.startDate = f.dateFrom.toISOString();
-      if (f.dateTo)   params.endDate   = f.dateTo.toISOString();
-      const res: any = await operationsService.getTransactionStats(params);
-      setStats(res?.data ?? res);
-    } catch {
-      // stats are non-critical, fail silently
-    } finally {
-      setStatsLoading(false);
-    }
-  }, [filters]);
+  const fetchStats = useCallback(
+    async (f = filters) => {
+      setStatsLoading(true);
+      try {
+        const params: any = {};
+        if (f.dateFrom) params.startDate = f.dateFrom.toISOString();
+        if (f.dateTo) params.endDate = f.dateTo.toISOString();
+        const res: any = await operationsService.getTransactionStats(params);
+        setStats(res?.data ?? res);
+      } catch {
+        // stats are non-critical, fail silently
+      } finally {
+        setStatsLoading(false);
+      }
+    },
+    [filters]
+  );
 
-  const fetchTransactions = useCallback(async (page = 1, tab = activeTab, f = filters, limit = pagination.limit) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params: any = { page, limit };
-      if (tab !== "all") params.status    = tab;
-      if (f.search)      params.search    = f.search;
-      if (f.dateFrom)    params.startDate = f.dateFrom.toISOString();
-      if (f.dateTo)      params.endDate   = f.dateTo.toISOString();
+  const fetchTransactions = useCallback(
+    async (page = 1, tab = activeTab, f = filters, limit = pagination.limit) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params: any = { page, limit };
+        if (tab !== "all") params.status = tab;
+        if (f.search) params.search = f.search;
+        if (f.dateFrom) params.startDate = f.dateFrom.toISOString();
+        if (f.dateTo) params.endDate = f.dateTo.toISOString();
 
-      const res: any = await operationsService.getTransactions(params);
-      setTransactions(Array.isArray(res?.data) ? res.data : []);
-      setPagination({
-        page:  res?.page  ?? 1,
-        pages: res?.pages ?? res?.totalPages ?? 1,
-        total: res?.total ?? 0,
-        limit,
-      });
-    } catch (err: any) {
-      const msg = err?.message || "Failed to load transactions";
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, filters, pagination.limit]);
+        const res: any = await operationsService.getTransactions(params);
+        setTransactions(Array.isArray(res?.data) ? res.data : []);
+        setPagination({
+          page: res?.page ?? 1,
+          pages: res?.pages ?? res?.totalPages ?? 1,
+          total: res?.total ?? 0,
+          limit,
+        });
+      } catch (err: any) {
+        const msg = err?.message || "Failed to load transactions";
+        setError(msg);
+        toast.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [activeTab, filters, pagination.limit]
+  );
 
   const handleExport = async () => {
     setExporting(true);
     try {
       const params: any = { limit: 10000 };
-      if (activeTab !== "all") params.status    = activeTab;
-      if (filters.search)      params.search    = filters.search;
-      if (filters.dateFrom)    params.startDate = filters.dateFrom.toISOString();
-      if (filters.dateTo)      params.endDate   = filters.dateTo.toISOString();
+      if (activeTab !== "all") params.status = activeTab;
+      if (filters.search) params.search = filters.search;
+      if (filters.dateFrom) params.startDate = filters.dateFrom.toISOString();
+      if (filters.dateTo) params.endDate = filters.dateTo.toISOString();
 
       const res: any = await operationsService.getTransactions(params);
       const data = Array.isArray(res?.data) ? res.data : [];
 
       downloadCSV(
         data.map((t: any) => ({
-          "Reference":        t.reference   ?? "—",
-          "Order ID":         t.orderId     ?? "—",
-          "Customer":         t.customerName ?? "Unknown",
-          "Vendor":           t.vendorName  ?? "—",
-          "Amount (NGN)":     t.amount      ?? 0,
-          "Delivery Fee":     t.deliveryFee ?? 0,
-          "Total (NGN)":      t.total       ?? 0,
-          "Payment Method":   t.paymentMethod ?? "—",
-          "Status":           t.status      ?? "—",
-          "Date":             t.createdAt ? new Date(t.createdAt).toLocaleString("en-NG") : "—",
+          Reference: t.reference ?? "—",
+          "Order ID": t.orderId ?? "—",
+          Customer: t.customerName ?? "Unknown",
+          Vendor: t.vendorName ?? "—",
+          "Amount (NGN)": t.amount ?? 0,
+          "Delivery Fee": t.deliveryFee ?? 0,
+          "Total (NGN)": t.total ?? 0,
+          "Payment Method": t.paymentMethod ?? "—",
+          Status: t.status ?? "—",
+          Date: t.createdAt ? new Date(t.createdAt).toLocaleString("en-NG") : "—",
         })),
-        `transactions_${new Date().toISOString().slice(0, 10)}`,
+        `transactions_${new Date().toISOString().slice(0, 10)}`
       );
       toast.success("CSV exported");
     } catch {
@@ -227,7 +260,6 @@ export default function OperationsTransactionsPage() {
 
   return (
     <div className="space-y-5 sm:space-y-6">
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -239,7 +271,11 @@ export default function OperationsTransactionsPage() {
           disabled={exporting || loading || transactions.length === 0}
           className="bg-[#1a3f1c] text-white hover:bg-[#1a3f1c]/90 h-10 px-6 font-bold rounded-xl flex items-center gap-2"
         >
-          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {exporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
           Export CSV
         </Button>
       </div>
@@ -278,31 +314,45 @@ export default function OperationsTransactionsPage() {
         <CardContent className="p-4 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <Label className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 block">Search</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 block">
+                Search
+              </Label>
               <Input
                 value={filters.search}
-                onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
+                onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
                 placeholder="Reference, customer name…"
                 className="h-10 rounded-xl"
-                onKeyDown={e => e.key === "Enter" && handleSearch()}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
 
-            {(["From", "To"] as const).map(lbl => {
+            {(["From", "To"] as const).map((lbl) => {
               const key = lbl === "From" ? "dateFrom" : "dateTo";
               return (
                 <div key={lbl}>
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 block">{lbl}</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 block">
+                    {lbl}
+                  </Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full h-10 rounded-xl justify-start font-normal">
+                      <Button
+                        variant="outline"
+                        className="w-full h-10 rounded-xl justify-start font-normal"
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {(filters as any)[key] ? format((filters as any)[key], "dd/MM/yyyy") : <span className="text-gray-400">DD/MM/YYYY</span>}
+                        {(filters as any)[key] ? (
+                          format((filters as any)[key], "dd/MM/yyyy")
+                        ) : (
+                          <span className="text-gray-400">DD/MM/YYYY</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={(filters as any)[key]}
-                        onSelect={d => setFilters(f => ({ ...f, [key]: d }))} />
+                      <Calendar
+                        mode="single"
+                        selected={(filters as any)[key]}
+                        onSelect={(d) => setFilters((f) => ({ ...f, [key]: d }))}
+                      />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -311,15 +361,26 @@ export default function OperationsTransactionsPage() {
           </div>
 
           <div className="flex gap-3 justify-end border-t border-border/50 pt-4">
-            <Button onClick={handleSearch} className="bg-primary hover:opacity-90 text-white h-10 px-8 font-black rounded-xl">Search</Button>
-            <Button onClick={handleReset} variant="outline" className="border-border text-[#1a3f1c] h-10 px-8 font-black rounded-xl">Reset</Button>
+            <Button
+              onClick={handleSearch}
+              className="bg-primary hover:opacity-90 text-white h-10 px-8 font-black rounded-xl"
+            >
+              Search
+            </Button>
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              className="border-border text-[#1a3f1c] h-10 px-8 font-black rounded-xl"
+            >
+              Reset
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Status tabs */}
       <div className="flex gap-2 flex-wrap">
-        {STATUS_TABS.map(tab => (
+        {STATUS_TABS.map((tab) => (
           <button
             type="button"
             key={tab.value}
@@ -333,14 +394,22 @@ export default function OperationsTransactionsPage() {
             {tab.label}
             {tab.value !== "all" && stats && !statsLoading && (
               <span className="ml-1.5 text-[10px] opacity-80">
-                ({tab.value === "success" ? stats.successful : tab.value === "failed" ? stats.failed : stats.pending})
+                (
+                {tab.value === "success"
+                  ? stats.successful
+                  : tab.value === "failed"
+                    ? stats.failed
+                    : stats.pending}
+                )
               </span>
             )}
           </button>
         ))}
         {!loading && !error && (
           <span className="ml-auto text-sm text-gray-400 self-center">
-            {pagination.total > 0 ? `${pagination.total} record${pagination.total !== 1 ? "s" : ""}` : "No records"}
+            {pagination.total > 0
+              ? `${pagination.total} record${pagination.total !== 1 ? "s" : ""}`
+              : "No records"}
           </span>
         )}
       </div>
@@ -351,19 +420,35 @@ export default function OperationsTransactionsPage() {
           <table className="modern-table min-w-[800px]">
             <thead>
               <tr>
-                {["Reference", "Order ID", "Customer", "Vendor", "Amount", "Method", "Status", "Date"].map(h => (
+                {[
+                  "Reference",
+                  "Order ID",
+                  "Customer",
+                  "Vendor",
+                  "Amount",
+                  "Method",
+                  "Status",
+                  "Date",
+                ].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <>{[0,1,2,3,4].map(i => <SkeletonRow key={i} />)}</>
+                <>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <SkeletonRow key={i} />
+                  ))}
+                </>
               ) : error ? (
                 <tr>
                   <td colSpan={8} className="p-12 text-center">
                     <p className="text-red-500 font-medium mb-3">{error}</p>
-                    <Button onClick={() => fetchTransactions(1)} className="bg-[#1a3f1c] text-white gap-2">
+                    <Button
+                      onClick={() => fetchTransactions(1)}
+                      className="bg-[#1a3f1c] text-white gap-2"
+                    >
                       <RefreshCw className="h-4 w-4" /> Retry
                     </Button>
                   </td>
@@ -378,16 +463,19 @@ export default function OperationsTransactionsPage() {
               ) : (
                 transactions.map((tx: any, i: number) => (
                   <tr key={tx.id ?? tx.reference ?? i}>
-                    <td className="font-mono text-[11px] text-gray-600 whitespace-nowrap max-w-[160px] truncate" title={tx.reference}>
+                    <td
+                      className="font-mono text-[11px] text-gray-600 whitespace-nowrap max-w-[160px] truncate"
+                      title={tx.reference}
+                    >
                       {tx.reference ?? "—"}
                     </td>
-                    <td className="text-xs text-gray-700 font-medium">
-                      {tx.orderId ?? "—"}
-                    </td>
+                    <td className="text-xs text-gray-700 font-medium">{tx.orderId ?? "—"}</td>
                     <td className="text-xs text-gray-800 font-bold max-w-[140px] truncate">
                       <div>{tx.customerName ?? "Unknown"}</div>
                       {tx.customerPhone && tx.customerPhone !== "—" && (
-                        <div className="text-[10px] text-gray-400 font-normal mt-0.5">{tx.customerPhone}</div>
+                        <div className="text-[10px] text-gray-400 font-normal mt-0.5">
+                          {tx.customerPhone}
+                        </div>
                       )}
                     </td>
                     <td className="text-xs text-gray-700 max-w-[130px] truncate">
@@ -396,7 +484,9 @@ export default function OperationsTransactionsPage() {
                     <td className="whitespace-nowrap">
                       <div className="text-xs font-black text-[#1a3f1c]">{fmt(tx.amount)}</div>
                       {tx.deliveryFee > 0 && (
-                        <div className="text-[10px] text-gray-400 font-semibold">+{fmt(tx.deliveryFee)} delivery</div>
+                        <div className="text-[10px] text-gray-400 font-semibold">
+                          +{fmt(tx.deliveryFee)} delivery
+                        </div>
                       )}
                     </td>
                     <td className="text-xs text-gray-600 whitespace-nowrap font-medium">
@@ -421,9 +511,9 @@ export default function OperationsTransactionsPage() {
           currentPage={pagination.page}
           totalPages={pagination.pages}
           pageSize={pagination.limit}
-          onPageChange={p => fetchTransactions(p, activeTab, filters, pagination.limit)}
-          onPageSizeChange={size => {
-            setPagination(prev => ({ ...prev, limit: size, page: 1 }));
+          onPageChange={(p) => fetchTransactions(p, activeTab, filters, pagination.limit)}
+          onPageSizeChange={(size) => {
+            setPagination((prev) => ({ ...prev, limit: size, page: 1 }));
             fetchTransactions(1, activeTab, filters, size);
           }}
         />

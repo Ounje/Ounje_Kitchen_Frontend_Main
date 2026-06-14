@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -26,24 +30,29 @@ function getDateRange(period: string): { startDate: string; endDate: string } | 
   switch (period) {
     case "daily":
       from = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      to   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      to = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       break;
     case "weekly": {
       const day = now.getDay();
       const diff = day === 0 ? -6 : 1 - day;
-      from = new Date(now); from.setDate(now.getDate() + diff); from.setHours(0,0,0,0);
-      to   = new Date(from); to.setDate(from.getDate() + 6);    to.setHours(23,59,59,999);
+      from = new Date(now);
+      from.setDate(now.getDate() + diff);
+      from.setHours(0, 0, 0, 0);
+      to = new Date(from);
+      to.setDate(from.getDate() + 6);
+      to.setHours(23, 59, 59, 999);
       break;
     }
     case "monthly":
       from = new Date(now.getFullYear(), now.getMonth(), 1);
-      to   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
       break;
     case "yearly":
       from = new Date(now.getFullYear(), 0, 1);
-      to   = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      to = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
       break;
-    default: return null;
+    default:
+      return null;
   }
   return { startDate: from.toISOString(), endDate: to.toISOString() };
 }
@@ -51,18 +60,20 @@ function getDateRange(period: string): { startDate: string; endDate: string } | 
 function resolveName(obj: any, fallback = "Unknown"): string {
   if (!obj) return fallback;
   if (typeof obj === "string") return fallback;
-  if (typeof obj.resolvedName === "string" && obj.resolvedName.trim()) return obj.resolvedName.trim();
+  if (typeof obj.resolvedName === "string" && obj.resolvedName.trim())
+    return obj.resolvedName.trim();
   if (typeof obj.name === "string" && obj.name.trim()) return obj.name.trim();
   const first = (obj.firstName ?? "").trim();
-  const last  = (obj.lastName  ?? "").trim();
-  const full  = `${first} ${last}`.trim();
+  const last = (obj.lastName ?? "").trim();
+  const full = `${first} ${last}`.trim();
   if (full) return full;
   if (obj.user && typeof obj.user === "object") return resolveName(obj.user, fallback);
   return fallback;
 }
 
 function resolveOrderImage(order: any): string {
-  const direct = order.image ?? order.foodImage ?? order.photo ?? order.thumbnail ?? order.coverImage ?? "";
+  const direct =
+    order.image ?? order.foodImage ?? order.photo ?? order.thumbnail ?? order.coverImage ?? "";
   if (direct) return direct;
   const items = order.items ?? [];
   for (const item of items) {
@@ -74,29 +85,34 @@ function resolveOrderImage(order: any): string {
 
 function statusBadgeColor(status: string): string {
   const s = (status ?? "").toLowerCase();
-  if (["delivered","completed"].includes(s))           return "text-green-700 font-bold";
-  if (["in_transit","picked_up","riding"].includes(s)) return "text-blue-700 font-bold";
-  if (["cancelled","declined"].includes(s))            return "text-red-600 font-bold";
-  if (["assigned","preparing"].includes(s))            return "text-purple-700 font-bold";
-  if (["confirming"].includes(s))                      return "text-orange-600 font-bold";
+  if (["delivered", "completed"].includes(s)) return "text-green-700 font-bold";
+  if (["in_transit", "picked_up", "riding"].includes(s)) return "text-blue-700 font-bold";
+  if (["cancelled", "declined"].includes(s)) return "text-red-600 font-bold";
+  if (["assigned", "preparing"].includes(s)) return "text-purple-700 font-bold";
+  if (["confirming"].includes(s)) return "text-orange-600 font-bold";
   return "text-yellow-700 font-bold";
 }
 
 function statusLabel(status: string): string {
   const map: Record<string, string> = {
-    in_transit: "RIDING",     picked_up:  "RIDING",
-    delivered:  "DELIVERED",  completed:  "DELIVERED",
-    cancelled:  "CANCELLED",  declined:   "CANCELLED",
-    confirming: "CONFIRMING", pending:    "PENDING",
-    assigned:   "ASSIGNED",   preparing:  "PREPARING",
-    riding:     "RIDING",
+    in_transit: "RIDING",
+    picked_up: "RIDING",
+    delivered: "DELIVERED",
+    completed: "DELIVERED",
+    cancelled: "CANCELLED",
+    declined: "CANCELLED",
+    confirming: "CONFIRMING",
+    pending: "PENDING",
+    assigned: "ASSIGNED",
+    preparing: "PREPARING",
+    riding: "RIDING",
   };
   return map[(status ?? "").toLowerCase()] ?? (status ?? "PENDING").toUpperCase();
 }
 
 function paymentBadgeClass(status: string): string {
   const s = (status ?? "").toLowerCase();
-  if (s === "paid")     return "bg-green-100 text-green-700 border border-green-300";
+  if (s === "paid") return "bg-green-100 text-green-700 border border-green-300";
   if (s === "refunded") return "bg-blue-100 text-blue-700 border border-blue-300";
   return "bg-red-100 text-red-600 border border-red-300";
 }
@@ -111,28 +127,57 @@ function formatOrderTime(dateStr: string): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "—";
   return d.toLocaleString("en-NG", {
-    day: "numeric", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit", hour12: true,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
   });
 }
 
 function groupByDate(orders: any[]): Record<string, any[]> {
-  return orders.reduce((acc, o) => {
-    const key = (o.createdAt ?? "").slice(0, 10) || "Unknown";
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(o);
-    return acc;
-  }, {} as Record<string, any[]>);
+  return orders.reduce(
+    (acc, o) => {
+      const key = (o.createdAt ?? "").slice(0, 10) || "Unknown";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(o);
+      return acc;
+    },
+    {} as Record<string, any[]>
+  );
 }
 
 function formatGroupDate(dateStr: string): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
-  const days   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
   const nth = (n: number) => {
     if (n > 3 && n < 21) return "th";
-    switch (n % 10) { case 1: return "st"; case 2: return "nd"; case 3: return "rd"; default: return "th"; }
+    switch (n % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
   };
   return `${days[d.getDay()]} ${d.getDate()}${nth(d.getDate())}, ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
@@ -143,7 +188,9 @@ function SkeletonCard() {
       <div className="flex gap-3">
         <div className="w-24 h-24 bg-muted/50 rounded-lg flex-shrink-0" />
         <div className="flex-1 space-y-2 content-center">
-          {[0,1,2,3,4,5].map(j => <div key={j} className="h-3 bg-muted/50 rounded w-3/4" />)}
+          {[0, 1, 2, 3, 4, 5].map((j) => (
+            <div key={j} className="h-3 bg-muted/50 rounded w-3/4" />
+          ))}
         </div>
         <div className="w-20 h-9 bg-muted/50 rounded-xl flex-shrink-0 self-center" />
       </div>
@@ -165,89 +212,104 @@ export default function OperationsOrdersPage() {
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
   const router = useRouter();
 
-  const [orders,     setOrders]     = useState<any[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState<string | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 1, limit: 7 });
-  const [period,     setPeriod]     = useState("all");
-  const [filters,    setFilters]    = useState({
-    name: "", vendor: "", zone: "", orderId: "", status: "all", paymentStatus: "all", failedPayment: false,
+  const [period, setPeriod] = useState("all");
+  const [filters, setFilters] = useState({
+    name: "",
+    vendor: "",
+    zone: "",
+    orderId: "",
+    status: "all",
+    paymentStatus: "all",
+    failedPayment: false,
     dateFrom: undefined as Date | undefined,
-    dateTo:   undefined as Date | undefined,
+    dateTo: undefined as Date | undefined,
   });
   const [exporting, setExporting] = useState(false);
 
-  const fetchOrders = useCallback(async (page = 1, activeFilters = filters, limit = pagination.limit) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const dateRange = (activeFilters.dateFrom && activeFilters.dateTo)
-        ? { startDate: activeFilters.dateFrom.toISOString(), endDate: activeFilters.dateTo.toISOString() }
-        : (getDateRange(period) ?? {});
+  const fetchOrders = useCallback(
+    async (page = 1, activeFilters = filters, limit = pagination.limit) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const dateRange =
+          activeFilters.dateFrom && activeFilters.dateTo
+            ? {
+                startDate: activeFilters.dateFrom.toISOString(),
+                endDate: activeFilters.dateTo.toISOString(),
+              }
+            : (getDateRange(period) ?? {});
 
-      const params: any = { page, limit, ...dateRange };
-      if (activeFilters.failedPayment) {
-        params.failedPayment = "true";
-      } else {
-        if (activeFilters.status !== "all")        params.status        = activeFilters.status;
-        if (activeFilters.paymentStatus !== "all") params.paymentStatus = activeFilters.paymentStatus;
+        const params: any = { page, limit, ...dateRange };
+        if (activeFilters.failedPayment) {
+          params.failedPayment = "true";
+        } else {
+          if (activeFilters.status !== "all") params.status = activeFilters.status;
+          if (activeFilters.paymentStatus !== "all")
+            params.paymentStatus = activeFilters.paymentStatus;
+        }
+        if (activeFilters.orderId) params.search = activeFilters.orderId;
+        if (activeFilters.name) params.search = activeFilters.name;
+        if (activeFilters.vendor) params.search = activeFilters.vendor;
+        if (activeFilters.zone) params.zone = activeFilters.zone;
+
+        const res: any = await operationsService.getOrders(params);
+        const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+        setOrders(data);
+        setPagination({
+          page: res?.page ?? 1,
+          pages: res?.pages ?? res?.totalPages ?? 1,
+          total: res?.total ?? 0,
+          limit,
+        });
+      } catch (err: any) {
+        const msg = err?.message || "Failed to load orders. Check if the server is running.";
+        setError(msg);
+        toast.error(msg);
+        setOrders([]);
+      } finally {
+        setLoading(false);
       }
-      if (activeFilters.orderId)  params.search = activeFilters.orderId;
-      if (activeFilters.name)     params.search = activeFilters.name;
-      if (activeFilters.vendor)   params.search = activeFilters.vendor;
-      if (activeFilters.zone)     params.zone   = activeFilters.zone;
-
-      const res: any = await operationsService.getOrders(params);
-      const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-      setOrders(data);
-      setPagination({
-        page:  res?.page  ?? 1,
-        pages: res?.pages ?? res?.totalPages ?? 1,
-        total: res?.total ?? 0,
-        limit,
-      });
-    } catch (err: any) {
-      const msg = err?.message || "Failed to load orders. Check if the server is running.";
-      setError(msg);
-      toast.error(msg);
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [period, pagination.limit, filters]);
+    },
+    [period, pagination.limit, filters]
+  );
 
   const handleExportCSV = async () => {
     setExporting(true);
     try {
-      const dateRange = (filters.dateFrom && filters.dateTo)
-        ? { startDate: filters.dateFrom.toISOString(), endDate: filters.dateTo.toISOString() }
-        : (getDateRange(period) ?? {});
+      const dateRange =
+        filters.dateFrom && filters.dateTo
+          ? { startDate: filters.dateFrom.toISOString(), endDate: filters.dateTo.toISOString() }
+          : (getDateRange(period) ?? {});
 
       const params: any = { ...dateRange, limit: 10000 };
       if (filters.failedPayment) {
         params.failedPayment = "true";
       } else {
-        if (filters.status !== "all")        params.status        = filters.status;
+        if (filters.status !== "all") params.status = filters.status;
         if (filters.paymentStatus !== "all") params.paymentStatus = filters.paymentStatus;
       }
-      if (filters.orderId)  params.search = filters.orderId;
-      if (filters.name)     params.search = filters.name;
-      if (filters.vendor)   params.search = filters.vendor;
-      if (filters.zone)     params.zone   = filters.zone;
+      if (filters.orderId) params.search = filters.orderId;
+      if (filters.name) params.search = filters.name;
+      if (filters.vendor) params.search = filters.vendor;
+      if (filters.zone) params.zone = filters.zone;
 
       const res: any = await operationsService.getOrders(params);
       const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-      
+
       const flatData = data.map((o: any) => ({
         "Order ID": o.orderNumber ?? o._id ?? "",
-        "Customer": resolveName(o.customer),
-        "Vendor": o.vendor?.storeName ?? o.vendor?.businessName ?? o.vendor?.name ?? "—",
-        "Rider": o.rider ? resolveName(o.rider.user ?? o.rider, "Assigned") : "Not Assigned",
-        "Status": statusLabel(o.status),
+        Customer: resolveName(o.customer),
+        Vendor: o.vendor?.storeName ?? o.vendor?.businessName ?? o.vendor?.name ?? "—",
+        Rider: o.rider ? resolveName(o.rider.user ?? o.rider, "Assigned") : "Not Assigned",
+        Status: statusLabel(o.status),
         "Sub-Status": formatSubStatus(o.subStatus),
-        "Payment": o.paymentStatus ?? "unpaid",
-        "Total (NGN)": (o.totalFee ?? o.total ?? o.totalPrice ?? 0),
-        "Date": o.createdAt ? new Date(o.createdAt).toLocaleString("en-NG") : "",
+        Payment: o.paymentStatus ?? "unpaid",
+        "Total (NGN)": o.totalFee ?? o.total ?? o.totalPrice ?? 0,
+        Date: o.createdAt ? new Date(o.createdAt).toLocaleString("en-NG") : "",
       }));
 
       downloadCSV(flatData, `orders_${period}_${new Date().toISOString().slice(0, 10)}`);
@@ -264,8 +326,18 @@ export default function OperationsOrdersPage() {
   }, [shouldRender, period]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = () => fetchOrders(1, filters);
-  const handleReset  = () => {
-    const cleared = { name: "", vendor: "", zone: "", orderId: "", status: "all", paymentStatus: "all", failedPayment: false, dateFrom: undefined, dateTo: undefined };
+  const handleReset = () => {
+    const cleared = {
+      name: "",
+      vendor: "",
+      zone: "",
+      orderId: "",
+      status: "all",
+      paymentStatus: "all",
+      failedPayment: false,
+      dateFrom: undefined,
+      dateTo: undefined,
+    };
     setFilters(cleared);
     fetchOrders(1, cleared);
   };
@@ -279,12 +351,11 @@ export default function OperationsOrdersPage() {
     );
   }
 
-  const grouped  = groupByDate(orders);
+  const grouped = groupByDate(orders);
   const dateKeys = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
   return (
     <div className="space-y-5 sm:space-y-6">
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Orders</h1>
@@ -293,17 +364,23 @@ export default function OperationsOrdersPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {["daily","weekly","monthly","yearly","all"].map(v => (
-              <SelectItem key={v} value={v}>{v.charAt(0).toUpperCase() + v.slice(1)}</SelectItem>
+            {["daily", "weekly", "monthly", "yearly", "all"].map((v) => (
+              <SelectItem key={v} value={v}>
+                {v.charAt(0).toUpperCase() + v.slice(1)}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Button 
-          onClick={handleExportCSV} 
+        <Button
+          onClick={handleExportCSV}
           disabled={exporting || loading || orders.length === 0}
           className="bg-[#1a3f1c] text-white hover:bg-[#1a3f1c]/90 h-10 px-6 font-bold shadow-sm rounded-xl flex items-center gap-2"
         >
-          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {exporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
           Export CSV
         </Button>
       </div>
@@ -313,27 +390,47 @@ export default function OperationsOrdersPage() {
         <CardContent className="p-4 sm:p-7 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { label: "Customer Name",     key: "name",    placeholder: "Search by customer..." },
-              { label: "Vendor Store",   key: "vendor",  placeholder: "Search by vendor..."   },
-              { label: "Zone / Area",     key: "zone",    placeholder: "Search by zone..."           },
-              { label: "Order Reference", key: "orderId", placeholder: "OUN-XXX-XXXX"  },
-            ].map(f => (
+              { label: "Customer Name", key: "name", placeholder: "Search by customer..." },
+              { label: "Vendor Store", key: "vendor", placeholder: "Search by vendor..." },
+              { label: "Zone / Area", key: "zone", placeholder: "Search by zone..." },
+              { label: "Order Reference", key: "orderId", placeholder: "OUN-XXX-XXXX" },
+            ].map((f) => (
               <div key={f.key}>
-                <Label className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 block">{f.label}</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-[#1a3f1c]/50 mb-1.5 block">
+                  {f.label}
+                </Label>
                 <Input
                   value={(filters as any)[f.key]}
-                  onChange={e => setFilters(prev => ({ ...prev, [f.key]: e.target.value }))}
-                  className="h-10 rounded-xl" placeholder={f.placeholder}
-                  onKeyDown={e => e.key === "Enter" && handleSearch()} />
+                  onChange={(e) => setFilters((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                  className="h-10 rounded-xl"
+                  placeholder={f.placeholder}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
               </div>
             ))}
 
             <div>
               <Label className="text-sm font-medium text-gray-700">Order Status</Label>
-              <Select value={filters.status} onValueChange={v => setFilters(f => ({ ...f, status: v }))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <Select
+                value={filters.status}
+                onValueChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {["all","pending","confirming","assigned","preparing","riding","in_transit","delivered","cancelled","declined"].map(v => (
+                  {[
+                    "all",
+                    "pending",
+                    "confirming",
+                    "assigned",
+                    "preparing",
+                    "riding",
+                    "in_transit",
+                    "delivered",
+                    "cancelled",
+                    "declined",
+                  ].map((v) => (
                     <SelectItem key={v} value={v}>
                       {v === "in_transit" ? "In Transit" : v.charAt(0).toUpperCase() + v.slice(1)}
                     </SelectItem>
@@ -346,15 +443,22 @@ export default function OperationsOrdersPage() {
               <Label className="text-sm font-medium text-gray-700">Payment Status</Label>
               <Select
                 value={filters.failedPayment ? "failed_payment" : filters.paymentStatus}
-                onValueChange={v => {
+                onValueChange={(v) => {
                   if (v === "failed_payment") {
-                    setFilters(f => ({ ...f, failedPayment: true, paymentStatus: "all", status: "all" }));
+                    setFilters((f) => ({
+                      ...f,
+                      failedPayment: true,
+                      paymentStatus: "all",
+                      status: "all",
+                    }));
                   } else {
-                    setFilters(f => ({ ...f, failedPayment: false, paymentStatus: v }));
+                    setFilters((f) => ({ ...f, failedPayment: false, paymentStatus: v }));
                   }
                 }}
               >
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Payments</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
@@ -365,7 +469,7 @@ export default function OperationsOrdersPage() {
               </Select>
             </div>
 
-            {(["From","To"] as const).map(lbl => {
+            {(["From", "To"] as const).map((lbl) => {
               const key = lbl === "From" ? "dateFrom" : "dateTo";
               return (
                 <div key={lbl}>
@@ -374,12 +478,19 @@ export default function OperationsOrdersPage() {
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full mt-1 justify-start font-normal">
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {(filters as any)[key] ? format((filters as any)[key], "dd/MM/yyyy") : <span className="text-gray-400">DD/MM/YYYY</span>}
+                        {(filters as any)[key] ? (
+                          format((filters as any)[key], "dd/MM/yyyy")
+                        ) : (
+                          <span className="text-gray-400">DD/MM/YYYY</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={(filters as any)[key]}
-                        onSelect={d => setFilters(f => ({ ...f, [key]: d }))} />
+                      <Calendar
+                        mode="single"
+                        selected={(filters as any)[key]}
+                        onSelect={(d) => setFilters((f) => ({ ...f, [key]: d }))}
+                      />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -388,8 +499,19 @@ export default function OperationsOrdersPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:justify-end border-t border-border/50 pt-5">
-            <Button onClick={handleSearch} className="bg-primary hover:opacity-90 text-white h-11 px-10 font-black rounded-xl shadow-md transition-all active:scale-95">Search</Button>
-            <Button onClick={handleReset} variant="outline" className="border-border text-[#1a3f1c] h-11 px-10 font-black rounded-xl hover:bg-muted/50 transition-all">Reset</Button>
+            <Button
+              onClick={handleSearch}
+              className="bg-primary hover:opacity-90 text-white h-11 px-10 font-black rounded-xl shadow-md transition-all active:scale-95"
+            >
+              Search
+            </Button>
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              className="border-border text-[#1a3f1c] h-11 px-10 font-black rounded-xl hover:bg-muted/50 transition-all"
+            >
+              Reset
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -407,20 +529,35 @@ export default function OperationsOrdersPage() {
         <table className="modern-table min-w-[900px]">
           <thead>
             <tr>
-              {["", "Order ID", "Customer", "Vendor", "Rider", "Status", "Sub-status", "Payment", "Placed", ""].map((h, i) => (
+              {[
+                "",
+                "Order ID",
+                "Customer",
+                "Vendor",
+                "Rider",
+                "Status",
+                "Sub-status",
+                "Payment",
+                "Placed",
+                "",
+              ].map((h, i) => (
                 <th key={i}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <>{[0,1,2,3,4,5].map(i => (
-                <tr key={i}>
-                  {[0,1,2,3,4,5,6,7,8,9].map(j => (
-                    <td key={j}><div className="h-4 bg-gray-100 rounded animate-pulse" /></td>
-                  ))}
-                </tr>
-              ))}</>
+              <>
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <tr key={i}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((j) => (
+                      <td key={j}>
+                        <div className="h-4 bg-gray-100 rounded animate-pulse" />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </>
             ) : error ? (
               <tr>
                 <td colSpan={10} className="p-12 text-center">
@@ -439,17 +576,19 @@ export default function OperationsOrdersPage() {
               </tr>
             ) : (
               orders.map((order: any) => {
-                const id            = order._id ?? order.id ?? "";
-                const image         = resolveOrderImage(order);
-                const status        = order.status        ?? "pending";
-                const subStatus     = order.subStatus     ?? "";
+                const id = order._id ?? order.id ?? "";
+                const image = resolveOrderImage(order);
+                const status = order.status ?? "pending";
+                const subStatus = order.subStatus ?? "";
                 const paymentStatus = order.paymentStatus ?? "unpaid";
-                const orderTime     = order.createdAt     ?? order.placedAt ?? "";
-                const customer      = order.customer      ?? {};
-                const vendor        = order.vendor        ?? {};
-                const vendorName    = vendor.storeName ?? vendor.businessName ?? vendor.name ?? "—";
-                const rider         = order.rider;
-                const riderLabel    = rider ? resolveName(rider.user ?? rider, "Assigned") : "Not Assigned";
+                const orderTime = order.createdAt ?? order.placedAt ?? "";
+                const customer = order.customer ?? {};
+                const vendor = order.vendor ?? {};
+                const vendorName = vendor.storeName ?? vendor.businessName ?? vendor.name ?? "—";
+                const rider = order.rider;
+                const riderLabel = rider
+                  ? resolveName(rider.user ?? rider, "Assigned")
+                  : "Not Assigned";
 
                 return (
                   <tr
@@ -459,9 +598,11 @@ export default function OperationsOrdersPage() {
                   >
                     <td>
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                        {image
-                          ? <img src={image} alt="order" className="w-full h-full object-cover" />
-                          : <div className="w-full h-full bg-gradient-to-br from-[#98ef9b]/50 to-[#1a3f1c]/50" />}
+                        {image ? (
+                          <img src={image} alt="order" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-[#98ef9b]/50 to-[#1a3f1c]/50" />
+                        )}
                       </div>
                     </td>
                     <td className="font-mono text-xs text-gray-600 whitespace-nowrap">
@@ -470,14 +611,12 @@ export default function OperationsOrdersPage() {
                     <td className="text-xs font-semibold text-gray-800 whitespace-nowrap">
                       {resolveName(customer)}
                     </td>
-                    <td className="text-xs text-gray-700 max-w-[130px] truncate">
-                      {vendorName}
-                    </td>
-                    <td className="text-xs text-gray-600 whitespace-nowrap">
-                      {riderLabel}
-                    </td>
+                    <td className="text-xs text-gray-700 max-w-[130px] truncate">{vendorName}</td>
+                    <td className="text-xs text-gray-600 whitespace-nowrap">{riderLabel}</td>
                     <td className="whitespace-nowrap">
-                      <span className={`uppercase text-[11px] font-bold ${statusBadgeColor(status)}`}>
+                      <span
+                        className={`uppercase text-[11px] font-bold ${statusBadgeColor(status)}`}
+                      >
                         {statusLabel(status)}
                       </span>
                     </td>
@@ -485,18 +624,23 @@ export default function OperationsOrdersPage() {
                       {formatSubStatus(subStatus)}
                     </td>
                     <td className="whitespace-nowrap">
-                      <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border ${paymentBadgeClass(paymentStatus)}`}>
+                      <span
+                        className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border ${paymentBadgeClass(paymentStatus)}`}
+                      >
                         {paymentStatus}
                       </span>
                     </td>
                     <td className="text-[11px] text-gray-500 whitespace-nowrap">
                       {formatOrderTime(orderTime)}
                     </td>
-                    <td onClick={e => e.stopPropagation()}>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <Button
                         size="sm"
                         className="bg-[#1a3f1c] hover:bg-[#164016] text-white h-8 px-4 text-xs font-bold rounded-lg"
-                        onClick={e => { e.stopPropagation(); router.push(`/operations/orders/${id}`); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/operations/orders/${id}`);
+                        }}
                       >
                         Details
                       </Button>
@@ -514,9 +658,9 @@ export default function OperationsOrdersPage() {
           currentPage={pagination.page}
           totalPages={pagination.pages}
           pageSize={pagination.limit}
-          onPageChange={p => fetchOrders(p, filters, pagination.limit)}
-          onPageSizeChange={size => {
-            setPagination(prev => ({ ...prev, limit: size, page: 1 }));
+          onPageChange={(p) => fetchOrders(p, filters, pagination.limit)}
+          onPageSizeChange={(size) => {
+            setPagination((prev) => ({ ...prev, limit: size, page: 1 }));
             fetchOrders(1, filters, size);
           }}
         />

@@ -23,7 +23,7 @@ export default function ITLayout({ children }: { children: React.ReactNode }) {
     }
 
     // Check if user is IT department or Super Admin
-    if (user.department?.toLowerCase() !== 'it' && !user.isSuperAdmin) {
+    if (user.department?.toLowerCase() !== "it" && !user.isSuperAdmin) {
       router.push("/");
     }
   }, [loading, isAuthenticated, user, router]);
@@ -37,8 +37,8 @@ export default function ITLayout({ children }: { children: React.ReactNode }) {
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   if (loading) {
@@ -49,23 +49,18 @@ export default function ITLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user || (user.department?.toLowerCase() !== 'it' && !user.isSuperAdmin)) {
+  if (!user || (user.department?.toLowerCase() !== "it" && !user.isSuperAdmin)) {
     return null;
   }
 
   return (
     <div className="flex min-h-screen">
-      <ITSidebar 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
-      />
-      
+      <ITSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
       <div className="flex-1 flex flex-col">
         <ITHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        
-        <main className="flex-1 p-4 md:p-6 bg-gray-50 overflow-auto">
-          {children}
-        </main>
+
+        <main className="flex-1 p-4 md:p-6 bg-gray-50 overflow-auto">{children}</main>
       </div>
     </div>
   );

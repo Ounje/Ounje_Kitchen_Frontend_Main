@@ -1,20 +1,20 @@
 // ==================== USER TYPE ====================
 export interface User {
-  _id: string;                       // MongoDB _id (backend uses this)
-  id?: string;                       // Alias for _id (optional for frontend convenience)
+  _id: string; // MongoDB _id (backend uses this)
+  id?: string; // Alias for _id (optional for frontend convenience)
   firstName: string;
   lastName: string;
-  fullName?: string;                 // Virtual from backend
-  
+  fullName?: string; // Virtual from backend
+
   email: string;
-  phoneNumber?: string;              // Backend uses phoneNumber, not phone
-  
-  department: string;                // "it", "operations", "finance", "investors", "management"
-  role?: string;                     // Optional role field
-  
-  isSuperAdmin: boolean;             // Critical for admin access
-  isHead: boolean;                   // Department head flag
-  
+  phoneNumber?: string; // Backend uses phoneNumber, not phone
+
+  department: string; // "it", "operations", "finance", "investors", "management"
+  role?: string; // Optional role field
+
+  isSuperAdmin: boolean; // Critical for admin access
+  isHead: boolean; // Department head flag
+
   lineManager?: {
     _id: string;
     firstName: string;
@@ -22,12 +22,12 @@ export interface User {
     email: string;
     department: string;
   } | null;
-  
+
   isActive: boolean;
   mustChangePassword?: boolean;
-  
+
   dashboardUrl?: string;
-  
+
   createdAt: string;
   updatedAt: string;
 
@@ -40,13 +40,13 @@ export interface Customer {
   id?: string;
   firstName?: string;
   lastName?: string;
-  name: string;                      // Full name
+  name: string; // Full name
   email: string;
   phoneNumber: string;
   address: string;
   isActive: boolean;
   totalOrders: number;
-  accountStatus?: 'verified' | 'unverified' | 'suspended';
+  accountStatus?: "verified" | "unverified" | "suspended";
   zone?: string;
   createdAt: string;
   updatedAt?: string;
@@ -56,12 +56,12 @@ export interface Customer {
 export interface Vendor {
   _id: string;
   id?: string;
-  ownerName: string;                 // Vendor owner name
-  businessName: string;              // Business/restaurant name
+  ownerName: string; // Vendor owner name
+  businessName: string; // Business/restaurant name
   email: string;
   phoneNumber: string;
   address: string;
-  deliveryType?: string;             // Pickup/delivery options
+  deliveryType?: string; // Pickup/delivery options
   isActive: boolean;
   isVerified: boolean;
   totalOrders: number;
@@ -77,13 +77,13 @@ export interface Rider {
   id?: string;
   firstName: string;
   lastName: string;
-  name?: string;                     // Full name
+  name?: string; // Full name
   email: string;
   phoneNumber: string;
   isActive: boolean;
   isVerified: boolean;
   zone: string;
-  vehicleType?: 'bike' | 'car' | 'motorcycle';
+  vehicleType?: "bike" | "car" | "motorcycle";
   totalDeliveries: number;
   rating: number;
   createdAt: string;
@@ -104,12 +104,14 @@ export interface Staff {
   isActive: boolean;
   isHead: boolean;
   isSuperAdmin?: boolean;
-  lineManager?: string | {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
+  lineManager?:
+    | string
+    | {
+        _id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+      };
   createdAt: string;
   updatedAt?: string;
   avatar?: string; // Base64 data URL from Settings
@@ -146,8 +148,8 @@ export interface DashboardRevenue {
 }
 
 export interface DashboardData {
-  users:   DashboardUsers;
-  orders:  DashboardOrders;
+  users: DashboardUsers;
+  orders: DashboardOrders;
   ratings: DashboardRatings;
   queries: DashboardQueries;
   revenue: DashboardRevenue;
@@ -157,7 +159,7 @@ export interface DashboardData {
 export interface Order {
   _id: string;
   id?: string;
-  orderNumber: string;               // Backend uses orderNumber, not orderId
+  orderNumber: string; // Backend uses orderNumber, not orderId
   customerId: string | Customer;
   customerName?: string;
   vendorId: string | Vendor;
@@ -165,18 +167,18 @@ export interface Order {
   riderId?: string | Rider;
   riderName?: string;
   status:
-    | 'pending'
-    | 'confirmed'
-    | 'preparing'
-    | 'ready'
-    | 'picked_up'
-    | 'in_transit'
-    | 'delivered'
-    | 'cancelled'
-    | 'rejected';
+    | "pending"
+    | "confirmed"
+    | "preparing"
+    | "ready"
+    | "picked_up"
+    | "in_transit"
+    | "delivered"
+    | "cancelled"
+    | "rejected";
   items: OrderItem[];
   totalAmount: number; // Sum of items
-  
+
   // Persisted Financials (Phase 1 Fix)
   subtotal?: number;
   serviceFee?: number;
@@ -221,7 +223,7 @@ export interface RevenueData {
   weekly: number;
   monthly: number;
   yearly: number;
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
   percentageChange: number;
   period?: string;
   topVendor?: {
@@ -244,8 +246,8 @@ export interface Notification {
   id?: string;
   title: string;
   message: string;
-  type: 'order' | 'user' | 'system' | 'payment' | 'rating' | 'query';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  type: "order" | "user" | "system" | "payment" | "rating" | "query";
+  priority: "low" | "medium" | "high" | "urgent";
   read: boolean;
   archived?: boolean;
   relatedId?: string;
@@ -263,8 +265,8 @@ export interface Query {
   subject: string;
   description: string;
   category?: string;
-  status: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: "open" | "assigned" | "in_progress" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "urgent";
   assignedTo?: string | Staff;
   assignedToName?: string;
   createdAt: string;
@@ -285,7 +287,7 @@ export interface Rating {
   orderId?: string | Order;
   stars: 1 | 2 | 3 | 4 | 5;
   comment?: string;
-  ratingType: 'vendor' | 'rider' | 'order';
+  ratingType: "vendor" | "rider" | "order";
   createdAt: string;
   updatedAt?: string;
 }
@@ -298,7 +300,7 @@ export interface Permission {
   userName?: string;
   requestType: string;
   reason: string;
-  status: 'pending' | 'approved' | 'declined' | 'cancelled';
+  status: "pending" | "approved" | "declined" | "cancelled";
   requestedAt: string;
   reviewedAt?: string;
   reviewedBy?: string | User;
@@ -336,7 +338,7 @@ export interface PaginationParams {
   isActive?: boolean;
   isVerified?: boolean;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 // ==================== AUTH TYPES ====================
@@ -358,12 +360,12 @@ export interface LoginResponse {
 export interface ChangePasswordData {
   currentPassword: string;
   newPassword: string;
-  confirmPassword: string;          // Frontend field
+  confirmPassword: string; // Frontend field
 }
 
 // ==================== UTILITY TYPES ====================
-export type UserRole = 'superadmin' | 'head' | 'staff' | 'user';
-export type Department = 'it' | 'operations' | 'finance' | 'investors' | 'management';
-export type OrderStatus = Order['status'];
-export type QueryStatus = Query['status'];
-export type NotificationType = Notification['type'];
+export type UserRole = "superadmin" | "head" | "staff" | "user";
+export type Department = "it" | "operations" | "finance" | "investors" | "management";
+export type OrderStatus = Order["status"];
+export type QueryStatus = Query["status"];
+export type NotificationType = Notification["type"];

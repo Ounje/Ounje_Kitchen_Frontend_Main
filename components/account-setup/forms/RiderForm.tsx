@@ -6,7 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { riderSetupService } from "@/lib/api/services/accountSetup.service";
 
@@ -33,30 +39,30 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
 
   const [form, setForm] = useState({
     // User / identity
-    name:    existing?.user?.name    ?? "",
-    email:   existing?.user?.email   ?? "",
-    phone:   existing?.user?.phone   ?? "",
+    name: existing?.user?.name ?? "",
+    email: existing?.user?.email ?? "",
+    phone: existing?.user?.phone ?? "",
     address: existing?.user?.address ?? "",
     // Rider profile
     modeOfDelivery: existing?.modeOfDelivery ?? "",
-    operatingArea:  (existing?.operatingArea ?? []).join(", "),
+    operatingArea: (existing?.operatingArea ?? []).join(", "),
     // Documents
-    driversLicense:  existing?.driversLicense  ?? "",
-    nin:             existing?.nin             ?? "",
-    profilePicture:  existing?.profilePicture  ?? "",
+    driversLicense: existing?.driversLicense ?? "",
+    nin: existing?.nin ?? "",
+    profilePicture: existing?.profilePicture ?? "",
     // Guarantor
-    guarantorName:  existing?.guarantor?.name  ?? "",
+    guarantorName: existing?.guarantor?.name ?? "",
     guarantorPhone: existing?.guarantor?.phone ?? "",
-    guarantorNin:   existing?.guarantor?.nin   ?? "",
+    guarantorNin: existing?.guarantor?.nin ?? "",
     // Bank
     bankAccountNumber: existing?.bankDetails?.accountNumber ?? "",
-    bankCode:          existing?.bankDetails?.bankCode      ?? "",
-    bankAccountName:   existing?.bankDetails?.accountName   ?? "",
-    bankName:          existing?.bankDetails?.bankName      ?? "",
+    bankCode: existing?.bankDetails?.bankCode ?? "",
+    bankAccountName: existing?.bankDetails?.accountName ?? "",
+    bankName: existing?.bankDetails?.bankName ?? "",
   });
 
   const [saving, setSaving] = useState(false);
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,23 +73,26 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
     setSaving(true);
     try {
       const payload: Record<string, any> = {
-        name:    form.name,
-        phone:   form.phone   || undefined,
+        name: form.name,
+        phone: form.phone || undefined,
         address: form.address || undefined,
         modeOfDelivery: form.modeOfDelivery || undefined,
         operatingArea: form.operatingArea
-          ? form.operatingArea.split(",").map((s: string) => s.trim()).filter(Boolean)
+          ? form.operatingArea
+              .split(",")
+              .map((s: string) => s.trim())
+              .filter(Boolean)
           : undefined,
         driversLicense: form.driversLicense || undefined,
-        nin:            form.nin            || undefined,
+        nin: form.nin || undefined,
         profilePicture: form.profilePicture || undefined,
-        guarantorName:  form.guarantorName  || undefined,
+        guarantorName: form.guarantorName || undefined,
         guarantorPhone: form.guarantorPhone || undefined,
-        guarantorNin:   form.guarantorNin   || undefined,
+        guarantorNin: form.guarantorNin || undefined,
         bankAccountNumber: form.bankAccountNumber || undefined,
-        bankCode:          form.bankCode          || undefined,
-        bankAccountName:   form.bankAccountName   || undefined,
-        bankName:          form.bankName          || undefined,
+        bankCode: form.bankCode || undefined,
+        bankAccountName: form.bankAccountName || undefined,
+        bankName: form.bankName || undefined,
       };
 
       if (isEdit) {
@@ -113,12 +122,17 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
 
         <ScrollArea className="max-h-[75vh] px-6 pb-6">
           <form onSubmit={handleSubmit} className="space-y-3 pt-2">
-
             <Section title="Personal Details" />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Full Name <span className="text-red-500">*</span></Label>
-                <Input value={form.name} onChange={e => set("name", e.target.value)} placeholder="e.g. Emeka Nwosu" />
+                <Label>
+                  Full Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  value={form.name}
+                  onChange={(e) => set("name", e.target.value)}
+                  placeholder="e.g. Emeka Nwosu"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>
@@ -128,18 +142,26 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
                 <Input
                   type="email"
                   value={form.email}
-                  onChange={e => set("email", e.target.value)}
+                  onChange={(e) => set("email", e.target.value)}
                   placeholder="rider@example.com"
                   disabled={isEdit}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label>Phone</Label>
-                <Input value={form.phone} onChange={e => set("phone", e.target.value)} placeholder="08012345678" />
+                <Input
+                  value={form.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                  placeholder="08012345678"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Address</Label>
-                <Input value={form.address} onChange={e => set("address", e.target.value)} placeholder="Residential address" />
+                <Input
+                  value={form.address}
+                  onChange={(e) => set("address", e.target.value)}
+                  placeholder="Residential address"
+                />
               </div>
             </div>
 
@@ -147,19 +169,31 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Mode of Delivery</Label>
-                <Select value={form.modeOfDelivery} onValueChange={v => set("modeOfDelivery", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select mode" /></SelectTrigger>
+                <Select value={form.modeOfDelivery} onValueChange={(v) => set("modeOfDelivery", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select mode" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {DELIVERY_MODES.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    {DELIVERY_MODES.map((m) => (
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
                 <Label>Operating Area</Label>
-                <Select value={form.operatingArea} onValueChange={v => set("operatingArea", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
+                <Select value={form.operatingArea} onValueChange={(v) => set("operatingArea", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select area" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {AREAS.map(a => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                    {AREAS.map((a) => (
+                      <SelectItem key={a} value={a}>
+                        {a}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -169,15 +203,27 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>NIN</Label>
-                <Input value={form.nin} onChange={e => set("nin", e.target.value)} placeholder="NIN number" />
+                <Input
+                  value={form.nin}
+                  onChange={(e) => set("nin", e.target.value)}
+                  placeholder="NIN number"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Driver&apos;s License No.</Label>
-                <Input value={form.driversLicense} onChange={e => set("driversLicense", e.target.value)} placeholder="License number" />
+                <Input
+                  value={form.driversLicense}
+                  onChange={(e) => set("driversLicense", e.target.value)}
+                  placeholder="License number"
+                />
               </div>
               <div className="space-y-1.5 col-span-2">
                 <Label>Profile Picture URL</Label>
-                <Input value={form.profilePicture} onChange={e => set("profilePicture", e.target.value)} placeholder="https://…" />
+                <Input
+                  value={form.profilePicture}
+                  onChange={(e) => set("profilePicture", e.target.value)}
+                  placeholder="https://…"
+                />
               </div>
             </div>
 
@@ -185,15 +231,27 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Guarantor Name</Label>
-                <Input value={form.guarantorName} onChange={e => set("guarantorName", e.target.value)} placeholder="Full name" />
+                <Input
+                  value={form.guarantorName}
+                  onChange={(e) => set("guarantorName", e.target.value)}
+                  placeholder="Full name"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Guarantor Phone</Label>
-                <Input value={form.guarantorPhone} onChange={e => set("guarantorPhone", e.target.value)} placeholder="08012345678" />
+                <Input
+                  value={form.guarantorPhone}
+                  onChange={(e) => set("guarantorPhone", e.target.value)}
+                  placeholder="08012345678"
+                />
               </div>
               <div className="space-y-1.5 col-span-2">
                 <Label>Guarantor NIN</Label>
-                <Input value={form.guarantorNin} onChange={e => set("guarantorNin", e.target.value)} placeholder="Guarantor NIN" />
+                <Input
+                  value={form.guarantorNin}
+                  onChange={(e) => set("guarantorNin", e.target.value)}
+                  placeholder="Guarantor NIN"
+                />
               </div>
             </div>
 
@@ -201,27 +259,53 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Account Number</Label>
-                <Input value={form.bankAccountNumber} onChange={e => set("bankAccountNumber", e.target.value)} placeholder="0123456789" />
+                <Input
+                  value={form.bankAccountNumber}
+                  onChange={(e) => set("bankAccountNumber", e.target.value)}
+                  placeholder="0123456789"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Bank Name</Label>
-                <Input value={form.bankName} onChange={e => set("bankName", e.target.value)} placeholder="e.g. GTBank" />
+                <Input
+                  value={form.bankName}
+                  onChange={(e) => set("bankName", e.target.value)}
+                  placeholder="e.g. GTBank"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Account Name</Label>
-                <Input value={form.bankAccountName} onChange={e => set("bankAccountName", e.target.value)} placeholder="Name on account" />
+                <Input
+                  value={form.bankAccountName}
+                  onChange={(e) => set("bankAccountName", e.target.value)}
+                  placeholder="Name on account"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Bank Code</Label>
-                <Input value={form.bankCode} onChange={e => set("bankCode", e.target.value)} placeholder="058" />
+                <Input
+                  value={form.bankCode}
+                  onChange={(e) => set("bankCode", e.target.value)}
+                  placeholder="058"
+                />
               </div>
             </div>
 
             <div className="flex gap-2 pt-4">
-              <Button type="button" variant="outline" className="flex-1" onClick={onClose} disabled={saving}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={onClose}
+                disabled={saving}
+              >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1 bg-[#1a3f1c] hover:bg-[#1a3f1c]/90" disabled={saving}>
+              <Button
+                type="submit"
+                className="flex-1 bg-[#1a3f1c] hover:bg-[#1a3f1c]/90"
+                disabled={saving}
+              >
                 {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Rider"}
               </Button>
             </div>

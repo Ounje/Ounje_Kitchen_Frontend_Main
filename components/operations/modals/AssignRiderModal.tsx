@@ -7,31 +7,31 @@ import { toast } from "sonner";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Rider {
-  _id:    string;
-  user?:  { name?: string; phone?: string | number; avatar?: string };
+  _id: string;
+  user?: { name?: string; phone?: string | number; avatar?: string };
   firstName?: string;
-  lastName?:  string;
-  phone?:     string | number;
-  photo?:     string;
-  avatar?:    string;
-  ratings?:   { average?: number; count?: number };
+  lastName?: string;
+  phone?: string | number;
+  photo?: string;
+  avatar?: string;
+  ratings?: { average?: number; count?: number };
   averageRating?: number;
-  ratingCount?:   number;
+  ratingCount?: number;
   totalDeliveries?: number;
   operatingArea?: string[];
-  zone?:          string;
+  zone?: string;
   // RiderProfile status: "available" | "busy" | "offline" | "pending" | "deactivated"
-  status?:        string;
-  isActive?:      boolean;
-  isSuspended?:   boolean;
+  status?: string;
+  isActive?: boolean;
+  isSuspended?: boolean;
   modeOfDelivery?: string;
 }
 
 interface Props {
-  open:       boolean;
-  orderId:    string;
-  orderZone?: string;       // pre-fill zone filter from the order
-  onClose:    () => void;
+  open: boolean;
+  orderId: string;
+  orderZone?: string; // pre-fill zone filter from the order
+  onClose: () => void;
   onAssigned?: () => void;
 }
 
@@ -66,60 +66,91 @@ function riderZone(r: Rider): string {
 // Derive a clear availability label from status + isActive + isSuspended
 function riderAvailability(r: Rider): {
   label: string;
-  color: string;         // tailwind bg class
+  color: string; // tailwind bg class
   textColor: string;
-  canAssign: boolean;    // only truly available riders can be assigned
+  canAssign: boolean; // only truly available riders can be assigned
 } {
   if (r.isSuspended === true) {
-    return { label: "Suspended",    color: "bg-red-100",    textColor: "text-red-700",    canAssign: false };
+    return { label: "Suspended", color: "bg-red-100", textColor: "text-red-700", canAssign: false };
   }
   if (r.isActive === false) {
-    return { label: "Inactive",     color: "bg-gray-100",   textColor: "text-gray-500",   canAssign: false };
+    return {
+      label: "Inactive",
+      color: "bg-gray-100",
+      textColor: "text-gray-500",
+      canAssign: false,
+    };
   }
   const s = (r.status ?? "").toLowerCase();
   if (s === "available") {
-    return { label: "Available",    color: "bg-green-100",  textColor: "text-green-700",  canAssign: true  };
+    return {
+      label: "Available",
+      color: "bg-green-100",
+      textColor: "text-green-700",
+      canAssign: true,
+    };
   }
   if (s === "busy") {
-    return { label: "Delivering",   color: "bg-blue-100",   textColor: "text-blue-700",   canAssign: false };
+    return {
+      label: "Delivering",
+      color: "bg-blue-100",
+      textColor: "text-blue-700",
+      canAssign: false,
+    };
   }
   if (s === "offline") {
-    return { label: "Offline",      color: "bg-gray-100",   textColor: "text-gray-500",   canAssign: false };
+    return { label: "Offline", color: "bg-gray-100", textColor: "text-gray-500", canAssign: false };
   }
   if (s === "deactivated") {
-    return { label: "Deactivated",  color: "bg-red-100",    textColor: "text-red-700",    canAssign: false };
+    return {
+      label: "Deactivated",
+      color: "bg-red-100",
+      textColor: "text-red-700",
+      canAssign: false,
+    };
   }
   // "pending" or unknown — treat as available for assignment (new riders)
-  return   { label: "Available",    color: "bg-green-100",  textColor: "text-green-700",  canAssign: true  };
+  return {
+    label: "Available",
+    color: "bg-green-100",
+    textColor: "text-green-700",
+    canAssign: true,
+  };
 }
 
 function unwrapRiders(res: any): Rider[] {
   if (!res) return [];
-  if (Array.isArray(res.data))         return res.data;
+  if (Array.isArray(res.data)) return res.data;
   if (Array.isArray(res.data?.riders)) return res.data.riders;
-  if (Array.isArray(res.riders))       return res.riders;
-  if (Array.isArray(res))              return res;
+  if (Array.isArray(res.riders)) return res.riders;
+  if (Array.isArray(res)) return res;
   return [];
 }
 
 // ── Rider Card ────────────────────────────────────────────────────────────────
-function RiderCard({ rider, onAssign, assigning }: {
+function RiderCard({
+  rider,
+  onAssign,
+  assigning,
+}: {
   rider: Rider;
   onAssign: (id: string) => void;
   assigning: boolean;
 }) {
-  const name         = riderName(rider);
-  const phone        = riderPhone(rider);
-  const photo        = riderPhoto(rider);
-  const rating       = riderRating(rider);
-  const reviews      = riderRatingCount(rider);
-  const zone         = riderZone(rider);
+  const name = riderName(rider);
+  const phone = riderPhone(rider);
+  const photo = riderPhoto(rider);
+  const rating = riderRating(rider);
+  const reviews = riderRatingCount(rider);
+  const zone = riderZone(rider);
   const availability = riderAvailability(rider);
 
   return (
-    <div className={`flex items-center gap-4 bg-white rounded-xl p-4 shadow-sm border ${
-      availability.canAssign ? "border-green-100" : "border-gray-100 opacity-70"
-    }`}>
+    <div
+      className={`flex items-center gap-4 bg-white rounded-xl p-4 shadow-sm border ${
+        availability.canAssign ? "border-green-100" : "border-gray-100 opacity-70"
+      }`}
+    >
       {/* Avatar */}
       <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-green-200 bg-gray-100">
         {photo ? (
@@ -136,7 +167,9 @@ function RiderCard({ rider, onAssign, assigning }: {
         <div className="flex items-center gap-2 flex-wrap">
           <p className="font-bold text-gray-900 text-base truncate">{name}</p>
           {/* Availability badge */}
-          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${availability.color} ${availability.textColor}`}>
+          <span
+            className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${availability.color} ${availability.textColor}`}
+          >
             {availability.label}
           </span>
         </div>
@@ -165,12 +198,17 @@ function RiderCard({ rider, onAssign, assigning }: {
         <button
           onClick={() => availability.canAssign && onAssign(rider._id)}
           disabled={assigning || !availability.canAssign}
-          title={!availability.canAssign ? `Cannot assign — rider is ${availability.label}` : "Assign this rider"}
+          title={
+            !availability.canAssign
+              ? `Cannot assign — rider is ${availability.label}`
+              : "Assign this rider"
+          }
           className={`px-4 py-2.5 rounded-xl text-sm font-bold text-white
                      transition-opacity flex items-center gap-2
-                     ${availability.canAssign
-                       ? "hover:opacity-90 disabled:opacity-50"
-                       : "cursor-not-allowed opacity-40"
+                     ${
+                       availability.canAssign
+                         ? "hover:opacity-90 disabled:opacity-50"
+                         : "cursor-not-allowed opacity-40"
                      }`}
           style={{ backgroundColor: availability.canAssign ? "#1a3f1c" : "#6b7280" }}
         >
@@ -188,19 +226,18 @@ function RiderCard({ rider, onAssign, assigning }: {
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
 export default function AssignRiderModal({ open, orderId, orderZone, onClose, onAssigned }: Props) {
-  const [allRiders,        setAllRiders]        = useState<Rider[]>([]);
-  const [filtered,         setFiltered]         = useState<Rider[]>([]);
-  const [loading,          setLoading]          = useState(false);
-  const [assigning,        setAssigning]        = useState<string | null>(null);
-  const [zoneFilter,       setZoneFilter]       = useState("all");
+  const [allRiders, setAllRiders] = useState<Rider[]>([]);
+  const [filtered, setFiltered] = useState<Rider[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [assigning, setAssigning] = useState<string | null>(null);
+  const [zoneFilter, setZoneFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
 
   // Unique zones from all fetched riders
   const zones: string[] = Array.from(
     new Set(
-      allRiders.flatMap(r =>
-        Array.isArray(r.operatingArea) ? r.operatingArea
-        : r.zone ? [r.zone] : []
+      allRiders.flatMap((r) =>
+        Array.isArray(r.operatingArea) ? r.operatingArea : r.zone ? [r.zone] : []
       )
     )
   ).sort();
@@ -209,14 +246,15 @@ export default function AssignRiderModal({ open, orderId, orderZone, onClose, on
   const fetchRiders = useCallback(async () => {
     setLoading(true);
     try {
-      const res1: any  = await operationsService.getRiders({ page: 1, limit: 50 } as any);
-      const page1      = unwrapRiders(res1);
+      const res1: any = await operationsService.getRiders({ page: 1, limit: 50 } as any);
+      const page1 = unwrapRiders(res1);
       const totalPages = Math.min(res1?.pages ?? res1?.totalPages ?? 1, 4);
 
       let extra: Rider[] = [];
       if (totalPages > 1) {
         const promises = Array.from({ length: totalPages - 1 }, (_, i) =>
-          operationsService.getRiders({ page: i + 2, limit: 50 } as any)
+          operationsService
+            .getRiders({ page: i + 2, limit: 50 } as any)
             .then((r: any) => unwrapRiders(r))
             .catch(() => [] as Rider[])
         );
@@ -261,18 +299,20 @@ export default function AssignRiderModal({ open, orderId, orderZone, onClose, on
     let result = [...riders];
 
     if (zone !== "all") {
-      result = result.filter(r => {
+      result = result.filter((r) => {
         const rz = Array.isArray(r.operatingArea)
-          ? r.operatingArea.map(z => z.toLowerCase())
-          : r.zone ? [r.zone.toLowerCase()] : [];
-        return rz.some(z => z.toLowerCase().includes(zone.toLowerCase()));
+          ? r.operatingArea.map((z) => z.toLowerCase())
+          : r.zone
+            ? [r.zone.toLowerCase()]
+            : [];
+        return rz.some((z) => z.toLowerCase().includes(zone.toLowerCase()));
       });
     }
 
     if (avail === "available") {
-      result = result.filter(r => riderAvailability(r).canAssign);
+      result = result.filter((r) => riderAvailability(r).canAssign);
     } else if (avail === "unavailable") {
-      result = result.filter(r => !riderAvailability(r).canAssign);
+      result = result.filter((r) => !riderAvailability(r).canAssign);
     }
 
     // Sort: available first
@@ -304,14 +344,16 @@ export default function AssignRiderModal({ open, orderId, orderZone, onClose, on
 
   if (!open) return null;
 
-  const availableCount   = filtered.filter(r => riderAvailability(r).canAssign).length;
+  const availableCount = filtered.filter((r) => riderAvailability(r).canAssign).length;
   const unavailableCount = filtered.length - availableCount;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
         className="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col"
@@ -322,7 +364,10 @@ export default function AssignRiderModal({ open, orderId, orderZone, onClose, on
           <div className="flex-1" />
           <h2 className="text-xl font-bold text-gray-900 text-center flex-1">Assign a Rider</h2>
           <div className="flex-1 flex justify-end">
-            <button onClick={onClose} className="w-8 h-8 rounded-full border-2 border-gray-400 flex items-center justify-center hover:bg-gray-100 transition-colors">
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full border-2 border-gray-400 flex items-center justify-center hover:bg-gray-100 transition-colors"
+            >
               <X className="h-4 w-4 text-gray-600" />
             </button>
           </div>
@@ -335,11 +380,15 @@ export default function AssignRiderModal({ open, orderId, orderZone, onClose, on
             <label className="text-xs font-semibold text-gray-700">Zone</label>
             <select
               value={zoneFilter}
-              onChange={e => setZoneFilter(e.target.value)}
+              onChange={(e) => setZoneFilter(e.target.value)}
               className="h-9 rounded-lg border border-gray-300 bg-white text-sm px-3 focus:outline-none focus:ring-2 focus:ring-[#1a3f1c] min-w-[130px]"
             >
               <option value="all">All Zones</option>
-              {zones.map(z => <option key={z} value={z}>{z}</option>)}
+              {zones.map((z) => (
+                <option key={z} value={z}>
+                  {z}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -348,7 +397,7 @@ export default function AssignRiderModal({ open, orderId, orderZone, onClose, on
             <label className="text-xs font-semibold text-gray-700">Availability</label>
             <select
               value={availabilityFilter}
-              onChange={e => setAvailabilityFilter(e.target.value)}
+              onChange={(e) => setAvailabilityFilter(e.target.value)}
               className="h-9 rounded-lg border border-gray-300 bg-white text-sm px-3 focus:outline-none focus:ring-2 focus:ring-[#1a3f1c] min-w-[150px]"
             >
               <option value="all">All Riders</option>
@@ -406,7 +455,7 @@ export default function AssignRiderModal({ open, orderId, orderZone, onClose, on
               <p className="text-xs text-center">Try changing the zone or availability filter.</p>
             </div>
           ) : (
-            filtered.map(rider => (
+            filtered.map((rider) => (
               <RiderCard
                 key={rider._id}
                 rider={rider}

@@ -1,5 +1,5 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
 
 export const promoService = {
   async getAllPromos() {
@@ -39,19 +39,22 @@ export const promoService = {
     return await apiClient.put(ENDPOINTS.OPERATIONS.PROMOS + `/${id}/decline`, { reason });
   },
 
-  async updatePromo(id: string, data: Partial<{
-    name: string;
-    code: string;
-    type: string;
-    value: number;
-    usageLimit: number;
-    maxUsesPerUser: number;
-    minOrderValue: number;
-    eventName?: string;
-    validUntil?: string;
-    isActive: boolean;
-    applicableTo: string;
-  }>) {
+  async updatePromo(
+    id: string,
+    data: Partial<{
+      name: string;
+      code: string;
+      type: string;
+      value: number;
+      usageLimit: number;
+      maxUsesPerUser: number;
+      minOrderValue: number;
+      eventName?: string;
+      validUntil?: string;
+      isActive: boolean;
+      applicableTo: string;
+    }>
+  ) {
     return await apiClient.put(ENDPOINTS.OPERATIONS.PROMOS + `/${id}`, data);
   },
 

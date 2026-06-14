@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 interface VendorFiltersProps {
   onSearch: (filters: FilterValues) => void;
@@ -15,9 +15,9 @@ export interface FilterValues {
 
 export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
   const [filters, setFilters] = useState<FilterValues>({
-    name: '',
-    accountStatus: '',
-    businessStatus: '',
+    name: "",
+    accountStatus: "",
+    businessStatus: "",
   });
 
   const handleInputChange = (field: keyof FilterValues, value: string) => {
@@ -27,27 +27,26 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
   const handleSearch = () => onSearch(filters);
 
   const handleReset = () => {
-    setFilters({ name: '', accountStatus: '', businessStatus: '' });
+    setFilters({ name: "", accountStatus: "", businessStatus: "" });
     onReset();
   };
 
   const inputCls =
-    'w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]';
-  const labelCls = 'block text-sm font-medium mb-1.5';
+    "w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]";
+  const labelCls = "block text-sm font-medium mb-1.5";
 
   return (
     <div className="glass-card p-4 sm:p-6 mb-6 w-full">
       {/* 1 col → 2 col → 4 col */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
         {/* Name */}
         <div>
           <label className={"labelCls text-[#1a3f1c]"}>Name</label>
           <input
             type="text"
             value={filters.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onChange={(e) => handleInputChange("name", e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className={inputCls}
             placeholder="Enter name"
           />
@@ -58,7 +57,7 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
           <label className={"labelCls text-[#1a3f1c]"}>Account Status</label>
           <select
             value={filters.accountStatus}
-            onChange={(e) => handleInputChange('accountStatus', e.target.value)}
+            onChange={(e) => handleInputChange("accountStatus", e.target.value)}
             className={inputCls}
           >
             <option value="">Select Status</option>
@@ -72,7 +71,7 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
           <label className={"labelCls text-[#1a3f1c]"}>Business Status</label>
           <select
             value={filters.businessStatus}
-            onChange={(e) => handleInputChange('businessStatus', e.target.value)}
+            onChange={(e) => handleInputChange("businessStatus", e.target.value)}
             className={inputCls}
           >
             <option value="">Select Status</option>
@@ -97,7 +96,6 @@ export function VendorFilters({ onSearch, onReset }: VendorFiltersProps) {
             Reset
           </button>
         </div>
-
       </div>
     </div>
   );

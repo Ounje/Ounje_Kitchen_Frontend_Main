@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { Users, Store, Bike } from "lucide-react";
 import CustomersPage from "@/app/operations/customers/page";
-import VendorsPage   from "@/app/operations/vendors/page";
-import RidersPage    from "@/app/operations/riders/page";
+import VendorsPage from "@/app/operations/vendors/page";
+import RidersPage from "@/app/operations/riders/page";
 
 type Tab = "customers" | "vendors" | "riders";
 
 const TABS: { key: Tab; label: string; Icon: React.ElementType }[] = [
   { key: "customers", label: "Customers", Icon: Users },
-  { key: "vendors",   label: "Vendors",   Icon: Store },
-  { key: "riders",    label: "Riders",    Icon: Bike  },
+  { key: "vendors", label: "Vendors", Icon: Store },
+  { key: "riders", label: "Riders", Icon: Bike },
 ];
 
 export default function UsersPage() {
@@ -40,8 +40,8 @@ export default function UsersPage() {
 
       {/* Tab content — each existing page renders in full */}
       {tab === "customers" && <CustomersPage />}
-      {tab === "vendors"   && <VendorsPage />}
-      {tab === "riders"    && <RidersPage />}
+      {tab === "vendors" && <VendorsPage />}
+      {tab === "riders" && <RidersPage />}
     </div>
   );
 }

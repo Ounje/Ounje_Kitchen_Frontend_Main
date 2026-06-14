@@ -1,86 +1,85 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
-import { notificationService } from './notification.service';
-import type { PaginationParams } from '@/types';
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
+import { notificationService } from "./notification.service";
+import type { PaginationParams } from "@/types";
 
 // ── Reviews types ─────────────────────────────────────────────────────────────
-export type ReviewType   = 'vendor' | 'rider' | 'all';
-export type ReviewFilter = 'mixed' | 'good' | 'bad';
+export type ReviewType = "vendor" | "rider" | "all";
+export type ReviewFilter = "mixed" | "good" | "bad";
 
 export interface ReviewStats {
-  totalReviews:  number;
-  goodRating:    number;
+  totalReviews: number;
+  goodRating: number;
   averageRating: number;
-  badRating:     number;
+  badRating: number;
 }
 
 export interface ReviewItem {
-  id:            string;
-  reviewerName:  string;
+  id: string;
+  reviewerName: string;
   reviewerPhoto: string;
-  starRating:    number;
-  date:          string;
-  text:          string;
+  starRating: number;
+  date: string;
+  text: string;
 }
 
 export interface VendorReviewRow {
-  id:           string;
-  name:         string;
-  photo:        string;
-  address:      string;
+  id: string;
+  name: string;
+  photo: string;
+  address: string;
   totalRatings: number;
-  starRating:   number;
+  starRating: number;
 }
 
 export interface RiderReviewRow {
-  id:           string;
-  name:         string;
-  photo:        string;
-  zone:         string;
+  id: string;
+  name: string;
+  photo: string;
+  zone: string;
   totalRatings: number;
-  starRating:   number;
+  starRating: number;
 }
 
 export interface AllReviewRow {
-  id:           string;
-  entityType:   'vendor' | 'rider';
-  name:         string;
-  photo:        string;
-  location:     string;
+  id: string;
+  entityType: "vendor" | "rider";
+  name: string;
+  photo: string;
+  location: string;
   totalRatings: number;
-  starRating:   number;
+  starRating: number;
 }
 
 export interface VendorReviewDetail {
-  id:          string;
-  name:        string;
-  photo:       string;
+  id: string;
+  name: string;
+  photo: string;
   phoneNumber: string;
-  rating:      number;
+  rating: number;
   ratingCount: number;
-  address:     string;
-  reviews:     ReviewItem[];
+  address: string;
+  reviews: ReviewItem[];
 }
 
 export interface RiderReviewDetail {
-  id:          string;
-  name:        string;
-  photo:       string;
+  id: string;
+  name: string;
+  photo: string;
   phoneNumber: string;
-  rating:      number;
+  rating: number;
   ratingCount: number;
-  zone:        string;
-  reviews:     ReviewItem[];
+  zone: string;
+  reviews: ReviewItem[];
 }
 
 export interface ReviewListParams extends PaginationParams {
-  ratingCategory?: '1' | '2' | '3' | '4' | '5';
-  filter?:         ReviewFilter;
+  ratingCategory?: "1" | "2" | "3" | "4" | "5";
+  filter?: ReviewFilter;
 }
 
 // ── Service ───────────────────────────────────────────────────────────────────
 export const operationsService = {
-
   // ==================== DASHBOARD ====================
   async getDashboard() {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.DASHBOARD);
@@ -88,15 +87,17 @@ export const operationsService = {
   },
 
   // ==================== ORDERS ====================
-  async getOrders(params?: PaginationParams & {
-    name?:      string;
-    vendor?:    string;
-    zone?:      string;
-    orderId?:   string;
-    status?:    string;
-    startDate?: string;
-    endDate?:   string;
-  }) {
+  async getOrders(
+    params?: PaginationParams & {
+      name?: string;
+      vendor?: string;
+      zone?: string;
+      orderId?: string;
+      status?: string;
+      startDate?: string;
+      endDate?: string;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.ORDERS, { params });
     return res;
   },
@@ -137,7 +138,14 @@ export const operationsService = {
     return res;
   },
 
-  async getTransactions(params?: { page?: number; limit?: number; status?: string; startDate?: string; endDate?: string; search?: string }) {
+  async getTransactions(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    search?: string;
+  }) {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTIONS, { params });
     return res;
   },
@@ -210,12 +218,14 @@ export const operationsService = {
   },
 
   // ==================== RIDERS ====================
-  async getRiders(params?: PaginationParams & {
-    name?:        string;
-    zone?:        string;
-    isActive?:    string;
-    isSuspended?: string;
-  }) {
+  async getRiders(
+    params?: PaginationParams & {
+      name?: string;
+      zone?: string;
+      isActive?: string;
+      isSuspended?: string;
+    }
+  ) {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.RIDERS, { params });
     return res;
   },

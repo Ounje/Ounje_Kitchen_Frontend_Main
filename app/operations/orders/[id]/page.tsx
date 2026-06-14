@@ -22,11 +22,12 @@ function fmt(n: any): string {
 
 function resolveName(obj: any, fallback = "—"): string {
   if (!obj) return fallback;
-  if (typeof obj.resolvedName === "string" && obj.resolvedName.trim()) return obj.resolvedName.trim();
+  if (typeof obj.resolvedName === "string" && obj.resolvedName.trim())
+    return obj.resolvedName.trim();
   if (typeof obj.name === "string" && obj.name.trim()) return obj.name.trim();
   const first = (obj.firstName ?? "").trim();
-  const last  = (obj.lastName  ?? "").trim();
-  const full  = `${first} ${last}`.trim();
+  const last = (obj.lastName ?? "").trim();
+  const full = `${first} ${last}`.trim();
   if (full) return full;
   if (obj.user) return resolveName(obj.user, fallback);
   return fallback;
@@ -44,11 +45,22 @@ function resolveAddress(val: any): string {
 
 function resolvePhoto(obj: any): string {
   if (!obj) return "";
-  return obj.photo ?? obj.avatar ?? obj.profileImage ?? obj.img ?? obj.image ?? obj.profilePhoto ?? obj.coverImage ?? obj.logo ?? "";
+  return (
+    obj.photo ??
+    obj.avatar ??
+    obj.profileImage ??
+    obj.img ??
+    obj.image ??
+    obj.profilePhoto ??
+    obj.coverImage ??
+    obj.logo ??
+    ""
+  );
 }
 
 function resolveOrderImage(order: any): string {
-  const direct = order.image ?? order.foodImage ?? order.photo ?? order.thumbnail ?? order.coverImage ?? "";
+  const direct =
+    order.image ?? order.foodImage ?? order.photo ?? order.thumbnail ?? order.coverImage ?? "";
   if (direct) return direct;
   const items = order.items ?? [];
   for (const item of items) {
@@ -60,20 +72,25 @@ function resolveOrderImage(order: any): string {
 
 function statusBarColor(status: string): string {
   const s = (status ?? "").toLowerCase();
-  if (["delivered", "completed"].includes(s))            return "bg-green-700 text-white";
+  if (["delivered", "completed"].includes(s)) return "bg-green-700 text-white";
   if (["in_transit", "picked_up", "riding"].includes(s)) return "bg-blue-700 text-white";
-  if (["cancelled", "declined"].includes(s))             return "bg-red-700 text-white";
+  if (["cancelled", "declined"].includes(s)) return "bg-red-700 text-white";
   return "bg-[#1a3f1c] text-white";
 }
 
 function statusLabel(status: string): string {
   const map: Record<string, string> = {
-    in_transit: "RIDING",     picked_up:  "RIDING",
-    delivered:  "SUCCESSFUL", completed:  "SUCCESSFUL",
-    cancelled:  "CANCELLED",  declined:   "CANCELLED",
-    riding:     "RIDING",     assigned:   "ASSIGNED",
-    confirming: "CONFIRMING", pending:    "PENDING",
-    preparing:  "PREPARING",
+    in_transit: "RIDING",
+    picked_up: "RIDING",
+    delivered: "SUCCESSFUL",
+    completed: "SUCCESSFUL",
+    cancelled: "CANCELLED",
+    declined: "CANCELLED",
+    riding: "RIDING",
+    assigned: "ASSIGNED",
+    confirming: "CONFIRMING",
+    pending: "PENDING",
+    preparing: "PREPARING",
   };
   return map[(status ?? "").toLowerCase()] ?? (status ?? "PENDING").toUpperCase();
 }
@@ -81,11 +98,15 @@ function statusLabel(status: string): string {
 function paymentBadge(status: string) {
   const s = (status ?? "").toLowerCase();
   const color =
-    s === "paid"     ? "bg-green-100 text-green-700 border-green-300" :
-    s === "refunded" ? "bg-blue-100 text-blue-700 border-blue-300"   :
-    "bg-red-100 text-red-600 border-red-300";
+    s === "paid"
+      ? "bg-green-100 text-green-700 border-green-300"
+      : s === "refunded"
+        ? "bg-blue-100 text-blue-700 border-blue-300"
+        : "bg-red-100 text-red-600 border-red-300";
   return (
-    <span className={`inline-block text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border ${color}`}>
+    <span
+      className={`inline-block text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border ${color}`}
+    >
       {status ?? "unpaid"}
     </span>
   );
@@ -96,10 +117,10 @@ function formatOrderTime(dateStr: string): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "—";
   return d.toLocaleString("en-NG", {
-    day:    "numeric",
-    month:  "short",
-    year:   "numeric",
-    hour:   "2-digit",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
     minute: "2-digit",
     hour12: true,
   });
@@ -107,13 +128,15 @@ function formatOrderTime(dateStr: string): string {
 
 function formatSubStatus(sub: string): string {
   if (!sub) return "—";
-  return sub
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return sub.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // ── PartyCard ─────────────────────────────────────────────────────────────────
-function PartyCard({ photo, name, rows }: {
+function PartyCard({
+  photo,
+  name,
+  rows,
+}: {
   photo?: string;
   name: string;
   rows: { icon: React.ReactNode; text: string }[];
@@ -122,7 +145,11 @@ function PartyCard({ photo, name, rows }: {
     <div className="flex gap-3">
       <div className="flex-shrink-0">
         {photo ? (
-          <img src={photo} alt={name} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-gray-200" />
+          <img
+            src={photo}
+            alt={name}
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-gray-200"
+          />
         ) : (
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#98ef9b] flex items-center justify-center text-[#1a3f1c] font-bold text-xl flex-shrink-0">
             {(name ?? "?").charAt(0).toUpperCase()}
@@ -137,7 +164,7 @@ function PartyCard({ photo, name, rows }: {
               <span className="flex-shrink-0 mt-0.5">{row.icon}</span>
               <span className="break-words">{row.text}</span>
             </div>
-          ) : null,
+          ) : null
         )}
       </div>
     </div>
@@ -145,7 +172,14 @@ function PartyCard({ photo, name, rows }: {
 }
 
 // ── Map builder ───────────────────────────────────────────────────────────────
-function buildMap(vLat: number, vLng: number, vAddr: string, cLat: number, cLng: number, cAddr: string): string {
+function buildMap(
+  vLat: number,
+  vLng: number,
+  vAddr: string,
+  cLat: number,
+  cLng: number,
+  cAddr: string
+): string {
   const mid = [(vLat + cLat) / 2, (vLng + cLng) / 2];
   const esc = (s: string) => s.replace(/'/g, "\\'");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/>
@@ -173,30 +207,38 @@ function Skeleton() {
         <div className="flex gap-4">
           <div className="w-32 h-28 bg-gray-200 rounded-xl flex-shrink-0" />
           <div className="space-y-3 flex-1">
-            {[1,2,3,4,5].map(i => <div key={i} className="h-4 bg-gray-200 rounded w-1/2" />)}
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-4 bg-gray-200 rounded w-1/2" />
+            ))}
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {[1,2,3].map(i => <div key={i} className="h-11 bg-gray-200 rounded-lg" />)}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-11 bg-gray-200 rounded-lg" />
+          ))}
         </div>
         <div className="h-8 bg-gray-200 rounded-lg" />
-        {[1,2,3,4,5].map(i => <div key={i} className="h-5 bg-gray-200 rounded" />)}
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-5 bg-gray-200 rounded" />
+        ))}
       </div>
     </div>
   );
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
-interface PageProps { params: Promise<{ id: string }>; }
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
 export default function OrderDetailsPage({ params }: PageProps) {
   const { shouldRender, Reloading } = useRouteGuard({ returnRenderFlag: true });
   const router = useRouter();
   const { id } = use(params);
 
-  const [order,      setOrder]      = useState<any>(null);
-  const [loading,    setLoading]    = useState(true);
-  const [tab,        setTab]        = useState<TabType>("content");
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<TabType>("content");
   const [assignOpen, setAssignOpen] = useState(false);
 
   const fetchOrder = useCallback(async () => {
@@ -212,7 +254,9 @@ export default function OrderDetailsPage({ params }: PageProps) {
     }
   }, [shouldRender, id]);
 
-  useEffect(() => { fetchOrder(); }, [fetchOrder]);
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
   const handleRefreshStatus = useCallback(async () => {
     toast.info("Refreshing order status…");
@@ -220,15 +264,14 @@ export default function OrderDetailsPage({ params }: PageProps) {
   }, [fetchOrder]);
 
   const [remindingVendor, setRemindingVendor] = useState(false);
-  const [remindingRider,  setRemindingRider]  = useState(false);
+  const [remindingRider, setRemindingRider] = useState(false);
 
   const handleContactVendor = useCallback(() => {
-    const phone = (
-      order?.vendor?.phone ??
-      order?.vendor?.phoneNumber ??
-      ""
-    ).toString();
-    if (!phone) { toast.error("No vendor phone number available"); return; }
+    const phone = (order?.vendor?.phone ?? order?.vendor?.phoneNumber ?? "").toString();
+    if (!phone) {
+      toast.error("No vendor phone number available");
+      return;
+    }
     window.open(`tel:${phone}`);
   }, [order]);
 
@@ -240,7 +283,10 @@ export default function OrderDetailsPage({ params }: PageProps) {
       order?.rider?.phoneNumber ??
       ""
     ).toString();
-    if (!phone) { toast.error("No rider phone number available"); return; }
+    if (!phone) {
+      toast.error("No rider phone number available");
+      return;
+    }
     window.open(`tel:${phone}`);
   }, [order]);
 
@@ -290,7 +336,10 @@ export default function OrderDetailsPage({ params }: PageProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-gray-500">
         <p className="text-xl font-medium">Order not found</p>
-        <Button onClick={() => router.push("/operations/orders")} className="bg-[#1a3f1c] text-white">
+        <Button
+          onClick={() => router.push("/operations/orders")}
+          className="bg-[#1a3f1c] text-white"
+        >
           Back to Orders
         </Button>
       </div>
@@ -298,77 +347,95 @@ export default function OrderDetailsPage({ params }: PageProps) {
   }
 
   // ── Order meta ──────────────────────────────────────────────────────────────
-  const status        = order.status    ?? "pending";
-  const subStatus     = order.subStatus ?? "";
-  const orderId       = order.orderNumber ?? order._id ?? id;
-  const orderType     = order.orderType ?? order.type ?? order.category ?? order.buildType ?? "Standard";
-  const orderImage    = resolveOrderImage(order);
+  const status = order.status ?? "pending";
+  const subStatus = order.subStatus ?? "";
+  const orderId = order.orderNumber ?? order._id ?? id;
+  const orderType =
+    order.orderType ?? order.type ?? order.category ?? order.buildType ?? "Standard";
+  const orderImage = resolveOrderImage(order);
   const paymentStatus = order.paymentStatus ?? "unpaid";
-  const orderTime     = order.createdAt ?? order.placedAt ?? "";
-  const zone          = order.zone ?? "—";
+  const orderTime = order.createdAt ?? order.placedAt ?? "";
+  const zone = order.zone ?? "—";
 
   // ── Items ───────────────────────────────────────────────────────────────────
   const items: any[] = order.items ?? [];
 
   // ── Cost breakdown ──────────────────────────────────────────────────────────
-  const mealCost    = order.calculatedMealCost ?? items.reduce((s: number, item: any) => s + (item.quantity ?? 1) * (item.price ?? 0), 0);
+  const mealCost =
+    order.calculatedMealCost ??
+    items.reduce((s: number, item: any) => s + (item.quantity ?? 1) * (item.price ?? 0), 0);
   const deliveryFee = order.calculatedDelivery ?? order.deliveryFee ?? 0;
-  const serviceFee  = order.calculatedService  ?? order.serviceFee  ?? 0;
-  const totalFee    = order.calculatedTotal    ?? order.totalPrice  ?? order.total ?? null;
+  const serviceFee = order.calculatedService ?? order.serviceFee ?? 0;
+  const totalFee = order.calculatedTotal ?? order.totalPrice ?? order.total ?? null;
 
   // ── Customer ────────────────────────────────────────────────────────────────
-  const customer        = order.customer ?? {};
-  const customerName    = resolveName(customer, "Unknown");
-  const customerPhone   = formatNigerianPhone(customer.phone ?? customer.phoneNumber ?? customer.user?.phone ?? customer.user?.phoneNumber ?? "");
-  const customerEmail   = customer.email ?? customer.user?.email ?? "";
+  const customer = order.customer ?? {};
+  const customerName = resolveName(customer, "Unknown");
+  const customerPhone = formatNigerianPhone(
+    customer.phone ??
+      customer.phoneNumber ??
+      customer.user?.phone ??
+      customer.user?.phoneNumber ??
+      ""
+  );
+  const customerEmail = customer.email ?? customer.user?.email ?? "";
   const customerAddress = resolveAddress(
-    customer.primaryAddress ?? customer.address ?? customer.user?.address ??
-    (customer.savedAddresses?.[0]?.address) ?? order.deliveryAddress ?? ""
+    customer.primaryAddress ??
+      customer.address ??
+      customer.user?.address ??
+      customer.savedAddresses?.[0]?.address ??
+      order.deliveryAddress ??
+      ""
   );
   const customerPhoto = resolvePhoto(customer) || resolvePhoto(customer.user);
 
   // ── Vendor ──────────────────────────────────────────────────────────────────
-  const vendor        = order.vendor ?? {};
-  const vendorName    = vendor.storeName ?? vendor.businessName ?? vendor.name ?? "—";
-  const vendorPhone   = formatNigerianPhone(vendor.phone ?? vendor.phoneNumber ?? "");
+  const vendor = order.vendor ?? {};
+  const vendorName = vendor.storeName ?? vendor.businessName ?? vendor.name ?? "—";
+  const vendorPhone = formatNigerianPhone(vendor.phone ?? vendor.phoneNumber ?? "");
   const vendorAddress = resolveAddress(vendor.address ?? "");
-  const vendorRating  = vendor.rating      ?? vendor.averageRating ?? 0;
-  const vendorCount   = vendor.ratingCount ?? vendor.totalRatings  ?? 0;
-  const vendorPhoto   = resolvePhoto(vendor);
+  const vendorRating = vendor.rating ?? vendor.averageRating ?? 0;
+  const vendorCount = vendor.ratingCount ?? vendor.totalRatings ?? 0;
+  const vendorPhoto = resolvePhoto(vendor);
 
   // ── Rider ───────────────────────────────────────────────────────────────────
-  const hasRider     = !!order.rider;
-  const riderObj     = order.rider ?? {};
-  const riderName    = hasRider ? resolveName(riderObj.user ?? riderObj, "Rider") : "Not Assigned";
-  const riderPhone   = formatNigerianPhone(riderObj.user?.phone ?? riderObj.user?.phoneNumber ?? riderObj.phone ?? riderObj.phoneNumber ?? "");
-  const riderRating  = riderObj.ratings?.average ?? riderObj.averageRating ?? riderObj.rating ?? 0;
-  const riderCount   = riderObj.ratings?.count   ?? riderObj.ratingCount   ?? 0;
-  const riderZone    = (() => {
+  const hasRider = !!order.rider;
+  const riderObj = order.rider ?? {};
+  const riderName = hasRider ? resolveName(riderObj.user ?? riderObj, "Rider") : "Not Assigned";
+  const riderPhone = formatNigerianPhone(
+    riderObj.user?.phone ??
+      riderObj.user?.phoneNumber ??
+      riderObj.phone ??
+      riderObj.phoneNumber ??
+      ""
+  );
+  const riderRating = riderObj.ratings?.average ?? riderObj.averageRating ?? riderObj.rating ?? 0;
+  const riderCount = riderObj.ratings?.count ?? riderObj.ratingCount ?? 0;
+  const riderZone = (() => {
     const z = riderObj.operatingArea ?? riderObj.zone ?? "";
     return Array.isArray(z) ? z.join(", ") : z;
   })();
   const riderVehicle = riderObj.modeOfDelivery ?? riderObj.vehicleType ?? "";
-  const riderPhoto   = resolvePhoto(riderObj) || resolvePhoto(riderObj.user);
+  const riderPhoto = resolvePhoto(riderObj) || resolvePhoto(riderObj.user);
 
   // ── Map coordinates ─────────────────────────────────────────────────────────
-  const vendorLat = vendor.latitude  ?? 6.5244;
+  const vendorLat = vendor.latitude ?? 6.5244;
   const vendorLng = vendor.longitude ?? 3.3792;
-  const custLat   = order.deliveryLatitude  ?? customer.latitude  ?? 6.5144;
-  const custLng   = order.deliveryLongitude ?? customer.longitude ?? 3.3692;
-  const mapHtml   = buildMap(vendorLat, vendorLng, vendorAddress, custLat, custLng, customerAddress);
+  const custLat = order.deliveryLatitude ?? customer.latitude ?? 6.5144;
+  const custLng = order.deliveryLongitude ?? customer.longitude ?? 3.3692;
+  const mapHtml = buildMap(vendorLat, vendorLng, vendorAddress, custLat, custLng, customerAddress);
 
   // ── Tabs ────────────────────────────────────────────────────────────────────
   const tabs = [
-    { id: "journey" as TabType, label: "Order Journey"          },
-    { id: "content" as TabType, label: "Order Content"          },
-    { id: "party"   as TabType, label: "Involved Party Details" },
-    { id: "map"     as TabType, label: "Map Feature"            },
+    { id: "journey" as TabType, label: "Order Journey" },
+    { id: "content" as TabType, label: "Order Content" },
+    { id: "party" as TabType, label: "Involved Party Details" },
+    { id: "map" as TabType, label: "Map Feature" },
   ];
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4 sm:space-y-5 w-full mx-auto">
-
       <Button
         onClick={() => router.push("/operations/orders")}
         variant="ghost"
@@ -391,9 +458,17 @@ export default function OrderDetailsPage({ params }: PageProps) {
           )}
         </div>
         <div className="space-y-1.5 text-sm sm:text-base flex-1 min-w-0">
-          <p><span className="font-bold">Order ID:</span> <span className="text-gray-700">{orderId}</span></p>
-          <p><span className="font-bold">Order Type:</span> <span className="text-gray-700">{orderType}</span></p>
-          <p><span className="font-bold">Zone:</span> <span className="text-gray-700">{zone}</span></p>
+          <p>
+            <span className="font-bold">Order ID:</span>{" "}
+            <span className="text-gray-700">{orderId}</span>
+          </p>
+          <p>
+            <span className="font-bold">Order Type:</span>{" "}
+            <span className="text-gray-700">{orderType}</span>
+          </p>
+          <p>
+            <span className="font-bold">Zone:</span> <span className="text-gray-700">{zone}</span>
+          </p>
           <p className="flex flex-wrap items-center gap-2">
             <span className="font-bold">Payment:</span>
             {paymentBadge(paymentStatus)}
@@ -411,7 +486,7 @@ export default function OrderDetailsPage({ params }: PageProps) {
 
       {/* ── Tabs ── */}
       <div className="grid grid-cols-4 gap-2 sm:gap-3">
-        {tabs.map(t => (
+        {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
@@ -427,13 +502,14 @@ export default function OrderDetailsPage({ params }: PageProps) {
       </div>
 
       {/* ── Status bar ── */}
-      <div className={`text-center py-2.5 rounded-xl text-sm font-bold tracking-widest ${statusBarColor(status)}`}>
+      <div
+        className={`text-center py-2.5 rounded-xl text-sm font-bold tracking-widest ${statusBarColor(status)}`}
+      >
         {statusLabel(status)}
       </div>
 
       {/* ── Tab content ── */}
       <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 min-h-[320px]">
-
         {/* ORDER CONTENT */}
         {tab === "content" && (
           <div>
@@ -451,12 +527,12 @@ export default function OrderDetailsPage({ params }: PageProps) {
                   </thead>
                   <tbody>
                     {items.map((item: any, i: number) => {
-                      const qty        = item.quantity ?? 1;
-                      const price      = item.price    ?? 0;
-                      const total      = qty * price;
-                      const name       = item.displayName ?? item.itemType ?? "Item";
-                      const unit       = item.unit ?? item.item?.unit ?? "";
-                      const itemLabel  = `${qty}x ${name}`;
+                      const qty = item.quantity ?? 1;
+                      const price = item.price ?? 0;
+                      const total = qty * price;
+                      const name = item.displayName ?? item.itemType ?? "Item";
+                      const unit = item.unit ?? item.item?.unit ?? "";
+                      const itemLabel = `${qty}x ${name}`;
                       const priceLabel = unit ? `${fmt(price)}/${unit}` : fmt(price);
                       return (
                         <tr key={i} className="border-b border-gray-100">
@@ -510,22 +586,33 @@ export default function OrderDetailsPage({ params }: PageProps) {
         {/* INVOLVED PARTY DETAILS */}
         {tab === "party" && (
           <>
-            <div className={`grid gap-6 ${hasRider ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"}`}>
+            <div
+              className={`grid gap-6 ${hasRider ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2"}`}
+            >
               <PartyCard
                 photo={customerPhoto}
                 name={customerName}
                 rows={[
-                  { icon: <Phone  className="h-3.5 w-3.5" />,                text: customerPhone   },
-                  { icon: <Mail   className="h-3.5 w-3.5" />,                text: customerEmail   },
-                  { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />, text: customerAddress },
+                  { icon: <Phone className="h-3.5 w-3.5" />, text: customerPhone },
+                  { icon: <Mail className="h-3.5 w-3.5" />, text: customerEmail },
+                  {
+                    icon: <MapPin className="h-3.5 w-3.5 text-green-600" />,
+                    text: customerAddress,
+                  },
                 ]}
               />
               <PartyCard
                 photo={vendorPhoto}
                 name={vendorName}
                 rows={[
-                  { icon: <Star className="h-3.5 w-3.5 fill-[#FFCA3A] stroke-[#FFCA3A]" />, text: vendorRating > 0 ? `Rating: ${Number(vendorRating).toFixed(1)}${vendorCount > 0 ? ` (${vendorCount})` : ""}` : "" },
-                  { icon: <Phone  className="h-3.5 w-3.5" />,                text: vendorPhone   },
+                  {
+                    icon: <Star className="h-3.5 w-3.5 fill-[#FFCA3A] stroke-[#FFCA3A]" />,
+                    text:
+                      vendorRating > 0
+                        ? `Rating: ${Number(vendorRating).toFixed(1)}${vendorCount > 0 ? ` (${vendorCount})` : ""}`
+                        : "",
+                  },
+                  { icon: <Phone className="h-3.5 w-3.5" />, text: vendorPhone },
                   { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />, text: vendorAddress },
                 ]}
               />
@@ -534,10 +621,21 @@ export default function OrderDetailsPage({ params }: PageProps) {
                   photo={riderPhoto}
                   name={riderName}
                   rows={[
-                    { icon: <Star className="h-3.5 w-3.5 fill-[#FFCA3A] stroke-[#FFCA3A]" />, text: riderRating > 0 ? `Rating: ${Number(riderRating).toFixed(1)}${riderCount > 0 ? ` (${riderCount})` : ""}` : "" },
-                    { icon: <Phone  className="h-3.5 w-3.5" />,              text: riderPhone   },
-                    { icon: <span className="text-xs">🚗</span>,             text: riderVehicle ? riderVehicle.charAt(0).toUpperCase() + riderVehicle.slice(1) : "" },
-                    { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />, text: riderZone  },
+                    {
+                      icon: <Star className="h-3.5 w-3.5 fill-[#FFCA3A] stroke-[#FFCA3A]" />,
+                      text:
+                        riderRating > 0
+                          ? `Rating: ${Number(riderRating).toFixed(1)}${riderCount > 0 ? ` (${riderCount})` : ""}`
+                          : "",
+                    },
+                    { icon: <Phone className="h-3.5 w-3.5" />, text: riderPhone },
+                    {
+                      icon: <span className="text-xs">🚗</span>,
+                      text: riderVehicle
+                        ? riderVehicle.charAt(0).toUpperCase() + riderVehicle.slice(1)
+                        : "",
+                    },
+                    { icon: <MapPin className="h-3.5 w-3.5 text-green-600" />, text: riderZone },
                   ]}
                 />
               )}
@@ -604,7 +702,9 @@ export default function OrderDetailsPage({ params }: PageProps) {
               </div>
 
               <div className="p-6 rounded-2xl bg-primary dark:bg-surface border-transparent dark:border-border text-primary-foreground dark:text-foreground shadow-lg space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-widest text-[#98ef9b] dark:text-primary">Quick Actions</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-[#98ef9b] dark:text-primary">
+                  Quick Actions
+                </h3>
                 <p className="text-[10px] text-primary-foreground/60 dark:text-muted-foreground font-medium leading-relaxed">
                   These actions execute strictly contextually based on the live order state.
                 </p>
@@ -639,10 +739,12 @@ export default function OrderDetailsPage({ params }: PageProps) {
                     >
                       {remindingVendor ? "Sending…" : "Remind Vendor"}
                     </Button>
-                    {(order?.vendorReminderCount > 0) && (
+                    {order?.vendorReminderCount > 0 && (
                       <p className="text-[9px] text-yellow-300/60 text-center leading-tight">
                         ×{order.vendorReminderCount} sent
-                        {order.lastVendorReminderAt ? ` · ${new Date(order.lastVendorReminderAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit", hour12: true })}` : ""}
+                        {order.lastVendorReminderAt
+                          ? ` · ${new Date(order.lastVendorReminderAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit", hour12: true })}`
+                          : ""}
                       </p>
                     )}
                   </div>
@@ -655,10 +757,12 @@ export default function OrderDetailsPage({ params }: PageProps) {
                     >
                       {remindingRider ? "Sending…" : "Remind Rider"}
                     </Button>
-                    {(order?.riderReminderCount > 0) && (
+                    {order?.riderReminderCount > 0 && (
                       <p className="text-[9px] text-yellow-300/60 text-center leading-tight">
                         ×{order.riderReminderCount} sent
-                        {order.lastRiderReminderAt ? ` · ${new Date(order.lastRiderReminderAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit", hour12: true })}` : ""}
+                        {order.lastRiderReminderAt
+                          ? ` · ${new Date(order.lastRiderReminderAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit", hour12: true })}`
+                          : ""}
                       </p>
                     )}
                   </div>

@@ -28,16 +28,16 @@ export default function ReviewList({ reviews, loading }: ReviewListProps) {
   if (loading) {
     return (
       <div className="divide-y divide-gray-100">
-        {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
+        {[...Array(5)].map((_, i) => (
+          <SkeletonRow key={i} />
+        ))}
       </div>
     );
   }
 
   if (reviews.length === 0) {
     return (
-      <div className="py-10 text-center text-gray-400 text-sm">
-        No reviews for this category.
-      </div>
+      <div className="py-10 text-center text-gray-400 text-sm">No reviews for this category.</div>
     );
   }
 
@@ -63,15 +63,11 @@ export default function ReviewList({ reviews, loading }: ReviewListProps) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-sm font-semibold text-gray-800">
-                  {review.reviewerName}
-                </span>
+                <span className="text-sm font-semibold text-gray-800">{review.reviewerName}</span>
                 <StarRating rating={review.starRating} size={14} />
                 <span className="text-xs text-gray-500">{review.date}</span>
               </div>
-              <p className="mt-1 text-sm text-gray-600 leading-relaxed">
-                {review.text}
-              </p>
+              <p className="mt-1 text-sm text-gray-600 leading-relaxed">{review.text}</p>
             </div>
           </div>
         </div>

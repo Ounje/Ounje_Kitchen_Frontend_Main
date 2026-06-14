@@ -1,8 +1,8 @@
-import { MapPin } from 'lucide-react';
-import { Buyer } from '@/lib/api/services/vendor.service';
+import { MapPin } from "lucide-react";
+import { Buyer } from "@/lib/api/services/vendor.service";
 
 interface VendorBuyerCardProps {
-  buyer:    Buyer | null;
+  buyer: Buyer | null;
   loading?: boolean;
 }
 
@@ -37,11 +37,16 @@ export function VendorBuyerCard({ buyer, loading = false }: VendorBuyerCardProps
       {/* Avatar */}
       <div className="flex-shrink-0">
         {buyer.avatar ? (
-          <img src={buyer.avatar} alt={buyer.name}
-            className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-white" />
+          <img
+            src={buyer.avatar}
+            alt={buyer.name}
+            className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-white"
+          />
         ) : (
-          <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[#98EF9B] flex items-center justify-center
-            text-[#1A3F1C] font-bold text-xl flex-shrink-0 border-2 border-white">
+          <div
+            className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-[#98EF9B] flex items-center justify-center
+            text-[#1A3F1C] font-bold text-xl flex-shrink-0 border-2 border-white"
+          >
             {buyer.name.charAt(0)}
           </div>
         )}
@@ -49,7 +54,9 @@ export function VendorBuyerCard({ buyer, loading = false }: VendorBuyerCardProps
 
       {/* Info */}
       <div className="flex-1 min-w-0 z-10">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Most Frequent Buyer</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">
+          Most Frequent Buyer
+        </p>
         <h3 className="text-xl sm:text-2xl font-black text-white mb-2">{buyer.name}</h3>
         {buyer.address && (
           <div className="flex items-start gap-1">
@@ -61,7 +68,9 @@ export function VendorBuyerCard({ buyer, loading = false }: VendorBuyerCardProps
 
       {/* Orders count */}
       <div className="bg-white/95 backdrop-blur-sm rounded-xl px-5 sm:px-8 py-4 sm:py-5 text-center flex-shrink-0 self-start sm:self-center shadow-lg border border-white/20 group-hover:scale-105 transition-transform duration-500 z-10">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#1a3f1c]/70 mb-1">Orders Here</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-[#1a3f1c]/70 mb-1">
+          Orders Here
+        </p>
         <p className="text-4xl sm:text-5xl font-black text-[#1a3f1c]">
           {buyer.totalOrders ?? buyer.ordersCount ?? 0}
         </p>

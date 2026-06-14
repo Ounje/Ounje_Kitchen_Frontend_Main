@@ -1,25 +1,34 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Calendar, Search, Download, User, Loader2 } from 'lucide-react';
-import { downloadCSV } from '@/lib/utils/exportCSV';
-import { TrendingUp } from 'lucide-react';
-import { RevenueTrendChart } from '@/components/finance/RevenueTrendChart';
-import { RevenueDistributionChart } from '@/components/finance/RevenueDistributionChart';
-import { TopVendorsModal, TopRidersModal } from '@/components/finance/TopPerformersModal';
+import { useState, useEffect, useCallback } from "react";
+import { Calendar, Search, Download, User, Loader2 } from "lucide-react";
+import { downloadCSV } from "@/lib/utils/exportCSV";
+import { TrendingUp } from "lucide-react";
+import { RevenueTrendChart } from "@/components/finance/RevenueTrendChart";
+import { RevenueDistributionChart } from "@/components/finance/RevenueDistributionChart";
+import { TopVendorsModal, TopRidersModal } from "@/components/finance/TopPerformersModal";
 import financeService, {
   type RevenueData,
   type RevenuePeriod,
   type TopVendor,
   type TopRider,
-} from '@/lib/api/services/finance.service';
+} from "@/lib/api/services/finance.service";
 
 // ── Revenue stat card ─────────────────────────────────────────────────────────
 function RevenueStatCard({
-  icon, value, label, detail1, detail2, change,
+  icon,
+  value,
+  label,
+  detail1,
+  detail2,
+  change,
 }: {
-  icon: string; value: number; label: string;
-  detail1?: string; detail2?: string; change?: number;
+  icon: string;
+  value: number;
+  label: string;
+  detail1?: string;
+  detail2?: string;
+  change?: number;
 }) {
   return (
     <div className="rounded-xl p-4 relative bg-[#98ef9b]/60 border border-[#98ef9b]">
@@ -34,7 +43,9 @@ function RevenueStatCard({
       </div>
       <p className="text-sm font-semibold mb-1 text-[#1a3f1c]">{label}</p>
       {(detail1 || detail2) && (
-        <p className="text-xs text-[#1a3f1c]/80">{detail1} {detail2}</p>
+        <p className="text-xs text-[#1a3f1c]/80">
+          {detail1} {detail2}
+        </p>
       )}
       {change !== undefined && (
         <p className="text-xs font-semibold mt-1 text-[#1a3f1c]">↑ +{change}%</p>
@@ -45,20 +56,32 @@ function RevenueStatCard({
 
 // ── Top performers mini section ───────────────────────────────────────────────
 function TopSection({
-  title, names, onViewDetails,
-}: { title: string; names: string[]; onViewDetails: () => void }) {
+  title,
+  names,
+  onViewDetails,
+}: {
+  title: string;
+  names: string[];
+  onViewDetails: () => void;
+}) {
   return (
     <div className="bg-white rounded-xl p-4 sm:p-5 flex-1">
       <p className="text-sm font-bold mb-3 text-[#1a3f1c]">{title}</p>
       <div className="flex flex-wrap gap-2 mb-4">
         {names.map((n, i) => (
-          <span key={i} className="px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium text-[#1a3f1c]">
+          <span
+            key={i}
+            className="px-3 py-1 rounded-lg border border-gray-200 text-xs font-medium text-[#1a3f1c]"
+          >
             {n}
           </span>
         ))}
       </div>
-      <button type="button" onClick={onViewDetails}
-        className="w-full h-9 rounded-lg bg-[#1a3f1c] text-white text-sm font-semibold hover:bg-[#163318] transition-colors">
+      <button
+        type="button"
+        onClick={onViewDetails}
+        className="w-full h-9 rounded-lg bg-[#1a3f1c] text-white text-sm font-semibold hover:bg-[#163318] transition-colors"
+      >
         View Details
       </button>
     </div>
@@ -68,21 +91,21 @@ function TopSection({
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function RevenuePage() {
   const [revenueData, setRevenueData] = useState<RevenueData | null>(null);
-  const [loading, setLoading]         = useState(true);
-  const [exporting, setExporting]     = useState(false);
-  const [period, setPeriod]           = useState<RevenuePeriod>('daily');
-  const [startDate, setStartDate]     = useState('');
-  const [endDate, setEndDate]         = useState('');
+  const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [period, setPeriod] = useState<RevenuePeriod>("daily");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   // Top performers modals
-  const [vendorsModal, setVendorsModal]     = useState(false);
-  const [ridersModal, setRidersModal]       = useState(false);
-  const [vendorsPeriod, setVendorsPeriod]   = useState<RevenuePeriod>('daily');
-  const [ridersPeriod, setRidersPeriod]     = useState<RevenuePeriod>('daily');
-  const [topVendors, setTopVendors]         = useState<TopVendor[]>([]);
-  const [topRiders, setTopRiders]           = useState<TopRider[]>([]);
+  const [vendorsModal, setVendorsModal] = useState(false);
+  const [ridersModal, setRidersModal] = useState(false);
+  const [vendorsPeriod, setVendorsPeriod] = useState<RevenuePeriod>("daily");
+  const [ridersPeriod, setRidersPeriod] = useState<RevenuePeriod>("daily");
+  const [topVendors, setTopVendors] = useState<TopVendor[]>([]);
+  const [topRiders, setTopRiders] = useState<TopRider[]>([]);
   const [vendorsLoading, setVendorsLoading] = useState(false);
-  const [ridersLoading, setRidersLoading]   = useState(false);
+  const [ridersLoading, setRidersLoading] = useState(false);
 
   const loadRevenue = useCallback(async () => {
     setLoading(true);
@@ -99,26 +122,52 @@ export default function RevenuePage() {
   }, [startDate, endDate, period]);
 
   // Load on mount and when period changes
-  useEffect(() => { loadRevenue(); }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    loadRevenue();
+  }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleExportCSV = () => {
     if (!revenueData) return;
     setExporting(true);
     try {
-      const rows = (revenueData.trend ?? []).map(t => ({
-        Period:         t.label,
-        'Gross Revenue':  t.gross,
-        'Vendor Revenue': t.vendor,
-        'Rider Revenue':  t.rider,
-        'Net Revenue':    t.net,
+      const rows = (revenueData.trend ?? []).map((t) => ({
+        Period: t.label,
+        "Gross Revenue": t.gross,
+        "Vendor Revenue": t.vendor,
+        "Rider Revenue": t.rider,
+        "Net Revenue": t.net,
       }));
       if (revenueData.stats) {
         const s = revenueData.stats;
         rows.push(
-          { Period: 'TOTAL — Gross',          'Gross Revenue': s.gross.amount,  'Vendor Revenue': 0, 'Rider Revenue': 0, 'Net Revenue': 0 },
-          { Period: 'TOTAL — Vendor',         'Gross Revenue': 0, 'Vendor Revenue': s.vendor.amount, 'Rider Revenue': 0, 'Net Revenue': 0 },
-          { Period: 'TOTAL — Rider',          'Gross Revenue': 0, 'Vendor Revenue': 0, 'Rider Revenue': s.rider.amount, 'Net Revenue': 0 },
-          { Period: 'TOTAL — Net',            'Gross Revenue': 0, 'Vendor Revenue': 0, 'Rider Revenue': 0, 'Net Revenue': s.net.amount },
+          {
+            Period: "TOTAL — Gross",
+            "Gross Revenue": s.gross.amount,
+            "Vendor Revenue": 0,
+            "Rider Revenue": 0,
+            "Net Revenue": 0,
+          },
+          {
+            Period: "TOTAL — Vendor",
+            "Gross Revenue": 0,
+            "Vendor Revenue": s.vendor.amount,
+            "Rider Revenue": 0,
+            "Net Revenue": 0,
+          },
+          {
+            Period: "TOTAL — Rider",
+            "Gross Revenue": 0,
+            "Vendor Revenue": 0,
+            "Rider Revenue": s.rider.amount,
+            "Net Revenue": 0,
+          },
+          {
+            Period: "TOTAL — Net",
+            "Gross Revenue": 0,
+            "Vendor Revenue": 0,
+            "Rider Revenue": 0,
+            "Net Revenue": s.net.amount,
+          }
         );
       }
       downloadCSV(rows, `revenue_${period}_${new Date().toISOString().slice(0, 10)}`);
@@ -131,11 +180,13 @@ export default function RevenuePage() {
     setVendorsLoading(true);
     try {
       const res: any = await financeService.getTopVendors({ period: p });
-      const list: TopVendor[] =
-        Array.isArray(res?.data)    ? res.data    :
-        Array.isArray(res?.vendors) ? res.vendors :
-        Array.isArray(res)          ? res          :
-        [];
+      const list: TopVendor[] = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.vendors)
+          ? res.vendors
+          : Array.isArray(res)
+            ? res
+            : [];
       setTopVendors(list);
     } catch {
       setTopVendors([]);
@@ -148,11 +199,13 @@ export default function RevenuePage() {
     setRidersLoading(true);
     try {
       const res: any = await financeService.getTopRiders({ period: p });
-      const list: TopRider[] =
-        Array.isArray(res?.data)   ? res.data   :
-        Array.isArray(res?.riders) ? res.riders :
-        Array.isArray(res)         ? res         :
-        [];
+      const list: TopRider[] = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.riders)
+          ? res.riders
+          : Array.isArray(res)
+            ? res
+            : [];
       setTopRiders(list);
     } catch {
       setTopRiders([]);
@@ -161,28 +214,79 @@ export default function RevenuePage() {
     }
   };
 
-  const openVendors = () => { setVendorsModal(true); loadTopVendors(vendorsPeriod); };
-  const openRiders  = () => { setRidersModal(true);  loadTopRiders(ridersPeriod); };
+  const openVendors = () => {
+    setVendorsModal(true);
+    loadTopVendors(vendorsPeriod);
+  };
+  const openRiders = () => {
+    setRidersModal(true);
+    loadTopRiders(ridersPeriod);
+  };
 
   const { stats } = revenueData ?? {};
 
   const statCards = stats
     ? [
-        { icon: '💰', value: stats.gross.amount,                    label: 'Gross Revenue',    detail1: stats.gross.detail1,          change: stats.gross.change },
-        { icon: '🏪', value: stats.vendor.amount,                   label: 'Vendors Revenue',  detail1: stats.vendor.detail1,         change: stats.vendor.change },
-        { icon: '🛵', value: stats.rider.amount,                    label: 'Riders Revenue',   detail1: stats.rider.detail1,          change: stats.rider.change },
-        { icon: '💹', value: stats.net.amount,                      label: 'Net Revenue',                                             change: stats.net.change },
-        ...(stats.platformMarkup ? [{ icon: '📈', value: stats.platformMarkup.amount, label: 'Platform Markup (10%)', change: stats.platformMarkup.change }] : []),
-        ...(stats.comboMarkup    ? [{ icon: '🍱', value: stats.comboMarkup.amount,    label: 'Combo Markup (20%)',    change: stats.comboMarkup.change    }] : []),
-        ...(stats.serviceFee     ? [{ icon: '🧾', value: stats.serviceFee.amount,     label: 'Service Fee (10%)',     change: stats.serviceFee.change     }] : []),
+        {
+          icon: "💰",
+          value: stats.gross.amount,
+          label: "Gross Revenue",
+          detail1: stats.gross.detail1,
+          change: stats.gross.change,
+        },
+        {
+          icon: "🏪",
+          value: stats.vendor.amount,
+          label: "Vendors Revenue",
+          detail1: stats.vendor.detail1,
+          change: stats.vendor.change,
+        },
+        {
+          icon: "🛵",
+          value: stats.rider.amount,
+          label: "Riders Revenue",
+          detail1: stats.rider.detail1,
+          change: stats.rider.change,
+        },
+        { icon: "💹", value: stats.net.amount, label: "Net Revenue", change: stats.net.change },
+        ...(stats.platformMarkup
+          ? [
+              {
+                icon: "📈",
+                value: stats.platformMarkup.amount,
+                label: "Platform Markup (10%)",
+                change: stats.platformMarkup.change,
+              },
+            ]
+          : []),
+        ...(stats.comboMarkup
+          ? [
+              {
+                icon: "🍱",
+                value: stats.comboMarkup.amount,
+                label: "Combo Markup (20%)",
+                change: stats.comboMarkup.change,
+              },
+            ]
+          : []),
+        ...(stats.serviceFee
+          ? [
+              {
+                icon: "🧾",
+                value: stats.serviceFee.amount,
+                label: "Service Fee (10%)",
+                change: stats.serviceFee.change,
+              },
+            ]
+          : []),
       ]
     : [];
 
   // Safe arrays — always defined even if backend omits the key
-  const trendData        = revenueData?.trend        ?? [];
+  const trendData = revenueData?.trend ?? [];
   const distributionData = revenueData?.distribution ?? [];
-  const topVendorNames   = (revenueData?.topVendors  ?? []).map(v => v.name);
-  const topRiderNames    = (revenueData?.topRiders   ?? []).map(r => r.name);
+  const topVendorNames = (revenueData?.topVendors ?? []).map((v) => v.name);
+  const topRiderNames = (revenueData?.topRiders ?? []).map((r) => r.name);
 
   return (
     <div className="w-full">
@@ -194,7 +298,7 @@ export default function RevenuePage() {
             value={period}
             title="Revenue period"
             aria-label="Revenue period"
-            onChange={e => setPeriod(e.target.value as RevenuePeriod)}
+            onChange={(e) => setPeriod(e.target.value as RevenuePeriod)}
             className="appearance-none bg-[#1a3f1c] pl-9 pr-8 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer"
           >
             <option value="daily">Daily</option>
@@ -202,7 +306,9 @@ export default function RevenuePage() {
             <option value="monthly">Monthly</option>
           </select>
           <User className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-white pointer-events-none text-xs">▾</span>
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-white pointer-events-none text-xs">
+            ▾
+          </span>
         </div>
       </div>
 
@@ -213,7 +319,7 @@ export default function RevenuePage() {
               <div key={i} className="h-28 rounded-xl bg-gray-200 animate-pulse" />
             ))
           : statCards.length > 0
-            ? statCards.map(c => <RevenueStatCard key={c.label} {...c} />)
+            ? statCards.map((c) => <RevenueStatCard key={c.label} {...c} />)
             : [...Array(4)].map((_, i) => (
                 <div key={i} className="h-28 rounded-xl bg-gray-100 border border-gray-200" />
               ))}
@@ -222,28 +328,32 @@ export default function RevenuePage() {
       {/* Date filter row */}
       <div className="flex flex-wrap items-end gap-3 mb-6">
         <div>
-          <label htmlFor="rev-start" className="block text-xs font-medium mb-1 text-[#1a3f1c]">Start Date</label>
+          <label htmlFor="rev-start" className="block text-xs font-medium mb-1 text-[#1a3f1c]">
+            Start Date
+          </label>
           <div className="relative">
             <input
               id="rev-start"
               type="date"
               title="Start date"
               value={startDate}
-              onChange={e => setStartDate(e.target.value)}
+              onChange={(e) => setStartDate(e.target.value)}
               className="px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
             />
             <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
         <div>
-          <label htmlFor="rev-end" className="block text-xs font-medium mb-1 text-[#1a3f1c]">End Date</label>
+          <label htmlFor="rev-end" className="block text-xs font-medium mb-1 text-[#1a3f1c]">
+            End Date
+          </label>
           <div className="relative">
             <input
               id="rev-end"
               type="date"
               title="End date"
               value={endDate}
-              onChange={e => setEndDate(e.target.value)}
+              onChange={(e) => setEndDate(e.target.value)}
               className="px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#37A449]"
             />
             <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -263,8 +373,12 @@ export default function RevenuePage() {
           disabled={exporting || !revenueData}
           className="flex items-center gap-2 px-5 py-2 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition-opacity bg-[#1a3f1c] disabled:opacity-50"
         >
-          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          {exporting ? 'Exporting…' : 'Export CSV'}
+          {exporting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
+          {exporting ? "Exporting…" : "Export CSV"}
         </button>
       </div>
 
@@ -276,28 +390,28 @@ export default function RevenuePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          {trendData.length > 0
-            ? <RevenueTrendChart data={trendData} />
-            : <div className="h-72 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-sm text-gray-400">No trend data for this period</div>}
-          {distributionData.length > 0
-            ? <RevenueDistributionChart data={distributionData} />
-            : <div className="h-72 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-sm text-gray-400">No distribution data for this period</div>}
+          {trendData.length > 0 ? (
+            <RevenueTrendChart data={trendData} />
+          ) : (
+            <div className="h-72 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-sm text-gray-400">
+              No trend data for this period
+            </div>
+          )}
+          {distributionData.length > 0 ? (
+            <RevenueDistributionChart data={distributionData} />
+          ) : (
+            <div className="h-72 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-sm text-gray-400">
+              No distribution data for this period
+            </div>
+          )}
         </div>
       )}
 
       {/* Top performers row */}
       {revenueData && (topVendorNames.length > 0 || topRiderNames.length > 0) && (
         <div className="flex flex-col sm:flex-row gap-4">
-          <TopSection
-            title="Top 5 Vendors"
-            names={topVendorNames}
-            onViewDetails={openVendors}
-          />
-          <TopSection
-            title="Top 5 Riders"
-            names={topRiderNames}
-            onViewDetails={openRiders}
-          />
+          <TopSection title="Top 5 Vendors" names={topVendorNames} onViewDetails={openVendors} />
+          <TopSection title="Top 5 Riders" names={topRiderNames} onViewDetails={openRiders} />
         </div>
       )}
 
@@ -307,7 +421,10 @@ export default function RevenuePage() {
         onClose={() => setVendorsModal(false)}
         vendors={topVendors}
         period={vendorsPeriod}
-        onPeriodChange={p => { setVendorsPeriod(p); loadTopVendors(p); }}
+        onPeriodChange={(p) => {
+          setVendorsPeriod(p);
+          loadTopVendors(p);
+        }}
         loading={vendorsLoading}
       />
       <TopRidersModal
@@ -315,7 +432,10 @@ export default function RevenuePage() {
         onClose={() => setRidersModal(false)}
         riders={topRiders}
         period={ridersPeriod}
-        onPeriodChange={p => { setRidersPeriod(p); loadTopRiders(p); }}
+        onPeriodChange={(p) => {
+          setRidersPeriod(p);
+          loadTopRiders(p);
+        }}
         loading={ridersLoading}
       />
     </div>

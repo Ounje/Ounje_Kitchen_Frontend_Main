@@ -20,7 +20,7 @@ export function CustomerTableSkeleton() {
                 key={index}
                 className="border-b border-gray-200"
                 style={{
-                  backgroundColor: index % 2 === 0 ? '#D4FFDE' : 'white'
+                  backgroundColor: index % 2 === 0 ? "#D4FFDE" : "white",
                 }}
               >
                 <td className="px-4 py-4">

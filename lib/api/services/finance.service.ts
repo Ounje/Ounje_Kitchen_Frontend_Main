@@ -1,5 +1,5 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
 
 // ── Shared ────────────────────────────────────────────────────────────────────
 export interface PaginatedResponse<T> {
@@ -12,57 +12,57 @@ export interface PaginatedResponse<T> {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export interface DashboardStats {
-  withdrawals:    { count: number; subtitle: string };
-  transactions:   { count: number; subtitle: string };
-  payroll:        { count: number; subtitle: string };
-  todayRevenue?:  { gross: number; net: number; subtitle: string };
+  withdrawals: { count: number; subtitle: string };
+  transactions: { count: number; subtitle: string };
+  payroll: { count: number; subtitle: string };
+  todayRevenue?: { gross: number; net: number; subtitle: string };
   pendingPayouts?: { count: number; total: number; subtitle: string };
-  failedPayouts?:  { count: number; subtitle: string };
+  failedPayouts?: { count: number; subtitle: string };
 }
 
 // ── Reconciliation ─────────────────────────────────────────────────────────────
 export interface ReconciliationCheckSummary {
-  key:      string;
-  label:    string;
-  severity: 'critical' | 'warning' | 'info';
-  count:    number;
-  items:    any[];
+  key: string;
+  label: string;
+  severity: "critical" | "warning" | "info";
+  count: number;
+  items: any[];
 }
 
 export interface ReconciliationReport {
-  id:          string;
-  runAt:       string;
+  id: string;
+  runAt: string;
   triggeredBy: string;
-  durationMs:  number;
+  durationMs: number;
   summary: {
-    totalIssues:    number;
+    totalIssues: number;
     criticalIssues: number;
-    warningIssues:  number;
-    infoIssues:     number;
+    warningIssues: number;
+    infoIssues: number;
   };
-  checks:  ReconciliationCheckSummary[];
-  errors:  { check: string; message: string }[];
-  clean:   boolean;
+  checks: ReconciliationCheckSummary[];
+  errors: { check: string; message: string }[];
+  clean: boolean;
 }
 
 export interface ReconciliationHistoryItem {
-  id:          string;
-  runAt:       string;
+  id: string;
+  runAt: string;
   triggeredBy: string;
-  durationMs:  number;
-  summary:     ReconciliationReport['summary'];
-  hasErrors:   boolean;
-  clean:       boolean;
+  durationMs: number;
+  summary: ReconciliationReport["summary"];
+  hasErrors: boolean;
+  clean: boolean;
 }
 
 export interface DashboardWithdrawalRow {
   id: string;
   userName: string;
   userAvatar?: string;
-  role: 'Rider' | 'Vendor';
+  role: "Rider" | "Vendor";
   process: string;
   amount: number;
-  status: 'Successful' | 'Failed';
+  status: "Successful" | "Failed";
 }
 
 // ── Transactions ──────────────────────────────────────────────────────────────
@@ -92,17 +92,17 @@ export interface TransactionDetail {
   paymentMethod: string;
   transactionId: string;
   amount: number;
-  orderCost: number;     // vendor's original price
-  serviceCost: number;   // 10% checkout service fee
+  orderCost: number; // vendor's original price
+  serviceCost: number; // 10% checkout service fee
   platformMarkup: number; // 10% standard markup
-  comboMarkup: number;    // 20% extra combo markup
+  comboMarkup: number; // 20% extra combo markup
   deliveryFee: number;
   total: number;
 }
 
 export interface TransactionFilters {
   name?: string;
-  role?: 'Rider' | 'Vendor' | '';
+  role?: "Rider" | "Vendor" | "";
   startDate?: string;
   endDate?: string;
   page?: number;
@@ -115,11 +115,11 @@ export interface WithdrawalItem {
   withdrawalId: string;
   userName: string;
   userAvatar?: string;
-  role: 'Rider' | 'Vendor';
+  role: "Rider" | "Vendor";
   bankName: string;
   amount: number;
   narration: string;
-  status: 'PASS' | 'FAIL';
+  status: "PASS" | "FAIL";
 }
 
 export interface WithdrawalGroup {
@@ -134,13 +134,13 @@ export interface WithdrawalDetail {
   accountNumber: string;
   paymentMethod: string;
   amount: number;
-  status: 'PASS' | 'FAIL' | 'PENDING';
+  status: "PASS" | "FAIL" | "PENDING";
   note: string;
 }
 
 export interface WithdrawalFilters {
   name?: string;
-  role?: 'Rider' | 'Vendor' | '';
+  role?: "Rider" | "Vendor" | "";
   startDate?: string;
   endDate?: string;
   page?: number;
@@ -151,128 +151,128 @@ export interface WithdrawalFilters {
 
 export interface WalletBucket {
   availableBalance: number;
-  pendingBalance:   number;
-  holdBalance:      number;
-  totalBalance:     number;
+  pendingBalance: number;
+  holdBalance: number;
+  totalBalance: number;
 }
 
 export interface WalletOverview {
   customers: { availableBalance: number; pendingBalance: number; totalBalance: number };
-  vendors:   WalletBucket;
-  riders:    WalletBucket;
-  platform:  { availableBalance: number; pendingBalance: number; totalBalance: number };
+  vendors: WalletBucket;
+  riders: WalletBucket;
+  platform: { availableBalance: number; pendingBalance: number; totalBalance: number };
   pendingPayouts: { count: number; totalNaira: number };
 }
 
 export interface WalletLedgerEntry {
-  _id:          string;
-  source:       'wallet' | 'bank';
-  entryType:    'CREDIT' | 'DEBIT';
-  reason:       string;
-  amount:       number;
+  _id: string;
+  source: "wallet" | "bank";
+  entryType: "CREDIT" | "DEBIT";
+  reason: string;
+  amount: number;
   balanceAfter?: number | null;
-  orderId?:     string | null;
-  reference?:   string;
-  paidAt?:      string | null;
-  meta?:        any;
-  createdAt:    string;
+  orderId?: string | null;
+  reference?: string;
+  paidAt?: string | null;
+  meta?: any;
+  createdAt: string;
 }
 
 export interface WalletHistoryResponse {
-  ledger:     WalletLedgerEntry[];
-  bank:       WalletLedgerEntry[];
-  page:       number;
-  limit:      number;
-  total:      number;
+  ledger: WalletLedgerEntry[];
+  bank: WalletLedgerEntry[];
+  page: number;
+  limit: number;
+  total: number;
   totalPages: number;
   account: { availableBalance: number; pendingBalance: number; holdBalance: number };
 }
 
 export interface PayoutItem {
-  _id:            string;
-  recipientName:  string;
-  recipientType:  'VendorProfile' | 'RiderProfile';
-  amountNaira:    number;
+  _id: string;
+  recipientName: string;
+  recipientType: "VendorProfile" | "RiderProfile";
+  amountNaira: number;
   netAmountNaira: number;
-  feeNaira:       number;
-  status:         'pending' | 'processing' | 'success' | 'failed' | 'cancelled';
+  feeNaira: number;
+  status: "pending" | "processing" | "success" | "failed" | "cancelled";
   bankDetails: {
-    bankName:      string;
+    bankName: string;
     accountNumber: string;
-    accountName:   string;
+    accountName: string;
   };
-  processAt:      string;
-  processedAt?:   string;
+  processAt: string;
+  processedAt?: string;
   failureReason?: string;
-  retryCount:     number;
-  createdAt:      string;
+  retryCount: number;
+  createdAt: string;
 }
 
 export interface PayoutStats {
-  pending:    { count: number; totalNaira: number };
+  pending: { count: number; totalNaira: number };
   processing: { count: number; totalNaira: number };
-  success:    { count: number; totalNaira: number };
-  failed:     { count: number; totalNaira: number };
-  cancelled:  { count: number; totalNaira: number };
+  success: { count: number; totalNaira: number };
+  failed: { count: number; totalNaira: number };
+  cancelled: { count: number; totalNaira: number };
 }
 
 export interface PayoutFilters {
-  status?:        string;
+  status?: string;
   recipientType?: string;
-  startDate?:     string;
-  endDate?:       string;
-  page?:          number;
-  limit?:         number;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
 }
 
 // ── Paid In (customer wallet top-ups) ─────────────────────────────────────────
 export interface PaidInItem {
-  _id:            string;
-  customerName:   string;
-  amountNaira:    number;
-  reference:      string;
-  status:         'pending' | 'success' | 'failed';
-  paidAt:         string | null;
-  createdAt:      string;
+  _id: string;
+  customerName: string;
+  amountNaira: number;
+  reference: string;
+  status: "pending" | "success" | "failed";
+  paidAt: string | null;
+  createdAt: string;
   paymentChannel?: string | null;
-  paymentBank?:    string | null;
+  paymentBank?: string | null;
 }
 
 export interface PaidInFilters {
   customerName?: string;
-  status?:       string;
-  startDate?:    string;
-  endDate?:      string;
-  page?:         number;
-  limit?:        number;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface PaidInStats {
   pending: { count: number; totalNaira: number };
   success: { count: number; totalNaira: number };
-  failed:  { count: number; totalNaira: number };
+  failed: { count: number; totalNaira: number };
 }
 
 // ── Wallet Balances ───────────────────────────────────────────────────────────
-export type WalletAccountType = 'CUSTOMER' | 'VENDOR' | 'RIDER';
+export type WalletAccountType = "CUSTOMER" | "VENDOR" | "RIDER";
 
 export interface WalletBalanceItem {
-  _id:              string;
-  name:             string;
+  _id: string;
+  name: string;
   availableBalance: number;
-  pendingBalance:   number;
-  holdBalance:      number;
+  pendingBalance: number;
+  holdBalance: number;
 }
 
 export interface WalletBalanceFilters {
-  type?:   WalletAccountType;
+  type?: WalletAccountType;
   search?: string;
-  page?:   number;
-  limit?:  number;
+  page?: number;
+  limit?: number;
 }
 
 // ── Revenue ───────────────────────────────────────────────────────────────────
-export type RevenuePeriod = 'daily' | 'weekly' | 'monthly';
+export type RevenuePeriod = "daily" | "weekly" | "monthly";
 
 export interface RevenueStatCard {
   amount: number;
@@ -282,13 +282,13 @@ export interface RevenueStatCard {
 }
 
 export interface RevenueStats {
-  gross:         RevenueStatCard;
-  vendor:        RevenueStatCard;
-  rider:         RevenueStatCard;
-  net:           RevenueStatCard;
+  gross: RevenueStatCard;
+  vendor: RevenueStatCard;
+  rider: RevenueStatCard;
+  net: RevenueStatCard;
   platformMarkup?: RevenueStatCard;
-  comboMarkup?:    RevenueStatCard;
-  serviceFee?:     RevenueStatCard;
+  comboMarkup?: RevenueStatCard;
+  serviceFee?: RevenueStatCard;
 }
 
 export interface RevenueTrendPoint {
@@ -355,7 +355,6 @@ export interface FinanceProfile {
 
 // ── Service ───────────────────────────────────────────────────────────────────
 export const financeService = {
-
   // ==================== DASHBOARD ====================
 
   async getDashboardStats() {
@@ -385,7 +384,7 @@ export const financeService = {
     return res;
   },
 
-  async exportTransactionsCSV(filters: Omit<TransactionFilters, 'page' | 'limit'>) {
+  async exportTransactionsCSV(filters: Omit<TransactionFilters, "page" | "limit">) {
     const res = await apiClient.get(ENDPOINTS.FINANCE.TRANSACTIONS_EXPORT, {
       params: filters,
     } as any);
@@ -404,7 +403,7 @@ export const financeService = {
     return res;
   },
 
-  async exportWithdrawalsCSV(filters: Omit<WithdrawalFilters, 'page' | 'limit'>) {
+  async exportWithdrawalsCSV(filters: Omit<WithdrawalFilters, "page" | "limit">) {
     const res = await apiClient.get(ENDPOINTS.FINANCE.WITHDRAWALS_EXPORT, {
       params: filters,
     } as any);
@@ -476,52 +475,61 @@ export const financeService = {
   // ==================== WALLETS & PAYOUTS ====================
 
   async getWalletOverview(): Promise<WalletOverview> {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.WALLETS_OVERVIEW) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.WALLETS_OVERVIEW)) as any;
     return res?.data ?? res;
   },
 
   async getPayouts(filters: PayoutFilters = {}) {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.PAYOUTS, { params: filters }) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.PAYOUTS, { params: filters })) as any;
     return res?.data ?? res;
   },
 
   async getPayoutStats(): Promise<PayoutStats> {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.PAYOUTS_STATS) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.PAYOUTS_STATS)) as any;
     return res?.data ?? res;
   },
 
   async getPayoutById(id: string): Promise<PayoutItem> {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.PAYOUT_BY_ID(id)) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.PAYOUT_BY_ID(id))) as any;
     return res?.data ?? res;
   },
 
   // ==================== PAID IN ====================
 
   async getCustomerPaymentStats(): Promise<PaidInStats> {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.PAID_IN_STATS) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.PAID_IN_STATS)) as any;
     return (res?.data ?? res) as PaidInStats;
   },
 
   async getWalletBalances(filters: WalletBalanceFilters = {}) {
     // Return full response — page needs data[], page, total, totalPages at the root
-    const res = await apiClient.get(ENDPOINTS.FINANCE.WALLET_BALANCES, { params: filters }) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.WALLET_BALANCES, {
+      params: filters,
+    })) as any;
     return res;
   },
 
-  async getWalletHistory(accountId: string, type: WalletAccountType, page = 1, limit = 20): Promise<WalletHistoryResponse> {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.WALLET_HISTORY, { params: { accountId, type, page, limit } }) as any;
+  async getWalletHistory(
+    accountId: string,
+    type: WalletAccountType,
+    page = 1,
+    limit = 20
+  ): Promise<WalletHistoryResponse> {
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.WALLET_HISTORY, {
+      params: { accountId, type, page, limit },
+    })) as any;
     return res?.data ?? res;
   },
 
   async getBankPaymentsTotal(): Promise<{ totalNaira: number; count: number }> {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.WALLET_BANK_TOTAL) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.WALLET_BANK_TOTAL)) as any;
     const d = res?.data ?? res;
     return { totalNaira: d?.totalNaira ?? 0, count: d?.count ?? 0 };
   },
 
   async getCustomerPayments(filters: PaidInFilters = {}) {
     // Return full response — page needs data[], page, total, totalPages at the root
-    const res = await apiClient.get(ENDPOINTS.FINANCE.PAID_IN, { params: filters }) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.PAID_IN, { params: filters })) as any;
     return res;
   },
 
@@ -529,28 +537,36 @@ export const financeService = {
 
   async getLatestReconciliation(): Promise<ReconciliationReport | null> {
     try {
-      const res = await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_LATEST) as any;
+      const res = (await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_LATEST)) as any;
       return res?.data ?? res ?? null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   },
 
   async getReconciliationHistory(page = 1, limit = 20) {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_HISTORY, { params: { page, limit } }) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_HISTORY, {
+      params: { page, limit },
+    })) as any;
     return res?.data ?? res;
   },
 
   async getReconciliationById(id: string): Promise<ReconciliationReport> {
-    const res = await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_BY_ID(id)) as any;
+    const res = (await apiClient.get(ENDPOINTS.FINANCE.RECONCILIATION_BY_ID(id))) as any;
     return res?.data ?? res;
   },
 
-  async fixDuplicateEntries(): Promise<{ duplicateGroups: number; deletedEntries: number; affectedAccounts: number }> {
-    const res = await apiClient.post(ENDPOINTS.FINANCE.RECONCILIATION_FIX_DUPES) as any;
+  async fixDuplicateEntries(): Promise<{
+    duplicateGroups: number;
+    deletedEntries: number;
+    affectedAccounts: number;
+  }> {
+    const res = (await apiClient.post(ENDPOINTS.FINANCE.RECONCILIATION_FIX_DUPES)) as any;
     return res?.data ?? res;
   },
 
   async fixWalletBalances(): Promise<{ totalChecked: number; updatedAccounts: number }> {
-    const res = await apiClient.post(ENDPOINTS.FINANCE.RECONCILIATION_FIX_BALANCES) as any;
+    const res = (await apiClient.post(ENDPOINTS.FINANCE.RECONCILIATION_FIX_BALANCES)) as any;
     return res?.data ?? res;
   },
 };

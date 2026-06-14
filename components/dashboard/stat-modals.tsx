@@ -523,10 +523,7 @@
 //   );
 // }
 
-
-
 // NEW
-
 
 // 'use client';
 
@@ -546,7 +543,7 @@
 // //   type RevenueTrendsResponse,
 // // } from '@/lib/api/superadmin/api';
 
-// import { superAdminApi, type Rating, type Order, type Customer, type Vendor, type Rider, type RevenueStats, type RevenueTrendsResponse, } from '@/lib/api/api'; 
+// import { superAdminApi, type Rating, type Order, type Customer, type Vendor, type Rider, type RevenueStats, type RevenueTrendsResponse, } from '@/lib/api/api';
 
 // // ─────────────────────────────────────────────────────────────────────────────
 // // Shared primitives
@@ -1279,17 +1276,15 @@
 //   );
 // }
 
-
-
 //Another new
 
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import {
   superAdminApi,
   type Rating,
@@ -1300,7 +1295,7 @@ import {
   type RevenueAnalyticsData,
   type RatingsResponse,
   type RevenueTrendsResponse,
-} from '@/lib/api/api';
+} from "@/lib/api/api";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared primitives
@@ -1313,12 +1308,12 @@ interface BaseModalProps {
 }
 
 function fmtCurrency(n?: number) {
-  if (n == null) return '—';
+  if (n == null) return "—";
   return `₦${Number(n).toLocaleString()}`;
 }
 
-function Initials({ name, className = '' }: { name?: string; className?: string }) {
-  const letter = (name ?? '?')[0]?.toUpperCase() ?? '?';
+function Initials({ name, className = "" }: { name?: string; className?: string }) {
+  const letter = (name ?? "?")[0]?.toUpperCase() ?? "?";
   return (
     <div
       className={`bg-primary/20 text-primary font-bold flex items-center justify-center shrink-0 ${className}`}
@@ -1330,9 +1325,13 @@ function Initials({ name, className = '' }: { name?: string; className?: string 
 
 function StatusDot({ status }: { status: string }) {
   const color =
-    status === 'active' ? 'bg-green-500' :
-    status === 'suspended' ? 'bg-red-500' :
-    status === 'pending' ? 'bg-yellow-500' : 'bg-gray-400';
+    status === "active"
+      ? "bg-green-500"
+      : status === "suspended"
+        ? "bg-red-500"
+        : status === "pending"
+          ? "bg-yellow-500"
+          : "bg-gray-400";
   return <span className={`inline-block w-2 h-2 rounded-full ${color}`} />;
 }
 
@@ -1384,7 +1383,9 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
 
 function GridSkeleton({ cols = 2, count = 6 }: { cols?: number; count?: number }) {
   return (
-    <div className={`grid gap-4 ${cols === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+    <div
+      className={`grid gap-4 ${cols === 3 ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1 md:grid-cols-2"}`}
+    >
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton key={i} className="h-28 rounded-xl" />
       ))}
@@ -1410,7 +1411,7 @@ function LoadMoreButton({
       className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
     >
       {loading && <Loader2 size={16} className="animate-spin" />}
-      {loading ? 'Loading…' : 'View More'}
+      {loading ? "Loading…" : "View More"}
     </button>
   );
 }
@@ -1446,12 +1447,12 @@ export function RatingsModal({ isOpen, onClose, title }: BaseModalProps) {
         const res = await superAdminApi.ratings.getAll({
           page: pageNum,
           limit: PAGE_SIZE,
-          ...(filter ? { rating: filter } : {}),  // controller param is `rating` not `score`
+          ...(filter ? { rating: filter } : {}), // controller param is `rating` not `score`
         });
         setRatings((prev) => (append ? [...prev, ...(res.data ?? [])] : (res.data ?? [])));
         setTotal(res.total ?? 0);
       } catch (err: any) {
-        const msg = err?.message || 'Failed to load ratings';
+        const msg = err?.message || "Failed to load ratings";
         setError(msg);
         toast.error(msg);
       } finally {
@@ -1491,11 +1492,11 @@ export function RatingsModal({ isOpen, onClose, title }: BaseModalProps) {
                 onClick={() => setFilter(filter === star ? null : star)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   filter === star
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:opacity-80'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:opacity-80"
                 }`}
               >
-                {'⭐'.repeat(star)} {star} Star{star !== 1 ? 's' : ''}
+                {"⭐".repeat(star)} {star} Star{star !== 1 ? "s" : ""}
               </button>
             ))}
           </div>
@@ -1526,16 +1527,20 @@ export function RatingsModal({ isOpen, onClose, title }: BaseModalProps) {
                         {r.customerName ?? `Customer #${r.customerId}`}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {r.targetType === 'VendorProfile' ? 'Vendor' : r.targetType === 'RiderProfile' ? 'Rider' : r.targetType ?? 'Unknown'}
-                        {r.targetName ? `: ${r.targetName}` : ''}
-                        {r.orderType ? ` · ${r.orderType}` : ''}
+                        {r.targetType === "VendorProfile"
+                          ? "Vendor"
+                          : r.targetType === "RiderProfile"
+                            ? "Rider"
+                            : (r.targetType ?? "Unknown")}
+                        {r.targetName ? `: ${r.targetName}` : ""}
+                        {r.orderType ? ` · ${r.orderType}` : ""}
                       </p>
                     </div>
-                    <span className="text-base shrink-0">{'⭐'.repeat(Math.min(r.rating ?? 0, 5))}</span>
+                    <span className="text-base shrink-0">
+                      {"⭐".repeat(Math.min(r.rating ?? 0, 5))}
+                    </span>
                   </div>
-                  {r.comment && (
-                    <p className="text-sm text-foreground line-clamp-3">{r.comment}</p>
-                  )}
+                  {r.comment && <p className="text-sm text-foreground line-clamp-3">{r.comment}</p>}
                 </div>
               ))}
             </div>
@@ -1553,10 +1558,10 @@ export function RatingsModal({ isOpen, onClose, title }: BaseModalProps) {
 // Orders Modal
 // ─────────────────────────────────────────────────────────────────────────────
 
-type OrderTab = 'active' | 'delivered' | 'rejected';
+type OrderTab = "active" | "delivered" | "rejected";
 
 export function OrdersModal({ isOpen, onClose, title }: BaseModalProps) {
-  const [tab, setTab] = useState<OrderTab>('active');
+  const [tab, setTab] = useState<OrderTab>("active");
   const [orders, setOrders] = useState<Order[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -1584,7 +1589,7 @@ export function OrdersModal({ isOpen, onClose, title }: BaseModalProps) {
         setOrders((prev) => (append ? [...prev, ...(res.data ?? [])] : (res.data ?? [])));
         setTotal(res.total ?? 0);
       } catch (err: any) {
-        const msg = err?.message || 'Failed to load orders';
+        const msg = err?.message || "Failed to load orders";
         setError(msg);
         toast.error(msg);
       } finally {
@@ -1610,9 +1615,9 @@ export function OrdersModal({ isOpen, onClose, title }: BaseModalProps) {
   if (!isOpen) return null;
 
   const TABS: { id: OrderTab; label: string }[] = [
-    { id: 'active', label: 'Active Orders' },
-    { id: 'delivered', label: 'Delivered' },
-    { id: 'rejected', label: 'Rejected/Reported' },
+    { id: "active", label: "Active Orders" },
+    { id: "delivered", label: "Delivered" },
+    { id: "rejected", label: "Rejected/Reported" },
   ];
 
   return (
@@ -1629,8 +1634,8 @@ export function OrdersModal({ isOpen, onClose, title }: BaseModalProps) {
                 onClick={() => setTab(t.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   tab === t.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:opacity-80'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:opacity-80"
                 }`}
               >
                 {t.label}
@@ -1650,10 +1655,19 @@ export function OrdersModal({ isOpen, onClose, title }: BaseModalProps) {
               {orders.map((order) => (
                 <div key={order.id} className="bg-secondary rounded-xl p-4 flex flex-col gap-3">
                   <div className="w-full h-20 rounded-lg bg-primary/10 flex items-center justify-center text-3xl">
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="20" cy="20" r="20" fill="#FFCA3A"/>
-                  <path d="M29 24C29 19.375 25.493 15.559 21 15.059V13H19V15.059C14.507 15.559 11 19.375 11 24V26H29V24ZM10 27H30V29H10V27Z" fill="#1A3F1C"/>
-                  </svg>
+                    <svg
+                      width="40"
+                      height="40"
+                      viewBox="0 0 40 40"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle cx="20" cy="20" r="20" fill="#FFCA3A" />
+                      <path
+                        d="M29 24C29 19.375 25.493 15.559 21 15.059V13H19V15.059C14.507 15.559 11 19.375 11 24V26H29V24ZM10 27H30V29H10V27Z"
+                        fill="#1A3F1C"
+                      />
+                    </svg>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-foreground text-sm truncate">
@@ -1668,9 +1682,11 @@ export function OrdersModal({ isOpen, onClose, title }: BaseModalProps) {
                   </div>
                   <span
                     className={`text-xs font-semibold px-2 py-0.5 rounded-full self-start capitalize ${
-                      order.status === 'active' ? 'bg-blue-100 text-blue-700' :
-                      order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                      'bg-red-100 text-red-700'
+                      order.status === "active"
+                        ? "bg-blue-100 text-blue-700"
+                        : order.status === "delivered"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
                     }`}
                   >
                     {order.status}
@@ -1691,11 +1707,11 @@ export function OrdersModal({ isOpen, onClose, title }: BaseModalProps) {
 // Users Modal
 // ─────────────────────────────────────────────────────────────────────────────
 
-type UsersTab = 'customers' | 'vendors' | 'riders';
+type UsersTab = "customers" | "vendors" | "riders";
 type AnyUser = Customer | Vendor | Rider;
 
 export function UsersModal({ isOpen, onClose, title }: BaseModalProps) {
-  const [tab, setTab] = useState<UsersTab>('customers');
+  const [tab, setTab] = useState<UsersTab>("customers");
   const [users, setUsers] = useState<AnyUser[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -1717,11 +1733,11 @@ export function UsersModal({ isOpen, onClose, title }: BaseModalProps) {
       try {
         const params = { page: pageNum, limit: PAGE_SIZE };
         const res =
-          tab === 'customers'
+          tab === "customers"
             ? await superAdminApi.customers.getAll(params)
-            : tab === 'vendors'
-            ? await superAdminApi.vendors.getAll(params)
-            : await superAdminApi.riders.getAll(params);
+            : tab === "vendors"
+              ? await superAdminApi.vendors.getAll(params)
+              : await superAdminApi.riders.getAll(params);
         setUsers((prev) => (append ? [...prev, ...(res.data ?? [])] : (res.data ?? [])));
         setTotal(res.total ?? 0);
       } catch (err: any) {
@@ -1751,9 +1767,9 @@ export function UsersModal({ isOpen, onClose, title }: BaseModalProps) {
   if (!isOpen) return null;
 
   const TABS: { id: UsersTab; label: string }[] = [
-    { id: 'customers', label: 'Customers' },
-    { id: 'vendors', label: 'Vendors' },
-    { id: 'riders', label: 'Riders' },
+    { id: "customers", label: "Customers" },
+    { id: "vendors", label: "Vendors" },
+    { id: "riders", label: "Riders" },
   ];
 
   return (
@@ -1770,8 +1786,8 @@ export function UsersModal({ isOpen, onClose, title }: BaseModalProps) {
                 onClick={() => setTab(t.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   tab === t.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:opacity-80'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:opacity-80"
                 }`}
               >
                 {t.label}
@@ -1804,16 +1820,14 @@ export function UsersModal({ isOpen, onClose, title }: BaseModalProps) {
                   )}
                   <div className="text-center">
                     <p className="font-semibold text-foreground">{user.name}</p>
-                    {user.phone && (
-                      <p className="text-xs text-muted-foreground">📞 {user.phone}</p>
-                    )}
+                    {user.phone && <p className="text-xs text-muted-foreground">📞 {user.phone}</p>}
                     {user.totalOrders != null && (
                       <p className="text-xs text-muted-foreground">
-                        {user.totalOrders} order{user.totalOrders !== 1 ? 's' : ''}
+                        {user.totalOrders} order{user.totalOrders !== 1 ? "s" : ""}
                       </p>
                     )}
                     <div className="flex items-center justify-center gap-1.5 mt-1">
-                      <StatusDot status={user.status ?? user.statusOfAccount ?? ''} />
+                      <StatusDot status={user.status ?? user.statusOfAccount ?? ""} />
                       <span className="text-xs text-muted-foreground capitalize">
                         {user.status}
                       </span>
@@ -1835,24 +1849,28 @@ export function UsersModal({ isOpen, onClose, title }: BaseModalProps) {
 // Revenue Modal
 // ─────────────────────────────────────────────────────────────────────────────
 
-type RevenueTab = 'gross' | 'expenses' | 'net';
-type RevenuePeriod = 'daily' | 'weekly' | 'yearly';
+type RevenueTab = "gross" | "expenses" | "net";
+type RevenuePeriod = "daily" | "weekly" | "yearly";
 
 // Maps each tab to the correct field names on RevenueAnalyticsData and RevenueTrendPoint
 // Controller fields: totalGrossRevenue, totalExpenses, totalNetRevenue (analytics)
 //                    grossRevenue, expenses, netRevenue (trend points)
 const REVENUE_FIELD_MAP: Record<
   RevenueTab,
-  { statsKey: keyof RevenueAnalyticsData; trendKey: 'grossRevenue' | 'expenses' | 'netRevenue'; label: string }
+  {
+    statsKey: keyof RevenueAnalyticsData;
+    trendKey: "grossRevenue" | "expenses" | "netRevenue";
+    label: string;
+  }
 > = {
-  gross:    { statsKey: 'totalGrossRevenue', trendKey: 'grossRevenue', label: 'Gross Revenue'   },
-  expenses: { statsKey: 'totalExpenses',     trendKey: 'expenses',     label: 'Total Expenses'  },
-  net:      { statsKey: 'totalNetRevenue',   trendKey: 'netRevenue',   label: 'Net Revenue'     },
+  gross: { statsKey: "totalGrossRevenue", trendKey: "grossRevenue", label: "Gross Revenue" },
+  expenses: { statsKey: "totalExpenses", trendKey: "expenses", label: "Total Expenses" },
+  net: { statsKey: "totalNetRevenue", trendKey: "netRevenue", label: "Net Revenue" },
 };
 
 export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
-  const [tab, setTab] = useState<RevenueTab>('gross');
-  const [period, setPeriod] = useState<RevenuePeriod | ''>('');
+  const [tab, setTab] = useState<RevenueTab>("gross");
+  const [period, setPeriod] = useState<RevenuePeriod | "">("");
   const [stats, setStats] = useState<RevenueAnalyticsData | null>(null);
   const [trends, setTrends] = useState<RevenueTrendsResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -1868,8 +1886,12 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
   }, [isOpen]);
 
   // Map UI period names to controller params
-  const PERIOD_TO_API: Record<string, string> = { daily: 'today', weekly: 'week', yearly: 'year' };
-  const PERIOD_TO_GROUPBY: Record<string, string> = { daily: 'hour', weekly: 'day', yearly: 'month' };
+  const PERIOD_TO_API: Record<string, string> = { daily: "today", weekly: "week", yearly: "year" };
+  const PERIOD_TO_GROUPBY: Record<string, string> = {
+    daily: "hour",
+    weekly: "day",
+    yearly: "month",
+  };
   const PERIOD_TO_LIMIT: Record<string, number> = { daily: 24, weekly: 7, yearly: 12 };
 
   const fetchRevenue = useCallback(async () => {
@@ -1880,14 +1902,14 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
       const [statsRes, trendsRes] = await Promise.all([
         superAdminApi.dashboard.getRevenue({ period: PERIOD_TO_API[period] ?? period }),
         superAdminApi.dashboard.getRevenueTrends({
-          groupBy: PERIOD_TO_GROUPBY[period] ?? 'day',
-          limit:   PERIOD_TO_LIMIT[period] ?? 12,
+          groupBy: PERIOD_TO_GROUPBY[period] ?? "day",
+          limit: PERIOD_TO_LIMIT[period] ?? 12,
         }),
       ]);
-      setStats(statsRes.data);           // unwrap: response is { period, data: RevenueAnalyticsData }
+      setStats(statsRes.data); // unwrap: response is { period, data: RevenueAnalyticsData }
       setTrends(trendsRes);
     } catch (err: any) {
-      const msg = err?.message || 'Failed to load revenue data';
+      const msg = err?.message || "Failed to load revenue data";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -1905,9 +1927,9 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
   const currentValue = stats ? (stats[fieldMap.statsKey] as number) : null;
 
   const TABS: { id: RevenueTab; label: string }[] = [
-    { id: 'gross',    label: 'Gross Revenue'  },
-    { id: 'expenses', label: 'Total Expenses' },
-    { id: 'net',      label: 'Net Revenue'    },
+    { id: "gross", label: "Gross Revenue" },
+    { id: "expenses", label: "Total Expenses" },
+    { id: "net", label: "Net Revenue" },
   ];
 
   return (
@@ -1924,8 +1946,8 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
                 onClick={() => setTab(t.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   tab === t.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:opacity-80'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:opacity-80"
                 }`}
               >
                 {t.label}
@@ -1940,7 +1962,7 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
             </label>
             <select
               value={period}
-              onChange={(e) => setPeriod(e.target.value as RevenuePeriod | '')}
+              onChange={(e) => setPeriod(e.target.value as RevenuePeriod | "")}
               className="w-52 px-4 py-2 rounded-lg border border-border bg-background text-foreground cursor-pointer text-sm"
             >
               <option value="">Choose duration…</option>
@@ -1959,7 +1981,9 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
             <div className="space-y-3 animate-pulse">
               <Skeleton className="h-32 rounded-xl" />
               <div className="grid grid-cols-3 gap-3">
-                {[0,1,2].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
+                {[0, 1, 2].map((i) => (
+                  <Skeleton key={i} className="h-20 rounded-xl" />
+                ))}
               </div>
             </div>
           ) : error ? (
@@ -1972,7 +1996,6 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
                 <p className="text-4xl font-bold text-foreground">
                   {fmtCurrency(currentValue ?? undefined)}
                 </p>
-
               </div>
 
               {/* All three metrics side-by-side for context */}
@@ -1985,8 +2008,8 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
                       key={t.id}
                       className={`rounded-xl p-4 cursor-pointer transition-colors ${
                         t.id === tab
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-foreground hover:bg-secondary/80'
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-foreground hover:bg-secondary/80"
                       }`}
                       onClick={() => setTab(t.id)}
                     >
@@ -2018,7 +2041,7 @@ export function RevenueModal({ isOpen, onClose, title }: BaseModalProps) {
                           {fmtCurrency((point[fieldMap.trendKey] as number) ?? undefined)}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {point.orders} order{point.orders !== 1 ? 's' : ''}
+                          {point.orders} order{point.orders !== 1 ? "s" : ""}
                         </span>
                       </div>
                     ))}

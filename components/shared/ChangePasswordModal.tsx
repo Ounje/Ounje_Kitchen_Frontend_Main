@@ -35,13 +35,13 @@ export default function ChangePasswordModal({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   const [validation, setValidation] = useState<PasswordValidation>({
     hasUppercase: false,
     hasNumber: false,
     hasMinLength: false,
   });
-  
+
   const [passwordsMatch, setPasswordsMatch] = useState(true);
 
   // Reset form when modal closes
@@ -86,12 +86,17 @@ export default function ChangePasswordModal({
   };
 
   const strength = calculateStrength();
-  const isValid = validation.hasUppercase && validation.hasNumber && validation.hasMinLength && passwordsMatch && confirmPassword;
+  const isValid =
+    validation.hasUppercase &&
+    validation.hasNumber &&
+    validation.hasMinLength &&
+    passwordsMatch &&
+    confirmPassword;
 
   const getStrengthColor = () => {
-    if (strength < 40) return '#ef4444'; // red
-    if (strength < 80) return '#f59e0b'; // orange
-    return '#10b981'; // green
+    if (strength < 40) return "#ef4444"; // red
+    if (strength < 80) return "#f59e0b"; // orange
+    return "#10b981"; // green
   };
 
   const handleProceed = () => {
@@ -104,11 +109,8 @@ export default function ChangePasswordModal({
   };
 
   return (
-     <Dialog open={open} onOpenChange={isForced ? undefined : onOpenChange}>
-      <DialogContent 
-        className="sm:max-w-md"
-        style={{ backgroundColor: '#e8f7e8' }}
-      >
+    <Dialog open={open} onOpenChange={isForced ? undefined : onOpenChange}>
+      <DialogContent className="sm:max-w-md" style={{ backgroundColor: "#e8f7e8" }}>
         {/* Close button */}
         {!isForced && (
           <button
@@ -120,9 +122,7 @@ export default function ChangePasswordModal({
         )}
 
         <DialogHeader className="text-center space-y-2">
-          <DialogTitle className="text-2xl font-bold text-gray-900">
-            Change Password
-          </DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-gray-900">Change Password</DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
             Update password for enhanced account security.
           </DialogDescription>
@@ -196,9 +196,7 @@ export default function ChangePasswordModal({
 
           {/* Validation Checklist */}
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Weak Password. Must Contain:
-            </p>
+            <p className="text-sm font-medium text-gray-700 mb-2">Weak Password. Must Contain:</p>
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm">
                 {validation.hasUppercase ? (
@@ -240,7 +238,7 @@ export default function ChangePasswordModal({
             <Button
               onClick={handleDiscard}
               className="flex-1 py-6"
-              style={{ backgroundColor: '#ffca3a', color: '#1a3f1c' }}
+              style={{ backgroundColor: "#ffca3a", color: "#1a3f1c" }}
             >
               Discard
             </Button>
@@ -249,9 +247,9 @@ export default function ChangePasswordModal({
             onClick={handleProceed}
             disabled={!isValid || !currentPassword}
             className="flex-1 py-6"
-            style={{ 
-              backgroundColor: isValid && currentPassword ? '#1a3f1c' : '#d1d5db',
-              color: isValid && currentPassword ? 'white' : '#6b7280',
+            style={{
+              backgroundColor: isValid && currentPassword ? "#1a3f1c" : "#d1d5db",
+              color: isValid && currentPassword ? "white" : "#6b7280",
             }}
           >
             Proceed

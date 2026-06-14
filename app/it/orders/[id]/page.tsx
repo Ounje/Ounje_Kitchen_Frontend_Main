@@ -21,14 +21,7 @@ function safeStr(val: any, fallback = "—"): string {
   if (typeof val === "string") return val.trim() || fallback;
   if (typeof val === "number") return String(val);
   if (typeof val === "object") {
-    return (
-      val.address    ??
-      val.name       ??
-      val.label      ??
-      val.city       ??
-      val.street     ??
-      fallback
-    );
+    return val.address ?? val.name ?? val.label ?? val.city ?? val.street ?? fallback;
   }
   return fallback;
 }
@@ -53,7 +46,7 @@ function buildMapHtml(
   vendorLat: number | null,
   vendorLng: number | null,
   deliveryAddress: string,
-  vendorAddress: string,
+  vendorAddress: string
 ): string {
   const hasVendor = vendorLat !== null && vendorLng !== null;
 
@@ -147,11 +140,15 @@ function Skeleton() {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          {[1,2,3].map(i => <div key={i} className="h-11 bg-gray-300 rounded-xl" />)}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-11 bg-gray-300 rounded-xl" />
+          ))}
         </div>
         <div className="h-10 bg-gray-300 rounded-xl" />
         <div className="space-y-3">
-          {[1,2,3,4].map(i => <div key={i} className="h-8 bg-gray-200 rounded" />)}
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-8 bg-gray-200 rounded" />
+          ))}
         </div>
       </div>
     </div>
@@ -160,13 +157,13 @@ function Skeleton() {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function OrderDetailPage() {
-  const params   = useParams();
-  const router   = useRouter();
-  const orderId  = params.id as string;
+  const params = useParams();
+  const router = useRouter();
+  const orderId = params.id as string;
 
-  const [order,   setOrder]   = useState<any>(null);
+  const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [tab,     setTab]     = useState<DetailTab>("Order Content");
+  const [tab, setTab] = useState<DetailTab>("Order Content");
 
   useEffect(() => {
     if (!orderId) return;
@@ -185,20 +182,19 @@ export default function OrderDetailPage() {
   }, [orderId]);
 
   // ── useMemo MUST be before any early returns (Rules of Hooks) ─────────────
-  const deliveryLat = order?.deliveryLatitude  ?? 6.5244;
+  const deliveryLat = order?.deliveryLatitude ?? 6.5244;
   const deliveryLng = order?.deliveryLongitude ?? 3.3792;
-  const vendorLat   = order?.vendor?.location?.coordinates?.[1] ?? null;
-  const vendorLng   = order?.vendor?.location?.coordinates?.[0] ?? null;
+  const vendorLat = order?.vendor?.location?.coordinates?.[1] ?? null;
+  const vendorLng = order?.vendor?.location?.coordinates?.[0] ?? null;
   const deliveryAddress = safeStr(order?.deliveryAddress);
-  const vendorZone  = safeStr(
+  const vendorZone = safeStr(
     order?.vendor?.location?.address ?? order?.vendor?.zone ?? order?.vendor?.area
   );
 
-  const mapHtml = useMemo(() => buildMapHtml(
-    deliveryLat, deliveryLng,
-    vendorLat,   vendorLng,
-    deliveryAddress, vendorZone,
-  ), [deliveryLat, deliveryLng, vendorLat, vendorLng, deliveryAddress, vendorZone]);
+  const mapHtml = useMemo(
+    () => buildMapHtml(deliveryLat, deliveryLng, vendorLat, vendorLng, deliveryAddress, vendorZone),
+    [deliveryLat, deliveryLng, vendorLat, vendorLng, deliveryAddress, vendorZone]
+  );
 
   if (loading) return <Skeleton />;
 
@@ -218,55 +214,52 @@ export default function OrderDetailPage() {
 
   // ── All fields from real API — no fallback mock values ─────────────────────
 
-  const status     = (order.status ?? "pending").toUpperCase();
-  const orderId2   = order.orderNumber ?? order._id ?? orderId;
-  const orderType  = order.orderType ?? order.type ?? "—";
+  const status = (order.status ?? "pending").toUpperCase();
+  const orderId2 = order.orderNumber ?? order._id ?? orderId;
+  const orderType = order.orderType ?? order.type ?? "—";
   const orderImage = order.image ?? order.foodImage ?? order.photo ?? "";
 
   // Cost breakdown — all from DB fields set by orderController
   const items: any[] = order.items ?? order.orderItems ?? [];
-  const mealCost     = order.totalPrice    ?? order.mealCost   ?? order.orderCost  ?? 0;
-  const deliveryFee  = order.deliveryFee   ?? 0;
-  const serviceFee   = order.serviceFee    ?? order.serviceCharge ?? 0;
-  const totalFee     = order.totalFee      ?? order.total ?? (mealCost + deliveryFee + serviceFee);
+  const mealCost = order.totalPrice ?? order.mealCost ?? order.orderCost ?? 0;
+  const deliveryFee = order.deliveryFee ?? 0;
+  const serviceFee = order.serviceFee ?? order.serviceCharge ?? 0;
+  const totalFee = order.totalFee ?? order.total ?? mealCost + deliveryFee + serviceFee;
 
   // Populated refs from backend
   const customer = order.customer ?? {};
-  const vendor   = order.vendor   ?? {};
-  const rider    = order.rider    ?? {};
+  const vendor = order.vendor ?? {};
+  const rider = order.rider ?? {};
 
   // Customer fields
-  const customerName  = safeStr(customer.user?.name  ?? customer.name);
+  const customerName = safeStr(customer.user?.name ?? customer.name);
   const customerPhone = safeStr(customer.user?.phone ?? customer.phone);
   const customerEmail = safeStr(customer.user?.email ?? customer.email);
-  const customerZone  = safeStr(
-    customer.savedAddresses?.[0]?.address ??
-    customer.savedAddresses?.[0]?.label   ??
-    customer.zone
+  const customerZone = safeStr(
+    customer.savedAddresses?.[0]?.address ?? customer.savedAddresses?.[0]?.label ?? customer.zone
   );
   const customerPhoto = customer.user?.avatar ?? customer.photo ?? "";
 
   // Vendor fields
-  const vendorName    = safeStr(vendor.name ?? vendor.businessName);
-  const vendorRating  = vendor.averageRating ?? vendor.rating ?? 0;
-  const vendorReviews = vendor.ratingCount   ?? vendor.totalRatings ?? 0;
-  const vendorPhone   = safeStr(vendor.owner?.phone ?? vendor.phone);
-  const vendorPhoto   = vendor.photo ?? vendor.logo ?? "";
+  const vendorName = safeStr(vendor.name ?? vendor.businessName);
+  const vendorRating = vendor.averageRating ?? vendor.rating ?? 0;
+  const vendorReviews = vendor.ratingCount ?? vendor.totalRatings ?? 0;
+  const vendorPhone = safeStr(vendor.owner?.phone ?? vendor.phone);
+  const vendorPhoto = vendor.photo ?? vendor.logo ?? "";
 
   // Rider fields
-  const riderName    = (rider.user?.name ??
-    `${rider.firstName ?? ""} ${rider.lastName ?? ""}`.trim()) || "—";
-  const riderRating  = rider.averageRating ?? rider.rating ?? rider.ratings?.average ?? 0;
-  const riderReviews = rider.ratingCount   ?? rider.ratings?.count ?? 0;
-  const riderPhone   = safeStr(rider.user?.phone ?? rider.phone);
-  const riderZone    = safeStr(rider.operatingArea?.[0] ?? rider.zone);
-  const riderPhoto   = rider.photo ?? rider.user?.avatar ?? "";
+  const riderName =
+    (rider.user?.name ?? `${rider.firstName ?? ""} ${rider.lastName ?? ""}`.trim()) || "—";
+  const riderRating = rider.averageRating ?? rider.rating ?? rider.ratings?.average ?? 0;
+  const riderReviews = rider.ratingCount ?? rider.ratings?.count ?? 0;
+  const riderPhone = safeStr(rider.user?.phone ?? rider.phone);
+  const riderZone = safeStr(rider.operatingArea?.[0] ?? rider.zone);
+  const riderPhoto = rider.photo ?? rider.user?.avatar ?? "";
 
   const tabs: DetailTab[] = ["Order Content", "Involved Party Details", "Map Feature"];
 
   return (
     <div className="w-full space-y-4">
-
       {/* ── Back ── */}
       <button
         onClick={() => router.push("/it/orders")}
@@ -278,7 +271,6 @@ export default function OrderDetailPage() {
 
       {/* ── Main card — full width ── */}
       <div className="w-full bg-[#e8f7e8] rounded-2xl shadow-md overflow-hidden">
-
         {/* Header */}
         <div className="px-6 pt-5 pb-4 border-b border-green-200">
           <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
@@ -289,11 +281,7 @@ export default function OrderDetailPage() {
           {/* Food image */}
           <div className="w-full sm:w-36 h-28 rounded-xl overflow-hidden bg-gray-200 flex-shrink-0">
             {orderImage ? (
-              <img
-                src={orderImage}
-                alt="Order"
-                className="w-full h-full object-cover"
-              />
+              <img src={orderImage} alt="Order" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-medium">
                 No image
@@ -314,9 +302,7 @@ export default function OrderDetailPage() {
             {order.placedAt && (
               <div className="text-sm md:text-base">
                 <span className="font-bold text-gray-900">Placed: </span>
-                <span className="text-gray-700">
-                  {new Date(order.placedAt).toLocaleString()}
-                </span>
+                <span className="text-gray-700">{new Date(order.placedAt).toLocaleString()}</span>
               </div>
             )}
             {order.deliveryAddress && (
@@ -330,7 +316,7 @@ export default function OrderDetailPage() {
 
         {/* Tabs */}
         <div className="grid grid-cols-3 gap-2 px-6 pb-3">
-          {tabs.map(t => (
+          {tabs.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -347,14 +333,15 @@ export default function OrderDetailPage() {
 
         {/* Status bar */}
         <div className="mx-6 mb-5">
-          <span className={`inline-block w-full text-center py-2.5 rounded-xl text-sm font-bold tracking-widest uppercase ${statusStyle(order.status ?? "")}`}>
+          <span
+            className={`inline-block w-full text-center py-2.5 rounded-xl text-sm font-bold tracking-widest uppercase ${statusStyle(order.status ?? "")}`}
+          >
             {status}
           </span>
         </div>
 
         {/* ── Tab content ── */}
         <div className="px-4 sm:px-6 pb-8">
-
           {/* ── ORDER CONTENT ── */}
           {tab === "Order Content" && (
             <div className="space-y-4">
@@ -375,21 +362,21 @@ export default function OrderDetailPage() {
                     </thead>
                     <tbody>
                       {items.map((item: any, i: number) => {
-                        const qty   = item.quantity ?? item.qty ?? 1;
-                        const name  = item.item?.name ?? item.name ?? item.itemName ?? item.foodName ?? "Item";
-                        const unit  = item.item?.category ?? item.unit ?? item.unitLabel ?? "";
+                        const qty = item.quantity ?? item.qty ?? 1;
+                        const name =
+                          item.item?.name ?? item.name ?? item.itemName ?? item.foodName ?? "Item";
+                        const unit = item.item?.category ?? item.unit ?? item.unitLabel ?? "";
                         const price = item.price ?? item.unitPrice ?? 0;
-                        const total = item.total ?? item.subtotal ?? (qty * price);
+                        const total = item.total ?? item.subtotal ?? qty * price;
                         return (
-                          <tr
-                            key={i}
-                            className={i % 2 === 0 ? "bg-white" : "bg-green-50"}
-                          >
+                          <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-green-50"}>
                             <td className="px-4 py-3 text-gray-800">
-                              {qty}x {name}{unit ? ` of ${unit}` : ""}
+                              {qty}x {name}
+                              {unit ? ` of ${unit}` : ""}
                             </td>
                             <td className="px-4 py-3 text-gray-600">
-                              {fmt(price)}{unit ? `/${unit}` : ""}
+                              {fmt(price)}
+                              {unit ? `/${unit}` : ""}
                             </td>
                             <td className="px-4 py-3 text-right font-semibold text-gray-900">
                               {fmt(total)}
@@ -416,8 +403,10 @@ export default function OrderDetailPage() {
                   <span className="text-gray-600">Delivery fee</span>
                   <span className="font-semibold text-gray-900">{fmt(deliveryFee)}</span>
                 </div>
-                <div className="px-4 py-4 flex justify-between font-bold text-base"
-                  style={{ backgroundColor: "#e8f7e8" }}>
+                <div
+                  className="px-4 py-4 flex justify-between font-bold text-base"
+                  style={{ backgroundColor: "#e8f7e8" }}
+                >
                   <span className="text-gray-900">Total Fee</span>
                   <span className="text-[#1a3f1c] text-lg">{fmt(totalFee)}</span>
                 </div>
@@ -483,8 +472,10 @@ export default function OrderDetailPage() {
               </div>
 
               {/* Map */}
-              <div className="w-full rounded-xl overflow-hidden border border-green-200 shadow-sm"
-                style={{ height: "420px" }}>
+              <div
+                className="w-full rounded-xl overflow-hidden border border-green-200 shadow-sm"
+                style={{ height: "420px" }}
+              >
                 <iframe
                   title="Delivery Route Map"
                   width="100%"
@@ -524,7 +515,6 @@ export default function OrderDetailPage() {
               )}
             </div>
           )}
-
         </div>
       </div>
     </div>
@@ -533,16 +523,23 @@ export default function OrderDetailPage() {
 
 // ── Party Card ────────────────────────────────────────────────────────────────
 function PartyCard({
-  label, photo, name, rating, reviewCount, phone, email, zone,
+  label,
+  photo,
+  name,
+  rating,
+  reviewCount,
+  phone,
+  email,
+  zone,
 }: {
-  label:        string;
-  photo:        string;
-  name:         string;
-  rating:       number | null;
-  reviewCount:  number | null;
-  phone:        string;
-  email?:       string;
-  zone:         string;
+  label: string;
+  photo: string;
+  name: string;
+  rating: number | null;
+  reviewCount: number | null;
+  phone: string;
+  email?: string;
+  zone: string;
 }) {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100 space-y-4">
@@ -572,7 +569,8 @@ function PartyCard({
           <div className="flex items-center gap-2">
             <Star className="h-4 w-4 text-yellow-500 fill-yellow-400 flex-shrink-0" />
             <span>
-              {rating.toFixed(1)}{reviewCount ? ` · ${reviewCount} reviews` : ""}
+              {rating.toFixed(1)}
+              {reviewCount ? ` · ${reviewCount} reviews` : ""}
             </span>
           </div>
         )}

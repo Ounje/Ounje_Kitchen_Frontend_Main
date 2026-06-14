@@ -1,33 +1,33 @@
-import { apiClient } from '@/lib/client';
-import { ENDPOINTS } from '@/lib/config';
-import type { 
-  PaginatedResponse, 
-  Customer, 
-  Vendor, 
-  Rider, 
-  Staff, 
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
+import type {
+  PaginatedResponse,
+  Customer,
+  Vendor,
+  Rider,
+  Staff,
   PaginationParams,
-  ApiResponse 
-} from '@/types';
+  ApiResponse,
+} from "@/types";
 
 class UsersService {
   // ==================== CUSTOMERS ====================
-  
+
   /**
    * Get all customers with optional filters
    */
   async getCustomers(params?: PaginationParams): Promise<PaginatedResponse<Customer>> {
     const queryParams = new URLSearchParams();
-    
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.zone) queryParams.append('zone', params.zone);
-    if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.search) queryParams.append("search", params.search);
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.zone) queryParams.append("zone", params.zone);
+    if (params?.isActive !== undefined) queryParams.append("isActive", params.isActive.toString());
 
     const queryString = queryParams.toString();
-    const url = queryString 
+    const url = queryString
       ? `${ENDPOINTS.SUPERADMIN.CUSTOMERS}?${queryString}`
       : ENDPOINTS.SUPERADMIN.CUSTOMERS;
 
@@ -48,18 +48,14 @@ class UsersService {
    * Suspend a customer
    */
   async suspendCustomer(id: string): Promise<ApiResponse<Customer>> {
-    return apiClient.put<ApiResponse<Customer>>(
-      ENDPOINTS.SUPERADMIN.CUSTOMER_SUSPEND(id)
-    );
+    return apiClient.put<ApiResponse<Customer>>(ENDPOINTS.SUPERADMIN.CUSTOMER_SUSPEND(id));
   }
 
   /**
    * Activate a customer
    */
   async activateCustomer(id: string): Promise<ApiResponse<Customer>> {
-    return apiClient.put<ApiResponse<Customer>>(
-      ENDPOINTS.SUPERADMIN.CUSTOMER_ACTIVATE(id)
-    );
+    return apiClient.put<ApiResponse<Customer>>(ENDPOINTS.SUPERADMIN.CUSTOMER_ACTIVATE(id));
   }
 
   // ==================== VENDORS ====================
@@ -69,17 +65,18 @@ class UsersService {
    */
   async getVendors(params?: PaginationParams): Promise<PaginatedResponse<Vendor>> {
     const queryParams = new URLSearchParams();
-    
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.zone) queryParams.append('zone', params.zone);
-    if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
-    if (params?.isVerified !== undefined) queryParams.append('isVerified', params.isVerified.toString());
+
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.search) queryParams.append("search", params.search);
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.zone) queryParams.append("zone", params.zone);
+    if (params?.isActive !== undefined) queryParams.append("isActive", params.isActive.toString());
+    if (params?.isVerified !== undefined)
+      queryParams.append("isVerified", params.isVerified.toString());
 
     const queryString = queryParams.toString();
-    const url = queryString 
+    const url = queryString
       ? `${ENDPOINTS.SUPERADMIN.VENDORS}?${queryString}`
       : ENDPOINTS.SUPERADMIN.VENDORS;
 
@@ -100,27 +97,21 @@ class UsersService {
    * Suspend a vendor
    */
   async suspendVendor(id: string): Promise<ApiResponse<Vendor>> {
-    return apiClient.put<ApiResponse<Vendor>>(
-      ENDPOINTS.SUPERADMIN.VENDOR_SUSPEND(id)
-    );
+    return apiClient.put<ApiResponse<Vendor>>(ENDPOINTS.SUPERADMIN.VENDOR_SUSPEND(id));
   }
 
   /**
    * Activate a vendor
    */
   async activateVendor(id: string): Promise<ApiResponse<Vendor>> {
-    return apiClient.put<ApiResponse<Vendor>>(
-      ENDPOINTS.SUPERADMIN.VENDOR_ACTIVATE(id)
-    );
+    return apiClient.put<ApiResponse<Vendor>>(ENDPOINTS.SUPERADMIN.VENDOR_ACTIVATE(id));
   }
 
   /**
    * Verify a vendor
    */
   async verifyVendor(id: string): Promise<ApiResponse<Vendor>> {
-    return apiClient.put<ApiResponse<Vendor>>(
-      ENDPOINTS.SUPERADMIN.VENDOR_VERIFY(id)
-    );
+    return apiClient.put<ApiResponse<Vendor>>(ENDPOINTS.SUPERADMIN.VENDOR_VERIFY(id));
   }
 
   // ==================== RIDERS ====================
@@ -130,17 +121,18 @@ class UsersService {
    */
   async getRiders(params?: PaginationParams): Promise<PaginatedResponse<Rider>> {
     const queryParams = new URLSearchParams();
-    
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.zone) queryParams.append('zone', params.zone);
-    if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
-    if (params?.isVerified !== undefined) queryParams.append('isVerified', params.isVerified.toString());
+
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.search) queryParams.append("search", params.search);
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.zone) queryParams.append("zone", params.zone);
+    if (params?.isActive !== undefined) queryParams.append("isActive", params.isActive.toString());
+    if (params?.isVerified !== undefined)
+      queryParams.append("isVerified", params.isVerified.toString());
 
     const queryString = queryParams.toString();
-    const url = queryString 
+    const url = queryString
       ? `${ENDPOINTS.SUPERADMIN.RIDERS}?${queryString}`
       : ENDPOINTS.SUPERADMIN.RIDERS;
 
@@ -151,9 +143,7 @@ class UsersService {
    * Get single rider by ID
    */
   async getRider(id: string): Promise<Rider> {
-    const response = await apiClient.get<ApiResponse<Rider>>(
-      ENDPOINTS.SUPERADMIN.RIDER_BY_ID(id)
-    );
+    const response = await apiClient.get<ApiResponse<Rider>>(ENDPOINTS.SUPERADMIN.RIDER_BY_ID(id));
     return response.data;
   }
 
@@ -161,27 +151,21 @@ class UsersService {
    * Suspend a rider
    */
   async suspendRider(id: string): Promise<ApiResponse<Rider>> {
-    return apiClient.put<ApiResponse<Rider>>(
-      ENDPOINTS.SUPERADMIN.RIDER_SUSPEND(id)
-    );
+    return apiClient.put<ApiResponse<Rider>>(ENDPOINTS.SUPERADMIN.RIDER_SUSPEND(id));
   }
 
   /**
    * Activate a rider
    */
   async activateRider(id: string): Promise<ApiResponse<Rider>> {
-    return apiClient.put<ApiResponse<Rider>>(
-      ENDPOINTS.SUPERADMIN.RIDER_ACTIVATE(id)
-    );
+    return apiClient.put<ApiResponse<Rider>>(ENDPOINTS.SUPERADMIN.RIDER_ACTIVATE(id));
   }
 
   /**
    * Verify a rider
    */
   async verifyRider(id: string): Promise<ApiResponse<Rider>> {
-    return apiClient.put<ApiResponse<Rider>>(
-      ENDPOINTS.SUPERADMIN.RIDER_VERIFY(id)
-    );
+    return apiClient.put<ApiResponse<Rider>>(ENDPOINTS.SUPERADMIN.RIDER_VERIFY(id));
   }
 
   // ==================== STAFF ====================
@@ -191,14 +175,14 @@ class UsersService {
    */
   async getStaff(params?: PaginationParams): Promise<PaginatedResponse<Staff>> {
     const queryParams = new URLSearchParams();
-    
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.search) queryParams.append("search", params.search);
+    if (params?.isActive !== undefined) queryParams.append("isActive", params.isActive.toString());
 
     const queryString = queryParams.toString();
-    const url = queryString 
+    const url = queryString
       ? `${ENDPOINTS.SUPERADMIN.STAFF}?${queryString}`
       : ENDPOINTS.SUPERADMIN.STAFF;
 

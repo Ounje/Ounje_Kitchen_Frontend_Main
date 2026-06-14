@@ -1,16 +1,17 @@
-import { MapPin, CheckCircle, Award } from 'lucide-react';
-import { TopPerformer } from '@/lib/api/services/rider.service';
+import { MapPin, CheckCircle, Award } from "lucide-react";
+import { TopPerformer } from "@/lib/api/services/rider.service";
 
 interface TopPerformerCardProps {
   performer: TopPerformer;
 }
 
 export function TopPerformerCard({ performer }: TopPerformerCardProps) {
-  const getRankConfig = (rank: 1 | 2 | 3) => ({
-    1: { gradient: 'linear-gradient(135deg,#FF8C00 0%,#FFA500 100%)', label: '1st' },
-    2: { gradient: 'linear-gradient(135deg,#A9A9A9 0%,#C0C0C0 100%)', label: '2nd' },
-    3: { gradient: 'linear-gradient(135deg,#CD7F32 0%,#D2691E 100%)', label: '3rd' },
-  }[rank]);
+  const getRankConfig = (rank: 1 | 2 | 3) =>
+    ({
+      1: { gradient: "linear-gradient(135deg,#FF8C00 0%,#FFA500 100%)", label: "1st" },
+      2: { gradient: "linear-gradient(135deg,#A9A9A9 0%,#C0C0C0 100%)", label: "2nd" },
+      3: { gradient: "linear-gradient(135deg,#CD7F32 0%,#D2691E 100%)", label: "3rd" },
+    })[rank];
 
   const config = getRankConfig(performer.rank);
 
@@ -37,7 +38,7 @@ export function TopPerformerCard({ performer }: TopPerformerCardProps) {
           />
         ) : (
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white flex-shrink-0 bg-white/30 flex items-center justify-center text-white text-xl font-bold">
-            {performer.name?.charAt(0).toUpperCase() ?? '?'}
+            {performer.name?.charAt(0).toUpperCase() ?? "?"}
           </div>
         )}
 

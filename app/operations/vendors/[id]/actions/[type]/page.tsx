@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { vendorService } from '@/lib/api/services/vendor.service';
-import { ConfirmActionModal } from '@/components/operations/Vendors/Modal/ConfirmActionModal';
-import { SuccessModal } from '@/components/operations/Vendors/Modal/SuccessModal';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { vendorService } from "@/lib/api/services/vendor.service";
+import { ConfirmActionModal } from "@/components/operations/Vendors/Modal/ConfirmActionModal";
+import { SuccessModal } from "@/components/operations/Vendors/Modal/SuccessModal";
+import { toast } from "sonner";
 
-type ActionType = 'suspend' | 'activate' | 'delete';
+type ActionType = "suspend" | "activate" | "delete";
 
 const actionConfig = {
   suspend: {
-    confirmTitle: 'Are you sure, you want to suspend this user?',
+    confirmTitle: "Are you sure, you want to suspend this user?",
     successTitle: "You've successfully suspended a user!",
   },
   activate: {
-    confirmTitle: 'Are you sure, you want to activate this user?',
-    successTitle: 'The account has been activated successfully!',
+    confirmTitle: "Are you sure, you want to activate this user?",
+    successTitle: "The account has been activated successfully!",
   },
   delete: {
-    confirmTitle: 'Are you sure, you want to delete this account?',
-    successTitle: 'The account has successfully been deleted!',
+    confirmTitle: "Are you sure, you want to delete this account?",
+    successTitle: "The account has successfully been deleted!",
   },
 };
 
@@ -35,9 +35,9 @@ export default function VendorActionPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!['suspend', 'activate', 'delete'].includes(actionType)) {
-      toast.error('Invalid action type');
-      router.push('/operations/vendors');
+    if (!["suspend", "activate", "delete"].includes(actionType)) {
+      toast.error("Invalid action type");
+      router.push("/operations/vendors");
     }
   }, [actionType, router]);
 
@@ -45,13 +45,13 @@ export default function VendorActionPage() {
     try {
       setLoading(true);
       switch (actionType) {
-        case 'suspend':
+        case "suspend":
           await vendorService.suspendVendor(vendorId);
           break;
-        case 'activate':
+        case "activate":
           await vendorService.activateVendor(vendorId);
           break;
-        case 'delete':
+        case "delete":
           await vendorService.deleteVendor(vendorId);
           break;
       }
@@ -65,7 +65,7 @@ export default function VendorActionPage() {
   };
 
   const handleCancel = () => router.push(`/operations/vendors/${vendorId}`);
-  const handleGoHome = () => router.push('/operations/vendors');
+  const handleGoHome = () => router.push("/operations/vendors");
 
   const config = actionConfig[actionType];
 
@@ -78,11 +78,7 @@ export default function VendorActionPage() {
         title={config?.confirmTitle}
         loading={loading}
       />
-      <SuccessModal
-        isOpen={showSuccess}
-        title={config?.successTitle}
-        onGoHome={handleGoHome}
-      />
+      <SuccessModal isOpen={showSuccess} title={config?.successTitle} onGoHome={handleGoHome} />
     </div>
   );
 }

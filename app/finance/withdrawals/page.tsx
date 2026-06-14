@@ -1,42 +1,45 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import { FinanceFilters, type FinanceFilterValues } from '@/components/finance/FinanceFilters';
-import { WithdrawalList } from '@/components/finance/WithdrawalList';
-import { WithdrawalInfoModal } from '@/components/finance/WithdrawalInfoModal';
-import Pagination from '@/components/Pagination';
+import { useState, useCallback, useEffect } from "react";
+import { FinanceFilters, type FinanceFilterValues } from "@/components/finance/FinanceFilters";
+import { WithdrawalList } from "@/components/finance/WithdrawalList";
+import { WithdrawalInfoModal } from "@/components/finance/WithdrawalInfoModal";
+import Pagination from "@/components/Pagination";
 import financeService, {
   type WithdrawalFilters,
   type WithdrawalGroup,
   type WithdrawalDetail,
-} from '@/lib/api/services/finance.service';
+} from "@/lib/api/services/finance.service";
 
 export default function WithdrawalsPage() {
-  const [groups, setGroups]         = useState<WithdrawalGroup[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [filters, setFilters]       = useState<WithdrawalFilters>({ page: 1, limit: 10 });
-  const [pageSize, setPageSize]     = useState(10);
+  const [groups, setGroups] = useState<WithdrawalGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<WithdrawalFilters>({ page: 1, limit: 10 });
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
 
   // Modal
-  const [modalOpen, setModalOpen]       = useState(false);
-  const [modalDetail, setModalDetail]   = useState<WithdrawalDetail | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalDetail, setModalDetail] = useState<WithdrawalDetail | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
 
-  const load = useCallback(async (f: WithdrawalFilters, limit = pageSize) => {
-    setLoading(true);
-    try {
-      const res: any = await financeService.getWithdrawals({ ...f, limit });
+  const load = useCallback(
+    async (f: WithdrawalFilters, limit = pageSize) => {
+      setLoading(true);
+      try {
+        const res: any = await financeService.getWithdrawals({ ...f, limit });
 
-      // Backend shape: { success, message, data: [], page, limit, total, totalPages }
-      const list: WithdrawalGroup[] = Array.isArray(res?.data) ? res.data : [];
+        // Backend shape: { success, message, data: [], page, limit, total, totalPages }
+        const list: WithdrawalGroup[] = Array.isArray(res?.data) ? res.data : [];
 
-      setGroups(list);
-      setTotalPages(res?.totalPages ?? 1);
-    } finally {
-      setLoading(false);
-    }
-  }, [pageSize]);
+        setGroups(list);
+        setTotalPages(res?.totalPages ?? 1);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pageSize]
+  );
 
   // ── Load on mount ─────────────────────────────────────────
   useEffect(() => {
@@ -45,10 +48,10 @@ export default function WithdrawalsPage() {
 
   const handleSearch = (v: FinanceFilterValues) => {
     const f: WithdrawalFilters = {
-      name:      v.name      || undefined,
-      role:      (v.role     || undefined) as WithdrawalFilters['role'],
+      name: v.name || undefined,
+      role: (v.role || undefined) as WithdrawalFilters["role"],
       startDate: v.startDate || undefined,
-      endDate:   v.endDate   || undefined,
+      endDate: v.endDate || undefined,
       page: 1,
       limit: pageSize,
     };
@@ -59,21 +62,23 @@ export default function WithdrawalsPage() {
   const handleExport = async () => {
     try {
       const res = await financeService.exportWithdrawalsCSV({
-        name:      filters.name,
-        role:      filters.role,
+        name: filters.name,
+        role: filters.role,
         startDate: filters.startDate,
-        endDate:   filters.endDate,
+        endDate: filters.endDate,
       });
 
       const blob: Blob =
-        res instanceof Blob                 ? res              :
-        (res as any)?.data instanceof Blob  ? (res as any).data :
-        new Blob([JSON.stringify(res)], { type: 'text/csv' });
+        res instanceof Blob
+          ? res
+          : (res as any)?.data instanceof Blob
+            ? (res as any).data
+            : new Blob([JSON.stringify(res)], { type: "text/csv" });
 
       const url = URL.createObjectURL(blob);
-      const a   = document.createElement('a');
-      a.href     = url;
-      a.download = 'withdrawals.csv';
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "withdrawals.csv";
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -113,7 +118,9 @@ export default function WithdrawalsPage() {
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1a3f1c]">Withdrawals</h1>
         <p className="text-sm text-gray-400 mt-1">
-          Internal withdrawal records — for reference only. Approving or rejecting here does <strong>not</strong> affect actual bank transfers, which are handled automatically by the Payouts system.
+          Internal withdrawal records — for reference only. Approving or rejecting here does{" "}
+          <strong>not</strong> affect actual bank transfers, which are handled automatically by the
+          Payouts system.
         </p>
       </div>
 

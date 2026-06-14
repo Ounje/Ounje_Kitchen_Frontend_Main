@@ -8,18 +8,18 @@ import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const PAGE_TITLES: Record<string, string> = {
-  "/it":                    "Dashboard",
-  "/it/admin":              "Admin Accounts",
-  "/it/orders":             "Orders",
+  "/it": "Dashboard",
+  "/it/admin": "Admin Accounts",
+  "/it/orders": "Orders",
   "/it/account-management": "Account Management",
-  "/it/settings":           "Settings",
+  "/it/settings": "Settings",
 };
 
 function getPageTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
   const base = Object.keys(PAGE_TITLES)
-    .filter(k => k !== "/it")
-    .find(k => pathname.startsWith(k));
+    .filter((k) => k !== "/it")
+    .find((k) => pathname.startsWith(k));
   return base ? PAGE_TITLES[base] : "IT Portal";
 }
 
@@ -32,15 +32,21 @@ export default function ITHeader({ onMenuClick }: ITHeaderProps) {
   const { user } = useAuth();
 
   const pageTitle = getPageTitle(pathname);
-  const initials  = user?.firstName && user?.lastName
-    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : "IT";
-  const fullName  = user?.firstName ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "User";
+  const initials =
+    user?.firstName && user?.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+      : "IT";
+  const fullName = user?.firstName ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "User";
 
   return (
     <header className="sticky top-0 z-30 h-14 bg-white border-b border-gray-100 shadow-sm flex items-center px-4 sm:px-6 gap-3">
-      <Button variant="ghost" size="icon"
+      <Button
+        variant="ghost"
+        size="icon"
         className="lg:hidden h-9 w-9 text-gray-600 hover:bg-gray-100 shrink-0"
-        onClick={onMenuClick} aria-label="Open menu">
+        onClick={onMenuClick}
+        aria-label="Open menu"
+      >
         <Menu className="h-5 w-5" />
       </Button>
 
@@ -52,8 +58,12 @@ export default function ITHeader({ onMenuClick }: ITHeaderProps) {
         <NotificationBell portal="IT" className="text-gray-600 hover:bg-gray-100" />
         <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200">
           <Avatar className="h-7 w-7 shrink-0">
-            {user?.avatar && <AvatarImage src={user.avatar} alt={fullName} className="object-cover" />}
-            <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold text-xs">{initials}</AvatarFallback>
+            {user?.avatar && (
+              <AvatarImage src={user.avatar} alt={fullName} className="object-cover" />
+            )}
+            <AvatarFallback className="bg-[#98ef9b] text-[#1a3f1c] font-bold text-xs">
+              {initials}
+            </AvatarFallback>
           </Avatar>
           <span className="text-sm font-semibold text-gray-700 max-w-30 truncate">{fullName}</span>
         </div>

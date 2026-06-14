@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { riderService, type RiderFilters } from '@/lib/api/services/rider.service';
-import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { riderService, type RiderFilters } from "@/lib/api/services/rider.service";
+import { toast } from "sonner";
 
 // ── Helper: unwrap the rider object from whatever shape the backend returns ───
 // Backend returns: { success, data: { rider, recentDeliveries } }
@@ -12,7 +12,7 @@ function unwrapRider(res: any) {
   // { data: { rider: {...} } }
   if (res?.data?.rider) return res.data.rider;
   // { data: {...} }  (flat data object)
-  if (res?.data && typeof res.data === 'object' && !Array.isArray(res.data)) return res.data;
+  if (res?.data && typeof res.data === "object" && !Array.isArray(res.data)) return res.data;
   // Already the rider object
   return res;
 }
@@ -20,8 +20,8 @@ function unwrapRider(res: any) {
 /** Paginated riders list */
 export function useRiders(filters: RiderFilters) {
   return useQuery({
-    queryKey: ['riders', filters],
-    queryFn:  () => riderService.getRiders(filters),
+    queryKey: ["riders", filters],
+    queryFn: () => riderService.getRiders(filters),
     staleTime: 30_000,
   });
 }
@@ -29,8 +29,8 @@ export function useRiders(filters: RiderFilters) {
 /** Top 3 performers */
 export function useTopPerformers() {
   return useQuery({
-    queryKey: ['riders', 'top-performers'],
-    queryFn:  () => riderService.getTopPerformers(),
+    queryKey: ["riders", "top-performers"],
+    queryFn: () => riderService.getTopPerformers(),
     staleTime: 60_000,
   });
 }
@@ -38,9 +38,9 @@ export function useTopPerformers() {
 /** Single rider detail */
 export function useRider(id: string) {
   return useQuery({
-    queryKey: ['riders', id],
-    queryFn:  () => riderService.getRiderById(id),
-    enabled:  !!id,
+    queryKey: ["riders", id],
+    queryFn: () => riderService.getRiderById(id),
+    enabled: !!id,
   });
 }
 
@@ -51,22 +51,18 @@ export function useRider(id: string) {
  */
 export function useRiderDocument(id: string) {
   return useQuery({
-    queryKey: ['riders', id, 'document'],
-    queryFn:  async () => {
-      const res: any    = await riderService.getRiderById(id);
+    queryKey: ["riders", id, "document"],
+    queryFn: async () => {
+      const res: any = await riderService.getRiderById(id);
       // Unwrap nested response shape
-      const rider: any  = unwrapRider(res);
+      const rider: any = unwrapRider(res);
 
       const documentUrl =
-        rider?.nin            ??
-        rider?.driversLicense ??
-        rider?.documentUrl    ??
-        rider?.document       ??
-        '';
+        rider?.nin ?? rider?.driversLicense ?? rider?.documentUrl ?? rider?.document ?? "";
 
       if (!documentUrl) return null;
 
-      const documentType = documentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image';
+      const documentType = documentUrl.toLowerCase().endsWith(".pdf") ? "pdf" : "image";
       return { documentUrl, documentType };
     },
     enabled: !!id,
@@ -79,12 +75,12 @@ export function useSuspendRider() {
   return useMutation({
     mutationFn: (riderId: string) => riderService.suspendRider(riderId),
     onSuccess: (_, riderId) => {
-      queryClient.invalidateQueries({ queryKey: ['riders'] });
-      queryClient.invalidateQueries({ queryKey: ['riders', riderId] });
-      toast.success('Rider suspended successfully');
+      queryClient.invalidateQueries({ queryKey: ["riders"] });
+      queryClient.invalidateQueries({ queryKey: ["riders", riderId] });
+      toast.success("Rider suspended successfully");
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to suspend rider');
+      toast.error(error.message || "Failed to suspend rider");
     },
   });
 }
@@ -95,12 +91,12 @@ export function useActivateRider() {
   return useMutation({
     mutationFn: (riderId: string) => riderService.activateRider(riderId),
     onSuccess: (_, riderId) => {
-      queryClient.invalidateQueries({ queryKey: ['riders'] });
-      queryClient.invalidateQueries({ queryKey: ['riders', riderId] });
-      toast.success('Rider activated successfully');
+      queryClient.invalidateQueries({ queryKey: ["riders"] });
+      queryClient.invalidateQueries({ queryKey: ["riders", riderId] });
+      toast.success("Rider activated successfully");
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to activate rider');
+      toast.error(error.message || "Failed to activate rider");
     },
   });
 }
@@ -111,11 +107,11 @@ export function useDeleteRider() {
   return useMutation({
     mutationFn: (riderId: string) => riderService.deleteRider(riderId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['riders'] });
-      toast.success('Rider deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ["riders"] });
+      toast.success("Rider deleted successfully");
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete rider');
+      toast.error(error.message || "Failed to delete rider");
     },
   });
 }
