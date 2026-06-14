@@ -15,7 +15,19 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Bell, Plus, Trash2, Users, Mail, MessageSquare, User, Search, X } from "lucide-react";
+import {
+  Bell,
+  Plus,
+  Trash2,
+  Users,
+  Mail,
+  MessageSquare,
+  User,
+  Search,
+  X,
+  Clock,
+  Zap,
+} from "lucide-react";
 import { NotificationDetailModal } from "@/components/ui/notification-detail-modal";
 import Pagination from "@/components/Pagination";
 
@@ -55,7 +67,19 @@ export default function NotificationsPage() {
   const [searchResults, setSearchResults] = useState<Recipient[]>([]);
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const toLocalDateTimeString = (date: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  const getDefaultScheduleTime = () => {
+    const d = new Date();
+    d.setHours(d.getHours() + 1);
+    return toLocalDateTimeString(d);
+  };
 
   // Debounced recipient search
   useEffect(() => {
@@ -96,6 +120,7 @@ export default function NotificationsPage() {
     setSearchResults([]);
     setSelectedRecipient(null);
     setShowDropdown(false);
+    setScheduledAt("");
   };
 
   const { data: queryData, isLoading } = useQuery({
@@ -110,7 +135,9 @@ export default function NotificationsPage() {
     mutationFn: (data: any) => notificationService.createBroadcast(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      toast.success("Broadcast sent successfully");
+      toast.success(
+        scheduledAt ? "Broadcast scheduled successfully" : "Broadcast sent successfully"
+      );
       setOpen(false);
       resetForm();
     },
@@ -142,6 +169,7 @@ export default function NotificationsPage() {
     }
 
     const formData = new FormData(e.currentTarget);
+    const scheduledAtISO = scheduledAt ? new Date(scheduledAt).toISOString() : undefined;
 
     if (isIndividual) {
       createMutation.mutate({
@@ -153,6 +181,7 @@ export default function NotificationsPage() {
         channels,
         recipientId: selectedRecipient!._id,
         recipientType: selectedRecipient!.type,
+        ...(scheduledAtISO ? { scheduledAt: scheduledAtISO } : {}),
       });
     } else {
       const audience = formData.get("audience") as string;
@@ -164,6 +193,7 @@ export default function NotificationsPage() {
         sourcePortal: "Operations",
         targetPortal: audience,
         channels,
+        ...(scheduledAtISO ? { scheduledAt: scheduledAtISO } : {}),
       });
     }
   };
@@ -415,13 +445,60 @@ export default function NotificationsPage() {
                 </div>
               </div>
 
+              {/* Send time */}
+              <div className="grid gap-1.5">
+                <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  Send Time
+                </Label>
+                <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setScheduledAt("")}
+                    className={`flex-1 py-2 text-sm font-medium transition ${!scheduledAt ? "bg-[#1A3F1C] text-white" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}
+                  >
+                    <Zap className="w-3.5 h-3.5 inline mr-1.5" />
+                    Send Now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScheduledAt(getDefaultScheduleTime())}
+                    className={`flex-1 py-2 text-sm font-medium transition ${scheduledAt ? "bg-[#1A3F1C] text-white" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}
+                  >
+                    <Clock className="w-3.5 h-3.5 inline mr-1.5" />
+                    Schedule
+                  </button>
+                </div>
+                {scheduledAt && (
+                  <>
+                    <label className="sr-only" htmlFor="scheduledAt">
+                      Schedule date and time
+                    </label>
+                    <input
+                      id="scheduledAt"
+                      type="datetime-local"
+                      title="Schedule date and time"
+                      value={scheduledAt}
+                      min={toLocalDateTimeString(new Date())}
+                      onChange={(e) => setScheduledAt(e.target.value)}
+                      className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1A3F1C]/30 focus:border-[#1A3F1C] transition"
+                    />
+                  </>
+                )}
+              </div>
+
               <Button
                 type="submit"
                 disabled={createMutation.isPending}
                 className="w-full bg-[#1A3F1C] hover:bg-[#1A3F1C]/90 gap-2"
               >
-                <Bell className="w-4 h-4" />
-                {createMutation.isPending ? "Sending..." : "Send Broadcast"}
+                {scheduledAt ? <Clock className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                {createMutation.isPending
+                  ? scheduledAt
+                    ? "Scheduling..."
+                    : "Sending..."
+                  : scheduledAt
+                    ? "Schedule Broadcast"
+                    : "Send Broadcast"}
               </Button>
             </form>
           </DialogContent>
@@ -476,8 +553,26 @@ export default function NotificationsPage() {
                       className="hover:bg-gray-50/80 transition-colors cursor-pointer"
                       onClick={() => setSelected(notif)}
                     >
-                      <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap text-xs">
-                        {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString() : "N/A"}
+                      <td className="px-4 py-3.5 whitespace-nowrap text-xs">
+                        {notif.status === "scheduled" ? (
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-1 text-amber-600 font-semibold">
+                              <Clock className="w-3 h-3" />
+                              Scheduled
+                            </div>
+                            <span className="text-gray-500">
+                              {notif.scheduledAt
+                                ? new Date(notif.scheduledAt).toLocaleString()
+                                : "N/A"}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">
+                            {notif.createdAt
+                              ? new Date(notif.createdAt).toLocaleDateString()
+                              : "N/A"}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3.5 font-semibold text-gray-800">{notif.title}</td>
                       <td className="px-4 py-3.5 text-gray-500 max-w-[180px]">

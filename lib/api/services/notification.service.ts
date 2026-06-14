@@ -28,6 +28,7 @@ export const notificationService = {
     channels?: string[];
     recipientId?: string;
     recipientType?: string;
+    scheduledAt?: string;
   }) {
     return await apiClient.post(ENDPOINTS.SHARED.NOTIFICATIONS, data);
   },
