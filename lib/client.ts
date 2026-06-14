@@ -73,12 +73,16 @@ class APIClient {
           const portalRoute = window.location.pathname.split("/")[1] || "";
           const settingsPath = portalRoute ? `/${portalRoute}/settings` : "/settings";
 
-          toast.error(message || "Password change required. Please update your password.");
+          // Only redirect if NOT already on the settings page — avoids a hard-reload loop
+          // when the settings page itself makes API calls that are blocked by requirePasswordChange
+          if (!window.location.pathname.startsWith(settingsPath)) {
+            toast.error(message || "Password change required. Please update your password.");
 
-          // Allow toast to show briefly before navigating
-          setTimeout(() => {
-            window.location.href = settingsPath;
-          }, 1000);
+            // Allow toast to show briefly before navigating
+            setTimeout(() => {
+              window.location.href = `${settingsPath}?mustChange=true`;
+            }, 1000);
+          }
         }
         throw new PasswordChangeRequiredError(message);
       }
