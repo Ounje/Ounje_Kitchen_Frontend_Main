@@ -7,7 +7,7 @@ export interface User {
   fullName?: string; // Virtual from backend
 
   email: string;
-  phoneNumber?: string; // Backend uses phoneNumber, not phone
+  phone?: string; // Staff/user model field (User model uses "phone", not "phoneNumber")
 
   department: string; // "it", "operations", "finance", "investors", "management"
   role?: string; // Optional role field

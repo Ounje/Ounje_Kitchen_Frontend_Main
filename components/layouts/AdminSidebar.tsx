@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Home,
   Users,
+  UserCog,
   DollarSign,
   ShoppingCart,
   Bell,
@@ -22,6 +23,7 @@ import {
 const navigation = [
   { name: "Home", href: "/admin", icon: Home },
   { name: "User & Staff", href: "/admin/users", icon: Users },
+  { name: "User Management", href: "/admin/user-management", icon: UserCog },
   { name: "Revenue", href: "/admin/revenue", icon: DollarSign },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Surge Pricing", href: "/admin/surge", icon: Zap },

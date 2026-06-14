@@ -47,9 +47,9 @@ export function useRouteGuard(options: RouteGuardOptions = {}): RouteGuardReturn
       const portalRoute = getPortalRoute(user);
       const settingsPath = `${portalRoute}/settings`;
 
-      // ✅ Only allow settings page
-      if (pathname !== settingsPath) {
-        router.replace(settingsPath);
+      // ✅ Only allow settings page; always carry the flag so the banner shows
+      if (!pathname.startsWith(settingsPath)) {
+        router.replace(`${settingsPath}?mustChange=true`);
       }
     }
   }, [user, loading, pathname, router]);

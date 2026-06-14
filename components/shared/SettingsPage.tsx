@@ -1,14 +1,25 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/context/AuthContext";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Camera, Loader2 } from "lucide-react";
+import {
+  Camera,
+  Loader2,
+  AlertTriangle,
+  ShieldAlert,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { apiClient } from "@/lib/client";
+import { ENDPOINTS } from "@/lib/config";
 import ChangePasswordModal from "@/components/shared/ChangePasswordModal";
 import ConfirmPasswordChangeModal from "@/components/shared/ConfirmPasswordChangeModal";
 import OTPVerificationModal from "@/components/shared/OTPVerificationModal";
@@ -40,8 +51,43 @@ interface SettingsPageProps {
   onAvatarUpdate?: (avatarUrl: string) => void;
 }
 
+// ─── activity log helpers ─────────────────────────────────────────────────────
+const ACTIVITY_ACTION_COLORS: Record<string, string> = {
+  LOGIN_SUCCESS: "bg-green-100 text-green-700 border-green-200",
+  LOGIN_FAILED: "bg-red-100 text-red-700 border-red-200",
+  LOGOUT: "bg-gray-100 text-gray-600 border-gray-200",
+  PASSWORD_CHANGED: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  PASSWORD_RESET: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  PROFILE_UPDATED: "bg-blue-100 text-blue-700 border-blue-200",
+  AVATAR_UPDATED: "bg-blue-100 text-blue-700 border-blue-200",
+};
+
+function activityStatus(action: string) {
+  if (action?.includes("FAILED"))
+    return { label: "Failed", cls: "bg-red-100 text-red-700 border-red-200" };
+  return { label: "Success", cls: "bg-green-100 text-green-700 border-green-200" };
+}
+
+function formatActivityDate(d: string) {
+  return new Date(d).toLocaleString("en-NG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+}
+
+const ACTIVITY_PAGE_SIZE = 10;
+
 export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPageProps) {
-  const { refreshUser, user: authUser } = useAuth(); // ✅ Get refreshUser from AuthContext
+  const { refreshUser, user: authUser } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const mustChange = searchParams.get("mustChange") === "true";
 
   useEffect(() => {
     if (authUser?.mustChangePassword) {
@@ -81,12 +127,40 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
     newPassword: "",
   });
 
+  // Activity log state
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityPage, setActivityPage] = useState(1);
+  const [activityTotal, setActivityTotal] = useState(0);
+  const [activityTotalPages, setActivityTotalPages] = useState(1);
+
+  const fetchActivity = useCallback(async (page: number) => {
+    setActivityLoading(true);
+    try {
+      const res: any = await apiClient.get(ENDPOINTS.USERS.MY_ACTIVITY, {
+        params: { page, limit: ACTIVITY_PAGE_SIZE },
+      });
+      setActivityLogs(Array.isArray(res?.data) ? res.data : []);
+      setActivityTotal(res?.total ?? 0);
+      setActivityTotalPages(res?.pages ?? 1);
+    } catch {
+      // silently fail — activity log is supplementary
+    } finally {
+      setActivityLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActivity(activityPage);
+  }, [fetchActivity, activityPage]);
+
   const handleSuccessClose = async () => {
     setSuccessModalOpen(false);
     setPasswordData({ currentPassword: "", newPassword: "" });
 
-    // ✅ Refresh user to update mustChangePassword flag
     await refreshUser();
+    // Remove the mustChange flag from the URL now that the password is set
+    router.replace(pathname);
   };
 
   // Fetch profile on mount
@@ -371,6 +445,20 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Settings</h1>
         </div>
 
+        {/* Force-password-change banner */}
+        {mustChange && (
+          <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-300 rounded-xl text-sm text-amber-800">
+            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5 text-amber-500" />
+            <div>
+              <p className="font-bold">Password change required</p>
+              <p className="mt-0.5 text-amber-700">
+                You must set a new password before you can access any other part of the portal.
+                Please use the <span className="font-semibold">Change Password</span> button below.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Profile Picture Section */}
         <div className="flex items-center gap-4">
           <div className="relative">
@@ -553,6 +641,111 @@ export default function SettingsPage({ apiService, onAvatarUpdate }: SettingsPag
               </Button>
             </>
           )}
+        </div>
+
+        {/* ── Activity Log ─────────────────────────────────────────────── */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5 text-[#1a3f1c]" />
+            <h2 className="text-lg font-bold text-gray-900">My Activity</h2>
+          </div>
+
+          <Card className="border shadow-sm">
+            <CardContent className="p-0">
+              {activityLoading ? (
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#1a3f1c]" />
+                </div>
+              ) : activityLogs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                  <ShieldAlert className="h-8 w-8 mb-2 opacity-30" />
+                  <p className="text-sm font-medium">No activity recorded yet</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100 bg-gray-50/80">
+                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                          Date &amp; Time
+                        </th>
+                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                          Action
+                        </th>
+                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                          IP Address
+                        </th>
+                        <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activityLogs.map((log) => {
+                        const status = activityStatus(log.action);
+                        return (
+                          <tr
+                            key={log._id}
+                            className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                          >
+                            <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
+                              {formatActivityDate(log.createdAt)}
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge
+                                variant="outline"
+                                className={`text-[10px] font-bold uppercase tracking-wider border ${ACTIVITY_ACTION_COLORS[log.action] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}
+                              >
+                                {log.action?.replace(/_/g, " ")}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-gray-500 text-xs font-mono">
+                              {log.ipAddress || "—"}
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge
+                                variant="outline"
+                                className={`text-[10px] font-bold border ${status.cls}`}
+                              >
+                                {status.label}
+                              </Badge>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {activityTotalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
+                  <span>
+                    {activityTotal === 0
+                      ? "No results"
+                      : `Page ${activityPage} of ${activityTotalPages} · ${activityTotal} total`}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setActivityPage((p) => Math.max(1, p - 1))}
+                      disabled={activityPage <= 1 || activityLoading}
+                      className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setActivityPage((p) => Math.min(activityTotalPages, p + 1))}
+                      disabled={activityPage >= activityTotalPages || activityLoading}
+                      className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
 

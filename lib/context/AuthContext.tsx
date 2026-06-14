@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/services/auth.service";
-import { apiClient } from "@/lib/client";
 import type { User, LoginCredentials, LoginResponse } from "@/types";
 
 // ─── types ────────────────────────────────────────────────────────────────────
@@ -23,27 +22,12 @@ export function getPortalRoute(user: User): string {
   if (user.isSuperAdmin) return "/admin";
 
   const dept = user.department?.toLowerCase();
-  if (dept === "it" && user.isHead) return "/it";
+  if (dept === "it") return "/it";
   if (dept === "operations") return "/operations";
   if (dept === "finance") return "/finance";
   if (dept === "investors") return "/investor";
 
   return "/";
-}
-
-// ─── helper: get portal-specific profile endpoint ────────────────────────────
-function getProfileEndpoint(user: User | null): string {
-  if (!user) return "/api/auth/me"; // Fallback to generic auth endpoint
-
-  if (user.isSuperAdmin) return "/api/admin/profile";
-
-  const dept = user.department?.toLowerCase();
-  if (dept === "it") return "/api/it/profile";
-  if (dept === "operations") return "/api/operations/profile";
-  if (dept === "finance") return "/api/finance/profile";
-  if (dept === "investors") return "/api/investors/profile";
-
-  return "/api/auth/me"; // Fallback
 }
 
 // ─── provider ─────────────────────────────────────────────────────────────────
@@ -86,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // route: password-change gate first, then the correct portal
     if (userData.mustChangePassword) {
-      router.push(`${getPortalRoute(userData)}/settings`);
+      router.push(`${getPortalRoute(userData)}/settings?mustChange=true`);
     } else {
       router.push(getPortalRoute(userData));
     }
@@ -111,10 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const endpoint = getProfileEndpoint(user);
-      const response = (await apiClient.get(endpoint)) as any;
-      const userData = response.user || response.data?.user || response;
-
+      const userData = await authService.getMe();
       setUser(userData);
     } catch (error) {
       console.error("Failed to refresh user:", error);

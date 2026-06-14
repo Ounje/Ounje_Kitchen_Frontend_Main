@@ -52,7 +52,7 @@ export const ENDPOINTS = {
 
     // Staff
     STAFF: "/api/superadmin/staff",
-    STAFF_BY_ID: (id: string) => `/api/superadmin/staff/{id}`,
+    STAFF_BY_ID: (id: string) => `/api/superadmin/staff/${id}`,
 
     // Orders
     ORDERS: "/api/superadmin/orders",
@@ -259,6 +259,20 @@ export const ENDPOINTS = {
     RIDERS: "/api/accounts/riders",
     RIDER_BY_ID: (id: string) => `/api/accounts/riders/${id}`,
     RIDER_UPDATE: (id: string) => `/api/accounts/riders/${id}`,
+  },
+
+  // ── Admin User Management ─────────────────────────────────────────────────
+  ADMIN: {
+    USERS: "/api/admin/users",
+    USER_DEACTIVATE: (id: string) => `/api/admin/users/${id}/deactivate`,
+    USER_REACTIVATE: (id: string) => `/api/admin/users/${id}/reactivate`,
+    USER_RESET_PASSWORD: (id: string) => `/api/admin/users/${id}/reset-password`,
+    AUDIT_LOGS: "/api/admin/audit-logs",
+  },
+
+  // ── Current User Activity ─────────────────────────────────────────────────
+  USERS: {
+    MY_ACTIVITY: "/api/users/me/activity",
   },
 
   // ── Finance Portal ────────────────────────────────────────────────────────
