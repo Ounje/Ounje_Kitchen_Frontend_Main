@@ -9,14 +9,14 @@
   --card-foreground: #1a1a1a;
   --popover: #ffffff;
   --popover-foreground: #1a1a1a;
-  --primary: #1A3F1C;
+  --primary: #1a3f1c;
   --primary-foreground: #ffffff;
-  --secondary: #98EF9B;
+  --secondary: #98ef9b;
   --secondary-foreground: #000000;
   --muted: #e0e0e0;
   --muted-foreground: #666666;
   --accent: #ffc107;
-  --accent-foreground: #1a1a1a;  
+  --accent-foreground: #1a1a1a;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #e0e0e0;
@@ -39,8 +39,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -85,30 +85,57 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+    font-family: var(--font-sans, "Inter", system-ui, sans-serif);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     letter-spacing: -0.015em;
   }
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
 
 /* Sidebar scrollbar — hidden but still scrollable */
-.sidebar-scroll { scrollbar-width: none; }
-.sidebar-scroll::-webkit-scrollbar { display: none; }
+.sidebar-scroll {
+  scrollbar-width: none;
+}
+.sidebar-scroll::-webkit-scrollbar {
+  display: none;
+}
 
 /* ── Transitions ─────────────────────────────────────────────────────────── */
-.page-transition { animation: fadeSlideIn 0.18s ease-out both; }
+.page-transition {
+  animation: fadeSlideIn 0.18s ease-out both;
+}
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0);   }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @layer components {
@@ -126,11 +153,11 @@
   }
   .login-blob-gold {
     background: #ffca3a;
-    opacity: 0.10;
+    opacity: 0.1;
   }
   .login-blob-green {
     background: #98ef9b;
-    opacity: 0.10;
+    opacity: 0.1;
   }
   .login-blob-white {
     background: #ffffff;
@@ -155,7 +182,9 @@
 
 /* ── Card polish ─────────────────────────────────────────────────────────── */
 .card-hover {
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 .card-hover:hover {
   box-shadow: 0 8px 24px -4px rgba(26, 63, 28, 0.12);
@@ -181,7 +210,9 @@
 }
 
 .hover-lift {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease;
 }
 .hover-lift:hover {
   transform: translateY(-4px);
@@ -192,7 +223,7 @@
   position: relative;
 }
 .pulse-glow::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -205,14 +236,20 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 @keyframes pulse {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 0;
+  }
 }
 
 /* ── Modern Table Utilities ──────────────────────────────────────────────── */
 .modern-table-container {
   @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
-  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.04);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04);
   overflow-x: auto;
 }
 .modern-table {
@@ -231,4 +268,3 @@
 .modern-table tbody td {
   @apply px-5 py-4 align-middle transition-colors duration-200;
 }
-

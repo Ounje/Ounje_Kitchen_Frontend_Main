@@ -43,7 +43,7 @@ export default function TopVendorsPage() {
 
   useEffect(() => {
     load(period);
-  }, [period]);  
+  }, [period]);
 
   return (
     <div className="w-full">

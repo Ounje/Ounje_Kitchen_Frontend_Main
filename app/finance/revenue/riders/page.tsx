@@ -43,7 +43,7 @@ export default function TopRidersPage() {
 
   useEffect(() => {
     load(period);
-  }, [period]);  
+  }, [period]);
 
   return (
     <div className="w-full">
