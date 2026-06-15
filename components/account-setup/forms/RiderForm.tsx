@@ -153,6 +153,11 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
                       {existing.status}
                     </span>
                   )}
+                  {existing?.tier && (
+                    <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-purple-100 text-purple-700">
+                      {existing.tier}
+                    </span>
+                  )}
                   {existing?.isSuspended && (
                     <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-100 text-amber-700">
                       Suspended
@@ -229,6 +234,24 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
                     }
                   />
                   <InfoRow label="Setup Complete" value={existing?.setupComplete ? "Yes" : "No"} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <InfoRow label="Rider ID" value={existing?.riderId} />
+                  <InfoRow label="Paystack Recipient" value={existing?.paystackRecipientCode} />
+                  <InfoRow
+                    label="Acceptance Rate"
+                    value={
+                      existing?.acceptanceRate != null ? `${existing.acceptanceRate}%` : undefined
+                    }
+                  />
+                  <InfoRow
+                    label="Orders (Offered / Accepted)"
+                    value={
+                      existing?.ordersOffered != null
+                        ? `${existing.ordersOffered} / ${existing.ordersAccepted ?? 0}`
+                        : undefined
+                    }
+                  />
                 </div>
               </>
             )}
@@ -418,8 +441,54 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
               </div>
             </div>
 
+            {/* Notification Preferences — read-only */}
+            {isEdit && (
+              <>
+                <Section title="Notification Preferences" />
+                <div className="grid grid-cols-3 gap-3">
+                  <InfoRow
+                    label="New Requests"
+                    value={
+                      existing?.notificationPreferences?.newRequests !== false
+                        ? "Enabled"
+                        : "Disabled"
+                    }
+                  />
+                  <InfoRow
+                    label="Earnings"
+                    value={
+                      existing?.notificationPreferences?.earnings !== false ? "Enabled" : "Disabled"
+                    }
+                  />
+                  <InfoRow
+                    label="Promotions"
+                    value={
+                      existing?.notificationPreferences?.promotions !== false
+                        ? "Enabled"
+                        : "Disabled"
+                    }
+                  />
+                </div>
+              </>
+            )}
+
             {/* Bank Details */}
             <Section title="Bank Details" />
+            {isEdit && existing?.bankDetails?.status && (
+              <div className="flex gap-2 mb-1">
+                <span
+                  className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${
+                    existing.bankDetails.status === "approved"
+                      ? "bg-green-100 text-green-700"
+                      : existing.bankDetails.status === "rejected"
+                        ? "bg-red-100 text-red-600"
+                        : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  Bank {existing.bankDetails.status}
+                </span>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Account Number</Label>

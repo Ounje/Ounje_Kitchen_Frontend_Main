@@ -137,11 +137,12 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
             autoAcceptOrders: form.autoAcceptOrders === "true",
           },
           bankDetails:
-            form.bankAccountNumber || form.bankCode
+            form.bankAccountNumber || form.bankCode || form.bankName
               ? {
                   accountNumber: form.bankAccountNumber || undefined,
                   bankCode: form.bankCode || undefined,
                   accountName: form.bankAccountName || undefined,
+                  bankName: form.bankName || undefined,
                 }
               : undefined,
           storeDetails: form.storeName
@@ -284,6 +285,15 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
                         : undefined
                     }
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <InfoRow label="Vendor ID" value={existing?.vendorId} />
+                  <InfoRow label="Tier" value={existing?.tier} />
+                  <InfoRow
+                    label="Ranking Score"
+                    value={existing?.rankingScore != null ? existing.rankingScore : undefined}
+                  />
+                  <InfoRow label="Paystack Recipient" value={existing?.paystackRecipientCode} />
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <InfoRow
@@ -550,6 +560,9 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
                   value={store.isVerifiedBusiness ? "Yes" : "No"}
                 />
               )}
+              {isEdit && store.isOpen !== undefined && (
+                <InfoRow label="Currently Open" value={store.isOpen ? "Open" : "Closed"} />
+              )}
             </div>
             <div className="space-y-1.5">
               <Label>
@@ -561,6 +574,26 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
                 placeholder="e.g. Jollof Rice, Fried Rice, Pepper Soup"
               />
             </div>
+
+            {/* Store Time Periods (set from mobile app) */}
+            {isEdit && Array.isArray(store.timePeriod) && store.timePeriod.length > 0 && (
+              <>
+                <Section title="Store Hours (from mobile)" />
+                <div className="grid grid-cols-2 gap-2">
+                  {store.timePeriod.map((t: any, i: number) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm"
+                    >
+                      <span className="font-semibold capitalize text-gray-700">{t.day}</span>
+                      <span className="text-xs text-gray-500">
+                        {t.openingHour} – {t.closingHour}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* Location */}
             <Section title="Location" />

@@ -254,7 +254,20 @@ export default function CustomerForm({ existing, onClose, onSuccess }: Props) {
                     }
                   />
                   <InfoRow label="Role" value={existing?.role} />
+                  <InfoRow label="Rank" value={profile?.rank} />
+                  <InfoRow label="Paystack Code" value={profile?.paystackCustomerCode} />
                 </div>
+
+                {profile?.titanAccount?.accountNumber && (
+                  <>
+                    <Section title="Virtual Bank Account (Titan)" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <InfoRow label="Account Number" value={profile.titanAccount.accountNumber} />
+                      <InfoRow label="Bank" value={profile.titanAccount.bankName} />
+                      <InfoRow label="Account Name" value={profile.titanAccount.accountName} />
+                    </div>
+                  </>
+                )}
               </>
             )}
 
