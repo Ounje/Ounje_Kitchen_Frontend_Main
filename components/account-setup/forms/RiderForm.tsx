@@ -24,12 +24,24 @@ interface Props {
 
 const DELIVERY_MODES = ["Bicycle", "Motorcycle"];
 const AREAS = ["Lekki", "Victoria Island", "Ikeja", "Surulere", "Yaba", "Ajah", "Ikoyi", "Other"];
+const RIDER_STATUSES = ["pending", "available", "busy", "offline", "deactivated"];
 
 function Section({ title }: { title: string }) {
   return (
     <div className="pt-4 pb-1">
       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{title}</p>
       <div className="h-px bg-gray-100 mt-1" />
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{label}</p>
+      <div className="min-h-9 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+        {value ?? <span className="text-gray-400">—</span>}
+      </div>
     </div>
   );
 }
@@ -41,11 +53,13 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
     // User / identity
     name: existing?.user?.name ?? "",
     email: existing?.user?.email ?? "",
-    phone: existing?.user?.phone ?? "",
-    address: existing?.user?.address ?? "",
+    phone: existing?.user?.phone?.toString() ?? "",
     // Rider profile
     modeOfDelivery: existing?.modeOfDelivery ?? "",
     operatingArea: (existing?.operatingArea ?? []).join(", "),
+    isActive: existing?.isActive !== undefined ? (existing.isActive ? "true" : "false") : "false",
+    status: existing?.status ?? "pending",
+    setupComplete: existing?.setupComplete ? "true" : "false",
     // Documents
     driversLicense: existing?.driversLicense ?? "",
     nin: existing?.nin ?? "",
@@ -75,7 +89,6 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
       const payload: Record<string, any> = {
         name: form.name,
         phone: form.phone || undefined,
-        address: form.address || undefined,
         modeOfDelivery: form.modeOfDelivery || undefined,
         operatingArea: form.operatingArea
           ? form.operatingArea
@@ -83,6 +96,9 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
               .map((s: string) => s.trim())
               .filter(Boolean)
           : undefined,
+        isActive: form.isActive === "true",
+        status: form.status || undefined,
+        setupComplete: form.setupComplete === "true",
         driversLicense: form.driversLicense || undefined,
         nin: form.nin || undefined,
         profilePicture: form.profilePicture || undefined,
@@ -113,16 +129,128 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-xl p-0">
+      <DialogContent className="max-w-2xl p-0">
         <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="text-[#1a3f1c] font-black">
             {isEdit ? "Edit Rider" : "Create Rider"}
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[75vh] px-6 pb-6">
+        <ScrollArea className="max-h-[80vh] px-6 pb-6">
           <form onSubmit={handleSubmit} className="space-y-3 pt-2">
+            {/* Account Status — edit only */}
+            {isEdit && (
+              <>
+                <Section title="Account Status" />
+                <div className="flex flex-wrap gap-2">
+                  <span
+                    className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${existing?.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                  >
+                    {existing?.isActive ? "Active" : "Inactive"}
+                  </span>
+                  {existing?.status && (
+                    <span className="text-[10px] font-black capitalize px-3 py-1 rounded-full bg-blue-100 text-blue-700">
+                      {existing.status}
+                    </span>
+                  )}
+                  {existing?.isSuspended && (
+                    <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-100 text-amber-700">
+                      Suspended
+                    </span>
+                  )}
+                  {existing?.isDeleted && (
+                    <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-red-100 text-red-600">
+                      Deleted
+                    </span>
+                  )}
+                </div>
+                {existing?.isSuspended && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <InfoRow label="Suspension Reason" value={existing?.suspensionReason} />
+                    <InfoRow
+                      label="Suspended At"
+                      value={
+                        existing?.suspendedAt
+                          ? new Date(existing.suspendedAt).toLocaleDateString()
+                          : undefined
+                      }
+                    />
+                  </div>
+                )}
+
+                {/* Rider Stats */}
+                <div className="grid grid-cols-3 gap-3">
+                  <InfoRow label="Rank" value={existing?.rank} />
+                  <InfoRow label="Total Deliveries" value={existing?.totalDeliveries} />
+                  <InfoRow
+                    label="Avg Rating"
+                    value={
+                      existing?.ratings?.average != null
+                        ? `${existing.ratings.average.toFixed(1)} (${existing.ratings.count ?? 0})`
+                        : existing?.averageRating != null
+                          ? `${existing.averageRating.toFixed(1)} (${existing.ratingCount ?? 0})`
+                          : undefined
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <InfoRow
+                    label="Today's Earnings"
+                    value={
+                      existing?.earnings?.today != null
+                        ? `₦${existing.earnings.today.toLocaleString()}`
+                        : undefined
+                    }
+                  />
+                  <InfoRow
+                    label="Week's Earnings"
+                    value={
+                      existing?.earnings?.week != null
+                        ? `₦${existing.earnings.week.toLocaleString()}`
+                        : undefined
+                    }
+                  />
+                  <InfoRow
+                    label="Total Earnings"
+                    value={
+                      existing?.earnings?.total != null
+                        ? `₦${existing.earnings.total.toLocaleString()}`
+                        : undefined
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <InfoRow
+                    label="Member Since"
+                    value={
+                      existing?.createdAt
+                        ? new Date(existing.createdAt).toLocaleDateString()
+                        : undefined
+                    }
+                  />
+                  <InfoRow label="Setup Complete" value={existing?.setupComplete ? "Yes" : "No"} />
+                </div>
+              </>
+            )}
+
+            {/* Personal Details */}
             <Section title="Personal Details" />
+
+            {/* Profile picture from user.img — read-only */}
+            {isEdit && existing?.user?.img && (
+              <div className="flex items-center gap-3">
+                <img
+                  src={existing.user.img}
+                  alt={existing.user?.name}
+                  className="w-14 h-14 rounded-full object-cover border-2 border-gray-200"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+                <p className="text-xs text-gray-400">Profile picture</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>
@@ -155,16 +283,10 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
                   placeholder="08012345678"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label>Address</Label>
-                <Input
-                  value={form.address}
-                  onChange={(e) => set("address", e.target.value)}
-                  placeholder="Residential address"
-                />
-              </div>
+              {isEdit && <InfoRow label="Address" value={existing?.user?.address} />}
             </div>
 
+            {/* Rider Details */}
             <Section title="Rider Details" />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -197,8 +319,48 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-1.5">
+                <Label>Active</Label>
+                <Select value={form.isActive} onValueChange={(v) => set("isActive", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Status</Label>
+                <Select value={form.status} onValueChange={(v) => set("status", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RIDER_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s} className="capitalize">
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Setup Complete</Label>
+                <Select value={form.setupComplete} onValueChange={(v) => set("setupComplete", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
+            {/* Documents */}
             <Section title="Documents" />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -227,6 +389,7 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
               </div>
             </div>
 
+            {/* Guarantor */}
             <Section title="Guarantor" />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -255,6 +418,7 @@ export default function RiderForm({ existing, onClose, onSuccess }: Props) {
               </div>
             </div>
 
+            {/* Bank Details */}
             <Section title="Bank Details" />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">

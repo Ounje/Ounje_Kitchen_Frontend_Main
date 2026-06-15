@@ -24,7 +24,10 @@ interface Props {
 }
 
 const STORE_TYPES = ["Restaurant", "Bakery", "Grocery", "Pharmacy", "Supermarket", "Other"];
-const FULFILLMENT = ["delivery", "pickup", "both"];
+const FULFILLMENT = [
+  { value: "on_demand", label: "On Demand" },
+  { value: "preorder", label: "Pre-Order" },
+];
 const ZONES = ["Lekki", "Victoria Island", "Ikeja", "Surulere", "Yaba", "Ajah", "Ikoyi", "Other"];
 
 function Section({ title }: { title: string }) {
@@ -36,20 +39,34 @@ function Section({ title }: { title: string }) {
   );
 }
 
+function InfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{label}</p>
+      <div className="min-h-9 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+        {value ?? <span className="text-gray-400">—</span>}
+      </div>
+    </div>
+  );
+}
+
 export default function VendorForm({ existing, onClose, onSuccess }: Props) {
   const isEdit = !!existing;
-
   const store = existing?.storeDetails?.[0] ?? {};
 
   const [form, setForm] = useState({
-    // User / identity
+    // Owner / identity (used in create; displayed read-only in edit)
     name: existing?.owner?.name ?? "",
     email: existing?.owner?.email ?? "",
-    phone: existing?.owner?.phone ?? "",
+    phone: existing?.owner?.phone?.toString() ?? "",
     address: existing?.owner?.address ?? "",
     // Vendor profile
     vendorName: existing?.name ?? "",
     description: existing?.description ?? "",
+    profileImage: existing?.profileImage ?? "",
+    logoUrl: existing?.logoUrl ?? "",
+    bannerUrl: existing?.bannerUrl ?? "",
+    isActive: existing?.isActive !== undefined ? (existing.isActive ? "true" : "false") : "true",
     // Store
     storeName: store.storeName ?? "",
     storeType: store.storeType ?? "",
@@ -58,15 +75,17 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
       : (store.servicesOffered ?? ""),
     ninID: store.ninID ?? "",
     CACNumber: store.CACNumber ?? "",
+    needsCACSupport: store.needsCACSupport ? "true" : "false",
     // Location
     locationAddress: existing?.location?.address ?? "",
     latitude: existing?.location?.coordinates?.[1]?.toString() ?? "",
     longitude: existing?.location?.coordinates?.[0]?.toString() ?? "",
     zone: existing?.zone ?? "",
     // Fulfillment
-    fulfillmentType: existing?.fulfillmentSettings?.type ?? "delivery",
+    fulfillmentType: existing?.fulfillmentSettings?.type ?? "on_demand",
     preparationTimeMin: existing?.fulfillmentSettings?.preparationTimeMin?.toString() ?? "30",
     minOrderAmount: existing?.fulfillmentSettings?.minOrderAmount?.toString() ?? "500",
+    deliveryPrice: existing?.fulfillmentSettings?.deliveryPrice?.toString() ?? "0",
     autoAcceptOrders: existing?.fulfillmentSettings?.autoAcceptOrders ? "true" : "false",
     // Bank
     bankAccountNumber: existing?.bankDetails?.accountNumber ?? "",
@@ -80,47 +99,107 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.vendorName.trim()) {
-      toast.error("Owner name, email, and vendor name are required");
+    if (!form.vendorName.trim() || (!isEdit && (!form.name.trim() || !form.email.trim()))) {
+      toast.error(
+        isEdit ? "Vendor name is required" : "Owner name, email, and vendor name are required"
+      );
       return;
     }
     setSaving(true);
     try {
-      const payload: Record<string, any> = {
-        name: form.name,
-        phone: form.phone || undefined,
-        address: form.address || undefined,
-        vendorName: form.vendorName,
-        description: form.description || undefined,
-        storeName: form.storeName || undefined,
-        storeType: form.storeType || undefined,
-        servicesOffered: form.servicesOffered
-          ? form.servicesOffered
-              .split(",")
-              .map((s: string) => s.trim())
-              .filter(Boolean)
-          : undefined,
-        ninID: form.ninID || undefined,
-        CACNumber: form.CACNumber || undefined,
-        locationAddress: form.locationAddress || undefined,
-        latitude: form.latitude ? parseFloat(form.latitude) : undefined,
-        longitude: form.longitude ? parseFloat(form.longitude) : undefined,
-        zone: form.zone || undefined,
-        fulfillmentType: form.fulfillmentType,
-        preparationTimeMin: form.preparationTimeMin ? parseInt(form.preparationTimeMin) : undefined,
-        minOrderAmount: form.minOrderAmount ? parseFloat(form.minOrderAmount) : undefined,
-        autoAcceptOrders: form.autoAcceptOrders === "true",
-        bankAccountNumber: form.bankAccountNumber || undefined,
-        bankCode: form.bankCode || undefined,
-        bankAccountName: form.bankAccountName || undefined,
-        bankName: form.bankName || undefined,
-      };
-
       if (isEdit) {
+        const payload: Record<string, any> = {
+          name: form.vendorName,
+          description: form.description || undefined,
+          profileImage: form.profileImage || undefined,
+          logoUrl: form.logoUrl || undefined,
+          bannerUrl: form.bannerUrl || undefined,
+          isActive: form.isActive === "true",
+          zone: form.zone || undefined,
+          location: (() => {
+            const lat = parseFloat(form.latitude);
+            const lng = parseFloat(form.longitude);
+            const hasCoords = !isNaN(lat) && !isNaN(lng);
+            if (!form.locationAddress && !hasCoords) return undefined;
+            return {
+              type: "Point",
+              ...(hasCoords ? { coordinates: [lng, lat] } : {}),
+              address: form.locationAddress || undefined,
+            };
+          })(),
+          fulfillmentSettings: {
+            type: form.fulfillmentType,
+            preparationTimeMin: form.preparationTimeMin
+              ? parseInt(form.preparationTimeMin)
+              : undefined,
+            minOrderAmount: form.minOrderAmount ? parseFloat(form.minOrderAmount) : undefined,
+            deliveryPrice: form.deliveryPrice ? parseFloat(form.deliveryPrice) : undefined,
+            autoAcceptOrders: form.autoAcceptOrders === "true",
+          },
+          bankDetails:
+            form.bankAccountNumber || form.bankCode
+              ? {
+                  accountNumber: form.bankAccountNumber || undefined,
+                  bankCode: form.bankCode || undefined,
+                  accountName: form.bankAccountName || undefined,
+                }
+              : undefined,
+          storeDetails: form.storeName
+            ? [
+                {
+                  // Preserve existing fields (status, isVerifiedBusiness, timePeriod, etc.)
+                  ...(existing?.storeDetails?.[0] ?? {}),
+                  storeName: form.storeName,
+                  storeType: form.storeType || undefined,
+                  // Keep as string — schema type is String (not array)
+                  servicesOffered: form.servicesOffered || undefined,
+                  ninID: form.ninID || undefined,
+                  CACNumber: form.CACNumber || undefined,
+                  needsCACSupport: form.needsCACSupport === "true",
+                },
+              ]
+            : undefined,
+        };
         await vendorSetupService.update(existing._id, payload);
         toast.success("Vendor updated");
       } else {
-        payload.email = form.email;
+        const payload: Record<string, any> = {
+          name: form.name,
+          email: form.email,
+          phone: form.phone || undefined,
+          address: form.address || undefined,
+          vendorName: form.vendorName,
+          description: form.description || undefined,
+          profileImage: form.profileImage || undefined,
+          logoUrl: form.logoUrl || undefined,
+          bannerUrl: form.bannerUrl || undefined,
+          storeName: form.storeName || undefined,
+          storeType: form.storeType || undefined,
+          servicesOffered: form.servicesOffered
+            ? form.servicesOffered
+                .split(",")
+                .map((s: string) => s.trim())
+                .filter(Boolean)
+            : undefined,
+          ninID: form.ninID || undefined,
+          CACNumber: form.CACNumber || undefined,
+          needsCACSupport: form.needsCACSupport === "true",
+          locationAddress: form.locationAddress || undefined,
+          latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+          longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+          zone: form.zone || undefined,
+          fulfillmentType: form.fulfillmentType,
+          preparationTimeMin: form.preparationTimeMin
+            ? parseInt(form.preparationTimeMin)
+            : undefined,
+          minOrderAmount: form.minOrderAmount ? parseFloat(form.minOrderAmount) : undefined,
+          deliveryPrice: form.deliveryPrice ? parseFloat(form.deliveryPrice) : undefined,
+          autoAcceptOrders: form.autoAcceptOrders === "true",
+          bankAccountNumber: form.bankAccountNumber || undefined,
+          bankCode: form.bankCode || undefined,
+          bankAccountName: form.bankAccountName || undefined,
+          bankName: form.bankName || undefined,
+        };
         await vendorSetupService.create(payload);
         toast.success("Vendor account created");
       }
@@ -134,68 +213,196 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-xl p-0">
+      <DialogContent className="max-w-2xl p-0">
         <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="text-[#1a3f1c] font-black">
             {isEdit ? "Edit Vendor" : "Create Vendor"}
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[75vh] px-6 pb-6">
+        <ScrollArea className="max-h-[80vh] px-6 pb-6">
           <form onSubmit={handleSubmit} className="space-y-3 pt-2">
-            <Section title="Owner Details" />
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>
-                  Full Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) => set("name", e.target.value)}
-                  placeholder="Owner name"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>
-                  Email <span className="text-red-500">*</span>
-                  {isEdit && <span className="text-xs text-gray-400 ml-1">(locked)</span>}
-                </Label>
-                <Input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => set("email", e.target.value)}
-                  placeholder="vendor@example.com"
-                  disabled={isEdit}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Phone</Label>
-                <Input
-                  value={form.phone}
-                  onChange={(e) => set("phone", e.target.value)}
-                  placeholder="08012345678"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Address</Label>
-                <Input
-                  value={form.address}
-                  onChange={(e) => set("address", e.target.value)}
-                  placeholder="Residential address"
-                />
-              </div>
-            </div>
+            {/* Account Status — edit only */}
+            {isEdit && (
+              <>
+                <Section title="Account Status" />
+                <div className="flex flex-wrap gap-2">
+                  <span
+                    className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${existing?.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                  >
+                    {existing?.isActive ? "Active" : "Inactive"}
+                  </span>
+                  {existing?.isVerified && (
+                    <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-blue-100 text-blue-700">
+                      Verified
+                    </span>
+                  )}
+                  {existing?.isSuspended && (
+                    <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-100 text-amber-700">
+                      Suspended
+                    </span>
+                  )}
+                  {existing?.isDeleted && (
+                    <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-red-100 text-red-600">
+                      Deleted
+                    </span>
+                  )}
+                </div>
+                {existing?.isSuspended && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <InfoRow label="Suspension Reason" value={existing?.suspensionReason} />
+                    <InfoRow
+                      label="Suspended At"
+                      value={
+                        existing?.suspendedAt
+                          ? new Date(existing.suspendedAt).toLocaleDateString()
+                          : undefined
+                      }
+                    />
+                  </div>
+                )}
+                <div className="grid grid-cols-3 gap-3">
+                  <InfoRow
+                    label="Avg Rating"
+                    value={
+                      existing?.averageRating != null
+                        ? `${existing.averageRating.toFixed(1)} (${existing.ratingCount ?? 0})`
+                        : undefined
+                    }
+                  />
+                  <InfoRow
+                    label="Balance (₦)"
+                    value={
+                      existing?.balance != null ? existing.balance.toLocaleString() : undefined
+                    }
+                  />
+                  <InfoRow
+                    label="Member Since"
+                    value={
+                      existing?.createdAt
+                        ? new Date(existing.createdAt).toLocaleDateString()
+                        : undefined
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <InfoRow
+                    label="Today's Earnings"
+                    value={
+                      existing?.earnings?.today != null
+                        ? `₦${existing.earnings.today.toLocaleString()}`
+                        : undefined
+                    }
+                  />
+                  <InfoRow
+                    label="Week's Earnings"
+                    value={
+                      existing?.earnings?.week != null
+                        ? `₦${existing.earnings.week.toLocaleString()}`
+                        : undefined
+                    }
+                  />
+                  <InfoRow
+                    label="Total Earnings"
+                    value={
+                      existing?.earnings?.total != null
+                        ? `₦${existing.earnings.total.toLocaleString()}`
+                        : undefined
+                    }
+                  />
+                </div>
+              </>
+            )}
 
+            {/* Owner Details */}
+            <Section title="Owner Details" />
+            {isEdit && existing?.owner?.img && (
+              <div className="flex items-center gap-3 pb-1">
+                <img
+                  src={existing.owner.img}
+                  alt={existing.owner?.name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+                <p className="text-xs text-gray-400">Owner profile picture</p>
+              </div>
+            )}
+            {isEdit ? (
+              <div className="grid grid-cols-2 gap-3">
+                <InfoRow label="Full Name" value={existing?.owner?.name} />
+                <InfoRow label="Email" value={existing?.owner?.email} />
+                <InfoRow label="Phone" value={existing?.owner?.phone} />
+                <InfoRow label="Address" value={existing?.owner?.address} />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>
+                    Full Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    value={form.name}
+                    onChange={(e) => set("name", e.target.value)}
+                    placeholder="Owner name"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>
+                    Email <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => set("email", e.target.value)}
+                    placeholder="vendor@example.com"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Phone</Label>
+                  <Input
+                    value={form.phone}
+                    onChange={(e) => set("phone", e.target.value)}
+                    placeholder="08012345678"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Address</Label>
+                  <Input
+                    value={form.address}
+                    onChange={(e) => set("address", e.target.value)}
+                    placeholder="Residential address"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Vendor Profile */}
             <Section title="Vendor Profile" />
-            <div className="space-y-1.5">
-              <Label>
-                Vendor / Brand Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                value={form.vendorName}
-                onChange={(e) => set("vendorName", e.target.value)}
-                placeholder="e.g. Mama Nkechi Kitchen"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5 col-span-2">
+                <Label>
+                  Vendor / Brand Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  value={form.vendorName}
+                  onChange={(e) => set("vendorName", e.target.value)}
+                  placeholder="e.g. Mama Nkechi Kitchen"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Active</Label>
+                <Select value={form.isActive} onValueChange={(v) => set("isActive", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label>Description</Label>
@@ -207,6 +414,79 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
               />
             </div>
 
+            {/* Images */}
+            <Section title="Images" />
+            <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-1.5">
+                <Label>Profile Image URL</Label>
+                <Input
+                  value={form.profileImage}
+                  onChange={(e) => set("profileImage", e.target.value)}
+                  placeholder="https://…"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Logo URL</Label>
+                <Input
+                  value={form.logoUrl}
+                  onChange={(e) => set("logoUrl", e.target.value)}
+                  placeholder="https://…"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Banner URL</Label>
+                <Input
+                  value={form.bannerUrl}
+                  onChange={(e) => set("bannerUrl", e.target.value)}
+                  placeholder="https://…"
+                />
+              </div>
+            </div>
+            {(form.profileImage || form.logoUrl || form.bannerUrl) && (
+              <div className="flex gap-4 flex-wrap pt-1">
+                {form.profileImage && (
+                  <div className="text-center">
+                    <img
+                      src={form.profileImage}
+                      alt="Profile"
+                      className="w-12 h-12 rounded-full object-cover border"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Profile</p>
+                  </div>
+                )}
+                {form.logoUrl && (
+                  <div className="text-center">
+                    <img
+                      src={form.logoUrl}
+                      alt="Logo"
+                      className="w-12 h-12 rounded object-cover border"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Logo</p>
+                  </div>
+                )}
+                {form.bannerUrl && (
+                  <div className="text-center">
+                    <img
+                      src={form.bannerUrl}
+                      alt="Banner"
+                      className="w-28 h-12 rounded object-cover border"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Banner</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Store Details */}
             <Section title="Store Details" />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -248,6 +528,28 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
                   placeholder="CAC reg number"
                 />
               </div>
+              <div className="space-y-1.5">
+                <Label>Needs CAC Support</Label>
+                <Select
+                  value={form.needsCACSupport}
+                  onValueChange={(v) => set("needsCACSupport", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {isEdit && store.status && <InfoRow label="Store Status" value={store.status} />}
+              {isEdit && store.isVerifiedBusiness !== undefined && (
+                <InfoRow
+                  label="Verified Business"
+                  value={store.isVerifiedBusiness ? "Yes" : "No"}
+                />
+              )}
             </div>
             <div className="space-y-1.5">
               <Label>
@@ -260,6 +562,7 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
               />
             </div>
 
+            {/* Location */}
             <Section title="Location" />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5 col-span-2">
@@ -303,6 +606,31 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
               </div>
             </div>
 
+            {/* Operating Hours — read-only display */}
+            {isEdit &&
+              Array.isArray(existing?.operatingHours) &&
+              existing.operatingHours.length > 0 && (
+                <>
+                  <Section title="Operating Hours" />
+                  <div className="grid grid-cols-2 gap-2">
+                    {existing.operatingHours.map((h: any, i: number) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm"
+                      >
+                        <span className="font-semibold capitalize text-gray-700">{h.day}</span>
+                        <span
+                          className={`text-xs ${h.isOpen ? "text-green-600" : "text-gray-400"}`}
+                        >
+                          {h.isOpen ? `${h.open} – ${h.close}` : "Closed"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+            {/* Fulfillment Settings */}
             <Section title="Fulfillment Settings" />
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -316,8 +644,8 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
                   </SelectTrigger>
                   <SelectContent>
                     {FULFILLMENT.map((f) => (
-                      <SelectItem key={f} value={f} className="capitalize">
-                        {f}
+                      <SelectItem key={f.value} value={f.value}>
+                        {f.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -344,6 +672,16 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
                 />
               </div>
               <div className="space-y-1.5">
+                <Label>Delivery Price (₦)</Label>
+                <Input
+                  type="number"
+                  value={form.deliveryPrice}
+                  onChange={(e) => set("deliveryPrice", e.target.value)}
+                  placeholder="0"
+                  min={0}
+                />
+              </div>
+              <div className="space-y-1.5">
                 <Label>Auto-Accept Orders</Label>
                 <Select
                   value={form.autoAcceptOrders}
@@ -360,7 +698,11 @@ export default function VendorForm({ existing, onClose, onSuccess }: Props) {
               </div>
             </div>
 
+            {/* Bank Details */}
             <Section title="Bank Details" />
+            <p className="text-xs text-gray-400 -mt-1">
+              Bank details are stored securely and not displayed on load.
+            </p>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Account Number</Label>

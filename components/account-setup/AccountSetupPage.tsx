@@ -41,6 +41,7 @@ export default function AccountSetupPage({ portal }: AccountSetupPageProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<any>(null);
+  const [editLoading, setEditLoading] = useState<string | null>(null);
 
   const fetchData = useCallback(
     async (pg = page, sz = pageSize, s = search) => {
@@ -79,6 +80,31 @@ export default function AccountSetupPage({ portal }: AccountSetupPageProps) {
     setShowForm(false);
     setEditTarget(null);
     fetchData(1, pageSize, search);
+  };
+
+  const handleEditClick = async (item: any) => {
+    // Customers: list already returns complete MarketUser + profile data
+    if (tab === "customers") {
+      setEditTarget(item);
+      setShowForm(true);
+      return;
+    }
+    // Vendors and Riders: fetch full record so all fields (bank details,
+    // owner address, etc.) are populated in the edit form
+    setEditLoading(item._id);
+    try {
+      const res: any =
+        tab === "vendors"
+          ? await vendorSetupService.getById(item._id)
+          : await riderSetupService.getById(item._id);
+      setEditTarget(res?.data ?? item);
+      setShowForm(true);
+    } catch {
+      setEditTarget(item);
+      setShowForm(true);
+    } finally {
+      setEditLoading(null);
+    }
   };
 
   const menuPath = (id: string) => `/${portal}/account-setup/vendor/${id}/menu`;
@@ -265,12 +291,14 @@ export default function AccountSetupPage({ portal }: AccountSetupPageProps) {
                             size="sm"
                             variant="ghost"
                             className="h-7 w-7 p-0"
-                            onClick={() => {
-                              setEditTarget(item);
-                              setShowForm(true);
-                            }}
+                            disabled={editLoading === item._id}
+                            onClick={() => handleEditClick(item)}
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            {editLoading === item._id ? (
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Eye className="w-3.5 h-3.5" />
+                            )}
                           </Button>
                         </div>
                       </td>
