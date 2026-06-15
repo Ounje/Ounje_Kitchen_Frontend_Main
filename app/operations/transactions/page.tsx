@@ -313,8 +313,10 @@ export default function OperationsTransactionsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Transactions</h1>
-          <p className="text-xs text-gray-400 mt-0.5">All payment activity across the platform</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Order Transactions</h1>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Payments made for orders — successful and failed only
+          </p>
         </div>
         <Button
           onClick={handleExport}
