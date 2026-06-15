@@ -63,6 +63,25 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function MethodBadge({ method }: { method: string }) {
+  const m = (method ?? "").toLowerCase();
+  const cfg =
+    m.includes("wallet") || m.includes("o-credit")
+      ? { cls: "bg-purple-100 text-purple-700 border-purple-300", label: "Wallet (O-Credit)" }
+      : m === "bank transfer"
+        ? { cls: "bg-blue-100 text-blue-700 border-blue-300", label: "Bank Transfer" }
+        : m === "ussd"
+          ? { cls: "bg-orange-100 text-orange-700 border-orange-300", label: "USSD" }
+          : { cls: "bg-gray-100 text-gray-600 border-gray-300", label: method || "Paystack" };
+  return (
+    <span
+      className={`inline-block text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${cfg.cls}`}
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
 function StatCard({
   icon,
   label,
@@ -515,8 +534,8 @@ export default function OperationsTransactionsPage() {
                         </div>
                       )}
                     </td>
-                    <td className="text-xs text-gray-600 whitespace-nowrap font-medium">
-                      {tx.paymentMethod ?? "Card"}
+                    <td className="whitespace-nowrap">
+                      <MethodBadge method={tx.paymentMethod} />
                     </td>
                     <td className="whitespace-nowrap">
                       <StatusBadge status={tx.status} />
