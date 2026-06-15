@@ -174,6 +174,7 @@ export const ENDPOINTS = {
     // Transactions (temporary module until migration to Admin Portal)
     TRANSACTIONS: "/api/operations/transactions",
     TRANSACTIONS_STATS: "/api/operations/transactions/stats",
+    TRANSACTIONS_ABANDONED: "/api/operations/transactions/abandoned",
     TRANSACTION_BY_ID: (id: string) => `/api/operations/transactions/${id}`,
     TRANSACTIONS_EXPORT: "/api/operations/transactions/export",
 

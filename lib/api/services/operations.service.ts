@@ -160,6 +160,11 @@ export const operationsService = {
     return res;
   },
 
+  async getAbandonedPayments(params?: { page?: number; limit?: number }) {
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTIONS_ABANDONED, { params });
+    return res;
+  },
+
   // ==================== CUSTOMERS ====================
   async getCustomers(params?: PaginationParams & { name?: string; email?: string }) {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.CUSTOMERS, { params });

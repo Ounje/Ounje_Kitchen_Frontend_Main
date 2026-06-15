@@ -7,13 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -23,8 +16,10 @@ import {
   RefreshCw,
   CheckCircle2,
   XCircle,
-  Clock,
+  AlertCircle,
   TrendingUp,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { format } from "date-fns";
 import Pagination from "@/components/Pagination";
@@ -58,9 +53,7 @@ function StatusBadge({ status }: { status: string }) {
       ? { cls: "bg-green-100 text-green-700 border-green-300", label: "Successful" }
       : s === "failed"
         ? { cls: "bg-red-100 text-red-600 border-red-300", label: "Failed" }
-        : s === "pending"
-          ? { cls: "bg-yellow-100 text-yellow-700 border-yellow-300", label: "Pending" }
-          : { cls: "bg-gray-100 text-gray-600 border-gray-300", label: status };
+        : { cls: "bg-gray-100 text-gray-600 border-gray-300", label: status };
   return (
     <span
       className={`inline-block text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border ${cfg.cls}`}
@@ -103,10 +96,10 @@ function StatCard({
   );
 }
 
-function SkeletonRow() {
+function SkeletonRow({ cols }: { cols: number }) {
   return (
     <tr className="animate-pulse border-b border-border/30">
-      {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+      {Array.from({ length: cols }).map((_, i) => (
         <td key={i} className="px-4 py-3">
           <div className="h-3 bg-muted/50 rounded w-3/4" />
         </td>
@@ -118,7 +111,6 @@ function SkeletonRow() {
 const STATUS_TABS = [
   { label: "All", value: "all" },
   { label: "Successful", value: "success" },
-  { label: "Pending", value: "pending" },
   { label: "Failed", value: "failed" },
 ];
 
@@ -136,6 +128,17 @@ export default function OperationsTransactionsPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 1, limit: 15 });
 
+  // Abandoned payments section
+  const [abandonedOpen, setAbandonedOpen] = useState(false);
+  const [abandoned, setAbandoned] = useState<any[]>([]);
+  const [abandonedLoading, setAbandonedLoading] = useState(false);
+  const [abandonedPagination, setAbandonedPagination] = useState({
+    page: 1,
+    total: 0,
+    pages: 1,
+    limit: 15,
+  });
+
   const [filters, setFilters] = useState({
     search: "",
     dateFrom: undefined as Date | undefined,
@@ -152,7 +155,7 @@ export default function OperationsTransactionsPage() {
         const res: any = await operationsService.getTransactionStats(params);
         setStats(res?.data ?? res);
       } catch {
-        // stats are non-critical, fail silently
+        // non-critical
       } finally {
         setStatsLoading(false);
       }
@@ -189,6 +192,34 @@ export default function OperationsTransactionsPage() {
     },
     [activeTab, filters, pagination.limit]
   );
+
+  const fetchAbandoned = useCallback(
+    async (page = 1, limit = abandonedPagination.limit) => {
+      setAbandonedLoading(true);
+      try {
+        const res: any = await operationsService.getAbandonedPayments({ page, limit });
+        setAbandoned(Array.isArray(res?.data) ? res.data : []);
+        setAbandonedPagination({
+          page: res?.page ?? 1,
+          pages: res?.pages ?? 1,
+          total: res?.total ?? 0,
+          limit,
+        });
+      } catch {
+        toast.error("Failed to load abandoned payments");
+      } finally {
+        setAbandonedLoading(false);
+      }
+    },
+    [abandonedPagination.limit]
+  );
+
+  const handleToggleAbandoned = () => {
+    if (!abandonedOpen && abandoned.length === 0) {
+      fetchAbandoned(1);
+    }
+    setAbandonedOpen((o) => !o);
+  };
 
   const handleExport = async () => {
     setExporting(true);
@@ -286,7 +317,7 @@ export default function OperationsTransactionsPage() {
           icon={<TrendingUp className="h-5 w-5 text-white" />}
           label="Total Revenue"
           value={statsLoading ? "—" : fmt(stats?.totalRevenue)}
-          sub={statsLoading ? "" : `${stats?.successful ?? 0} successful`}
+          sub={statsLoading ? "" : `${stats?.successful ?? 0} successful payments`}
           color="bg-[#1a3f1c]"
         />
         <StatCard
@@ -296,10 +327,11 @@ export default function OperationsTransactionsPage() {
           color="bg-green-600"
         />
         <StatCard
-          icon={<Clock className="h-5 w-5 text-white" />}
-          label="Pending"
+          icon={<AlertCircle className="h-5 w-5 text-white" />}
+          label="Abandoned"
           value={statsLoading ? "—" : (stats?.pending ?? 0).toLocaleString()}
-          color="bg-yellow-500"
+          sub="no money moved"
+          color="bg-amber-500"
         />
         <StatCard
           icon={<XCircle className="h-5 w-5 text-white" />}
@@ -394,13 +426,7 @@ export default function OperationsTransactionsPage() {
             {tab.label}
             {tab.value !== "all" && stats && !statsLoading && (
               <span className="ml-1.5 text-[10px] opacity-80">
-                (
-                {tab.value === "success"
-                  ? stats.successful
-                  : tab.value === "failed"
-                    ? stats.failed
-                    : stats.pending}
-                )
+                ({tab.value === "success" ? stats.successful : stats.failed})
               </span>
             )}
           </button>
@@ -414,7 +440,7 @@ export default function OperationsTransactionsPage() {
         )}
       </div>
 
-      {/* Table */}
+      {/* Main table */}
       <div className="modern-table-container">
         <div className="overflow-x-auto">
           <table className="modern-table min-w-[800px]">
@@ -438,7 +464,7 @@ export default function OperationsTransactionsPage() {
               {loading ? (
                 <>
                   {[0, 1, 2, 3, 4].map((i) => (
-                    <SkeletonRow key={i} />
+                    <SkeletonRow key={i} cols={8} />
                   ))}
                 </>
               ) : error ? (
@@ -518,6 +544,107 @@ export default function OperationsTransactionsPage() {
           }}
         />
       )}
+
+      {/* Abandoned Payments section */}
+      <div className="border border-amber-200 rounded-2xl overflow-hidden">
+        <button
+          type="button"
+          onClick={handleToggleAbandoned}
+          className="w-full flex items-center justify-between px-5 py-4 bg-amber-50 hover:bg-amber-100 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+            <div className="text-left">
+              <p className="text-sm font-bold text-amber-800">
+                Abandoned Payments
+                {!statsLoading && stats?.pending > 0 && (
+                  <span className="ml-2 bg-amber-200 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full">
+                    {stats.pending}
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-amber-600">
+                Customers who opened a Paystack checkout but never completed payment — no money
+                moved
+              </p>
+            </div>
+          </div>
+          {abandonedOpen ? (
+            <ChevronUp className="h-5 w-5 text-amber-600 flex-shrink-0" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-amber-600 flex-shrink-0" />
+          )}
+        </button>
+
+        {abandonedOpen && (
+          <div className="p-4 sm:p-5 space-y-4 bg-white">
+            <div className="overflow-x-auto">
+              <table className="modern-table min-w-[500px]">
+                <thead>
+                  <tr>
+                    {["Reference", "Customer", "Amount", "Date"].map((h) => (
+                      <th key={h}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {abandonedLoading ? (
+                    <>
+                      {[0, 1, 2, 3].map((i) => (
+                        <SkeletonRow key={i} cols={4} />
+                      ))}
+                    </>
+                  ) : abandoned.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="p-8 text-center text-gray-400 text-sm">
+                        No abandoned payments found
+                      </td>
+                    </tr>
+                  ) : (
+                    abandoned.map((p: any, i: number) => (
+                      <tr key={p.id ?? i}>
+                        <td
+                          className="font-mono text-[11px] text-gray-600 whitespace-nowrap max-w-[200px] truncate"
+                          title={p.reference}
+                        >
+                          {p.reference ?? "—"}
+                        </td>
+                        <td className="text-xs text-gray-800 font-bold">
+                          <div>{p.customerName ?? "Unknown"}</div>
+                          {p.customerPhone && p.customerPhone !== "—" && (
+                            <div className="text-[10px] text-gray-400 font-normal mt-0.5">
+                              {p.customerPhone}
+                            </div>
+                          )}
+                        </td>
+                        <td className="text-xs font-black text-amber-700 whitespace-nowrap">
+                          {fmt(p.amount)}
+                        </td>
+                        <td className="text-[11px] text-gray-500 whitespace-nowrap font-medium">
+                          {formatTime(p.createdAt)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {!abandonedLoading && abandonedPagination.total > 0 && (
+              <Pagination
+                currentPage={abandonedPagination.page}
+                totalPages={abandonedPagination.pages}
+                pageSize={abandonedPagination.limit}
+                onPageChange={(p) => fetchAbandoned(p, abandonedPagination.limit)}
+                onPageSizeChange={(size) => {
+                  setAbandonedPagination((prev) => ({ ...prev, limit: size, page: 1 }));
+                  fetchAbandoned(1, size);
+                }}
+              />
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
