@@ -5,6 +5,7 @@ const projectRoot = path.resolve(__dirname);
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  turbopack: {},
   images: {
     remotePatterns: [
       {
