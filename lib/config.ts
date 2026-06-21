@@ -231,6 +231,12 @@ export const ENDPOINTS = {
     // Surge Pricing
     SURGE: "/api/operations/surge",
 
+    // Regions
+    REGIONS: "/api/operations/regions",
+    REGION_BY_ID: (id: string) => `/api/operations/regions/${id}`,
+    REGION_TOGGLE: (id: string) => `/api/operations/regions/${id}/toggle`,
+    REGION_ASSIGN_VENDOR: (id: string) => `/api/operations/regions/${id}/assign-vendor`,
+
     // Notifications
     NOTIFICATIONS: "/api/operations/notifications",
     NOTIFICATION_DELETE: (id: string) => `/api/operations/notifications/${id}`,

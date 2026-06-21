@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/services/auth.service";
 import type { User, LoginCredentials, LoginResponse } from "@/types";
 
@@ -34,7 +33,6 @@ export function getPortalRoute(user: User): string {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   // Single effect: runs once on mount.
   // If a token cookie exists, fetch the user to hydrate context.
@@ -70,9 +68,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // route: password-change gate first, then the correct portal
     if (userData.mustChangePassword) {
-      router.push(`${getPortalRoute(userData)}/settings?mustChange=true`);
+      window.location.href = `${getPortalRoute(userData)}/settings?mustChange=true`;
     } else {
-      router.push(getPortalRoute(userData));
+      window.location.href = getPortalRoute(userData);
     }
   };
 
@@ -84,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authService.clearToken(); // even if the network call fails
     }
     setUser(null);
-    router.push("/");
+    window.location.href = "/";
   };
 
   // ── refreshUser ─────────────────────────────────────────────────────────────
