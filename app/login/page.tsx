@@ -35,13 +35,15 @@ export default function LoginPage() {
     } catch (err: any) {
       const msg = err?.message?.toLowerCase() ?? "";
       const friendly =
-        msg.includes("invalid") || msg.includes("incorrect")
-          ? "Invalid email or password."
-          : msg.includes("deactivated")
-            ? "Account deactivated. Contact IT support."
-            : msg.includes("suspended")
-              ? "Account suspended. Contact support."
-              : err?.message || "Login failed. Please try again.";
+        msg.includes("failed to fetch") || msg.includes("network") || msg.includes("load")
+          ? "Unable to connect to the server. Please check your internet connection and try again."
+          : msg.includes("invalid") || msg.includes("incorrect")
+            ? "Invalid email or password."
+            : msg.includes("deactivated")
+              ? "Account deactivated. Contact IT support."
+              : msg.includes("suspended")
+                ? "Account suspended. Contact support."
+                : err?.message || "Login failed. Please try again.";
       setError(friendly);
       setPassword("");
     } finally {

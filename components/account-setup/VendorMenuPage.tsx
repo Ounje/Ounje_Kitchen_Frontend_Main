@@ -23,7 +23,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { foodItemService, comboService } from "@/lib/api/services/accountSetup.service";
+import {
+  foodItemService,
+  comboService,
+  vendorSetupService,
+} from "@/lib/api/services/accountSetup.service";
 
 type MenuTab = "food-items" | "combos";
 
@@ -72,7 +76,7 @@ function FoodItemViewModal({
     JSON.parse(JSON.stringify(item.subCategory ?? []))
   );
   const [editingKey, setEditingKey] = useState<string | null>(null); // "si-di"
-  const [editForm, setEditForm] = useState({ name: "", price: "", imageUrl: "" });
+  const [editForm, setEditForm] = useState({ name: "", price: "", imageUrl: "", description: "" });
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
@@ -82,6 +86,7 @@ function FoodItemViewModal({
       name: dish.name ?? "",
       price: dish.price?.toString() ?? "",
       imageUrl: dish.img ?? "",
+      description: dish.description ?? "",
     });
   };
 
@@ -101,6 +106,7 @@ function FoodItemViewModal({
                     name: editForm.name,
                     price: parseFloat(editForm.price) || dish.price,
                     img: editForm.imageUrl || dish.img,
+                    description: editForm.description || dish.description,
                   }
             ),
           }
@@ -203,6 +209,14 @@ function FoodItemViewModal({
                                 value={editForm.imageUrl}
                                 onChange={(e) =>
                                   setEditForm((f) => ({ ...f, imageUrl: e.target.value }))
+                                }
+                              />
+                              <input
+                                className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full"
+                                placeholder="Description (optional)"
+                                value={editForm.description}
+                                onChange={(e) =>
+                                  setEditForm((f) => ({ ...f, description: e.target.value }))
                                 }
                               />
                               <div className="flex gap-2 justify-end">
@@ -321,6 +335,7 @@ function FoodItemForm({
     dishName: "",
     price: "",
     imageUrl: "",
+    description: "",
     isAvailable: "true",
   });
   const [saving, setSaving] = useState(false);
@@ -335,6 +350,7 @@ function FoodItemForm({
     "rice",
     "protein",
     "sides",
+    "shawarma",
     "others",
   ];
 
@@ -371,6 +387,7 @@ function FoodItemForm({
                   name: form.dishName,
                   price: parseFloat(form.price),
                   img: form.imageUrl || undefined,
+                  description: form.description || undefined,
                   isAvailable: true,
                 },
               ],
@@ -449,6 +466,15 @@ function FoodItemForm({
                     placeholder="https://…"
                   />
                 </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Description</Label>
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  placeholder="Short description of the dish…"
+                  rows={2}
+                />
               </div>
             </>
           )}
@@ -642,6 +668,17 @@ export default function VendorMenuPage({ vendorId, portal }: Props) {
   const [viewTarget, setViewTarget] = useState<any>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [vendorName, setVendorName] = useState<string | null>(null);
+
+  useEffect(() => {
+    vendorSetupService
+      .getById(vendorId)
+      .then((res: any) => {
+        const v = res?.data;
+        setVendorName(v?.storeName || v?.owner?.name || null);
+      })
+      .catch(() => {});
+  }, [vendorId]);
 
   const fetch = useCallback(async () => {
     setLoading(true);
@@ -703,9 +740,13 @@ export default function VendorMenuPage({ vendorId, portal }: Props) {
             <ArrowLeft className="w-4 h-4" /> Back
           </Button>
           <div>
-            <h1 className="text-2xl font-black text-[#1a3f1c]">Vendor Menu</h1>
+            <h1 className="text-2xl font-black text-[#1a3f1c]">
+              {vendorName ? vendorName : "Vendor Menu"}
+            </h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              Manage food categories and combos for this vendor
+              {vendorName
+                ? "Manage food categories and combos"
+                : "Manage food categories and combos for this vendor"}
             </p>
           </div>
         </div>
