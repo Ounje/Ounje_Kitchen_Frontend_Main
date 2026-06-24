@@ -10,16 +10,13 @@ export const API_CONFIG = {
 };
 
 export const ENDPOINTS = {
-  // ── Web Push ──────────────────────────────────────────────────────────────
-  PUSH: {
-    SUBSCRIBE: "/api/push/subscribe",
-    UNSUBSCRIBE: "/api/push/unsubscribe",
-  },
-
   // ── Shared (Universal Access) ─────────────────────────────────────────────
   SHARED: {
     NOTIFICATIONS: "/api/shared/notifications",
     NOTIFICATION_DELETE: (id: string) => `/api/shared/notifications/${id}`,
+    PUSH_SUBSCRIBE: "/api/shared/push-subscription",
+    PUSH_UNSUBSCRIBE: "/api/shared/push-subscription",
+    PUSH_VAPID_KEY: "/api/shared/push-subscription/vapid-public-key",
   },
 
   // ── Authentication ────────────────────────────────────────────────────────

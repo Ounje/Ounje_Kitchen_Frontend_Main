@@ -1,6 +1,12 @@
 self.addEventListener("push", (event) => {
-  const data = event.data?.json() ?? {};
-  const title = data.title || "Ounje Kitchen";
+  let data = {};
+  try {
+    data = event.data?.json() ?? {};
+  } catch {
+    data = { body: event.data?.text() ?? "" };
+  }
+
+  const title = data.title || "OunjeFood";
   const options = {
     body: data.body || "",
     icon: "/images/logo.png",
@@ -15,13 +21,17 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const orderId = event.notification.data?.orderId;
-  const url = orderId ? `/operations/orders/${orderId}` : "/operations";
+  const targetUrl = orderId ? `/operations/orders/${orderId}` : "/operations";
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
-      const existing = wins.find((w) => w.focused || w.url.includes(url));
-      if (existing) return existing.focus();
-      return clients.openWindow(url);
+      for (const win of wins) {
+        if ("focus" in win) {
+          if (orderId) win.navigate(targetUrl);
+          return win.focus();
+        }
+      }
+      return clients.openWindow(targetUrl);
     })
   );
 });

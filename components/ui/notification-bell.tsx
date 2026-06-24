@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell, ChevronRight, Trash2 } from "lucide-react";
+import { subscribeToPushNotifications } from "@/lib/push-notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,6 +30,11 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
   const [open, setOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<any | null>(null);
   const queryClient = useQueryClient();
+
+  // Register service worker and subscribe to web push after login
+  useEffect(() => {
+    subscribeToPushNotifications();
+  }, []);
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifications", portal],
