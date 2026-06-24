@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { authService } from "@/lib/api/services/auth.service";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import type { User, LoginCredentials, LoginResponse } from "@/types";
 
 // ─── types ────────────────────────────────────────────────────────────────────
@@ -33,6 +34,8 @@ export function getPortalRoute(user: User): string {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  usePushNotifications(!!user);
 
   // Single effect: runs once on mount.
   // If a token cookie exists, fetch the user to hydrate context.

@@ -10,6 +10,12 @@ export const API_CONFIG = {
 };
 
 export const ENDPOINTS = {
+  // ── Web Push ──────────────────────────────────────────────────────────────
+  PUSH: {
+    SUBSCRIBE: "/api/push/subscribe",
+    UNSUBSCRIBE: "/api/push/unsubscribe",
+  },
+
   // ── Shared (Universal Access) ─────────────────────────────────────────────
   SHARED: {
     NOTIFICATIONS: "/api/shared/notifications",
