@@ -20,6 +20,7 @@ import {
   UserPlus,
   Zap,
   MapPin,
+  Bell,
 } from "lucide-react";
 
 const navigation = [
@@ -32,6 +33,7 @@ const navigation = [
   { name: "Surge Pricing", href: "/operations/surge", icon: Zap },
   { name: "Regions", href: "/operations/regions", icon: MapPin },
   { name: "Order Transactions", href: "/operations/transactions", icon: CreditCard },
+  { name: "Inbox", href: "/operations/inbox", icon: Bell },
   { name: "Broadcasts", href: "/operations/notifications", icon: Radio },
   { name: "Settings", href: "/operations/settings", icon: UserCircle },
 ];
