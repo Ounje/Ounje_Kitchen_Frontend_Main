@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, CheckCircle, Trash2, ShoppingBag, Tag, Info, Radio } from "lucide-react";
+import { Bell, CheckCircle, Trash2, ShoppingBag, Tag, Info } from "lucide-react";
 import { notificationService } from "@/lib/api/services/notification.service";
 import { NotificationDetailModal } from "@/components/ui/notification-detail-modal";
 import { Button } from "@/components/ui/button";
@@ -18,8 +17,6 @@ const typeAccent: Record<string, string> = {
   promo_declined: "border-l-red-400 bg-red-50",
   promo_approval_processed: "border-l-gray-200 bg-gray-50",
   order_update: "border-l-blue-400 bg-blue-50",
-  general: "border-l-indigo-300 bg-white",
-  broadcast: "border-l-indigo-300 bg-white",
 };
 
 const typeIcon: Record<string, React.ReactNode> = {
@@ -28,11 +25,8 @@ const typeIcon: Record<string, React.ReactNode> = {
   promo_approved: <CheckCircle className="w-3.5 h-3.5 text-green-500" />,
   promo_declined: <Info className="w-3.5 h-3.5 text-red-500" />,
   promo_approval_processed: <CheckCircle className="w-3.5 h-3.5 text-gray-400" />,
-  general: <Radio className="w-3.5 h-3.5 text-indigo-400" />,
-  broadcast: <Radio className="w-3.5 h-3.5 text-indigo-400" />,
 };
 
-type PageTab = "notifications" | "broadcasts";
 type FilterType = "all" | "unread" | "order_update" | "promo";
 
 const notifFilters: { key: FilterType; label: string }[] = [
@@ -63,20 +57,20 @@ function ItemRow({
 
   return (
     <div
-      className={`flex items-start gap-3 px-4 py-3 border-l-[3px] ${accent} hover:brightness-[0.97] transition-all`}
+      className={`flex items-center gap-2.5 px-3 py-2 border-l-[3px] ${accent} hover:brightness-[0.97] transition-all`}
     >
-      <div className="mt-1.5 shrink-0">
+      <div className="shrink-0">
         {!notif.read ? (
-          <span className="w-2 h-2 rounded-full bg-blue-500 block" />
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 block" />
         ) : (
-          <span className="w-2 h-2 rounded-full bg-gray-200 block" />
+          <span className="w-1.5 h-1.5 rounded-full bg-gray-200 block" />
         )}
       </div>
-      <div className="mt-1 shrink-0">{icon}</div>
+      <div className="shrink-0">{icon}</div>
       <button type="button" className="flex-1 min-w-0 text-left" onClick={() => onOpen(notif)}>
         <div className="flex items-center justify-between gap-2">
           <span
-            className={`text-sm font-bold line-clamp-1 ${!notif.read ? "text-gray-900" : "text-gray-500"}`}
+            className={`text-xs font-semibold line-clamp-1 ${!notif.read ? "text-gray-900" : "text-gray-500"}`}
           >
             {notif.title}
           </span>
@@ -84,14 +78,14 @@ function ItemRow({
             {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : "Now"}
           </span>
         </div>
-        <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{notif.message}</p>
+        <p className="text-[11px] text-gray-500 line-clamp-1">{notif.message}</p>
       </button>
-      <div className="flex items-center gap-1 shrink-0 mt-0.5">
+      <div className="flex items-center gap-0.5 shrink-0">
         {!notif.read && (
           <button
             type="button"
             title="Mark as read"
-            className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors"
+            className="p-1 rounded text-blue-500 hover:bg-blue-50 transition-colors"
             onClick={() => onMarkRead(id)}
           >
             <CheckCircle className="w-3.5 h-3.5" />
@@ -100,7 +94,7 @@ function ItemRow({
         <button
           type="button"
           title="Delete"
-          className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors"
+          className="p-1 rounded text-red-400 hover:bg-red-50 transition-colors"
           onClick={() => {
             if (confirm("Delete this notification?")) onDelete(id);
           }}
@@ -113,21 +107,11 @@ function ItemRow({
 }
 
 export function NotificationsInbox({ portal }: NotificationsInboxProps) {
-  const searchParams = useSearchParams();
-  const initialTab = (searchParams.get("tab") as PageTab | null) || "notifications";
-
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<PageTab>(initialTab);
-  const [notifFilter, setNotifFilter] = useState<FilterType>("all");
+  const [filter, setFilter] = useState<FilterType>("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const [selected, setSelected] = useState<any | null>(null);
-
-  // Sync tab when URL param changes (e.g. navigating from bell "View all")
-  useEffect(() => {
-    const t = searchParams.get("tab") as PageTab | null;
-    if (t === "notifications" || t === "broadcasts") setActiveTab(t);
-  }, [searchParams]);
 
   const { data: all = [], isLoading } = useQuery({
     queryKey: ["notifications", portal],
@@ -147,7 +131,6 @@ export function NotificationsInbox({ portal }: NotificationsInboxProps) {
   });
 
   const notifItems = all.filter((n: any) => !BROADCAST_TYPES.has(n.type));
-  const broadcastItems = all.filter((n: any) => BROADCAST_TYPES.has(n.type));
 
   const markReadMutation = useMutation({
     mutationFn: (id: string) => notificationService.markAsRead(id),
@@ -165,8 +148,8 @@ export function NotificationsInbox({ portal }: NotificationsInboxProps) {
   });
 
   const markAllMutation = useMutation({
-    mutationFn: async (items: any[]) => {
-      const unread = items.filter((n: any) => !n.read);
+    mutationFn: async () => {
+      const unread = notifItems.filter((n: any) => !n.read);
       await Promise.all(unread.map((n: any) => notificationService.markAsRead(n._id || n.id)));
     },
     onSuccess: () => {
@@ -175,139 +158,94 @@ export function NotificationsInbox({ portal }: NotificationsInboxProps) {
     },
   });
 
-  // Build paginated list for notifications tab (with filter chips)
-  const filteredNotifs = notifItems.filter((n: any) => {
-    if (notifFilter === "unread") return !n.read;
-    if (notifFilter === "order_update") return n.type === "order_update";
-    if (notifFilter === "promo") return n.type?.startsWith("promo_");
+  const filtered = notifItems.filter((n: any) => {
+    if (filter === "unread") return !n.read;
+    if (filter === "order_update") return n.type === "order_update";
+    if (filter === "promo") return n.type?.startsWith("promo_");
     return true;
   });
 
-  const activeSource = activeTab === "notifications" ? filteredNotifs : broadcastItems;
-  const totalPages = Math.max(1, Math.ceil(activeSource.length / pageSize));
-  const paginated = activeSource.slice((page - 1) * pageSize, page * pageSize);
-
-  const unreadNotifs = notifItems.filter((n: any) => !n.read).length;
-  const unreadBroadcasts = broadcastItems.filter((n: any) => !n.read).length;
-
-  const switchTab = (t: PageTab) => {
-    setActiveTab(t);
-    setPage(1);
-    setNotifFilter("all");
-  };
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const unreadCount = notifItems.filter((n: any) => !n.read).length;
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
-      {/* Page header */}
+    <div className="p-3 sm:p-5 max-w-4xl mx-auto space-y-2.5">
+      {/* Header */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h1 className="text-xl font-black text-gray-900 tracking-tight">Inbox</h1>
-        {(activeTab === "notifications" ? unreadNotifs : unreadBroadcasts) > 0 && (
+        <div className="flex items-center gap-2">
+          <h1 className="text-base font-black text-gray-900 tracking-tight">Inbox</h1>
+          {unreadCount > 0 && (
+            <span className="text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">
+              {unreadCount}
+            </span>
+          )}
+        </div>
+        {unreadCount > 0 && (
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="gap-1.5 text-xs text-[#1A3F1C] border-[#1A3F1C]/30 hover:bg-[#1A3F1C]/5"
-            onClick={() =>
-              markAllMutation.mutate(activeTab === "notifications" ? notifItems : broadcastItems)
-            }
+            className="h-7 gap-1 text-xs text-[#1A3F1C] border-[#1A3F1C]/30 hover:bg-[#1A3F1C]/5"
+            onClick={() => markAllMutation.mutate()}
             disabled={markAllMutation.isPending}
           >
-            <CheckCircle className="w-3.5 h-3.5" />
-            {markAllMutation.isPending ? "Marking..." : "Mark all as read"}
+            <CheckCircle className="w-3 h-3" />
+            {markAllMutation.isPending ? "Marking..." : "Mark all read"}
           </Button>
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200">
-        <button
-          type="button"
-          onClick={() => switchTab("notifications")}
-          className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
-            activeTab === "notifications"
-              ? "border-[#1A3F1C] text-[#1A3F1C]"
-              : "border-transparent text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          <Bell className="w-4 h-4" />
-          Notifications
-          {unreadNotifs > 0 && (
-            <span className="ml-1 text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">
-              {unreadNotifs}
-            </span>
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={() => switchTab("broadcasts")}
-          className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
-            activeTab === "broadcasts"
-              ? "border-[#1A3F1C] text-[#1A3F1C]"
-              : "border-transparent text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          <Radio className="w-4 h-4" />
-          Broadcasts
-          {unreadBroadcasts > 0 && (
-            <span className="ml-1 text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">
-              {unreadBroadcasts}
-            </span>
-          )}
-        </button>
+      {/* Filter chips */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {notifFilters.map((f) => {
+          const count =
+            f.key === "all"
+              ? notifItems.length
+              : f.key === "unread"
+                ? unreadCount
+                : f.key === "order_update"
+                  ? notifItems.filter((n: any) => n.type === "order_update").length
+                  : notifItems.filter((n: any) => n.type?.startsWith("promo_")).length;
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => {
+                setFilter(f.key);
+                setPage(1);
+              }}
+              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold transition-all border ${
+                filter === f.key
+                  ? "bg-[#1A3F1C] text-white border-[#1A3F1C]"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-[#1A3F1C]/40 hover:text-[#1A3F1C]"
+              }`}
+            >
+              {f.label}
+              {count > 0 && (
+                <span
+                  className={`ml-1 text-[10px] font-bold px-1 py-px rounded-full ${
+                    filter === f.key ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Filter chips — only on notifications tab */}
-      {activeTab === "notifications" && (
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {notifFilters.map((f) => {
-            const count =
-              f.key === "all"
-                ? notifItems.length
-                : f.key === "unread"
-                  ? unreadNotifs
-                  : f.key === "order_update"
-                    ? notifItems.filter((n: any) => n.type === "order_update").length
-                    : notifItems.filter((n: any) => n.type?.startsWith("promo_")).length;
-            return (
-              <button
-                key={f.key}
-                type="button"
-                onClick={() => {
-                  setNotifFilter(f.key);
-                  setPage(1);
-                }}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all border ${
-                  notifFilter === f.key
-                    ? "bg-[#1A3F1C] text-white border-[#1A3F1C] shadow-sm"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-[#1A3F1C]/40 hover:text-[#1A3F1C]"
-                }`}
-              >
-                {f.label}
-                {count > 0 && (
-                  <span
-                    className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                      notifFilter === f.key ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
       {/* List */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
         {isLoading ? (
-          <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
+          <div className="flex items-center justify-center h-28 text-gray-400 text-sm">
             Loading...
           </div>
         ) : paginated.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40 gap-3 text-gray-400">
-            <Bell className="h-10 w-10 opacity-15" />
-            <p className="text-sm">Nothing here yet</p>
+          <div className="flex flex-col items-center justify-center h-28 gap-2 text-gray-400">
+            <Bell className="h-8 w-8 opacity-15" />
+            <p className="text-xs">Nothing here yet</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -322,7 +260,7 @@ export function NotificationsInbox({ portal }: NotificationsInboxProps) {
             ))}
           </div>
         )}
-        {activeSource.length > pageSize && (
+        {filtered.length > 0 && (
           <Pagination
             currentPage={page}
             totalPages={totalPages}
