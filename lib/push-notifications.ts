@@ -1,10 +1,13 @@
 import { ENDPOINTS } from "@/lib/config";
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = atob(base64);
-  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+  // new Uint8Array(n) produces Uint8Array<ArrayBuffer>, compatible with BufferSource
+  const output = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i);
+  return output;
 }
 
 async function sendSubscriptionToServer(subscription: PushSubscription): Promise<void> {
