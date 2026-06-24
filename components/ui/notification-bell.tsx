@@ -78,10 +78,7 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
           <Button
             variant="ghost"
             size="icon"
-            className={
-              className ||
-              "text-white hover:bg-white/10 active:bg-white/20 relative h-9 w-9 sm:h-10 sm:w-10"
-            }
+            className={`relative ${className || "text-white hover:bg-white/10 active:bg-white/20 h-9 w-9 sm:h-10 sm:w-10"}`}
             aria-label="Notifications"
           >
             <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
