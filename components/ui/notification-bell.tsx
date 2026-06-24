@@ -20,6 +20,7 @@ const typeAccent: Record<string, string> = {
   promo_approved: "border-l-green-400  bg-green-50",
   promo_declined: "border-l-red-400    bg-red-50",
   promo_approval_processed: "border-l-gray-300   bg-gray-50",
+  order_update: "border-l-blue-400   bg-blue-50",
   general: "border-l-indigo-300 bg-white",
   broadcast: "border-l-indigo-300 bg-white",
 };

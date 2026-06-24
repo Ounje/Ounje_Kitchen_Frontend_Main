@@ -70,6 +70,7 @@ const typeMeta: Record<string, { label: string; bg: string; text: string; icon: 
     text: "text-gray-600",
     icon: CheckCircle,
   },
+  order_update: { label: "Order Update", bg: "bg-blue-50", text: "text-blue-700", icon: Info },
   general: { label: "Broadcast", bg: "bg-indigo-50", text: "text-indigo-700", icon: Bell },
   broadcast: { label: "Broadcast", bg: "bg-indigo-50", text: "text-indigo-700", icon: Bell },
 };
