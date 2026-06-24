@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   PiggyBank,
   ArrowDownToLine,
+  Bell,
 } from "lucide-react";
 
 const NAV = [
@@ -26,6 +27,7 @@ const NAV = [
   { href: "/finance/wallets", name: "Wallet Balances", icon: PiggyBank },
   { href: "/finance/revenue", name: "Revenue", icon: TrendingUp },
   { href: "/finance/reconciliation", name: "Reconciliation", icon: ShieldCheck },
+  { href: "/finance/inbox", name: "Inbox", icon: Bell },
   { href: "/finance/settings", name: "Settings", icon: Settings },
 ];
 

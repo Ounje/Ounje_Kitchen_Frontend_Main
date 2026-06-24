@@ -2,7 +2,12 @@ import { apiClient } from "@/lib/client";
 import { ENDPOINTS } from "@/lib/config";
 
 export const notificationService = {
-  async getAllNotifications(params?: { targetPortal?: string; page?: number; limit?: number }) {
+  async getAllNotifications(params?: {
+    targetPortal?: string;
+    type?: string;
+    page?: number;
+    limit?: number;
+  }) {
     return await apiClient.get(ENDPOINTS.SHARED.NOTIFICATIONS, {
       params: params ?? undefined,
     });

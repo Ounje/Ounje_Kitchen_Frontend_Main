@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, ChevronRight, ExternalLink, Trash2 } from "lucide-react";
+import { Bell, ExternalLink, Trash2, Radio } from "lucide-react";
 import Link from "next/link";
 import { subscribeToPushNotifications } from "@/lib/push-notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,14 +17,16 @@ interface NotificationBellProps {
 }
 
 const typeAccent: Record<string, string> = {
-  promo_approval_request: "border-l-amber-400  bg-amber-50",
-  promo_approved: "border-l-green-400  bg-green-50",
-  promo_declined: "border-l-red-400    bg-red-50",
-  promo_approval_processed: "border-l-gray-300   bg-gray-50",
-  order_update: "border-l-blue-400   bg-blue-50",
+  promo_approval_request: "border-l-amber-400 bg-amber-50",
+  promo_approved: "border-l-green-400 bg-green-50",
+  promo_declined: "border-l-red-400 bg-red-50",
+  promo_approval_processed: "border-l-gray-200 bg-gray-50",
+  order_update: "border-l-blue-400 bg-blue-50",
   general: "border-l-indigo-300 bg-white",
   broadcast: "border-l-indigo-300 bg-white",
 };
+
+const BROADCAST_TYPES = new Set(["broadcast", "general"]);
 
 const inboxRouteMap: Record<string, string> = {
   Operations: "/operations/inbox",
@@ -33,12 +35,15 @@ const inboxRouteMap: Record<string, string> = {
   Admin: "/admin/inbox",
 };
 
+type BellTab = "notifications" | "broadcasts";
+
 export function NotificationBell({ className, portal }: NotificationBellProps) {
   const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<BellTab>("notifications");
   const [selectedNotification, setSelectedNotification] = useState<any | null>(null);
   const queryClient = useQueryClient();
 
-  const inboxRoute = (portal && inboxRouteMap[portal]) || null;
+  const inboxBase = (portal && inboxRouteMap[portal]) || null;
 
   useEffect(() => {
     subscribeToPushNotifications();
@@ -72,14 +77,21 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
     },
   });
 
-  const unreadCount = notifications.filter((n: any) => !n.read).length;
-  // Show only 5 most recent in the bell
-  const recent = notifications.slice(0, 5);
+  const notifs = notifications.filter((n: any) => !BROADCAST_TYPES.has(n.type));
+  const broadcasts = notifications.filter((n: any) => BROADCAST_TYPES.has(n.type));
+
+  const unreadNotifs = notifs.filter((n: any) => !n.read).length;
+  const unreadBroadcasts = broadcasts.filter((n: any) => !n.read).length;
+  const totalUnread = unreadNotifs + unreadBroadcasts;
+
+  const activeItems = activeTab === "notifications" ? notifs.slice(0, 5) : broadcasts.slice(0, 5);
 
   const handleOpen = (notif: any) => {
     setSelectedNotification(notif);
     setOpen(false);
   };
+
+  const viewAllHref = inboxBase ? `${inboxBase}?tab=${activeTab}` : null;
 
   return (
     <>
@@ -92,9 +104,9 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
             aria-label="Notifications"
           >
             <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-            {unreadCount > 0 && (
+            {totalUnread > 0 && (
               <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white ring-2 ring-white">
-                {unreadCount > 9 ? "9+" : unreadCount}
+                {totalUnread > 9 ? "9+" : totalUnread}
               </span>
             )}
           </Button>
@@ -105,34 +117,60 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
           align="end"
           sideOffset={8}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2.5 bg-[#1A3F1C]">
-            <div className="flex items-center gap-2">
-              <Bell className="h-3.5 w-3.5 text-white/80" />
-              <h4 className="text-xs font-semibold text-white">Notifications</h4>
+          {/* Tabs header */}
+          <div className="bg-[#1A3F1C]">
+            <div className="flex">
+              <button
+                type="button"
+                onClick={() => setActiveTab("notifications")}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-colors ${
+                  activeTab === "notifications"
+                    ? "text-white border-b-2 border-white"
+                    : "text-white/50 hover:text-white/80"
+                }`}
+              >
+                <Bell className="h-3 w-3" />
+                Notifications
+                {unreadNotifs > 0 && (
+                  <span className="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                    {unreadNotifs}
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("broadcasts")}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-colors ${
+                  activeTab === "broadcasts"
+                    ? "text-white border-b-2 border-white"
+                    : "text-white/50 hover:text-white/80"
+                }`}
+              >
+                <Radio className="h-3 w-3" />
+                Broadcasts
+                {unreadBroadcasts > 0 && (
+                  <span className="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                    {unreadBroadcasts}
+                  </span>
+                )}
+              </button>
             </div>
-            {unreadCount > 0 ? (
-              <span className="text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">
-                {unreadCount} new
-              </span>
-            ) : (
-              <span className="text-[10px] text-white/60">All caught up</span>
-            )}
           </div>
 
-          <ScrollArea className="h-65 bg-white">
-            {recent.length === 0 ? (
+          <ScrollArea className="h-60 bg-white">
+            {activeItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 gap-2 text-gray-400">
                 <Bell className="h-7 w-7 opacity-20" />
-                <p className="text-xs">No notifications yet</p>
+                <p className="text-xs">Nothing here yet</p>
               </div>
             ) : (
               <div className="flex flex-col divide-y divide-gray-100">
-                {recent.map((notif: any, index: number) => {
+                {activeItems.map((notif: any, index: number) => {
                   const accent = typeAccent[notif.type] || typeAccent.general;
                   return (
                     <button
                       key={notif.id || notif._id || index}
+                      type="button"
                       onClick={() => handleOpen(notif)}
                       className={`flex items-start gap-2.5 px-3 py-2.5 text-left w-full hover:brightness-95 transition-all border-l-[3px] ${accent}`}
                     >
@@ -146,7 +184,7 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
                           <span
-                            className={`text-[11px] font-bold leading-snug line-clamp-1 ${!notif.read ? "text-gray-900" : "text-gray-500"}`}
+                            className={`text-[11px] font-bold line-clamp-1 ${!notif.read ? "text-gray-900" : "text-gray-500"}`}
                           >
                             {notif.title}
                           </span>
@@ -160,7 +198,6 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
                           {notif.message}
                         </p>
                       </div>
-                      <ChevronRight className="h-3 w-3 text-gray-300 shrink-0 mt-1" />
                     </button>
                   );
                 })}
@@ -170,9 +207,9 @@ export function NotificationBell({ className, portal }: NotificationBellProps) {
 
           {/* Footer */}
           <div className="px-3 py-2 border-t bg-gray-50 flex items-center justify-between gap-2">
-            {inboxRoute ? (
+            {viewAllHref ? (
               <Link
-                href={inboxRoute}
+                href={viewAllHref}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-1 text-[11px] font-semibold text-[#1A3F1C] hover:underline"
               >

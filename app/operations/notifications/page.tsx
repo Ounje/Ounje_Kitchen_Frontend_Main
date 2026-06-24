@@ -124,8 +124,9 @@ export default function NotificationsPage() {
   };
 
   const { data: queryData, isLoading } = useQuery({
-    queryKey: ["notifications", page, pageSize],
-    queryFn: () => notificationService.getAllNotifications({ page, limit: pageSize }),
+    queryKey: ["notifications-broadcasts", page, pageSize],
+    queryFn: () =>
+      notificationService.getAllNotifications({ type: "broadcast,general", page, limit: pageSize }),
   });
 
   const notifications: any[] = (queryData as any)?.notifications ?? [];

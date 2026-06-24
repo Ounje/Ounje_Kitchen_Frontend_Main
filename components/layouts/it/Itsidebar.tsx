@@ -15,6 +15,7 @@ import {
   X,
   ScrollText,
   UserPlus,
+  Bell,
 } from "lucide-react";
 
 const navigation = [
@@ -23,6 +24,7 @@ const navigation = [
   { name: "Orders", href: "/it/orders", icon: ShoppingCart },
   { name: "Account Management", href: "/it/account-management", icon: FolderLock },
   { name: "Account Setup", href: "/it/account-setup", icon: UserPlus },
+  { name: "Inbox", href: "/it/inbox", icon: Bell },
   { name: "Audit Logs", href: "/it/audit-logs", icon: ScrollText },
   { name: "Settings", href: "/it/settings", icon: UserCircle },
 ];
