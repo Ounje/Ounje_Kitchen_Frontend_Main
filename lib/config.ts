@@ -243,6 +243,25 @@ export const ENDPOINTS = {
     // Notifications
     NOTIFICATIONS: "/api/operations/notifications",
     NOTIFICATION_DELETE: (id: string) => `/api/operations/notifications/${id}`,
+
+    // Rewards — Catalog
+    REWARDS_CATALOG: "/api/operations/rewards/catalog",
+    REWARDS_CATALOG_BY_ID: (id: string) => `/api/operations/rewards/catalog/${id}`,
+    REWARDS_CATALOG_DEACTIVATE: (id: string) => `/api/operations/rewards/catalog/${id}/deactivate`,
+    REWARDS_CATALOG_REACTIVATE: (id: string) => `/api/operations/rewards/catalog/${id}/reactivate`,
+
+    // Rewards — Ledger
+    REWARDS_LEDGER: "/api/operations/rewards/ledger",
+    REWARDS_LEDGER_STATS: "/api/operations/rewards/ledger/stats",
+    REWARDS_LEDGER_CUSTOMER: (customerId: string) =>
+      `/api/operations/rewards/ledger/customer/${customerId}`,
+    REWARDS_LEDGER_REDEEM: (id: string) => `/api/operations/rewards/ledger/${id}/redeem`,
+
+    // Rewards — Lucky Order
+    REWARDS_LUCKY_POOL: "/api/operations/rewards/lucky-order/pool",
+    REWARDS_LUCKY_TODAY: "/api/operations/rewards/lucky-order/today",
+    REWARDS_LUCKY_HISTORY: "/api/operations/rewards/lucky-order/history",
+    REWARDS_LUCKY_DRAW: "/api/operations/rewards/lucky-order/draw",
   },
 
   // ── Account Setup (IT + Operations) ──────────────────────────────────────────

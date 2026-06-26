@@ -21,6 +21,7 @@ import {
   Zap,
   MapPin,
   Bell,
+  Gift,
 } from "lucide-react";
 
 const navigation = [
@@ -32,6 +33,7 @@ const navigation = [
   { name: "Promo Codes", href: "/operations/promos", icon: Tag },
   { name: "Surge Pricing", href: "/operations/surge", icon: Zap },
   { name: "Regions", href: "/operations/regions", icon: MapPin },
+  { name: "Rewards", href: "/operations/rewards", icon: Gift },
   { name: "Order Transactions", href: "/operations/transactions", icon: CreditCard },
   { name: "Inbox", href: "/operations/inbox", icon: Bell },
   { name: "Broadcasts", href: "/operations/notifications", icon: Radio },
