@@ -49,73 +49,103 @@ export interface LuckyOrderDraw {
   createdAt: string;
 }
 
+interface PaginatedResponse<T> {
+  data: T[];
+  page: number;
+  pages: number;
+  total: number;
+  limit: number;
+}
+
+interface DrawResult {
+  winner: { name: string; email: string; phone: string };
+  reward: { label: string; rewardType: string; walletCreditAmount: number };
+  eligiblePoolSize: number;
+  date: string;
+}
+
 export const rewardsService = {
   // ── Catalog ───────────────────────────────────────────────
 
   async getCatalogItems(filters: Record<string, unknown> = {}) {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_CATALOG, { params: filters });
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_CATALOG, { params: filters });
+    return res as { data: CatalogItem[] };
   },
 
   async getCatalogItem(id: string) {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_BY_ID(id));
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_BY_ID(id));
+    return res as { data: CatalogItem };
   },
 
   async createCatalogItem(data: CatalogItemData) {
-    return await apiClient.post(ENDPOINTS.OPERATIONS.REWARDS_CATALOG, data);
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.REWARDS_CATALOG, data);
+    return res as { data: CatalogItem };
   },
 
   async updateCatalogItem(id: string, data: Partial<CatalogItemData>) {
-    return await apiClient.put(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_BY_ID(id), data);
+    const res = await apiClient.put(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_BY_ID(id), data);
+    return res as { data: CatalogItem };
   },
 
   async deactivateCatalogItem(id: string) {
-    return await apiClient.patch(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_DEACTIVATE(id), {});
+    const res = await apiClient.patch(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_DEACTIVATE(id), {});
+    return res as { data: CatalogItem };
   },
 
   async reactivateCatalogItem(id: string) {
-    return await apiClient.patch(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_REACTIVATE(id), {});
+    const res = await apiClient.patch(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_REACTIVATE(id), {});
+    return res as { data: CatalogItem };
   },
 
   async deleteCatalogItem(id: string) {
-    return await apiClient.delete(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_BY_ID(id));
+    const res = await apiClient.delete(ENDPOINTS.OPERATIONS.REWARDS_CATALOG_BY_ID(id));
+    return res as { success: boolean; message?: string };
   },
 
   // ── Ledger ────────────────────────────────────────────────
 
   async getLedger(params: Record<string, unknown> = {}) {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LEDGER, { params });
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LEDGER, { params });
+    return res as PaginatedResponse<CustomerRewardEntry>;
   },
 
   async getLedgerStats() {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LEDGER_STATS);
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LEDGER_STATS);
+    return res as { data: RewardStats[] };
   },
 
   async getCustomerRewards(customerId: string, params: Record<string, unknown> = {}) {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LEDGER_CUSTOMER(customerId), {
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LEDGER_CUSTOMER(customerId), {
       params,
     });
+    return res as { data: CustomerRewardEntry[] };
   },
 
   async markRedeemed(id: string) {
-    return await apiClient.patch(ENDPOINTS.OPERATIONS.REWARDS_LEDGER_REDEEM(id), {});
+    const res = await apiClient.patch(ENDPOINTS.OPERATIONS.REWARDS_LEDGER_REDEEM(id), {});
+    return res as { data: CustomerRewardEntry };
   },
 
   // ── Lucky Order ───────────────────────────────────────────
 
   async getLuckyOrderPool() {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LUCKY_POOL);
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LUCKY_POOL);
+    return res as { data: { eligibleCount: number } };
   },
 
   async getLuckyOrderToday() {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LUCKY_TODAY);
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LUCKY_TODAY);
+    return res as { data: LuckyOrderDraw | null };
   },
 
   async getLuckyOrderHistory(params: Record<string, unknown> = {}) {
-    return await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LUCKY_HISTORY, { params });
+    const res = await apiClient.get(ENDPOINTS.OPERATIONS.REWARDS_LUCKY_HISTORY, { params });
+    return res as PaginatedResponse<LuckyOrderDraw>;
   },
 
   async runLuckyOrderDraw() {
-    return await apiClient.post(ENDPOINTS.OPERATIONS.REWARDS_LUCKY_DRAW, {});
+    const res = await apiClient.post(ENDPOINTS.OPERATIONS.REWARDS_LUCKY_DRAW, {});
+    return res as { data: DrawResult };
   },
 };
 
