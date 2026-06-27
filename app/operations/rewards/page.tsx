@@ -59,8 +59,7 @@ const REWARD_TYPES = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  applied: "bg-blue-100 text-blue-700",
+  unlocked: "bg-yellow-100 text-yellow-700",
   redeemed: "bg-green-100 text-green-700",
   expired: "bg-gray-100 text-gray-500",
 };
@@ -536,7 +535,7 @@ function LedgerTab() {
     <div className="space-y-5">
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {["pending", "applied", "redeemed", "expired"].map((s) => (
+        {["unlocked", "redeemed", "expired"].map((s) => (
           <div key={s} className="bg-white rounded-xl border border-gray-200 px-4 py-3">
             <p className="text-xs text-gray-400 capitalize">{s}</p>
             <p className="text-xl font-bold text-gray-900 mt-0.5">{statMap[s] ?? 0}</p>
@@ -553,8 +552,7 @@ function LedgerTab() {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="applied">Applied</option>
+            <option value="unlocked">Unlocked</option>
             <option value="redeemed">Redeemed</option>
             <option value="expired">Expired</option>
           </select>
@@ -625,7 +623,7 @@ function LedgerTab() {
                     })}
                   </td>
                   <td className="px-4 py-3">
-                    {entry.status === "applied" &&
+                    {entry.status === "unlocked" &&
                       ["free delivery", "free item", "priority delivery"].includes(
                         entry.rewardType
                       ) && (
