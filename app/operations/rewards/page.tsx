@@ -79,7 +79,6 @@ const DEFAULT_CATALOG_FORM: CatalogItemData = {
   walletCreditAmount: 0,
   freeItemDescription: "",
   isMysteryPoolMember: false,
-  phase: 1,
 };
 
 // ── Main Page ──────────────────────────────────────────────────────────────
@@ -202,7 +201,6 @@ function CatalogTab() {
       walletCreditAmount: item.walletCreditAmount,
       freeItemDescription: item.freeItemDescription,
       isMysteryPoolMember: item.isMysteryPoolMember,
-      phase: item.phase,
     });
     setDialogOpen(true);
   };
@@ -305,20 +303,6 @@ function CatalogTab() {
                     }
                   />
                 </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Phase *</label>
-                  <select
-                    required
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    value={form.phase}
-                    onChange={(e) => setForm((f) => ({ ...f, phase: Number(e.target.value) }))}
-                  >
-                    <option value={1}>Phase 1</option>
-                    <option value={2}>Phase 2</option>
-                    <option value={3}>Phase 3</option>
-                  </select>
-                </div>
               </div>
 
               {form.rewardType === "wallet credit" && (
@@ -385,7 +369,6 @@ function CatalogTab() {
               <th className="px-4 py-3 text-left">Type</th>
               <th className="px-4 py-3 text-left">Trigger</th>
               <th className="px-4 py-3 text-left">Value</th>
-              <th className="px-4 py-3 text-left">Phase</th>
               <th className="px-4 py-3 text-left">Status</th>
               <th className="px-4 py-3 text-left">Actions</th>
             </tr>
@@ -403,7 +386,7 @@ function CatalogTab() {
               ))
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
+                <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                   No reward items configured yet. Create the first one.
                 </td>
               </tr>
@@ -420,11 +403,6 @@ function CatalogTab() {
                     {item.rewardType === "wallet credit"
                       ? `₦${item.walletCreditAmount?.toLocaleString()}`
                       : item.freeItemDescription || "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="bg-[#1a3f1c]/10 text-[#1a3f1c] text-xs font-medium px-2 py-0.5 rounded-full">
-                      Phase {item.phase}
-                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <span

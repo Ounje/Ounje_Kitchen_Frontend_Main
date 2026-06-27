@@ -9,7 +9,6 @@ export interface CatalogItemData {
   walletCreditAmount?: number;
   freeItemDescription?: string;
   isMysteryPoolMember?: boolean;
-  phase: number;
 }
 
 export interface CatalogItem extends CatalogItemData {
