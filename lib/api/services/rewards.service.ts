@@ -26,8 +26,7 @@ export interface CustomerRewardEntry {
   rewardType: string;
   label: string;
   walletCreditAmount: number;
-  phase: number;
-  status: "pending" | "applied" | "redeemed" | "expired";
+  status: "unlocked" | "redeemed" | "expired";
   appliedAt?: string;
   redeemedAt?: string;
   createdAt: string;
