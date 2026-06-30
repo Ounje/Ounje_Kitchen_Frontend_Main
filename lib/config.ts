@@ -196,6 +196,7 @@ export const ENDPOINTS = {
     VENDOR_SUSPEND: (id: string) => `/api/operations/vendors/${id}/suspend`,
     VENDOR_ACTIVATE: (id: string) => `/api/operations/vendors/${id}/activate`,
     VENDOR_DELETE: (id: string) => `/api/operations/vendors/${id}`,
+    VENDOR_TOGGLE_EXPLORER: (id: string) => `/api/operations/vendors/${id}/explorer`,
 
     // Riders
     RIDERS: "/api/operations/riders",

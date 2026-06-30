@@ -20,6 +20,7 @@ export default function VendorDetailsPage() {
   const [buyer, setBuyer] = useState<Buyer | null>(null);
   const [loading, setLoading] = useState(true);
   const [buyerLoading, setBuyerLoading] = useState(true);
+  const [isExplorer, setIsExplorer] = useState(false);
 
   useEffect(() => {
     const fetchVendorDetails = async () => {
@@ -27,6 +28,7 @@ export default function VendorDetailsPage() {
         setLoading(true);
         const data = await vendorService.getVendorById(vendorId);
         setVendor(data);
+        setIsExplorer(data.isExplorer);
       } catch (error: any) {
         toast.error(error.message || "Failed to load vendor details");
       } finally {
@@ -83,10 +85,15 @@ export default function VendorDetailsPage() {
         </button>
       </div>
 
-      <VendorDetailsHeader vendor={vendor} />
+      <VendorDetailsHeader vendor={{ ...vendor, isExplorer }} />
       <VendorMetrics vendor={vendor} />
       <VendorBuyerCard buyer={buyer} loading={buyerLoading} />
-      <ActionButtons vendorId={vendor.id} accountStatus={vendor.accountStatus} />
+      <ActionButtons
+        vendorId={vendor.id}
+        accountStatus={vendor.accountStatus}
+        isExplorer={isExplorer}
+        onExplorerToggled={setIsExplorer}
+      />
     </div>
   );
 }

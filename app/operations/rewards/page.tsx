@@ -16,6 +16,8 @@ import {
   RefreshCw,
   Users,
   ChevronDown,
+  Compass,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -217,6 +219,18 @@ function CatalogTab() {
 
   return (
     <div className="space-y-4">
+      {/* Explorer cold start notice */}
+      <div className="flex items-start gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+        <Compass className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+        <p className="text-xs text-emerald-700">
+          <span className="font-semibold">Restaurant Explorer</span> — To activate Explorer rewards,
+          go to <span className="font-semibold">Vendors</span> and toggle &ldquo;Add to
+          Explorer&rdquo; on the restaurants you want to include. Explorer rewards only trigger when
+          a customer orders from a vendor you&apos;ve marked as Explorer.
+        </p>
+        <Info className="w-4 h-4 text-emerald-400 shrink-0" />
+      </div>
+
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">{items.length} reward item(s) configured</p>
         <Dialog

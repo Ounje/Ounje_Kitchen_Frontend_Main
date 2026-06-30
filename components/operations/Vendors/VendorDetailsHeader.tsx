@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Star, Phone, MapPin, Building2 } from "lucide-react";
+import { Star, Phone, MapPin, Building2, Compass } from "lucide-react";
 import { vendorService, Vendor } from "@/lib/api/services/vendor.service";
 import { StatusBadge } from "./StatusBadge";
 import { CACBadge } from "./CACBadge";
@@ -67,7 +67,15 @@ export function VendorDetailsHeader({ vendor }: VendorDetailsHeaderProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1">
             <h2 className="text-base font-bold text-gray-900 truncate">{vendor.name}</h2>
-            <StatusBadge status={vendor.accountStatus} size="sm" />
+            <div className="flex items-center gap-1.5">
+              {vendor.isExplorer && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                  <Compass className="w-3 h-3" />
+                  Explorer
+                </span>
+              )}
+              <StatusBadge status={vendor.accountStatus} size="sm" />
+            </div>
           </div>
 
           <StarRating rating={vendor.rating ?? 0} />

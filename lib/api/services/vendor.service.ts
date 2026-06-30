@@ -29,6 +29,8 @@ export interface Vendor {
   // inline from enrichVendor
   mostFrequentBuyer?: Buyer | null;
   createdAt?: string;
+  isExplorer: boolean;
+  explorerAddedAt?: string;
 }
 
 export interface Buyer {
@@ -134,6 +136,8 @@ function normaliseVendor(raw: any): Vendor {
     totalOrders,
     mostFrequentBuyer,
     createdAt: raw.createdAt,
+    isExplorer: raw.isExplorer === true,
+    explorerAddedAt: raw.explorerAddedAt,
   };
 }
 
@@ -243,5 +247,10 @@ export const vendorService = {
   async alertVendor(id: string): Promise<{ message: string }> {
     const res = await apiClient.put(ENDPOINTS.OPERATIONS.REVIEWS_WARN("vendor", id));
     return res as { message: string };
+  },
+
+  async toggleExplorerStatus(id: string): Promise<{ isExplorer: boolean }> {
+    const res = (await apiClient.patch(ENDPOINTS.OPERATIONS.VENDOR_TOGGLE_EXPLORER(id))) as any;
+    return res?.data ?? res;
   },
 };
