@@ -173,6 +173,8 @@ export const ENDPOINTS = {
     ORDER_STATUS: (id: string) => `/api/operations/orders/${id}/status`,
     ORDER_REMIND_VENDOR: (id: string) => `/api/operations/orders/${id}/remind-vendor`,
     ORDER_REMIND_RIDER: (id: string) => `/api/operations/orders/${id}/remind-rider`,
+    ORDER_ALERT_RIDERS_START: (id: string) => `/api/operations/orders/${id}/alert-riders/start`,
+    ORDER_ALERT_RIDERS_STOP: (id: string) => `/api/operations/orders/${id}/alert-riders/stop`,
 
     // Transactions (temporary module until migration to Admin Portal)
     TRANSACTIONS: "/api/operations/transactions",

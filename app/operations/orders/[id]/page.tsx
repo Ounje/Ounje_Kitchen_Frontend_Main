@@ -241,18 +241,22 @@ export default function OrderDetailsPage({ params }: PageProps) {
   const [tab, setTab] = useState<TabType>("content");
   const [assignOpen, setAssignOpen] = useState(false);
 
-  const fetchOrder = useCallback(async () => {
-    if (!shouldRender || !id) return;
-    try {
-      setLoading(true);
-      const res: any = await operationsService.getOrder(id);
-      setOrder(res?.data ?? res);
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to load order");
-    } finally {
-      setLoading(false);
-    }
-  }, [shouldRender, id]);
+  // `silent` skips the loading/toast flicker for background refreshes (e.g. rider-alert polling)
+  const fetchOrder = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!shouldRender || !id) return;
+      try {
+        if (!opts?.silent) setLoading(true);
+        const res: any = await operationsService.getOrder(id);
+        setOrder(res?.data ?? res);
+      } catch (err: any) {
+        if (!opts?.silent) toast.error(err?.message || "Failed to load order");
+      } finally {
+        if (!opts?.silent) setLoading(false);
+      }
+    },
+    [shouldRender, id]
+  );
 
   useEffect(() => {
     fetchOrder();
@@ -265,6 +269,7 @@ export default function OrderDetailsPage({ params }: PageProps) {
 
   const [remindingVendor, setRemindingVendor] = useState(false);
   const [remindingRider, setRemindingRider] = useState(false);
+  const [alertingRiders, setAlertingRiders] = useState(false);
 
   const handleContactVendor = useCallback(() => {
     const phone = (order?.vendor?.phone ?? order?.vendor?.phoneNumber ?? "").toString();
@@ -319,6 +324,45 @@ export default function OrderDetailsPage({ params }: PageProps) {
       setRemindingRider(false);
     }
   }, [id, remindingRider, fetchOrder]);
+
+  // ── Rider alert loop (all riders, zone-first, every 5 min until claimed) ────
+  const handleStartRiderAlert = useCallback(async () => {
+    if (alertingRiders) return;
+    setAlertingRiders(true);
+    try {
+      await operationsService.startRiderAlertLoop(id);
+      toast.success("Alerting zone riders every 5 minutes until claimed");
+      await fetchOrder({ silent: true });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to start rider alerts");
+    } finally {
+      setAlertingRiders(false);
+    }
+  }, [id, alertingRiders, fetchOrder]);
+
+  const handleStopRiderAlert = useCallback(async () => {
+    if (alertingRiders) return;
+    setAlertingRiders(true);
+    try {
+      await operationsService.stopRiderAlertLoop(id);
+      toast.info("Rider alert loop stopped");
+      await fetchOrder({ silent: true });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to stop rider alerts");
+    } finally {
+      setAlertingRiders(false);
+    }
+  }, [id, alertingRiders, fetchOrder]);
+
+  // Reflect the backend's progress (round/scope/timestamp) while a loop is running.
+  // The loop itself lives server-side (cron) — this just keeps the UI in sync.
+  useEffect(() => {
+    if (!order?.riderAlertActive) return;
+    const t = setInterval(() => {
+      fetchOrder({ silent: true });
+    }, 30_000);
+    return () => clearInterval(t);
+  }, [order?.riderAlertActive, fetchOrder]);
 
   // ── Early returns (must come after all hooks) ───────────────────────────────
 
@@ -417,6 +461,14 @@ export default function OrderDetailsPage({ params }: PageProps) {
   })();
   const riderVehicle = riderObj.modeOfDelivery ?? riderObj.vehicleType ?? "";
   const riderPhoto = resolvePhoto(riderObj) || resolvePhoto(riderObj.user);
+
+  // ── Rider alert loop state (flat fields on the order — matches vendorReminderCount pattern) ──
+  const riderAlertActive = !!order.riderAlertActive;
+  const riderAlertScope = order.riderAlertScope; // "zone" | "platform"
+  const riderAlertRound = order.riderAlertRound ?? 0;
+  const riderAlertLastSentAt = order.riderAlertLastSentAt;
+  const riderAlertCappedOut = !!order.riderAlertCappedOut;
+  const canAlertRiders = status === "ready" && !hasRider;
 
   // ── Map coordinates ─────────────────────────────────────────────────────────
   const vendorLat = vendor.latitude ?? 6.5244;
@@ -766,6 +818,40 @@ export default function OrderDetailsPage({ params }: PageProps) {
                       </p>
                     )}
                   </div>
+                  {(canAlertRiders || riderAlertActive) && (
+                    <div className="flex flex-col gap-0.5">
+                      <Button
+                        onClick={riderAlertActive ? handleStopRiderAlert : handleStartRiderAlert}
+                        disabled={alertingRiders}
+                        variant="outline"
+                        className={`text-[10px] h-8 transition-all font-bold disabled:opacity-50 ${
+                          riderAlertActive
+                            ? "bg-red-500/10 border-red-400/40 text-red-200 hover:bg-red-500/20"
+                            : "bg-orange-500/10 border-orange-400/40 text-orange-200 hover:bg-orange-500/20"
+                        }`}
+                      >
+                        {alertingRiders
+                          ? "Working…"
+                          : riderAlertActive
+                            ? "Stop Alerting Riders"
+                            : "Alert All Riders"}
+                      </Button>
+                      {riderAlertActive && (
+                        <p className="text-[9px] text-orange-300/60 text-center leading-tight">
+                          {riderAlertScope === "platform" ? "Platform-wide" : "Zone"} · round{" "}
+                          {riderAlertRound}
+                          {riderAlertLastSentAt
+                            ? ` · last sent ${new Date(riderAlertLastSentAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit", hour12: true })}`
+                            : ""}
+                        </p>
+                      )}
+                      {!riderAlertActive && riderAlertCappedOut && (
+                        <p className="text-[9px] text-red-300/70 text-center leading-tight">
+                          Stopped after 2h — no rider found
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <Button
                     onClick={() => setAssignOpen(true)}
                     variant="outline"

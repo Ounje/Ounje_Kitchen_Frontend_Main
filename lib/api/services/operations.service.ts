@@ -132,6 +132,16 @@ export const operationsService = {
     return res;
   },
 
+  async startRiderAlertLoop(orderId: string) {
+    const res = await apiClient.put(ENDPOINTS.OPERATIONS.ORDER_ALERT_RIDERS_START(orderId));
+    return res;
+  },
+
+  async stopRiderAlertLoop(orderId: string) {
+    const res = await apiClient.put(ENDPOINTS.OPERATIONS.ORDER_ALERT_RIDERS_STOP(orderId));
+    return res;
+  },
+
   // ==================== TRANSACTIONS ====================
   async getTransactionStats(params?: { startDate?: string; endDate?: string }) {
     const res = await apiClient.get(ENDPOINTS.OPERATIONS.TRANSACTIONS_STATS, { params });
